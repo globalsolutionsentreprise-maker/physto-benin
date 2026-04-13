@@ -1,11 +1,39 @@
-export default function Accueil() {
+import { createClient } from "@supabase/supabase-js"
 
-  const stats = [
-    { valeur: "+50", label: "Clients protégés" },
-    { valeur: "2h", label: "Délai d'intervention" },
-    { valeur: "100%", label: "Résultats garantis" },
-    { valeur: "24h/24", label: "Disponibilité urgence" },
-  ]
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
+export const revalidate = 60
+
+async function getDonnees() {
+  const [chiffres, temoignages, parametres] = await Promise.all([
+    supabase.from("chiffres").select("*").order("ordre"),
+    supabase.from("temoignages").select("*").order("id"),
+    supabase.from("parametres").select("*"),
+  ])
+
+  const params = {}
+  if (parametres.data) {
+    parametres.data.forEach(function(p) { params[p.cle] = p.valeur })
+  }
+
+  return {
+    chiffres: chiffres.data || [
+      { id: 1, valeur: "+50", label: "Clients protégés" },
+      { id: 2, valeur: "2h", label: "Délai d'intervention" },
+      { id: 3, valeur: "100%", label: "Résultats garantis" },
+      { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
+    ],
+    temoignages: temoignages.data || [],
+    agrement: params.agrement || "N° AGRÉMENT-BÉNIN-XXXXX",
+  }
+}
+
+export default async function Accueil() {
+
+  const { chiffres, temoignages, agrement } = await getDonnees()
 
   const services = [
     { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Élimination complète et durable par gel appât, pulvérisation résiduelle et fumigation professionnelle. Traitement certifié, résultat garanti par contrat." },
@@ -16,21 +44,6 @@ export default function Accueil() {
     { numero: "06", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. Traitement adapté à chaque situation, devis gratuit sous 2h." },
   ]
 
-  const secteurs = [
-    { ico: "🏨", label: "Hôtels et Resorts" },
-    { ico: "🍽️", label: "Restaurants" },
-    { ico: "🏭", label: "Entrepôts et Industrie" },
-    { ico: "🏢", label: "Bureaux et Entreprises" },
-    { ico: "🏫", label: "Écoles et Institutions" },
-    { ico: "🏠", label: "Particuliers exigeants" },
-  ]
-
-  const temoignages = [
-    { init: "A.K", nom: "A. Koné", role: "Directeur de restauration — Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire. Je recommande PHYSTO sans hésitation." },
-    { init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier — Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
-    { init: "M.B", nom: "M. Bello", role: "Responsable logistique — Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires. Excellent suivi post-traitement." },
-  ]
-
   const etapes = [
     { num: "01", titre: "Vous nous contactez", desc: "Par WhatsApp, téléphone ou formulaire. Disponibles 24h/24 et 7j/7, y compris les jours fériés." },
     { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien certifié se déplace chez vous pour évaluer la situation et proposer la solution la plus adaptée." },
@@ -39,12 +52,18 @@ export default function Accueil() {
   ]
 
   const garanties = [
-    { titre: "Agréé par l'État du Bénin", desc: "Entreprise officiellement référencée et agréée par les autorités sanitaires du Bénin.", detail: "N° AGRÉMENT-BÉNIN-XXXXX", accent: true },
+    { titre: "Agréé par l'État du Bénin", desc: "Entreprise officiellement référencée et agréée par les autorités sanitaires du Bénin.", detail: agrement, accent: true },
     { titre: "Produits homologués OMS", desc: "Tous nos produits respectent les normes de l'Organisation Mondiale de la Santé et la réglementation béninoise.", accent: false },
     { titre: "Résultats probants garantis", desc: "Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu. Sans exception.", accent: false },
     { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai d'intervention garanti en moins de 2h sur Cotonou et ses environs.", accent: false },
     { titre: "Certificat officiel remis", desc: "À l'issue de chaque intervention, un document officiel vous est remis pour vos archives ou vos démarches administratives.", accent: false },
     { titre: "Techniciens certifiés", desc: "Notre équipe est formée, certifiée et régulièrement mise à jour sur les protocoles d'hygiène phytosanitaire.", accent: false },
+  ]
+
+  const temoignagesAffiches = temoignages.length > 0 ? temoignages : [
+    { id: 1, init: "A.K", nom: "A. Koné", role: "Directeur de restauration — Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire." },
+    { id: 2, init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier — Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
+    { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique — Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
   ]
 
   return (
@@ -53,49 +72,41 @@ export default function Accueil() {
       <style>{`
         .srv-card { transition: border-top-color 0.2s; border-top: 3px solid transparent; }
         .srv-card:hover { border-top-color: #d4a920 !important; }
-        .btn-or:hover { opacity: 0.9; }
-        .btn-outline:hover { background: rgba(255,255,255,0.08); }
-        .lien-texte:hover { opacity: 0.7; }
       `}</style>
 
       {/* HERO */}
       <section style={{ position: "relative", minHeight: "92vh", display: "flex", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", backgroundColor: "#050e07" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/images/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.45 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020904 0%, rgba(2,9,4,0.75) 45%, rgba(2,9,4,0.2) 100%)" }} />
-
-        <div style={{ position: "relative", zIndex: 2, padding: "0 60px 80px" }}>
+        <div className="hero-padding" style={{ position: "relative", zIndex: 2, padding: "0 60px 80px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.35)", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "6px 16px", borderRadius: "20px", letterSpacing: "0.08em", marginBottom: "28px" }}>
             <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#d4a920" }} />
             BÉNIN · SPÉCIALISTE EN HYGIÈNE SANITAIRE PROFESSIONNELLE
           </div>
-
-          <h1 style={{ fontSize: "clamp(36px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "700px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
+          <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "700px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
             Protégez votre espace.
             <br />
             <span style={{ color: "#d4a920", fontWeight: "700" }}>Vivez et travaillez</span>
             <br />
             en toute sérénité.
           </h1>
-
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "520px", marginBottom: "40px", fontWeight: "300" }}>
-            Désinsectisation, dératisation, désinfection — des interventions professionnelles
-            certifiées pour hôtels, restaurants, entreprises et particuliers exigeants
-            dans tout le Bénin.
+          <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "520px", marginBottom: "40px", fontWeight: "300" }}>
+            Désinsectisation, dératisation, désinfection — des interventions professionnelles certifiées pour hôtels, restaurants, entreprises et particuliers exigeants dans tout le Bénin.
           </p>
-
-          <div style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
-            <a href="/contact" className="btn-or" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none", letterSpacing: "0.02em" }}>
+          <div className="hero-btns" style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
+            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
               Demander une intervention
             </a>
-            <a href="/services" className="btn-outline" style={{ backgroundColor: "transparent", color: "#ffffff", fontWeight: "500", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <a href="/services" style={{ backgroundColor: "transparent", color: "#ffffff", fontWeight: "500", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
               Découvrir nos services →
             </a>
           </div>
 
-          <div style={{ display: "flex", marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", maxWidth: "600px" }}>
-            {stats.map(function(s, i) {
+          {/* CHIFFRES DEPUIS SUPABASE */}
+          <div className="hero-stats" style={{ display: "flex", marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", maxWidth: "600px" }}>
+            {chiffres.map(function(s, i) {
               return (
-                <div key={i} style={{ flex: 1, textAlign: "center", borderRight: i < stats.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none", padding: "0 20px" }}>
+                <div key={s.id} style={{ flex: 1, textAlign: "center", borderRight: i < chiffres.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none", padding: "0 20px" }}>
                   <div style={{ fontSize: "28px", fontWeight: "700", color: "#d4a920" }}>{s.valeur}</div>
                   <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", marginTop: "6px", letterSpacing: "0.06em" }}>{s.label.toUpperCase()}</div>
                 </div>
@@ -103,15 +114,10 @@ export default function Accueil() {
             })}
           </div>
         </div>
-
-        <div style={{ position: "absolute", bottom: "32px", right: "60px", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "1px", height: "40px", backgroundColor: "rgba(255,255,255,0.2)" }} />
-          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em" }}>DÉFILER</span>
-        </div>
       </section>
 
       {/* INTRO */}
-      <section style={{ backgroundColor: "#ffffff", padding: "100px 60px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "100px 60px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE ENGAGEMENT</div>
           <h2 style={{ fontSize: "clamp(26px, 3vw, 40px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "24px" }}>
@@ -120,23 +126,20 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700" }}>suffit à tout changer.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "16px" }}>
-            PHYSTO Bénin est la référence béninoise en matière d'hygiène sanitaire et
-            phytosanitaire professionnelle. Nous intervenons avec des produits homologués,
-            des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
+            PHYSTO Bénin est la référence béninoise en matière d'hygiène sanitaire et phytosanitaire professionnelle. Nous intervenons avec des produits homologués, des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
           </p>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
-            Notre promesse est simple et absolue : si le résultat n'est pas à la hauteur
-            de vos attentes, nous revenons gratuitement jusqu'à ce que ce soit parfait.
+            Notre promesse est simple et absolue : si le résultat n'est pas à la hauteur de vos attentes, nous revenons gratuitement jusqu'à ce que ce soit parfait.
           </p>
-          <a href="/qui-sommes-nous" className="lien-texte" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
+          <a href="/qui-sommes-nous" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
             Découvrir notre histoire →
           </a>
         </div>
         <div style={{ position: "relative" }}>
           <div style={{ borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#e8e8e8" }}>
-            <img src="/images/about-team.jpg" alt="Technicien PHYSTO Bénin en intervention professionnelle" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="/images/about-team.jpg" alt="Technicien PHYSTO Bénin" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          <div style={{ position: "absolute", bottom: "-20px", left: "-20px", backgroundColor: "#0a2e1a", color: "#ffffff", padding: "20px 24px", borderRadius: "4px" }}>
+          <div className="badge-float" style={{ position: "absolute", bottom: "-20px", left: "-20px", backgroundColor: "#0a2e1a", color: "#ffffff", padding: "20px 24px", borderRadius: "4px" }}>
             <div style={{ fontSize: "22px", fontWeight: "700", color: "#d4a920" }}>+10 ans</div>
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "3px" }}>d'expertise terrain</div>
           </div>
@@ -144,7 +147,7 @@ export default function Accueil() {
       </section>
 
       {/* SERVICES */}
-      <section style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
+      <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "64px", flexWrap: "wrap", gap: "20px" }}>
             <div>
@@ -155,19 +158,18 @@ export default function Accueil() {
                 <strong style={{ fontWeight: "700" }}>pour chaque nuisible.</strong>
               </h2>
             </div>
-            <a href="/services" className="lien-texte" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px", whiteSpace: "nowrap" }}>
+            <a href="/services" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px", whiteSpace: "nowrap" }}>
               Voir tous nos services →
             </a>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
             {services.map(function(s, i) {
               return (
                 <a key={i} href="/services" style={{ textDecoration: "none" }}>
                   <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "40px 32px", minHeight: "280px", display: "flex", flexDirection: "column", cursor: "pointer" }}>
                     <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>{s.numero}</div>
                     <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "10px" }}>{s.accroche.toUpperCase()}</div>
-                    <h3 style={{ fontSize: "20px", fontWeight: "600", color: "#0a0a0a", marginBottom: "14px", letterSpacing: "-0.01em" }}>{s.titre}</h3>
+                    <h3 style={{ fontSize: "20px", fontWeight: "600", color: "#0a0a0a", marginBottom: "14px" }}>{s.titre}</h3>
                     <p style={{ fontSize: "13px", color: "#777", lineHeight: "1.75", flex: 1 }}>{s.desc}</p>
                     <div style={{ marginTop: "24px", fontSize: "12px", fontWeight: "600", color: "#0a2e1a" }}>En savoir plus →</div>
                   </div>
@@ -179,7 +181,7 @@ export default function Accueil() {
       </section>
 
       {/* SECTEURS */}
-      <section style={{ backgroundColor: "#0a2e1a", padding: "100px 60px" }}>
+      <section className="section-padding" style={{ backgroundColor: "#0a2e1a", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "64px" }}>
             <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOS CLIENTS</div>
@@ -189,8 +191,7 @@ export default function Accueil() {
               <strong style={{ fontWeight: "700", color: "#d4a920" }}>établissements du Bénin.</strong>
             </h2>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "48px" }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "48px" }}>
             {[
               { img: "/images/client-hotel.jpg", label: "Hôtels et Resorts", desc: "Interventions discrètes, respect des horaires, protocole hôtelier" },
               { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Traitement des grandes surfaces, mise aux normes, suivi régulier" },
@@ -207,22 +208,11 @@ export default function Accueil() {
               )
             })}
           </div>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: "32px", flexWrap: "wrap" }}>
-            {secteurs.map(function(s, i) {
-              return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ fontSize: "15px" }}>{s.ico}</span>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)", fontWeight: "500" }}>{s.label}</span>
-                </div>
-              )
-            })}
-          </div>
         </div>
       </section>
 
       {/* PROCESSUS */}
-      <section style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
+      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "80px" }}>
             <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE MÉTHODE</div>
@@ -232,15 +222,14 @@ export default function Accueil() {
               <strong style={{ fontWeight: "700" }}>Définitivement efficace.</strong>
             </h2>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>
+          <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>
             {etapes.map(function(e, i) {
               return (
                 <div key={i} style={{ position: "relative" }}>
                   {i < etapes.length - 1 && (
                     <div style={{ position: "absolute", top: "20px", right: "-20px", width: "40px", height: "1px", backgroundColor: "#e0e0e0" }} />
                   )}
-                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px", letterSpacing: "0.05em" }}>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
                     {e.num}
                   </div>
                   <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#0a0a0a", marginBottom: "12px" }}>{e.titre}</h3>
@@ -252,8 +241,8 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* TÉMOIGNAGES */}
-      <section style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
+      {/* TÉMOIGNAGES DEPUIS SUPABASE */}
+      <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "64px", flexWrap: "wrap", gap: "20px" }}>
             <div>
@@ -266,11 +255,10 @@ export default function Accueil() {
             </div>
             <span style={{ color: "#d4a920", fontSize: "20px", letterSpacing: "4px" }}>★★★★★</span>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-            {temoignages.map(function(t, i) {
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+            {temoignagesAffiches.slice(0, 3).map(function(t) {
               return (
-                <div key={i} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
+                <div key={t.id} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: "48px", color: "#d4a920", lineHeight: 1, marginBottom: "16px", fontFamily: "Georgia, serif" }}>"</div>
                   <p style={{ fontSize: "14px", color: "#444", lineHeight: "1.85", fontStyle: "italic", flex: 1, marginBottom: "32px" }}>{t.texte}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -290,7 +278,7 @@ export default function Accueil() {
       </section>
 
       {/* GARANTIES */}
-      <section style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
+      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "64px" }}>
             <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOS ENGAGEMENTS</div>
@@ -300,8 +288,7 @@ export default function Accueil() {
               <strong style={{ fontWeight: "700" }}>faire confiance.</strong>
             </h2>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
             {garanties.map(function(g, i) {
               return (
                 <div key={i} style={{ backgroundColor: g.accent ? "#0a2e1a" : "#f7f7f5", padding: "40px 32px", border: g.accent ? "2px solid #d4a920" : "none" }}>
@@ -330,11 +317,10 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>jamais seule.</strong>
           </h2>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", marginBottom: "48px" }}>
-            Chaque heure compte. Contactez-nous maintenant pour une intervention
-            rapide et définitive. Résultats garantis par contrat.
+            Chaque heure compte. Contactez-nous maintenant pour une intervention rapide et définitive. Résultats garantis par contrat.
           </p>
-          <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none", letterSpacing: "0.02em" }}>
+          <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
               Demander une intervention
             </a>
             <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#ffffff", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none", display: "flex", alignItems: "center", gap: "8px" }}>
