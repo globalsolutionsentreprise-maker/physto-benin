@@ -5,8 +5,8 @@ import { createClient } from "@supabase/supabase-js"
 // Options critiques : désactiver auth pour éviter le bug de verrou
 function creerSupabase() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
         persistSession: false,
