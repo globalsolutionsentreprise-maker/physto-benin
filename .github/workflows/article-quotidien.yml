@@ -2,16 +2,14 @@ name: Génération article quotidien
 
 on:
   schedule:
-    # Chaque jour à 7h00 (heure de Paris = 6h UTC)
     - cron: "0 6 * * *"
-  # Permet de lancer manuellement depuis GitHub
   workflow_dispatch:
 
 jobs:
   generer-article:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout du code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -19,12 +17,12 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Installer les dépendances
-        run: npm install @supabase/supabase-js node-fetch
+      - name: Installer Supabase
+        run: npm install @supabase/supabase-js
 
-      - name: Générer et insérer l article
+      - name: Generer article
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/generer-article.js
+        run: node scripts/generer-article.mjs
