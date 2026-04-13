@@ -23,13 +23,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/logo-gse.jpeg" type="image/jpeg" />
         <meta name="theme-color" content="#0a2e1a" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* Google Analytics GA4 — G-9XPCMJE1PJ */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9XPCMJE1PJ" />
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-9XPCMJE1PJ');
+        `}} />
       </head>
       <body style={{ margin: 0, padding: 0, fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
         <style>{`
           * { box-sizing: border-box; }
-
-          /* NAVBAR RESPONSIVE */
           .nav-desktop { display: flex; }
           .nav-mobile-btn { display: none; }
           .nav-links-mobile { display: none; }
@@ -37,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           @media (max-width: 768px) {
             .nav-desktop { display: none !important; }
             .nav-mobile-btn { display: flex !important; }
-            .nav-links-mobile.open { display: flex !important; }
             .urgband-tags { display: none !important; }
             .hero-padding { padding: 40px 20px 60px !important; }
             .hero-h1 { font-size: 32px !important; }
@@ -52,7 +58,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             .section-padding { padding: 60px 20px !important; }
             .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px !important; }
             .footer-padding { padding: 48px 20px 24px !important; }
-            .cta-flex { flex-direction: column !important; text-align: center; }
             .cta-btns { justify-content: center !important; }
             .badge-float { display: none !important; }
             .nav-padding { padding: 10px 20px !important; }
@@ -68,8 +73,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* NAVBAR */}
         <nav style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, zIndex: 50 }}>
           <div className="nav-padding" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 40px" }}>
-
-            {/* LOGO */}
             <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
               <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
               <div>
@@ -78,7 +81,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </a>
 
-            {/* LIENS DESKTOP */}
             <div className="nav-desktop" style={{ alignItems: "center", gap: "28px" }}>
               {[
                 { label: "Accueil", href: "/" },
@@ -93,7 +95,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               ))}
             </div>
 
-            {/* BOUTONS DESKTOP */}
             <div className="nav-desktop" style={{ alignItems: "center", gap: "8px" }}>
               <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "#25d366", color: "#fff", fontSize: "12px", fontWeight: "600", padding: "9px 14px", borderRadius: "20px", textDecoration: "none" }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="white">
@@ -106,7 +107,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </a>
             </div>
 
-            {/* BOUTON MENU MOBILE */}
             <div className="nav-mobile-btn" style={{ display: "none", alignItems: "center", gap: "8px" }}>
               <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#fff", fontSize: "11px", fontWeight: "600", padding: "8px 12px", borderRadius: "20px", textDecoration: "none" }}>
                 WhatsApp
@@ -115,21 +115,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Appel
               </a>
             </div>
-          </div>
-
-          {/* MENU MOBILE LIENS */}
-          <div className="nav-links-mobile" style={{ display: "none", flexDirection: "column", borderTop: "1px solid #f0f0f0", padding: "12px 20px", gap: "4px" }}>
-            {[
-              { label: "Accueil", href: "/" },
-              { label: "Services", href: "/services" },
-              { label: "Qui sommes-nous", href: "/qui-sommes-nous" },
-              { label: "Blog", href: "/blog" },
-              { label: "Contact", href: "/contact" },
-            ].map((l) => (
-              <a key={l.href} href={l.href} style={{ fontSize: "14px", color: "#444", textDecoration: "none", fontWeight: "500", padding: "10px 0", borderBottom: "1px solid #f9f9f9" }}>
-                {l.label}
-              </a>
-            ))}
           </div>
         </nav>
 
@@ -163,8 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
               </div>
               <p style={{ fontSize: "12px", color: "#888", lineHeight: "1.8" }}>
-                Specialiste hygiene sanitaire et phytosanitaire au Benin.
-                Intervention rapide, produits certifies, resultats probants.
+                Specialiste hygiene sanitaire et phytosanitaire au Benin. Intervention rapide, produits certifies, resultats probants.
               </p>
             </div>
             {[
