@@ -1,3 +1,5 @@
+"use client"
+import { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -5,35 +7,39 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-export const dynamic = "force-dynamic"
+export default function Accueil() {
 
-async function getDonnees() {
-  const [chiffres, temoignages, parametres] = await Promise.all([
-    supabase.from("chiffres").select("*").order("ordre"),
-    supabase.from("temoignages").select("*").order("id"),
-    supabase.from("parametres").select("*"),
+  const [chiffres, setChiffres] = useState([
+    { id: 1, valeur: "+50", label: "Clients protégés" },
+    { id: 2, valeur: "2h", label: "Délai d'intervention" },
+    { id: 3, valeur: "100%", label: "Résultats garantis" },
+    { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
   ])
 
-  const params = {}
-  if (parametres.data) {
-    parametres.data.forEach(function(p) { params[p.cle] = p.valeur })
-  }
+  const [temoignages, setTemoignages] = useState([
+    { id: 1, init: "A.K", nom: "A. Koné", role: "Directeur de restauration — Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire." },
+    { id: 2, init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier — Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
+    { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique — Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
+  ])
 
-  return {
-    chiffres: chiffres.data || [
-      { id: 1, valeur: "+50", label: "Clients protégés" },
-      { id: 2, valeur: "2h", label: "Délai d'intervention" },
-      { id: 3, valeur: "100%", label: "Résultats garantis" },
-      { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
-    ],
-    temoignages: temoignages.data || [],
-    agrement: params.agrement || "N° AGRÉMENT-BÉNIN-XXXXX",
-  }
-}
+  const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
 
-export default async function Accueil() {
-
-  const { chiffres, temoignages, agrement } = await getDonnees()
+  useEffect(function() {
+    async function charger() {
+      const [c, t, p] = await Promise.all([
+        supabase.from("chiffres").select("*").order("ordre"),
+        supabase.from("temoignages").select("*").order("id"),
+        supabase.from("parametres").select("*"),
+      ])
+      if (c.data && c.data.length > 0) setChiffres(c.data)
+      if (t.data && t.data.length > 0) setTemoignages(t.data)
+      if (p.data) {
+        const agr = p.data.find(function(x) { return x.cle === "agrement" })
+        if (agr) setAgrement(agr.valeur)
+      }
+    }
+    charger()
+  }, [])
 
   const services = [
     { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Élimination complète et durable par gel appât, pulvérisation résiduelle et fumigation professionnelle. Traitement certifié, résultat garanti par contrat." },
@@ -58,12 +64,6 @@ export default async function Accueil() {
     { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai d'intervention garanti en moins de 2h sur Cotonou et ses environs.", accent: false },
     { titre: "Certificat officiel remis", desc: "À l'issue de chaque intervention, un document officiel vous est remis pour vos archives ou vos démarches administratives.", accent: false },
     { titre: "Techniciens certifiés", desc: "Notre équipe est formée, certifiée et régulièrement mise à jour sur les protocoles d'hygiène phytosanitaire.", accent: false },
-  ]
-
-  const temoignagesAffiches = temoignages.length > 0 ? temoignages : [
-    { id: 1, init: "A.K", nom: "A. Koné", role: "Directeur de restauration — Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire." },
-    { id: 2, init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier — Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
-    { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique — Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
   ]
 
   return (
@@ -102,7 +102,7 @@ export default async function Accueil() {
             </a>
           </div>
 
-          {/* CHIFFRES DEPUIS SUPABASE */}
+          {/* CHIFFRES DYNAMIQUES DEPUIS SUPABASE */}
           <div className="hero-stats" style={{ display: "flex", marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", maxWidth: "600px" }}>
             {chiffres.map(function(s, i) {
               return (
@@ -166,7 +166,7 @@ export default async function Accueil() {
             {services.map(function(s, i) {
               return (
                 <a key={i} href="/services" style={{ textDecoration: "none" }}>
-                  <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "40px 32px", minHeight: "280px", display: "flex", flexDirection: "column", cursor: "pointer" }}>
+                  <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "40px 32px", minHeight: "280px", display: "flex", flexDirection: "column" }}>
                     <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>{s.numero}</div>
                     <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "10px" }}>{s.accroche.toUpperCase()}</div>
                     <h3 style={{ fontSize: "20px", fontWeight: "600", color: "#0a0a0a", marginBottom: "14px" }}>{s.titre}</h3>
@@ -191,7 +191,7 @@ export default async function Accueil() {
               <strong style={{ fontWeight: "700", color: "#d4a920" }}>établissements du Bénin.</strong>
             </h2>
           </div>
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "48px" }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
             {[
               { img: "/images/client-hotel.jpg", label: "Hôtels et Resorts", desc: "Interventions discrètes, respect des horaires, protocole hôtelier" },
               { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Traitement des grandes surfaces, mise aux normes, suivi régulier" },
@@ -241,7 +241,7 @@ export default async function Accueil() {
         </div>
       </section>
 
-      {/* TÉMOIGNAGES DEPUIS SUPABASE */}
+      {/* TÉMOIGNAGES DYNAMIQUES */}
       <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "64px", flexWrap: "wrap", gap: "20px" }}>
@@ -256,7 +256,7 @@ export default async function Accueil() {
             <span style={{ color: "#d4a920", fontSize: "20px", letterSpacing: "4px" }}>★★★★★</span>
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-            {temoignagesAffiches.slice(0, 3).map(function(t) {
+            {temoignages.slice(0, 3).map(function(t) {
               return (
                 <div key={t.id} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: "48px", color: "#d4a920", lineHeight: 1, marginBottom: "16px", fontFamily: "Georgia, serif" }}>"</div>
@@ -295,7 +295,7 @@ export default async function Accueil() {
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: g.accent ? "#d4a920" : "#0a0a0a", marginBottom: "12px" }}>{g.titre}</h3>
                   <p style={{ fontSize: "13px", color: g.accent ? "rgba(255,255,255,0.65)" : "#777", lineHeight: "1.75", marginBottom: g.detail ? "16px" : "0" }}>{g.desc}</p>
                   {g.detail && (
-                    <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.12)", padding: "6px 12px", borderRadius: "4px", display: "inline-block", letterSpacing: "0.04em" }}>
+                    <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.12)", padding: "6px 12px", borderRadius: "4px", display: "inline-block" }}>
                       {g.detail}
                     </div>
                   )}
