@@ -2,10 +2,20 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+// Options critiques : désactiver auth pour éviter le bug de verrou
+function creerSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      }
+    }
+  )
+}
 
 export default function Accueil() {
 
@@ -23,21 +33,37 @@ export default function Accueil() {
   ])
 
   const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
+  const [charge, setCharge] = useState(false)
 
   useEffect(function() {
+    // Créer le client DANS le useEffect pour éviter les conflits React
+    const db = creerSupabase()
+
     async function charger() {
-      const [c, t, p] = await Promise.all([
-        supabase.from("chiffres").select("*").order("ordre"),
-        supabase.from("temoignages").select("*").order("id"),
-        supabase.from("parametres").select("*"),
-      ])
-      if (c.data && c.data.length > 0) setChiffres(c.data)
-      if (t.data && t.data.length > 0) setTemoignages(t.data)
-      if (p.data) {
-        const agr = p.data.find(function(x) { return x.cle === "agrement" })
-        if (agr) setAgrement(agr.valeur)
+      try {
+        const [resChiffres, resTemoignages, resParametres] = await Promise.all([
+          db.from("chiffres").select("valeur, label, ordre, id").order("ordre"),
+          db.from("temoignages").select("id, init, nom, role, texte").order("id"),
+          db.from("parametres").select("cle, valeur"),
+        ])
+
+        if (resChiffres.data && resChiffres.data.length > 0) {
+          setChiffres(resChiffres.data)
+        }
+        if (resTemoignages.data && resTemoignages.data.length > 0) {
+          setTemoignages(resTemoignages.data)
+        }
+        if (resParametres.data) {
+          const agr = resParametres.data.find(function(x) { return x.cle === "agrement" })
+          if (agr) setAgrement(agr.valeur)
+        }
+        setCharge(true)
+      } catch(err) {
+        console.error("Erreur Supabase:", err)
+        setCharge(true)
       }
     }
+
     charger()
   }, [])
 
@@ -59,11 +85,11 @@ export default function Accueil() {
 
   const garanties = [
     { titre: "Agréé par l'État du Bénin", desc: "Entreprise officiellement référencée et agréée par les autorités sanitaires du Bénin.", detail: agrement, accent: true },
-    { titre: "Produits homologués OMS", desc: "Tous nos produits respectent les normes de l'Organisation Mondiale de la Santé et la réglementation béninoise.", accent: false },
-    { titre: "Résultats probants garantis", desc: "Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu. Sans exception.", accent: false },
-    { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai d'intervention garanti en moins de 2h sur Cotonou et ses environs.", accent: false },
-    { titre: "Certificat officiel remis", desc: "À l'issue de chaque intervention, un document officiel vous est remis pour vos archives ou vos démarches administratives.", accent: false },
-    { titre: "Techniciens certifiés", desc: "Notre équipe est formée, certifiée et régulièrement mise à jour sur les protocoles d'hygiène phytosanitaire.", accent: false },
+    { titre: "Produits homologués OMS", desc: "Tous nos produits respectent les normes de l'Organisation Mondiale de la Santé.", accent: false },
+    { titre: "Résultats probants garantis", desc: "Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu.", accent: false },
+    { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai garanti en moins de 2h sur Cotonou.", accent: false },
+    { titre: "Certificat officiel remis", desc: "Un document officiel vous est remis après chaque intervention.", accent: false },
+    { titre: "Techniciens certifiés", desc: "Notre équipe est formée et certifiée en hygiène phytosanitaire.", accent: false },
   ]
 
   return (
@@ -102,11 +128,11 @@ export default function Accueil() {
             </a>
           </div>
 
-          {/* CHIFFRES DYNAMIQUES DEPUIS SUPABASE */}
+          {/* CHIFFRES DYNAMIQUES */}
           <div className="hero-stats" style={{ display: "flex", marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", maxWidth: "600px" }}>
             {chiffres.map(function(s, i) {
               return (
-                <div key={s.id} style={{ flex: 1, textAlign: "center", borderRight: i < chiffres.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none", padding: "0 20px" }}>
+                <div key={s.id || i} style={{ flex: 1, textAlign: "center", borderRight: i < chiffres.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none", padding: "0 20px" }}>
                   <div style={{ fontSize: "28px", fontWeight: "700", color: "#d4a920" }}>{s.valeur}</div>
                   <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", marginTop: "6px", letterSpacing: "0.06em" }}>{s.label.toUpperCase()}</div>
                 </div>
@@ -241,7 +267,7 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* TÉMOIGNAGES DYNAMIQUES */}
+      {/* TÉMOIGNAGES */}
       <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "64px", flexWrap: "wrap", gap: "20px" }}>
@@ -256,9 +282,9 @@ export default function Accueil() {
             <span style={{ color: "#d4a920", fontSize: "20px", letterSpacing: "4px" }}>★★★★★</span>
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-            {temoignages.slice(0, 3).map(function(t) {
+            {temoignages.slice(0, 3).map(function(t, i) {
               return (
-                <div key={t.id} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
+                <div key={t.id || i} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: "48px", color: "#d4a920", lineHeight: 1, marginBottom: "16px", fontFamily: "Georgia, serif" }}>"</div>
                   <p style={{ fontSize: "14px", color: "#444", lineHeight: "1.85", fontStyle: "italic", flex: 1, marginBottom: "32px" }}>{t.texte}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
