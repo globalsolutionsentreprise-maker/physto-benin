@@ -1,187 +1,181 @@
-export const metadata = {
-  title: "Qui sommes-nous — PHYSTO Bénin | Agréé par l'État du Bénin",
-  description: "PHYSTO Bénin, spécialiste en hygiène sanitaire et phytosanitaire agréé par l'État. Techniciens certifiés, 10 ans d'expertise, intervention dans tout le Bénin.",
+"use client"
+import { useState, useEffect } from "react"
+import { createClient } from "@supabase/supabase-js"
+
+function creerSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
+  )
 }
 
-export default function QuiSommesNous() {
+const SERVICES_DEFAUT = [
+  { id: 1, ico: "🪳", titre: "Désinsectisation", accroche: "Cafards · Fourmis · Moustiques · Mouches", desc: "Élimination complète et durable de tous les insectes nuisibles. Traitements par gel appât, pulvérisation résiduelle et fumigation professionnelle.", tag: "Devis gratuit sous 2h", details: ["Diagnostic complet et gratuit", "Gel appât professionnel longue durée", "Pulvérisation résiduelle certifiée", "Fumigation pour les cas sévères", "Contrat de suivi mensuel disponible"] },
+  { id: 2, ico: "🐀", titre: "Dératisation", accroche: "Rats · Souris · Rongeurs", desc: "Intervention sécurisée et efficace contre les rongeurs. Pièges homologués, raticides certifiés, sécurisation des accès et suivi mensuel.", tag: "Contrat mensuel disponible", details: ["Inspection complète des zones à risque", "Pièges professionnels certifiés", "Raticides homologués et sécurisés", "Sécurisation des points d'entrée", "Rapport d'intervention et suivi"] },
+  { id: 3, ico: "🧴", titre: "Désinfection", accroche: "Assainissement · Virucide · Bactéricide", desc: "Assainissement complet de vos locaux avec produits virucides, bactéricides et fongicides. Certifié restaurants, hôtels et établissements de santé.", tag: "Certificat officiel remis", details: ["Désinfection totale des surfaces", "Produits virucides certifiés OMS", "Conforme aux normes sanitaires", "Certificat d'hygiène officiel remis", "Traitement adapté aux ERP"] },
+  { id: 4, ico: "🐜", titre: "Anti-termites", accroche: "Protection bois et béton", desc: "Protection durable de vos structures. Barrière chimique en profondeur, traitement par injection et garantie longue durée avec contrôle annuel.", tag: "Garantie longue durée", details: ["Diagnostic complet des structures", "Barrière chimique par injection", "Traitement du bois et fondations", "Garantie longue durée", "Contrôle annuel inclus"] },
+  { id: 5, ico: "🐍", titre: "Reptiles et Serpents", accroche: "Geckos · Serpents · Lézards", desc: "Sécurisation complète contre les reptiles. Répulsifs professionnels longue durée, barrières physiques et intervention urgence en moins de 2h.", tag: "Urgence — 2h à Cotonou", details: ["Intervention d'urgence en moins de 2h", "Répulsifs professionnels longue durée", "Sécurisation périmétrique complète", "Pose de barrières physiques", "Suivi post-intervention inclus"] },
+  { id: 6, ico: "🦟", titre: "Anti-moustiques", accroche: "Gîtes larvaires · Jardins · Extérieurs", desc: "Traitement des zones de prolifération, gîtes larvaires et espaces extérieurs. Protection durable pour votre famille et vos employés.", tag: "Traitement extérieur inclus", details: ["Traitement des gîtes larvaires", "Pulvérisation des extérieurs", "Brumisation professionnelle", "Pose de diffuseurs longue durée", "Traitement préventif de saison"] },
+  { id: 7, ico: "🛏️", titre: "Punaises de lit", accroche: "Hôtels · Appartements · Résidences", desc: "Élimination complète et garantie. Traitement thermique à 60°C et traitement chimique certifié. Inspection intégrale du mobilier.", tag: "Résultat garanti", details: ["Inspection complète du mobilier", "Traitement thermique à 60 degrés", "Traitement chimique résiduel", "Protection des matelas incluse", "Garantie sans punaises 3 mois"] },
+  { id: 8, ico: "📋", titre: "Contrat d'entretien", accroche: "Mensuel · Trimestriel · Sur mesure", desc: "Programme d'entretien régulier sur mesure. Visites planifiées, rapports détaillés, alerte préventive et tarif préférentiel.", tag: "À partir de 25 000 FCFA/mois", details: ["Fréquence mensuelle ou trimestrielle", "Rapport détaillé après chaque visite", "Alerte préventive SMS/WhatsApp", "Tarif préférentiel sous contrat", "Priorité en cas d'urgence"] },
+]
 
-  const valeurs = [
-    { num: "01", titre: "Efficacité", desc: "Chaque intervention est préparée, planifiée et exécutée avec précision. Nous ne partons pas avant que le résultat soit là." },
-    { num: "02", titre: "Fiabilité", desc: "Produits homologués, protocoles certifiés, techniciens formés en continu. Pas de compromis sur la qualité." },
-    { num: "03", titre: "Réactivité", desc: "Disponibles 24h/24 et 7j/7. Délai d'intervention garanti en moins de 2h à Cotonou et ses environs." },
-    { num: "04", titre: "Transparence", desc: "Devis clair, intervention expliquée, certificat remis. Vous savez exactement ce que vous payez et pourquoi." },
-  ]
+export default function Services() {
+  const [services, setServices] = useState(SERVICES_DEFAUT)
 
-  const equipe = [
-    { init: "YK", nom: "Yakoubou Kabir", role: "Directeur Général", desc: "Fondateur de Global Solutions Entreprise, fort de plus de 10 ans d'expérience en conseil, gestion d'entreprise et accompagnement de structures professionnelles au Bénin et en France." },
-    { init: "AT", nom: "Amadou T.", role: "Responsable Technique", desc: "Technicien certifié en hygiène phytosanitaire, spécialisé dans les traitements anti-termites, désinsectisation et fumigation. Formé aux protocoles OMS." },
-    { init: "MB", nom: "Marie B.", role: "Chargée de Clientèle", desc: "Responsable de la relation client, de l'établissement des devis et du suivi des contrats d'entretien. Première interlocutrice de nos clients professionnels." },
-  ]
+  useEffect(function() {
+    const db = creerSupabase()
+    async function charger() {
+      const { data } = await db.from("services").select("*").order("id")
+      if (data && data.length > 0) {
+        setServices(data.map(function(s) {
+          return {
+            id: s.id,
+            ico: s.ico || "🔧",
+            titre: s.titre,
+            accroche: s.accroche || "",
+            desc: s.desc,
+            tag: s.tag || "",
+            details: s.details || []
+          }
+        }))
+      }
+    }
+    charger()
+  }, [])
 
-  const chiffres = [
-    { valeur: "+50", label: "Clients protégés" },
-    { valeur: "2h", label: "Délai d'urgence garanti" },
-    { valeur: "100%", label: "Résultats probants" },
-    { valeur: "24h/24", label: "Disponibilité" },
-  ]
-
-  const engagements = [
-    "Techniciens formés et régulièrement certifiés",
-    "Produits respectueux de la santé humaine et de l'environnement",
-    "Transparence totale sur les traitements appliqués",
-    "Retour gratuit si le résultat n'est pas au rendez-vous",
-    "Rapport d'intervention remis après chaque prestation",
-    "Respect absolu de la confidentialité de nos clients",
+  const secteurs = [
+    "Hôtels et Resorts", "Restaurants et Traiteurs", "Entrepôts et Industrie",
+    "Bureaux et Entreprises", "Écoles et Institutions", "Particuliers exigeants",
+    "Établissements de santé", "Résidences haut de gamme",
   ]
 
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
+      <style>{`
+        .section-pad { padding: 80px 60px; }
+        .hero-pad { padding: 80px 60px 72px; }
+        .grid-2-mob { display: grid; grid-template-columns: 1fr 1fr; }
+        .grid-3-mob { display: grid; grid-template-columns: repeat(3, 1fr); }
+        .srv-row { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; }
+        @media (max-width: 768px) {
+          .section-pad { padding: 48px 20px !important; }
+          .hero-pad { padding: 48px 20px !important; }
+          .grid-2-mob { grid-template-columns: 1fr !important; gap: 40px !important; }
+          .grid-3-mob { grid-template-columns: 1fr !important; }
+          .srv-row { grid-template-columns: 1fr !important; gap: 20px !important; }
+          .secteurs-grid { grid-template-columns: 1fr 1fr !important; }
+          .cta-btns { flex-direction: column !important; }
+        }
+      `}</style>
+
       {/* EN-TÊTE */}
-      <section style={{ backgroundColor: "#0a2e1a", padding: "80px 60px 72px", position: "relative", overflow: "hidden" }}>
+      <section className="hero-pad" style={{ backgroundColor: "#0a2e1a", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "400px", height: "400px", borderRadius: "50%", backgroundColor: "rgba(212,169,32,0.04)", pointerEvents: "none" }} />
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>QUI SOMMES-NOUS</div>
-          <h1 style={{ fontSize: "clamp(32px, 4vw, 52px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.15", letterSpacing: "-0.02em", marginBottom: "20px", maxWidth: "620px" }}>
-            Une expertise reconnue
+          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>NOS INTERVENTIONS</div>
+          <h1 style={{ fontSize: "clamp(28px, 4vw, 52px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.15", letterSpacing: "-0.02em", marginBottom: "20px", maxWidth: "600px" }}>
+            Une expertise complète
             <br />
-            <strong style={{ fontWeight: "700", color: "#d4a920" }}>au service du Bénin.</strong>
+            <strong style={{ fontWeight: "700", color: "#d4a920" }}>pour chaque nuisible.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
-            PHYSTO Bénin est la division hygiène sanitaire et phytosanitaire de Global Solutions
-            Entreprise. Basés à Cotonou, nous intervenons dans tout le Bénin avec des techniciens
-            certifiés et des produits homologués.
+            Huit interventions spécialisées, réalisées par des techniciens certifiés avec des produits homologués par l'OMS. Résultats garantis par contrat écrit.
           </p>
         </div>
       </section>
 
-      {/* MISSION */}
-      <section style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE MISSION</div>
-            <h2 style={{ fontSize: "clamp(26px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "24px" }}>
-              Offrir un environnement
-              <br />
-              <strong style={{ fontWeight: "700" }}>sain à chaque client.</strong>
-            </h2>
-            <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "20px" }}>
-              Notre mission est simple : offrir à chaque client, particulier ou professionnel,
-              un environnement sain, sécurisé et durablement débarrassé de toute nuisance.
-              Nous intervenons avec des produits certifiés, des méthodes éprouvées et un
-              engagement total sur les résultats.
-            </p>
-            <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
-              Notre promesse est absolue : si vous n'êtes pas entièrement satisfait du résultat,
-              nous revenons gratuitement jusqu'à ce que ce soit parfait. Sans délai, sans discussion.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {engagements.map(function(e) {
-                return (
-                  <div key={e} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                    <span style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px", fontWeight: "700" }}>✓</span>
-                    <span style={{ fontSize: "14px", color: "#444", lineHeight: "1.6" }}>{e}</span>
+      {/* LISTE SERVICES */}
+      <section className="section-pad" style={{ backgroundColor: "#f7f7f5" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "3px" }}>
+          {services.map(function(s, i) {
+            return (
+              <div key={s.id || i} style={{ backgroundColor: "#ffffff", padding: "48px", borderTop: i === 0 ? "3px solid #d4a920" : "3px solid transparent" }}>
+                <div className="srv-row" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "60px", alignItems: "start" }}>
+                  <div>
+                    <div style={{ fontSize: "36px", marginBottom: "16px" }}>{s.ico}</div>
+                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0a0a0a", marginBottom: "10px" }}>{s.titre}</h2>
+                    {s.accroche && <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "20px" }}>{s.accroche.toUpperCase()}</div>}
+                    <div style={{ display: "inline-block", fontSize: "11px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.1)", padding: "6px 14px", borderRadius: "4px" }}>
+                      {s.tag}
+                    </div>
                   </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px", marginBottom: "3px" }}>
-              {chiffres.map(function(c, i) {
-                return (
-                  <div key={i} style={{ backgroundColor: i === 0 ? "#0a2e1a" : "#f7f7f5", padding: "32px 24px", textAlign: "center" }}>
-                    <div style={{ fontSize: "32px", fontWeight: "700", color: i === 0 ? "#d4a920" : "#0a2e1a", marginBottom: "8px" }}>{c.valeur}</div>
-                    <div style={{ fontSize: "11px", color: i === 0 ? "rgba(255,255,255,0.6)" : "#999", letterSpacing: "0.06em" }}>{c.label.toUpperCase()}</div>
+                  <div>
+                    <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "24px" }}>{s.desc}</p>
+                    {s.details && s.details.length > 0 && (
+                      <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+                        {s.details.map(function(d, j) {
+                          return (
+                            <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: "12px", fontSize: "13px", color: "#444" }}>
+                              <span style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px", fontWeight: "700" }}>✓</span>
+                              {d}
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                    <a href="/contact" style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
+                      Demander une intervention →
+                    </a>
                   </div>
-                )
-              })}
-            </div>
-            <div style={{ backgroundColor: "#d4a920", padding: "28px 24px" }}>
-              <div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a", marginBottom: "6px" }}>Notre garantie absolue</div>
-              <div style={{ fontSize: "13px", color: "rgba(10,46,26,0.75)", lineHeight: "1.6" }}>
-                Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu.
+                </div>
               </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* SECTEURS */}
+      <section className="section-pad" style={{ backgroundColor: "#ffffff" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div className="grid-2-mob" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>SECTEURS D'ACTIVITÉ</div>
+              <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "24px" }}>
+                Nous intervenons dans
+                <br />
+                <strong style={{ fontWeight: "700" }}>tous les secteurs.</strong>
+              </h2>
+              <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "32px" }}>
+                De l'hôtel cinq étoiles à l'entrepôt industriel, PHYSTO Bénin adapte ses protocoles à chaque environnement avec la même exigence de résultat.
+              </p>
+              <a href="/contact" style={{ display: "inline-block", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "13px", padding: "13px 28px", borderRadius: "6px", textDecoration: "none" }}>
+                Nous contacter
+              </a>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* VALEURS */}
-      <section style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
-            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOS VALEURS</div>
-            <h2 style={{ fontSize: "clamp(26px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em" }}>
-              Ce qui nous distingue
-              <br />
-              <strong style={{ fontWeight: "700" }}>depuis le premier jour.</strong>
-            </h2>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "3px" }}>
-            {valeurs.map(function(v, i) {
-              return (
-                <div key={i} style={{ backgroundColor: "#ffffff", padding: "40px 28px", borderTop: "3px solid #0a2e1a" }}>
-                  <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.15em", marginBottom: "20px" }}>{v.num}</div>
-                  <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a", marginBottom: "14px" }}>{v.titre}</h3>
-                  <p style={{ fontSize: "13px", color: "#777", lineHeight: "1.75" }}>{v.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ÉQUIPE */}
-      <section style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ marginBottom: "64px" }}>
-            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE ÉQUIPE</div>
-            <h2 style={{ fontSize: "clamp(26px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em" }}>
-              Des experts à
-              <br />
-              <strong style={{ fontWeight: "700" }}>votre service.</strong>
-            </h2>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "3px" }}>
-            {equipe.map(function(m, i) {
-              return (
-                <div key={i} style={{ backgroundColor: "#f7f7f5", padding: "40px 32px" }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "14px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
-                    {m.init}
+            <div className="secteurs-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px" }}>
+              {secteurs.map(function(s, i) {
+                return (
+                  <div key={i} style={{ backgroundColor: "#f7f7f5", padding: "20px 18px", fontSize: "13px", fontWeight: "500", color: "#444", borderLeft: "3px solid #0a2e1a" }}>
+                    {s}
                   </div>
-                  <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a", marginBottom: "6px" }}>{m.nom}</h3>
-                  <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "16px" }}>{m.role.toUpperCase()}</div>
-                  <p style={{ fontSize: "13px", color: "#666", lineHeight: "1.8" }}>{m.desc}</p>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section style={{ backgroundColor: "#0a2e1a", padding: "80px 60px", textAlign: "center" }}>
+      <section className="section-pad" style={{ backgroundColor: "#0a2e1a", textAlign: "center" }}>
         <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>TRAVAILLONS ENSEMBLE</div>
-          <h2 style={{ fontSize: "clamp(26px, 3vw, 38px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "16px" }}>
-            Prêt à confier votre
+          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>INTERVENTION RAPIDE</div>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "16px" }}>
+            Votre situation mérite
             <br />
-            <strong style={{ fontWeight: "700", color: "#d4a920" }}>hygiène à des experts ?</strong>
+            <strong style={{ fontWeight: "700", color: "#d4a920" }}>une réponse immédiate.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", marginBottom: "40px" }}>
-            Contactez-nous pour un diagnostic gratuit. Nous vous proposons la solution
-            la plus adaptée à votre situation, sans engagement.
+            Décrivez-nous votre problème. Nous vous répondons sous 2h avec un diagnostic et un devis gratuit.
           </p>
-          <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
-              Demander un diagnostic gratuit
+              Demander un devis gratuit
             </a>
-            <a href="/services" style={{ border: "1px solid rgba(255,255,255,0.25)", color: "#ffffff", fontWeight: "500", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
-              Découvrir nos services →
+            <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#ffffff", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
+              WhatsApp direct
             </a>
           </div>
         </div>
