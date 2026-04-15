@@ -287,7 +287,15 @@ export default function Admin() {
   async function sauvegarderService(id) {
     const s = services.find(function(item) { return item.id === id })
     if (!s) return
-    const { error } = await supabase.from("services").update(s).eq("id", id)
+    // Envoyer uniquement les champs modifiables - pas id, pas actif
+    const { error } = await supabase.from("services").update({
+      ico: s.ico,
+      titre: s.titre,
+      accroche: s.accroche,
+      description: s.description,
+      tag: s.tag,
+      ordre: s.ordre
+    }).eq("id", id)
     if (!error) afficherMessage("Service sauvegarde")
     else afficherMessage("Erreur lors de la sauvegarde")
   }
@@ -297,7 +305,15 @@ export default function Admin() {
   }
   async function ajouterService() {
     if (!nouveauService.titre || !nouveauService.description) return
-    const { error } = await supabase.from("services").insert([Object.assign({}, nouveauService, { ordre: services.length + 1 })])
+    const { error } = await supabase.from("services").insert([{
+      ico: nouveauService.ico || "🔧",
+      titre: nouveauService.titre,
+      accroche: nouveauService.accroche || "",
+      description: nouveauService.description,
+      tag: nouveauService.tag || "",
+      ordre: services.length + 1,
+      actif: true
+    }])
     if (!error) { setNouveauService({ ico: "", titre: "", accroche: "", description: "", tag: "" }); chargerTout(); afficherMessage("Service ajoute") }
   }
 
