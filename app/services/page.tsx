@@ -35,7 +35,7 @@ export default function Services() {
             ico: s.ico || "🔧",
             titre: s.titre,
             accroche: s.accroche || "",
-            desc: s.desc,
+            desc: s.description,
             tag: s.tag || "",
             details: s.details || []
           }
@@ -103,7 +103,7 @@ export default function Services() {
                     </div>
                   </div>
                   <div>
-                    <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "24px" }}>{s.desc}</p>
+                    <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "24px" }}>{s.description}</p>
                     {s.details && s.details.length > 0 && (
                       <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
                         {s.details.map(function(d, j) {
