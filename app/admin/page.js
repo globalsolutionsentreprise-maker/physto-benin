@@ -31,6 +31,8 @@ export default function Admin() {
   const [temoignages, setTemoignages] = useState([])
   const [articles, setArticles] = useState([])
   const [equipe, setEquipe] = useState([])
+  const [services, setServices] = useState([])
+  const [nouveauService, setNouveauService] = useState({ ico: "", titre: "", accroche: "", description: "", tag: "" })
 
   const [nouveauTemoignage, setNouveauTemoignage] = useState({ init: "", nom: "", role: "", texte: "" })
   const [nouvelArticle, setNouvelArticle] = useState({ categorie: "", titre: "", resume: "", contenu: "", date: "", lecture: "5 min", vedette: false })
@@ -52,6 +54,7 @@ export default function Admin() {
         supabase.from("temoignages").select("*").order("id"),
         supabase.from("articles").select("*").order("id"),
         supabase.from("equipe").select("*").order("ordre"),
+        supabase.from("services").select("*").order("ordre"),
       ])
 
       if (p.error) setErreurDB("Erreur table parametres: " + p.error.message)
@@ -79,6 +82,8 @@ export default function Admin() {
       if (t.data) setTemoignages(t.data)
       if (a.data) setArticles(a.data)
       if (e.data) setEquipe(e.data)
+      const sv = await supabase.from("services").select("*").order("ordre")
+      if (sv.data) setServices(sv.data)
 
     } catch(err) {
       setErreurDB("Erreur de connexion: " + err.message)
@@ -273,6 +278,29 @@ export default function Admin() {
     }
   }
 
+
+  function modifierService(id, champ, val) {
+    setServices(function(prev) {
+      return prev.map(function(s) { if (s.id === id) return Object.assign({}, s, { [champ]: val }); return s })
+    })
+  }
+  async function sauvegarderService(id) {
+    const s = services.find(function(item) { return item.id === id })
+    if (!s) return
+    const { error } = await supabase.from("services").update(s).eq("id", id)
+    if (!error) afficherMessage("Service sauvegarde")
+    else afficherMessage("Erreur lors de la sauvegarde")
+  }
+  async function supprimerService(id) {
+    const { error } = await supabase.from("services").delete().eq("id", id)
+    if (!error) { setServices(function(prev) { return prev.filter(function(s) { return s.id !== id }) }); afficherMessage("Service supprime") }
+  }
+  async function ajouterService() {
+    if (!nouveauService.titre || !nouveauService.description) return
+    const { error } = await supabase.from("services").insert([Object.assign({}, nouveauService, { ordre: services.length + 1 })])
+    if (!error) { setNouveauService({ ico: "", titre: "", accroche: "", description: "", tag: "" }); chargerTout(); afficherMessage("Service ajoute") }
+  }
+
   const inp = { width: "100%", padding: "10px 12px", borderRadius: "6px", border: "1px solid #e0e0e0", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box", backgroundColor: "#fff" }
   const lbl = { fontSize: "10px", color: "#888", fontWeight: "700", letterSpacing: "0.08em", display: "block", marginBottom: "5px" }
   const card = { backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: "10px", padding: "20px", marginBottom: "12px" }
@@ -291,6 +319,7 @@ export default function Admin() {
     { id: "textes_garanties", label: "Garanties" },
     { id: "temoignages", label: "Temoignages" },
     { id: "articles", label: "Articles Blog" },
+    { id: "services", label: "Nos Services" },
     { id: "equipe", label: "Notre Equipe" },
   ]
 
@@ -560,7 +589,40 @@ export default function Admin() {
             </div>
           )}
 
-          {onglet === "equipe" && (
+                    {onglet === "services" && (
+            <div>
+              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Nos Services</h2>
+              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Modifiez chaque service puis cliquez Sauvegarder.</p>
+              {services.map(function(s) {
+                return (
+                  <div key={s.id} style={cardVert}>
+                    <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                      <div><label style={lbl}>ICONE</label><input type="text" value={s.ico || ""} onChange={function(e) { modifierService(s.id, "ico", e.target.value) }} style={inp} /></div>
+                      <div><label style={lbl}>NOM DU SERVICE</label><input type="text" value={s.titre || ""} onChange={function(e) { modifierService(s.id, "titre", e.target.value) }} style={inp} /></div>
+                      <div><label style={lbl}>ETIQUETTE</label><input type="text" value={s.tag || ""} onChange={function(e) { modifierService(s.id, "tag", e.target.value) }} style={inp} /></div>
+                    </div>
+                    <div style={{ marginBottom: "10px" }}><label style={lbl}>ACCROCHE</label><input type="text" value={s.accroche || ""} onChange={function(e) { modifierService(s.id, "accroche", e.target.value) }} style={inp} /></div>
+                    <div style={{ marginBottom: "14px" }}><label style={lbl}>DESCRIPTION</label><textarea rows={3} value={s.description || ""} onChange={function(e) { modifierService(s.id, "description", e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} /></div>
+                    <button onClick={function() { sauvegarderService(s.id) }} style={btnSave}>Sauvegarder</button>
+                    <button onClick={function() { supprimerService(s.id) }} style={btnSuppr}>Supprimer</button>
+                  </div>
+                )
+              })}
+              <div style={cardOr}>
+                <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#111", marginBottom: "14px" }}>Ajouter un service</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <div><label style={lbl}>ICONE</label><input type="text" value={nouveauService.ico} onChange={function(e) { setNouveauService(function(p) { return Object.assign({}, p, { ico: e.target.value }) }) }} placeholder="🔧" style={inp} /></div>
+                  <div><label style={lbl}>NOM</label><input type="text" value={nouveauService.titre} onChange={function(e) { setNouveauService(function(p) { return Object.assign({}, p, { titre: e.target.value }) }) }} placeholder="Ex: Desinsectisation" style={inp} /></div>
+                  <div><label style={lbl}>ETIQUETTE</label><input type="text" value={nouveauService.tag} onChange={function(e) { setNouveauService(function(p) { return Object.assign({}, p, { tag: e.target.value }) }) }} placeholder="Ex: Devis gratuit 24h" style={inp} /></div>
+                </div>
+                <div style={{ marginBottom: "10px" }}><label style={lbl}>ACCROCHE</label><input type="text" value={nouveauService.accroche} onChange={function(e) { setNouveauService(function(p) { return Object.assign({}, p, { accroche: e.target.value }) }) }} placeholder="Ex: Cafards · Fourmis" style={inp} /></div>
+                <div style={{ marginBottom: "14px" }}><label style={lbl}>DESCRIPTION</label><textarea rows={3} value={nouveauService.description} onChange={function(e) { setNouveauService(function(p) { return Object.assign({}, p, { description: e.target.value }) }) }} style={Object.assign({}, inp, { resize: "vertical" })} /></div>
+                <button onClick={ajouterService} style={btnAjouter}>Ajouter ce service</button>
+              </div>
+            </div>
+          )}
+
+{onglet === "equipe" && (
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "24px" }}>Notre equipe</h2>
               {equipe.map(function(m) {
