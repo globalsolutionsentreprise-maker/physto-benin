@@ -185,7 +185,12 @@ export default function Admin() {
   async function sauvegarderTemoignage(id) {
     const t = temoignages.find(function(item) { return item.id === id })
     if (!t) return
-    const { error } = await supabase.from("temoignages").update(t).eq("id", id)
+    const { error } = await supabase.from("temoignages").update({
+      init: t.init,
+      nom: t.nom,
+      role: t.role,
+      texte: t.texte
+    }).eq("id", id)
     if (!error) afficherMessage("Temoignage sauvegarde")
     else afficherMessage("Erreur: " + error.message)
   }
@@ -255,7 +260,13 @@ export default function Admin() {
   async function sauvegarderMembre(id) {
     const m = equipe.find(function(item) { return item.id === id })
     if (!m) return
-    const { error } = await supabase.from("equipe").update(m).eq("id", id)
+    const { error } = await supabase.from("equipe").update({
+      init: m.init,
+      nom: m.nom,
+      role: m.role,
+      description: m.description,
+      ordre: m.ordre
+    }).eq("id", id)
     if (!error) afficherMessage("Membre sauvegarde")
     else afficherMessage("Erreur: " + error.message)
   }
