@@ -29,17 +29,7 @@ export default function Services() {
     async function charger() {
       const { data } = await db.from("services").select("*").order("id")
       if (data && data.length > 0) {
-        setServices(data.map(function(s) {
-          return {
-            id: s.id,
-            ico: s.ico || "🔧",
-            titre: s.titre,
-            accroche: s.accroche || "",
-            desc: s.description,
-            tag: s.tag || "",
-            details: s.details || []
-          }
-        }))
+        setServices(data)
       }
     }
     charger()
