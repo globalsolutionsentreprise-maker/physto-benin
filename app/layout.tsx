@@ -168,7 +168,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 { label: "Cotonou, Benin", href: "/contact" },
                 { label: "+229 01 53 04 79 50", href: "tel:+2290153047950" },
                 { label: "WhatsApp", href: "https://wa.me/2290153047950" },
-                { label: "contact@physto-benin.com", href: "mailto:contact@physto-benin.com" },
+                { label: "globalsolutionsentreprise@gmail.com", href: "mailto:globalsolutionsentreprise@gmail.com" },
               ]},
             ].map((col) => (
               <div key={col.titre}>
