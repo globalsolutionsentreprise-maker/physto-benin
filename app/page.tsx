@@ -165,7 +165,6 @@ export default function Accueil() {
           <div style={{ borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#e8e8e8" }}>
             <img src="/images/about-team.jpg" alt="Technicien PHYSTO Bénin" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
-          </div>
         </div>
       </section>
 
