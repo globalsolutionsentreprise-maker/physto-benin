@@ -33,6 +33,8 @@ export default function Admin() {
   const [equipe, setEquipe] = useState([])
   const [services, setServices] = useState([])
   const [nouveauService, setNouveauService] = useState({ ico: "", titre: "", accroche: "", description: "", tag: "" })
+  const [realisations, setRealisations] = useState([])
+  const [uploadEnCours, setUploadEnCours] = useState(false)
 
   const [nouveauTemoignage, setNouveauTemoignage] = useState({ init: "", nom: "", role: "", texte: "" })
   const [nouvelArticle, setNouvelArticle] = useState({ categorie: "", titre: "", resume: "", contenu: "", date: "", lecture: "5 min", vedette: false })
@@ -84,6 +86,8 @@ export default function Admin() {
       if (e.data) setEquipe(e.data)
       const sv = await supabase.from("services").select("*").order("ordre")
       if (sv.data) setServices(sv.data)
+      const r = await supabase.from("realisations").select("*").order("id")
+      if (r.data) setRealisations(r.data)
 
     } catch(err) {
       setErreurDB("Erreur de connexion: " + err.message)
@@ -328,6 +332,59 @@ export default function Admin() {
     if (!error) { setNouveauService({ ico: "", titre: "", accroche: "", description: "", tag: "" }); chargerTout(); afficherMessage("Service ajoute") }
   }
 
+
+  async function uploaderFichier(fichier, dossier) {
+    const ext = fichier.name.split('.').pop()
+    const nom = dossier + '_' + Date.now() + '.' + ext
+    const { data, error } = await supabase.storage.from('realisations').upload(nom, fichier, { upsert: true })
+    if (error) { afficherMessage('Erreur upload: ' + error.message); return null }
+    const { data: urlData } = supabase.storage.from('realisations').getPublicUrl(nom)
+    return urlData.publicUrl
+  }
+
+  async function sauvegarderRealisation(id) {
+    const r = realisations.find(function(item) { return item.id === id })
+    if (!r) return
+    const { error } = await supabase.from('realisations').update({
+      secteur: r.secteur,
+      probleme: r.probleme,
+      resultat: r.resultat,
+      photo_avant: r.photo_avant,
+      photo_apres: r.photo_apres,
+      video: r.video,
+      actif: r.actif
+    }).eq('id', id)
+    if (!error) afficherMessage('Realisation sauvegardee')
+    else afficherMessage('Erreur: ' + error.message)
+  }
+
+  function modifierRealisation(id, champ, val) {
+    setRealisations(function(prev) {
+      return prev.map(function(r) { if (r.id === id) return Object.assign({}, r, { [champ]: val }); return r })
+    })
+  }
+
+  async function uploaderPhotoAvant(id, fichier) {
+    setUploadEnCours(true)
+    const url = await uploaderFichier(fichier, 'avant')
+    if (url) { modifierRealisation(id, 'photo_avant', url); afficherMessage('Photo avant uploadee') }
+    setUploadEnCours(false)
+  }
+
+  async function uploaderPhotoApres(id, fichier) {
+    setUploadEnCours(true)
+    const url = await uploaderFichier(fichier, 'apres')
+    if (url) { modifierRealisation(id, 'photo_apres', url); afficherMessage('Photo apres uploadee') }
+    setUploadEnCours(false)
+  }
+
+  async function uploaderVideo(id, fichier) {
+    setUploadEnCours(true)
+    const url = await uploaderFichier(fichier, 'video')
+    if (url) { modifierRealisation(id, 'video', url); afficherMessage('Video uploadee') }
+    setUploadEnCours(false)
+  }
+
   const inp = { width: "100%", padding: "10px 12px", borderRadius: "6px", border: "1px solid #e0e0e0", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box", backgroundColor: "#fff" }
   const lbl = { fontSize: "10px", color: "#888", fontWeight: "700", letterSpacing: "0.08em", display: "block", marginBottom: "5px" }
   const card = { backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: "10px", padding: "20px", marginBottom: "12px" }
@@ -347,6 +404,7 @@ export default function Admin() {
     { id: "temoignages", label: "Temoignages" },
     { id: "articles", label: "Articles Blog" },
     { id: "services", label: "Nos Services" },
+    { id: "realisations", label: "Realisations" },
     { id: "equipe", label: "Notre Equipe" },
   ]
 
@@ -616,7 +674,58 @@ export default function Admin() {
             </div>
           )}
 
-                    {onglet === "services" && (
+                              {onglet === "realisations" && (
+            <div>
+              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Realisations</h2>
+              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Modifiez le cas client, uploadez les photos avant/apres et la video. Activez ou desactivez l affichage sur le site.</p>
+              {realisations.map(function(r) {
+                return (
+                  <div key={r.id} style={cardVert}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                      <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#111" }}>Cas client #{r.id}</h3>
+                      <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={r.actif || false} onChange={function(e) { modifierRealisation(r.id, "actif", e.target.checked) }} />
+                        Afficher sur le site
+                      </label>
+                    </div>
+                    <div style={{ marginBottom: "10px" }}>
+                      <label style={lbl}>SECTEUR (ex: Hotel - Cotonou)</label>
+                      <input type="text" value={r.secteur || ""} onChange={function(e) { modifierRealisation(r.id, "secteur", e.target.value) }} style={inp} />
+                    </div>
+                    <div style={{ marginBottom: "10px" }}>
+                      <label style={lbl}>LE PROBLEME</label>
+                      <textarea rows={3} value={r.probleme || ""} onChange={function(e) { modifierRealisation(r.id, "probleme", e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
+                    </div>
+                    <div style={{ marginBottom: "20px" }}>
+                      <label style={lbl}>LE RESULTAT</label>
+                      <textarea rows={3} value={r.resultat || ""} onChange={function(e) { modifierRealisation(r.id, "resultat", e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                      <div>
+                        <label style={lbl}>PHOTO AVANT</label>
+                        {r.photo_avant && <img src={r.photo_avant} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px" }} />}
+                        <input type="file" accept="image/*" onChange={function(e) { if (e.target.files[0]) uploaderPhotoAvant(r.id, e.target.files[0]) }} style={{ fontSize: "11px", width: "100%" }} />
+                      </div>
+                      <div>
+                        <label style={lbl}>PHOTO APRES</label>
+                        {r.photo_apres && <img src={r.photo_apres} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px" }} />}
+                        <input type="file" accept="image/*" onChange={function(e) { if (e.target.files[0]) uploaderPhotoApres(r.id, e.target.files[0]) }} style={{ fontSize: "11px", width: "100%" }} />
+                      </div>
+                      <div>
+                        <label style={lbl}>VIDEO</label>
+                        {r.video && <video src={r.video} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "4px", marginBottom: "6px" }} controls />}
+                        <input type="file" accept="video/*" onChange={function(e) { if (e.target.files[0]) uploaderVideo(r.id, e.target.files[0]) }} style={{ fontSize: "11px", width: "100%" }} />
+                      </div>
+                    </div>
+                    {uploadEnCours && <p style={{ fontSize: "12px", color: "#888", marginBottom: "10px" }}>Upload en cours...</p>}
+                    <button onClick={function() { sauvegarderRealisation(r.id) }} style={btnSave}>Sauvegarder</button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+{onglet === "services" && (
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Nos Services</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Modifiez chaque service puis cliquez Sauvegarder.</p>
