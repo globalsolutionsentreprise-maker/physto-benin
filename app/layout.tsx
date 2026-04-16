@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import Footer from "../components/Footer"
 
 export const metadata: Metadata = {
   title: "PHYSTO Benin - Desinsectisation Cotonou | 24h/24",
@@ -136,8 +135,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {children}
-
-        <Footer />
 
       </body>
     </html>
