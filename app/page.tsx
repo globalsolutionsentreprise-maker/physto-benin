@@ -34,16 +34,7 @@ export default function Accueil() {
 
   const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
   const [charge, setCharge] = useState(false)
-  const [realisations, setRealisations] = useState([{
-    id: 1,
-    secteur: "Hôtel — Cotonou",
-    probleme: "Infestation sévère de cafards dans les cuisines et réserves. Signalement lors d une inspection sanitaire — risque de fermeture administrative.",
-    resultat: "Traitement gel appât en 2 interventions sur 72h. Zéro nuisible constaté à la contre-visite. Certificat d hygiène délivré. L établissement a rouvert sans aucune réserve.",
-    photo_avant: "",
-    photo_apres: "",
-    video: "",
-    actif: true
-  }])
+  const [realisations, setRealisations] = useState<any[]>([])
 
   useEffect(function() {
     // Créer le client DANS le useEffect pour éviter les conflits React
@@ -392,16 +383,7 @@ export default function Accueil() {
 
   const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
   const [charge, setCharge] = useState(false)
-  const [realisations, setRealisations] = useState([{
-    id: 1,
-    secteur: "Hôtel — Cotonou",
-    probleme: "Infestation sévère de cafards dans les cuisines et réserves. Signalement lors d une inspection sanitaire — risque de fermeture administrative.",
-    resultat: "Traitement gel appât en 2 interventions sur 72h. Zéro nuisible constaté à la contre-visite. Certificat d hygiène délivré. L établissement a rouvert sans aucune réserve.",
-    photo_avant: "",
-    photo_apres: "",
-    video: "",
-    actif: true
-  }])
+  const [realisations, setRealisations] = useState<any[]>([])
 
   useEffect(function() {
     // Créer le client DANS le useEffect pour éviter les conflits React
