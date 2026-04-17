@@ -58,7 +58,7 @@ export default function Accueil() {
           const agr = resParametres.data.find(function(x) { return x.cle === "agrement" })
           if (agr) setAgrement(agr.valeur)
         }
-        const resReal = await db.from("realisations").select("*").eq("actif", true).order("id")
+        const resReal = await db.from("realisations").select("*").filter("actif", "eq", "true").order("id")
         if (resReal.data && resReal.data.length > 0) setRealisations(resReal.data)
         setCharge(true)
       } catch(err) {
