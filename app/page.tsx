@@ -59,7 +59,7 @@ export default function Accueil() {
           if (agr) setAgrement(agr.valeur)
         }
         const rr = await db.from("realisations").select("*").eq("actif", true).order("id")
-        if (rr.data && rr.data.length > 0) setRealisations(rr.data)
+        if (rr.data && rr.data.length > 0) setRealisations(rr.data.filter(function(r) { return r.actif === true }))
         setCharge(true)
       } catch(err) {
         console.error("Erreur Supabase:", err)
