@@ -367,7 +367,7 @@ export default function Accueil() {
               <div key={r.id} style={{ backgroundColor: "#f7f7f5", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0", marginBottom: "24px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
                   <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e0e0e0", overflow: "hidden" }}>
-                    {r.photo_avant ? <img src={r.photo_avant} alt="Avant" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (
+                    {r.photo_avant ? <img src={r.photo_avant || ""} alt="Avant" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (
                       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                         <div style={{ fontSize: "32px", marginBottom: "8px" }}>📷</div>
                         <div style={{ fontSize: "11px", fontWeight: "700", color: "#999" }}>AVANT</div>
@@ -377,7 +377,7 @@ export default function Accueil() {
                     <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: "#991b1b", color: "#fff", fontSize: "9px", fontWeight: "700", padding: "4px 10px", borderRadius: "3px" }}>AVANT</div>
                   </div>
                   <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e8f5ee", overflow: "hidden" }}>
-                    {r.photo_apres ? <img src={r.photo_apres} alt="Après" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (
+                    {r.photo_apres ? <img src={r.photo_apres || ""} alt="Après" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (
                       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                         <div style={{ fontSize: "32px", marginBottom: "8px" }}>✅</div>
                         <div style={{ fontSize: "11px", fontWeight: "700", color: "#1a6b38" }}>APRÈS</div>
