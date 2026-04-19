@@ -45,7 +45,8 @@ export default function Footer() {
         </div>
       </div>
       <div style={{ borderTop: "1px solid #eee", paddingTop: "20px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-        <p style={{ fontSize: "11px", color: "#aaa" }}>2025 PHYSTO Benin — Tous droits reserves</p>
+        <p style={{ fontSize: "11px", color: "#aaa" }}>2025 PHYSTO by GSE — Tous droits réservés</p>
+        <a href="/mentions-legales" style={{ fontSize: "11px", color: "#aaa", textDecoration: "none" }}>Mentions légales</a>
         <div style={{ display: "flex", gap: "8px" }}>
           {["Produits certifies","Agrees par l Etat","24h/24"].map(function(c) { return <span key={c} style={{ fontSize: "10px", backgroundColor: "#fff", border: "1px solid #eee", padding: "3px 10px", borderRadius: "4px", color: "#aaa" }}>{c}</span> })}
         </div>
