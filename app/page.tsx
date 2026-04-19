@@ -267,6 +267,39 @@ export default function Accueil() {
       </section>
 
 
+
+      {realisations.length > 0 && (
+      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "100px 60px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "64px" }}>
+            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>CAS RÉELS</div>
+            <h2 style={{ fontSize: "clamp(26px, 3vw, 40px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2" }}>Des résultats concrets<br /><strong style={{ fontWeight: "700" }}>sur le terrain.</strong></h2>
+          </div>
+          {realisations.map(function(r) { return (
+            <div key={r.id} style={{ backgroundColor: "#f7f7f5", display: "grid", gridTemplateColumns: "1fr 1fr", marginBottom: "24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
+                <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e0e0e0", overflow: "hidden" }}>
+                  {r.photo_avant ? <img src={r.photo_avant} alt="Avant" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div><div style={{ fontSize: "11px", color: "#999" }}>AVANT</div></div>}
+                  <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: "#991b1b", color: "#fff", fontSize: "9px", fontWeight: "700", padding: "4px 10px", borderRadius: "3px" }}>AVANT</div>
+                </div>
+                <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e8f5ee", overflow: "hidden" }}>
+                  {r.photo_apres ? <img src={r.photo_apres} alt="Apres" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div><div style={{ fontSize: "11px", color: "#1a6b38" }}>APRÈS</div></div>}
+                  <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "9px", fontWeight: "700", padding: "4px 10px", borderRadius: "3px" }}>APRÈS</div>
+                </div>
+                <div style={{ gridColumn: "span 2", backgroundColor: "#1a1a1a", minHeight: "180px", position: "relative", overflow: "hidden" }}>
+                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Equipe" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens PHYSTO Bénin</div></div></>}
+                </div>
+              </div>
+              <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", marginBottom: "24px" }}>🏨 {r.secteur}</div>
+                <div style={{ marginBottom: "24px" }}><div style={{ fontSize: "10px", color: "#991b1b", fontWeight: "700", marginBottom: "8px" }}>LE PROBLÈME</div><p style={{ fontSize: "15px", color: "#333", lineHeight: "1.8" }}>{r.probleme}</p></div>
+                <div><div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", marginBottom: "8px" }}>LE RÉSULTAT</div><p style={{ fontSize: "15px", color: "#333", lineHeight: "1.8" }}>{r.resultat}</p></div>
+              </div>
+            </div>
+          )})}
+        </div>
+      </section>
+      )}
       {/* TÉMOIGNAGES */}
       <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
