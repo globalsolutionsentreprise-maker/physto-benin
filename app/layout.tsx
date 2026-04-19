@@ -77,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
               <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
               <div>
-                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>PHYSTO Benin</div>
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>PHYSTO <span style={{ color: "#d4a920" }}>by</span> GSE</div>
                 <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>
               </div>
             </a>
