@@ -38,14 +38,14 @@ export default function ContactForm() {
   }
 
   const zones = [
-    { ville: "Cotonou", delai: "moins de 2h", priorite: true },
-    { ville: "Abomey-Calavi", delai: "moins de 2h", priorite: true },
-    { ville: "Sèmè-Kpodji", delai: "moins de 2h", priorite: true },
-    { ville: "Porto-Novo", delai: "environ 3h", priorite: false },
-    { ville: "Ouidah", delai: "environ 3h", priorite: false },
-    { ville: "Abomey", delai: "environ 4h", priorite: false },
-    { ville: "Parakou", delai: "sous 24h", priorite: false },
-    { ville: "Toute autre ville", delai: "nous consulter", priorite: false },
+    { ville: "Cotonou", delai: "Zone prioritaire", priorite: true },
+    { ville: "Abomey-Calavi", delai: "Zone prioritaire", priorite: true },
+    { ville: "Sèmè-Kpodji", delai: "Zone prioritaire", priorite: true },
+    { ville: "Porto-Novo", delai: "Disponible", priorite: false },
+    { ville: "Ouidah", delai: "Disponible", priorite: false },
+    { ville: "Abomey", delai: "Disponible", priorite: false },
+    { ville: "Parakou", delai: "Disponible", priorite: false },
+    { ville: "Toute autre ville", delai: "Nous contacter", priorite: false },
   ]
 
   const inp = {
@@ -82,7 +82,7 @@ export default function ContactForm() {
           <strong style={{ fontWeight: "700" }}>Nous prenons en charge le reste.</strong>
         </h2>
         <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", marginBottom: "40px" }}>
-          Réponse garantie sous 2h. Diagnostic et devis gratuits, sans engagement.
+          Réponse sous 2h. Diagnostic et estimation offerts.
         </p>
 
         {statut === "succes" && (
@@ -156,7 +156,7 @@ export default function ContactForm() {
           </button>
 
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-            {["Réponse sous 2h", "Gratuit et sans engagement", "Disponible 24h/24"].map(function(g) {
+            {["Réponse rapide", "Disponible 24h/24"].map(function(g) {
               return (
                 <div key={g} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "10px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}>
                   <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "#1a6b38", flexShrink: 0 }} />

@@ -20,8 +20,7 @@ export default function Contact() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>24h/24 et 7j/7.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "520px", fontWeight: "300" }}>
-            Décrivez votre situation. Nous vous répondons sous 2h avec un diagnostic
-            et un devis gratuit, sans engagement de votre part.
+            Décrivez votre situation. Nous vous répondons rapidement avec un diagnostic et une estimation offerts.
           </p>
         </div>
       </section>

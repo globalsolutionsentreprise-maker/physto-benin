@@ -57,7 +57,6 @@ export default function QuiSommesNous() {
     "Techniciens formés et régulièrement certifiés",
     "Produits respectueux de la santé humaine et de l'environnement",
     "Transparence totale sur les traitements appliqués",
-    "Retour gratuit si le résultat n'est pas au rendez-vous",
     "Rapport d'intervention remis après chaque prestation",
     "Respect absolu de la confidentialité de nos clients",
   ]
