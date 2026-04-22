@@ -72,7 +72,7 @@ export default function Services() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>pour chaque nuisible.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
-            Huit interventions spécialisées, réalisées par des techniciens certifiés avec des produits homologués par l'OMS. Résultats garantis par contrat écrit.
+            Huit interventions spécialisées, réalisées par des techniciens certifiés avec des produits homologués par l'OMS.
           </p>
         </div>
       </section>
