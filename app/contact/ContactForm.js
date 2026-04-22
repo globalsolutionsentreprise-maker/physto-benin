@@ -103,24 +103,24 @@ export default function ContactForm() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
             <div>
-              <label style={lbl}>VOTRE NOM *</label>
-              <input type="text" name="nom" required value={formulaire.nom} onChange={handleChange} placeholder="Ex : Kofi Mensah" style={inp} />
+              <label htmlFor="nom" style={lbl}>VOTRE NOM *</label>
+              <input id="nom" type="text" name="nom" required value={formulaire.nom} onChange={handleChange} placeholder="Ex : Kofi Mensah" style={inp} />
             </div>
             <div>
-              <label style={lbl}>TÉLÉPHONE *</label>
-              <input type="tel" name="telephone" required value={formulaire.telephone} onChange={handleChange} placeholder="+229 XX XX XX XX" style={inp} />
+              <label htmlFor="telephone" style={lbl}>TÉLÉPHONE *</label>
+              <input id="telephone" type="tel" name="telephone" required value={formulaire.telephone} onChange={handleChange} placeholder="+229 XX XX XX XX" style={inp} />
             </div>
           </div>
 
           <div>
-            <label style={lbl}>EMAIL</label>
-            <input type="email" name="email" value={formulaire.email} onChange={handleChange} placeholder="exemple@email.com" style={inp} />
+            <label htmlFor="email" style={lbl}>EMAIL</label>
+            <input id="email" type="email" name="email" value={formulaire.email} onChange={handleChange} placeholder="exemple@email.com" style={inp} />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
             <div>
-              <label style={lbl}>TYPE DE NUISIBLE *</label>
-              <select name="nuisible" required value={formulaire.nuisible} onChange={handleChange} style={inp}>
+              <label htmlFor="nuisible" style={lbl}>TYPE DE NUISIBLE *</label>
+              <select id="nuisible" name="nuisible" required value={formulaire.nuisible} onChange={handleChange} style={inp}>
                 <option value="" style={{ backgroundColor: "#0a2e1a" }}>Sélectionner</option>
                 <option value="Cafards" style={{ backgroundColor: "#0a2e1a" }}>Cafards et Blattes</option>
                 <option value="Rats" style={{ backgroundColor: "#0a2e1a" }}>Rats et Souris</option>
@@ -134,14 +134,14 @@ export default function ContactForm() {
               </select>
             </div>
             <div>
-              <label style={lbl}>VOTRE VILLE *</label>
-              <input type="text" name="ville" required value={formulaire.ville} onChange={handleChange} placeholder="Ex : Cotonou" style={inp} />
+              <label htmlFor="ville" style={lbl}>VOTRE VILLE *</label>
+              <input id="ville" type="text" name="ville" required value={formulaire.ville} onChange={handleChange} placeholder="Ex : Cotonou" style={inp} />
             </div>
           </div>
 
           <div>
-            <label style={lbl}>VOTRE MESSAGE</label>
-            <textarea name="message" rows={4} value={formulaire.message} onChange={handleChange} placeholder="Décrivez votre situation, la superficie, le type de local..." style={Object.assign({}, inp, { resize: "vertical" })} />
+            <label htmlFor="message" style={lbl}>VOTRE MESSAGE</label>
+            <textarea id="message" name="message" rows={4} value={formulaire.message} onChange={handleChange} placeholder="Décrivez votre situation, la superficie, le type de local..." style={Object.assign({}, inp, { resize: "vertical" })} />
           </div>
 
           <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>

@@ -1,14 +1,10 @@
 "use client"
 import { useState, useEffect } from "react"
-import { createClient } from "@supabase/supabase-js"
-function creerSupabase() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
-}
+import { supabase } from "../lib/supabase"
 export default function Footer() {
-  const [coord, setCoord] = useState({ email: "globalsolutionsentreprise@gmail.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "22953047950" })
+  const [coord, setCoord] = useState({ email: "globalsolutionsentreprise@gmail.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "2290153047950" })
   useEffect(function() {
-    const db = creerSupabase()
-    db.from("parametres").select("cle, valeur").then(function({ data }) {
+    supabase.from("parametres").select("cle, valeur").then(function({ data }) {
       if (data) {
         const map: Record<string,string> = {}
         data.forEach(function(p: any) { map[p.cle] = p.valeur })
@@ -24,11 +20,11 @@ export default function Footer() {
             <img src="/logo-gse.jpeg" alt="Logo" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
             <div><div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>PHYSTO Benin</div><div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div></div>
           </div>
-          <p style={{ fontSize: "12px", color: "#888", lineHeight: "1.8" }}>Specialiste hygiene sanitaire et phytosanitaire au Benin.</p>
+          <p style={{ fontSize: "12px", color: "#888", lineHeight: "1.8" }}>Spécialiste hygiène sanitaire et phytosanitaire au Bénin.</p>
         </div>
         <div>
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Nos services</h4>
-          {["Desinsectisation","Deratisation","Desinfection","Anti-termites","Reptiles"].map(function(s) { return <a key={s} href="/services" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{s}</a> })}
+          {["Désinsectisation","Dératisation","Désinfection","Anti-termites","Reptiles"].map(function(s) { return <a key={s} href="/services" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{s}</a> })}
         </div>
         <div>
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Entreprise</h4>
@@ -45,10 +41,10 @@ export default function Footer() {
         </div>
       </div>
       <div style={{ borderTop: "1px solid #eee", paddingTop: "20px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-        <p style={{ fontSize: "11px", color: "#aaa" }}>2025 PHYSTO by GSE — Tous droits réservés</p>
+        <p style={{ fontSize: "11px", color: "#aaa" }}>{new Date().getFullYear()} PHYSTO by GSE — Tous droits réservés</p>
         <a href="/mentions-legales" style={{ fontSize: "11px", color: "#aaa", textDecoration: "none" }}>Mentions légales</a>
         <div style={{ display: "flex", gap: "8px" }}>
-          {["Produits certifies","Agrees par l Etat","24h/24"].map(function(c) { return <span key={c} style={{ fontSize: "10px", backgroundColor: "#fff", border: "1px solid #eee", padding: "3px 10px", borderRadius: "4px", color: "#aaa" }}>{c}</span> })}
+          {["Produits certifiés","Agréés par l'État","24h/24"].map(function(c) { return <span key={c} style={{ fontSize: "10px", backgroundColor: "#fff", border: "1px solid #eee", padding: "3px 10px", borderRadius: "4px", color: "#aaa" }}>{c}</span> })}
         </div>
       </div>
     </footer>

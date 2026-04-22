@@ -1,14 +1,6 @@
 "use client"
 import { useState, useEffect, use } from "react"
-import { createClient } from "@supabase/supabase-js"
-
-function creerSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
-  )
-}
+import { supabase } from "../../lib/supabase"
 
 function slugifier(titre: string): string {
   return titre
@@ -26,11 +18,9 @@ export default function Article({ params }: { params: Promise<{ slug: string }> 
   const [chargement, setChargement] = useState(true)
 
   useEffect(function() {
-    const db = creerSupabase()
     async function charger() {
       setChargement(true)
-      // Forcer un rechargement frais depuis Supabase à chaque visite
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from("articles")
         .select("*")
         .order("id")

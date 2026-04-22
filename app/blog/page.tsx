@@ -1,19 +1,12 @@
 "use client"
 import { useState, useEffect } from "react"
-import { createClient } from "@supabase/supabase-js"
-
-function creerSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } }
-  )
-}
+import { supabase } from "../lib/supabase"
 
 function slugifier(titre: string): string {
   return titre
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/['\u2019]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
 }
@@ -32,9 +25,8 @@ export default function Blog() {
   ]
 
   useEffect(function() {
-    const db = creerSupabase()
     async function charger() {
-      const { data } = await db.from("articles").select("*").order("id")
+      const { data } = await supabase.from("articles").select("*").order("id")
       if (data && data.length > 0) setArticles(data)
       else setArticles(articlesParDefaut)
     }
