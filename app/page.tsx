@@ -22,7 +22,6 @@ export default function Accueil() {
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
     { id: 2, valeur: "2h", label: "Délai d'intervention" },
-    { id: 3, valeur: "100%", label: "Résultats garantis" },
     { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
   ])
 
@@ -140,6 +139,15 @@ export default function Accueil() {
                 </div>
               )
             })}
+          </div>
+
+          {/* BADGE AGRÉMENT */}
+          <div style={{ marginTop: "20px", display: "inline-flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(212,169,32,0.1)", border: "1px solid rgba(212,169,32,0.3)", padding: "9px 18px", borderRadius: "4px" }}>
+            <span style={{ color: "#d4a920", fontSize: "14px", fontWeight: "700", lineHeight: 1 }}>✓</span>
+            <div>
+              <div style={{ fontSize: "10px", fontWeight: "700", color: "#d4a920", letterSpacing: "0.1em" }}>AGRÉÉ PAR L'ÉTAT BÉNINOIS</div>
+              <div style={{ fontSize: "9px", color: "rgba(212,169,32,0.6)", letterSpacing: "0.06em", marginTop: "2px" }}>{agrement}</div>
+            </div>
           </div>
         </div>
       </section>

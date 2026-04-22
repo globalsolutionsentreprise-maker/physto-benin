@@ -12,7 +12,6 @@ const MOT_DE_PASSE = "physto2025"
 const CHIFFRES_DEFAUT = [
   { id: 1, valeur: "+50", label: "Clients proteges", ordre: 1 },
   { id: 2, valeur: "2h", label: "Delai intervention", ordre: 2 },
-  { id: 3, valeur: "100%", label: "Resultats garantis", ordre: 3 },
   { id: 4, valeur: "24h/24", label: "Disponibilite urgence", ordre: 4 },
 ]
 
