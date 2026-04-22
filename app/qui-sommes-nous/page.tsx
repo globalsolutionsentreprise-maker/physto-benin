@@ -18,7 +18,7 @@ export default function QuiSommesNous() {
   ])
 
   const [mission, setMission] = useState("Notre mission est simple : offrir à chaque client, particulier ou professionnel, un environnement sain, sécurisé et durablement débarrassé de toute nuisance.")
-  const [engagement, setEngagement] = useState("Notre promesse est absolue : si vous n'êtes pas entièrement satisfait du résultat, nous revenons gratuitement jusqu'à ce que ce soit parfait. Sans délai, sans discussion.")
+  const [engagement, setEngagement] = useState("Notre engagement est de délivrer des interventions professionnelles, rigoureuses et durables, avec des produits homologués et des techniciens certifiés.")
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
     { id: 2, valeur: "2h", label: "Délai d'urgence garanti" },

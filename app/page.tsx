@@ -157,7 +157,7 @@ export default function Accueil() {
             PHYSTO Bénin est la référence béninoise en matière d'hygiène sanitaire et phytosanitaire professionnelle. Nous intervenons avec des produits homologués, des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
           </p>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
-            Notre promesse est simple et absolue : si le résultat n'est pas à la hauteur de vos attentes, nous revenons gratuitement jusqu'à ce que ce soit parfait.
+            Notre équipe met tout en œuvre pour vous offrir un environnement sain, sécurisé et durablement traité.
           </p>
           <a href="/qui-sommes-nous" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
             Découvrir notre histoire →
