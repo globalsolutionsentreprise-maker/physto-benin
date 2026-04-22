@@ -375,7 +375,7 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>jamais seule.</strong>
           </h2>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", marginBottom: "48px" }}>
-            Chaque heure compte. Contactez-nous maintenant pour une intervention rapide et définitive.
+            Besoin d'une intervention urgente ? Contactez-nous dès maintenant. Diagnostic et devis gratuit, réponse rapide garantie.
           </p>
           <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
