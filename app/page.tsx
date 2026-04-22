@@ -71,7 +71,7 @@ export default function Accueil() {
   }, [])
 
   const services = [
-    { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Élimination complète et durable par gel appât, pulvérisation résiduelle et fumigation professionnelle. Traitement certifié, résultat garanti par contrat." },
+    { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Élimination complète et durable par gel appât, pulvérisation résiduelle et fumigation professionnelle. Traitement certifié." },
     { numero: "02", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Intervention sécurisée avec pièges homologués et raticides certifiés. Sécurisation de vos accès et suivi mensuel inclus." },
     { numero: "03", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Traitement virucide, bactéricide et fongicide. Certifié pour les restaurants, hôtels et établissements de santé. Certificat officiel remis." },
     { numero: "04", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Barrière chimique en profondeur, traitement par injection et garantie longue durée. Diagnostic gratuit inclus." },
@@ -83,7 +83,7 @@ export default function Accueil() {
     { num: "01", titre: "Vous nous contactez", desc: "Par WhatsApp, téléphone ou formulaire. Disponibles 24h/24 et 7j/7, y compris les jours fériés." },
     { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien certifié se déplace chez vous pour évaluer la situation et proposer la solution la plus adaptée." },
     { num: "03", titre: "Intervention professionnelle", desc: "Traitement réalisé avec des produits homologués et des équipements de niveau professionnel. Discret et efficace." },
-    { num: "04", titre: "Certificat et suivi", desc: "Un certificat officiel vous est remis. Résultat garanti par contrat — nous revenons gratuitement si nécessaire." },
+    { num: "04", titre: "Certificat et suivi", desc: "Un certificat officiel vous est remis à l'issue de chaque intervention." },
   ]
 
   const garanties = [
