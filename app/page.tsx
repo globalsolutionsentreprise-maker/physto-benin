@@ -89,7 +89,6 @@ export default function Accueil() {
   const garanties = [
     { titre: "Agréé par l'État du Bénin", desc: "Entreprise officiellement référencée et agréée par les autorités sanitaires du Bénin.", detail: agrement, accent: true },
     { titre: "Produits homologués OMS", desc: "Tous nos produits respectent les normes de l'Organisation Mondiale de la Santé.", accent: false },
-    { titre: "Résultats probants garantis", desc: "Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu.", accent: false },
     { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai garanti en moins de 2h sur Cotonou.", accent: false },
     { titre: "Certificat officiel remis", desc: "Un document officiel vous est remis après chaque intervention.", accent: false },
     { titre: "Techniciens certifiés", desc: "Notre équipe est formée et certifiée en hygiène phytosanitaire.", accent: false },

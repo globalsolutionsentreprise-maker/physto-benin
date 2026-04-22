@@ -139,12 +139,7 @@ export default function QuiSommesNous() {
                   )
                 })}
               </div>
-              <div style={{ backgroundColor: "#d4a920", padding: "28px 24px" }}>
-                <div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a", marginBottom: "6px" }}>Notre garantie absolue</div>
-                <div style={{ fontSize: "13px", color: "rgba(10,46,26,0.75)", lineHeight: "1.6" }}>
-                  Pas satisfait du résultat ? Nous revenons sans surcoût jusqu'à obtenir le résultat attendu.
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
