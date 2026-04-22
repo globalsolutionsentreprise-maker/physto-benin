@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase"
 export default function Footer() {
   const [coord, setCoord] = useState({ email: "globalsolutionsentreprise@gmail.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "2290153047950" })
   useEffect(function() {
-    supabase.from("parametres").select("cle, valeur").then(function({ data }) {
+    supabase.from("parametres").select("cle, valeur").then(function({ data }: { data: any }) {
       if (data) {
         const map: Record<string,string> = {}
         data.forEach(function(p: any) { map[p.cle] = p.valeur })
