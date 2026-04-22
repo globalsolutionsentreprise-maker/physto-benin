@@ -32,11 +32,11 @@ export default function Article({ params }: { params: Promise<{ slug: string }> 
       }
 
       if (data && data.length > 0) {
-        const trouve = data.find(function(a) {
+        const trouve = data.find(function(a: any) {
           return slugifier(a.titre) === slug
         })
         setArticle(trouve || null)
-        setAutres(data.filter(function(a) {
+        setAutres(data.filter(function(a: any) {
           return slugifier(a.titre) !== slug
         }).slice(0, 3))
       }
