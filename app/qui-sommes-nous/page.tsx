@@ -97,7 +97,7 @@ export default function QuiSommesNous() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>au service du Bénin.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
-            PHYSTO Bénin est la division hygiène sanitaire et phytosanitaire de Global Solutions Entreprise. Basés à Cotonou, nous intervenons dans tout le Bénin.
+            Phyto Bénin est la division hygiène sanitaire et phytosanitaire de Global Solutions Entreprise. Basés à Cotonou, nous intervenons dans tout le Bénin.
           </p>
         </div>
       </section>

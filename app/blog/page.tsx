@@ -46,7 +46,7 @@ export default function Blog() {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>BLOG ET CONSEILS</div>
           <h1 style={{ fontSize: "clamp(32px, 4vw, 52px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.15", letterSpacing: "-0.02em", marginBottom: "20px", maxWidth: "600px" }}>
-            L'expertise PHYSTO
+            L'expertise Phyto Bénin
             <br />
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>à votre disposition.</strong>
           </h1>
@@ -105,7 +105,7 @@ export default function Blog() {
                     Un traitement efficace commence par un diagnostic rigoureux. C'est ce qui fait la différence entre une solution temporaire et une élimination définitive.
                   </p>
                   <div style={{ marginTop: "20px", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "700", letterSpacing: "0.08em" }}>
-                    — L'ÉQUIPE PHYSTO BÉNIN
+                    — L'ÉQUIPE Phyto Bénin BÉNIN
                   </div>
                 </div>
               </div>

@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const MOT_DE_PASSE = "physto2025"
+const MOT_DE_PASSE = "phyto-benin2025"
 
 const CHIFFRES_DEFAUT = [
   { id: 1, valeur: "+50", label: "Clients proteges", ordre: 1 },
@@ -40,7 +40,7 @@ export default function Admin() {
   const [nouveauMembre, setNouveauMembre] = useState({ init: "", nom: "", role: "", description: "", ordre: 0 })
 
   useEffect(function() {
-    const auth = localStorage.getItem("physto_admin_v4")
+    const auth = localStorage.getItem("phyto-benin_admin_v4")
     if (auth === "oui") { setConnecte(true); chargerTout() }
   }, [])
 
@@ -107,7 +107,7 @@ export default function Admin() {
     e.preventDefault()
     if (mdp === MOT_DE_PASSE) {
       setConnecte(true)
-      localStorage.setItem("physto_admin_v4", "oui")
+      localStorage.setItem("phyto-benin_admin_v4", "oui")
       chargerTout()
     } else {
       setErreurMdp(true)
@@ -116,7 +116,7 @@ export default function Admin() {
 
   function seDeconnecter() {
     setConnecte(false)
-    localStorage.removeItem("physto_admin_v4")
+    localStorage.removeItem("phyto-benin_admin_v4")
   }
 
   function afficherMessage(msg) {
@@ -415,7 +415,7 @@ export default function Admin() {
           <div style={{ textAlign: "center", marginBottom: "36px" }}>
             <img src="/logo-gse.jpeg" alt="Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
             <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>Back Office</h1>
-            <p style={{ fontSize: "13px", color: "#888" }}>PHYSTO Benin</p>
+            <p style={{ fontSize: "13px", color: "#888" }}>Phyto Bénin</p>
           </div>
           <form onSubmit={seConnecter} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
@@ -439,7 +439,7 @@ export default function Admin() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <img src="/logo-gse.jpeg" alt="Logo" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px" }} />
           <div>
-            <div style={{ fontSize: "14px", fontWeight: "700", color: "#d4a920" }}>Back Office PHYSTO Benin</div>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "#d4a920" }}>Back Office Phyto Bénin</div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>
               {chargement ? "Chargement..." : "Connecte a Supabase — Modifications en temps reel"}
             </div>
@@ -516,7 +516,7 @@ export default function Admin() {
                 { cle: "agrement", label: "NUMERO D AGREMENT OFFICIEL", placeholder: "N AGREMENT-BENIN-XXXXX" },
                 { cle: "telephone", label: "TELEPHONE", placeholder: "+229 XX XX XX XX" },
                 { cle: "whatsapp", label: "NUMERO WHATSAPP (sans +)", placeholder: "22901234567" },
-                { cle: "email", label: "EMAIL", placeholder: "contact@physto-benin.com" },
+                { cle: "email", label: "EMAIL", placeholder: "contact@phyto-benin.com" },
                 { cle: "adresse", label: "ADRESSE", placeholder: "Cotonou, Benin" },
               ].map(function(p) {
                 return (

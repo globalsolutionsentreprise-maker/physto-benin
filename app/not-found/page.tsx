@@ -10,7 +10,7 @@ export default function NotFound() {
           <a href="/" style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>Retour accueil</a>
           <a href="/contact" style={{ backgroundColor: "#f7f7f5", color: "#0a2e1a", fontWeight: "600", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none", border: "1px solid #e0e0e0" }}>Nous contacter</a>
         </div>
-        <div style={{ marginTop: "48px", fontSize: "12px", color: "#bbb" }}>PHYSTO Bénin · +229 01 53 04 79 50 · 24h/24</div>
+        <div style={{ marginTop: "48px", fontSize: "12px", color: "#bbb" }}>Phyto Bénin · +229 01 53 04 79 50 · 24h/24</div>
       </div>
     </main>
   )

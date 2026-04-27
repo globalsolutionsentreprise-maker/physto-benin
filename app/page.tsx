@@ -162,7 +162,7 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700" }}>suffit à tout changer.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "16px" }}>
-            PHYSTO Bénin est la référence béninoise en matière d'hygiène sanitaire et phytosanitaire professionnelle. Nous intervenons avec des produits homologués, des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
+            Phyto Bénin est la référence béninoise en matière d'hygiène sanitaire et phytosanitaire professionnelle. Nous intervenons avec des produits homologués, des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
           </p>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
             Notre équipe met tout en œuvre pour vous offrir un environnement sain, sécurisé et durablement traité.
@@ -173,7 +173,7 @@ export default function Accueil() {
         </div>
         <div style={{ position: "relative" }}>
           <div style={{ borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#e8e8e8" }}>
-            <img src="/images/about-team.jpg" alt="Technicien PHYSTO Bénin" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src="/images/about-team.jpg" alt="Technicien Phyto Bénin" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         </div>
       </section>
@@ -294,7 +294,7 @@ export default function Accueil() {
                   <div style={{ position: "absolute", top: "12px", left: "12px", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "9px", fontWeight: "700", padding: "4px 10px", borderRadius: "3px" }}>APRÈS</div>
                 </div>
                 <div style={{ gridColumn: "span 2", backgroundColor: "#1a1a1a", minHeight: "180px", position: "relative", overflow: "hidden" }}>
-                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Equipe" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens PHYSTO Bénin</div></div></>}
+                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Equipe" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
                 </div>
               </div>
               <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>

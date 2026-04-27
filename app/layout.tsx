@@ -4,15 +4,15 @@ import "./globals.css"
 import Footer from "./components/Footer"
 
 export const metadata: Metadata = {
-  title: "PHYSTO Benin - Desinsectisation Cotonou | 24h/24",
+  title: "Phyto Bénin - Desinsectisation Cotonou | 24h/24",
   description: "Desinsectisation, deratisation, desinfection au Benin. Techniciens certifies, produits homologues. Intervention rapide 24h/24 a Cotonou.",
   keywords: "desinsectisation Cotonou, deratisation Benin, desinfection hotel, cafards Cotonou, termites Benin",
-  metadataBase: new URL("https://physto-benin.vercel.app"),
+  metadataBase: new URL("https://phyto-benin.vercel.app"),
   openGraph: {
-    title: "PHYSTO Benin - Hygiene Sanitaire Professionnelle",
+    title: "Phyto Bénin - Hygiene Sanitaire Professionnelle",
     description: "Desinsectisation, deratisation, desinfection au Benin. Intervention rapide 24h/24.",
-    url: "https://physto-benin.vercel.app",
-    siteName: "PHYSTO Benin",
+    url: "https://phyto-benin.vercel.app",
+    siteName: "Phyto Bénin",
     locale: "fr_FR",
     type: "website",
   },
@@ -78,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
               <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
               <div>
-                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>PHYSTO <span style={{ color: "#d4a920" }}>by</span> GSE</div>
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span style={{ color: "#d4a920" }}>by</span> GSE</div>
                 <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>
               </div>
             </a>

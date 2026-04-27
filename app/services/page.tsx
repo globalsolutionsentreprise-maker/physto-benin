@@ -129,7 +129,7 @@ export default function Services() {
                 <strong style={{ fontWeight: "700" }}>tous les secteurs.</strong>
               </h2>
               <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "32px" }}>
-                De l'hôtel cinq étoiles à l'entrepôt industriel, PHYSTO Bénin adapte ses protocoles à chaque environnement avec la même exigence de résultat.
+                De l'hôtel cinq étoiles à l'entrepôt industriel, Phyto Bénin adapte ses protocoles à chaque environnement avec la même exigence de résultat.
               </p>
               <a href="/contact" style={{ display: "inline-block", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "13px", padding: "13px 28px", borderRadius: "6px", textDecoration: "none" }}>
                 Nous contacter

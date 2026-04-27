@@ -1,10 +1,10 @@
-export const metadata = { title: "Mentions légales — PHYSTO Bénin" }
+export const metadata = { title: "Mentions légales — Phyto Bénin" }
 
 export default function MentionsLegales() {
   const sections = [
-    { t: "Éditeur du site", c: "Raison sociale : Global Solutions Entreprise (GSE)\nMarque : PHYSTO Bénin — division hygiène sanitaire\nSiège social : Ilot 3535, Cotonou, Bénin\nRCCM : RB/COT/24 B 38910\nIFU : 3202420126111\nTél : +229 01 53 04 79 50\nEmail : globalsolutionsentreprise@gmail.com\nDirecteur : Yakoubou Kabir" },
+    { t: "Éditeur du site", c: "Raison sociale : Global Solutions Entreprise (GSE)\nMarque : Phyto Bénin — division hygiène sanitaire\nSiège social : Ilot 3535, Cotonou, Bénin\nRCCM : RB/COT/24 B 38910\nIFU : 3202420126111\nTél : +229 01 53 04 79 50\nEmail : globalsolutionsentreprise@gmail.com\nDirecteur : Yakoubou Kabir" },
     { t: "Hébergement", c: "Vercel Inc. — 340 Pine Street, Suite 701, San Francisco, CA 94104, USA — vercel.com" },
-    { t: "Propriété intellectuelle", c: "Tous les contenus de ce site sont la propriété de Global Solutions Entreprise. Toute reproduction sans autorisation écrite est interdite. La marque PHYSTO Bénin est une marque de GSE." },
+    { t: "Propriété intellectuelle", c: "Tous les contenus de ce site sont la propriété de Global Solutions Entreprise. Toute reproduction sans autorisation écrite est interdite. La marque Phyto Bénin est une marque de GSE." },
     { t: "Données personnelles", c: "Les informations collectées via le formulaire sont utilisées uniquement pour répondre à vos demandes. Elles ne sont ni vendues ni transmises à des tiers. Contact : globalsolutionsentreprise@gmail.com" },
     { t: "Cookies", c: "Ce site utilise Google Analytics (GA4) pour mesurer l'audience de manière anonyme. Aucune donnée personnelle identifiable n'est collectée à des fins publicitaires." },
   ]

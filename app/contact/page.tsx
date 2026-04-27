@@ -1,8 +1,8 @@
 import ContactForm from "./ContactForm"
 
 export const metadata = {
-  title: "Zones d'intervention et Contact — PHYSTO Bénin | Cotonou",
-  description: "Contactez PHYSTO Bénin pour une intervention rapide 24h/24. Disponibles à Cotonou, Porto-Novo, Calavi, Ouidah et dans tout le Bénin.",
+  title: "Zones d'intervention et Contact — Phyto Bénin | Cotonou",
+  description: "Contactez Phyto Bénin pour une intervention rapide 24h/24. Disponibles à Cotonou, Porto-Novo, Calavi, Ouidah et dans tout le Bénin.",
 }
 
 export default function Contact() {

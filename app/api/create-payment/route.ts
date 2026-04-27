@@ -7,7 +7,7 @@ import { createClient } from "@supabase/supabase-js"
 const FEDAPAY_SECRET = process.env.FEDAPAY_SECRET_KEY!
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://physto-benin.vercel.app"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.vercel.app"
 
 export async function POST(req: NextRequest) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
