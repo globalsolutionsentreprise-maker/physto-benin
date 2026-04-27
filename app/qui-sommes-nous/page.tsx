@@ -119,7 +119,7 @@ export default function QuiSommesNous() {
                 {engagements.map(function(e) {
                   return (
                     <div key={e} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                      <span style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px", fontWeight: "700" }}>✓</span>
+                      <span style={{ width: "10px", height: "1px", backgroundColor: "#d4a920", display: "inline-block", flexShrink: 0, marginTop: "9px" }/>
                       <span style={{ fontSize: "14px", color: "#444", lineHeight: "1.6" }}>{e}</span>
                     </div>
                   )
@@ -184,7 +184,7 @@ export default function QuiSommesNous() {
             {equipe.map(function(m, i) {
               return (
                 <div key={m.id || i} style={{ backgroundColor: "#f7f7f5", padding: "40px 32px" }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "14px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
+                  <div style={{ width: "56px", height: "56px", borderRadius: "0", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "14px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
                     {m.init}
                   </div>
                   <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a", marginBottom: "6px" }}>{m.nom}</h3>

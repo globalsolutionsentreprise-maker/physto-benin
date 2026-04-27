@@ -261,7 +261,7 @@ export default function Accueil() {
                   {i < etapes.length - 1 && (
                     <div style={{ position: "absolute", top: "20px", right: "-20px", width: "40px", height: "1px", backgroundColor: "#e0e0e0" }} />
                   )}
-                  <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "0", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
                     {e.num}
                   </div>
                   <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#0a0a0a", marginBottom: "12px" }}>{e.titre}</h3>
@@ -328,7 +328,7 @@ export default function Accueil() {
                   <div style={{ fontSize: "48px", color: "#d4a920", lineHeight: 1, marginBottom: "16px", fontFamily: "Georgia, serif" }}>"</div>
                   <p style={{ fontSize: "14px", color: "#444", lineHeight: "1.85", fontStyle: "italic", flex: 1, marginBottom: "32px" }}>{t.texte}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <div style={{ width: "42px", height: "42px", borderRadius: "0", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {t.init}
                     </div>
                     <div>

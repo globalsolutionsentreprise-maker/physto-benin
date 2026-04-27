@@ -87,7 +87,7 @@ export default function ContactForm() {
 
         {statut === "succes" && (
           <div style={{ backgroundColor: "rgba(26,107,56,0.25)", border: "1px solid rgba(26,107,56,0.5)", padding: "24px", marginBottom: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: "28px", marginBottom: "8px" }}>✓</div>
+            <div style={{ fontSize: "18px", marginBottom: "8px", color: "#d4a920", fontWeight: "300" }}>— Envoyé</div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "#4ade80", marginBottom: "4px" }}>Message envoyé avec succès</div>
             <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Notre équipe vous contacte sous 2h.</div>
           </div>
