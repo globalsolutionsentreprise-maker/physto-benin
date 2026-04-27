@@ -119,7 +119,7 @@ export default function QuiSommesNous() {
                 {engagements.map(function(e) {
                   return (
                     <div key={e} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                      <span style={{ width: "10px", height: "1px", backgroundColor: "#d4a920", display: "inline-block", flexShrink: 0, marginTop: "9px" }/>
+                      <span style={{ width: "10px", height: "1px", backgroundColor: "#d4a920", display: "inline-block", flexShrink: 0, marginTop: "9px" }} />
                       <span style={{ fontSize: "14px", color: "#444", lineHeight: "1.6" }}>{e}</span>
                     </div>
                   )
