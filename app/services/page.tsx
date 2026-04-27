@@ -85,7 +85,7 @@ export default function Services() {
               <div key={s.id || i} style={{ backgroundColor: "#ffffff", padding: "48px", borderTop: i === 0 ? "3px solid #d4a920" : "3px solid transparent" }}>
                 <div className="srv-row" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "60px", alignItems: "start" }}>
                   <div>
-                    <div style={{ fontSize: "36px", marginBottom: "16px" }}>{s.ico}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}><div style={{ width: "28px", height: "1px", backgroundColor: "#d4a920" }} /><span style={{ fontSize: "9px", fontWeight: "700", letterSpacing: "0.15em", color: "#d4a920", textTransform: "uppercase" }}>0{i + 1}</span></div>
                     <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0a0a0a", marginBottom: "10px" }}>{s.titre}</h2>
                     {s.accroche && <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "20px" }}>{s.accroche.toUpperCase()}</div>}
                     <div style={{ display: "inline-block", fontSize: "11px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.1)", padding: "6px 14px", borderRadius: "4px" }}>
@@ -99,7 +99,7 @@ export default function Services() {
                         {s.details.map(function(d, j) {
                           return (
                             <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: "12px", fontSize: "13px", color: "#444" }}>
-                              <span style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px", fontWeight: "700" }}>✓</span>
+                              <span style={{ width: "10px", height: "1px", backgroundColor: "#d4a920", display: "inline-block", flexShrink: 0, marginTop: "8px" }} />
                               {d}
                             </li>
                           )
