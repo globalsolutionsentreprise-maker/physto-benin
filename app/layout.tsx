@@ -90,8 +90,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 { label: "Qui sommes-nous", href: "/qui-sommes-nous" },
                 { label: "Blog", href: "/blog" },
                 { label: "Contact", href: "/contact" },
+                { label: "Espace client", href: "/espace-client" },
               ].map((l) => (
-                <a key={l.href} href={l.href} style={{ fontSize: "12px", color: "#444", textDecoration: "none", fontWeight: "500" }}>
+                <a key={l.href} href={l.href} style={{
+                  fontSize: "12px",
+                  color: l.href === "/espace-client" ? "#0a2e1a" : "#444",
+                  textDecoration: "none",
+                  fontWeight: l.href === "/espace-client" ? "700" : "500",
+                  border: l.href === "/espace-client" ? "0.5px solid #d4a920" : "none",
+                  padding: l.href === "/espace-client" ? "6px 14px" : "0",
+                  letterSpacing: l.href === "/espace-client" ? "0.04em" : "normal",
+                }}>
                   {l.label}
                 </a>
               ))}
