@@ -1,0 +1,68 @@
+:root {
+  --vert: #0a2e1a;
+  --or: #d4a920;
+  --gris-bord: #e8e6e0;
+  --texte-doux: #6b6b65;
+}
+
+/* SÉLECTION */
+::selection { background: var(--or); color: var(--vert); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--gris-bord); }
+::-webkit-scrollbar-thumb:hover { background: var(--or); }
+
+/* SECTION LABELS */
+.section-label, [class*="section-label"] {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: var(--or) !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::before, [class*="section-label"]::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 0.5px;
+  background: var(--or);
+  flex-shrink: 0;
+}
+
+/* LISTE PREMIUM — tiret or au lieu de cercles verts */
+.check-item, [class*="check-item"] {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 9px 0 !important;
+  border-bottom: 0.5px solid var(--gris-bord) !important;
+}
+.check-item:last-child, [class*="check-item"]:last-child {
+  border-bottom: none !important;
+}
+.check-item svg, [class*="check-item"] svg { display: none !important; }
+.check-item::before, [class*="check-item"]::before {
+  content: '—';
+  color: var(--or);
+  font-size: 11px;
+  font-weight: 300;
+  flex-shrink: 0;
+  margin-top: 3px;
+  letter-spacing: -0.05em;
+}
+
+/* TÉMOIGNAGES — guillemets typographiques */
+.gse-stars { display: none; }
+.testimonial-accent { width: 24px; height: 1px; background: var(--or); margin: 10px 0; }
+
+/* URGENCY DOT — carré or discret */
+.urgency-dot, .blink-dot {
+  width: 4px !important; height: 4px !important;
+  border-radius: 0 !important;
+  background: var(--or) !important;
+  animation: none !important;
+}
