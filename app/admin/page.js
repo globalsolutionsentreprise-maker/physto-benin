@@ -831,6 +831,7 @@ function SectionClientsDevis({ db }) {
   const [validating, setValidating] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+  const COMMISSION_FEDAPAY = 0.0185 // 1.85% frais FedaPay répercutés sur le client
 
   // États clients
   const [showFormClient, setShowFormClient] = React.useState(false)
@@ -936,10 +937,13 @@ function SectionClientsDevis({ db }) {
     // ── MODE ÉDITION : modifier un devis existant ──
     if (editingDevis) {
       const cl = clients.find(function(c) { return c.id === editingDevis.client_id })
+      const montantNetEdit = parseFloat(formDevis.montant)
+      const montantClientEdit = Math.round(montantNetEdit * (1 + COMMISSION_FEDAPAY))
       const { error } = await db.from("devis").update({
         prestation: formDevis.prestation,
         description: formDevis.description,
-        montant_total: parseFloat(formDevis.montant),
+        montant_total: montantClientEdit,
+        montant_net: montantNetEdit,
         statut: "envoye",
         notes_modification: null,
         date_envoi: new Date().toISOString()
@@ -986,9 +990,12 @@ function SectionClientsDevis({ db }) {
 
     const { data: num } = await db.rpc("generate_devis_numero")
     const numero = num || ("DEV-" + Date.now())
+    const montantNet = parseFloat(formDevis.montant)
+    const montantClient = Math.round(montantNet * (1 + COMMISSION_FEDAPAY))
     const { error: err } = await db.from("devis").insert({
       client_id: clientId, numero: numero, prestation: formDevis.prestation,
-      description: formDevis.description, montant_total: parseFloat(formDevis.montant),
+      description: formDevis.description, montant_total: montantClient,
+      montant_net: montantNet,
       statut: "envoye", date_envoi: new Date().toISOString()
     })
     if (err) { setMsg("Erreur devis: " + err.message); setSubmittingDevis(false); return }
@@ -1211,7 +1218,38 @@ function SectionClientsDevis({ db }) {
             ),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Prestation *"), React.createElement("select", { value: formDevis.prestation, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { prestation: e.target.value })) }, style: inp }, React.createElement("option", { value: "" }, "Choisir..."), PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) }))),
-          React.createElement("div", null, React.createElement("label", { style: lbl }, "Montant FCFA *"), React.createElement("input", { type: "number", value: formDevis.montant, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montant: e.target.value })) }, placeholder: "150000", style: inp }))
+          React.createElement("div", null,
+          React.createElement("label", { style: lbl }, "Montant net souhaité FCFA *"),
+          React.createElement("input", { type: "number", value: formDevis.montant, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montant: e.target.value })) }, placeholder: "150000", style: inp }),
+          formDevis.montant && !isNaN(parseFloat(formDevis.montant)) && React.createElement("div", { style: { marginTop: "10px", padding: "14px 16px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px" } },
+            React.createElement("div", { style: { fontSize: "12px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" } }, "Récapitulatif paiement client"),
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "6px" } },
+              React.createElement("span", null, "Montant net prestation"),
+              React.createElement("span", null, parseFloat(formDevis.montant).toLocaleString("fr-FR") + " FCFA")
+            ),
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "10px" } },
+              React.createElement("span", null, "Frais paiement en ligne (1.85%)"),
+              React.createElement("span", null, "+" + Math.round(parseFloat(formDevis.montant) * COMMISSION_FEDAPAY).toLocaleString("fr-FR") + " FCFA")
+            ),
+            React.createElement("div", { style: { borderTop: "1px solid #e0ddd6", paddingTop: "10px", marginBottom: "10px" } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", marginBottom: "8px" } },
+                React.createElement("span", null, "💳 Total facturé au client"),
+                React.createElement("span", null, Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY)).toLocaleString("fr-FR") + " FCFA")
+              ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#666" } },
+                React.createElement("span", null, "→ Acompte 60%"),
+                React.createElement("span", null, Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY) * 0.6).toLocaleString("fr-FR") + " FCFA")
+              ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#666", marginTop: "4px" } },
+                React.createElement("span", null, "→ Solde 40%"),
+                React.createElement("span", null, Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY) * 0.4).toLocaleString("fr-FR") + " FCFA")
+              )
+            ),
+            React.createElement("div", { style: { fontSize: "11px", color: "#d4a920", backgroundColor: "#fffbeb", padding: "8px 10px", borderRadius: "6px", fontStyle: "italic" } },
+              "ℹ Les frais de paiement en ligne sont inclus et seront mentionnés sur le devis."
+            )
+          )
+        ))
         ),
         React.createElement("div", { style: { marginBottom: "18px" } }, React.createElement("label", { style: lbl }, "Description"), React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })),
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
