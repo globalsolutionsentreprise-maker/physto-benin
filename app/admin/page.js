@@ -829,6 +829,7 @@ function SectionClientsDevis({ db }) {
   const [submittingDevis, setSubmittingDevis] = React.useState(false)
   const [showNewClient, setShowNewClient] = React.useState(false)
   const [validating, setValidating] = React.useState(null)
+  const [editingDevis, setEditingDevis] = React.useState(null)
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
 
   // États clients
@@ -931,6 +932,43 @@ function SectionClientsDevis({ db }) {
       setMsg("Remplissez tous les champs obligatoires."); return
     }
     setSubmittingDevis(true); setMsg("")
+
+    // ── MODE ÉDITION : modifier un devis existant ──
+    if (editingDevis) {
+      const cl = clients.find(function(c) { return c.id === editingDevis.client_id })
+      const { error } = await db.from("devis").update({
+        prestation: formDevis.prestation,
+        description: formDevis.description,
+        montant_total: parseFloat(formDevis.montant),
+        statut: "envoye",
+        notes_modification: null,
+        date_envoi: new Date().toISOString()
+      }).eq("id", editingDevis.id)
+      if (error) { setMsg("Erreur: " + error.message); setSubmittingDevis(false); return }
+
+      // Renvoyer l'email avec le devis mis à jour
+      if (cl && cl.email) {
+        try {
+          await fetch("/api/send-devis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "",
+              devisNumero: editingDevis.numero, prestation: formDevis.prestation,
+              montant: formDevis.montant, description: formDevis.description
+            })
+          })
+          setMsg("✓ Devis modifié et renvoyé à " + cl.email)
+        } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
+      } else { setMsg("✓ Devis modifié") }
+
+      setShowFormDevis(false); setEditingDevis(null)
+      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+      await charger(); setSubmittingDevis(false)
+      return
+    }
+
+    // ── MODE CRÉATION ──
     let clientId = formDevis.clientId
     let clientEmail = "", clientNom = "", clientPrenom = ""
 
@@ -955,7 +993,6 @@ function SectionClientsDevis({ db }) {
     })
     if (err) { setMsg("Erreur devis: " + err.message); setSubmittingDevis(false); return }
 
-    // Envoi email si email disponible
     if (clientEmail) {
       try {
         await fetch("/api/send-devis", {
@@ -968,16 +1005,30 @@ function SectionClientsDevis({ db }) {
           })
         })
         setMsg("✓ Devis créé et email envoyé à " + clientEmail)
-      } catch(e) {
-        setMsg("✓ Devis créé (email non envoyé: " + e.message + ")")
-      }
-    } else {
-      setMsg("✓ Devis créé (pas d'email pour ce client)")
-    }
+      } catch(e) { setMsg("✓ Devis créé (email non envoyé: " + e.message + ")") }
+    } else { setMsg("✓ Devis créé (pas d'email pour ce client)") }
 
     setShowFormDevis(false); setShowNewClient(false)
     setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
     await charger(); setSubmittingDevis(false)
+  }
+
+  async function ouvrirEditionDevis(d) {
+    const cl = clients.find(function(c) { return c.id === d.client_id })
+    setEditingDevis(d)
+    setFormDevis({
+      clientId: d.client_id || "",
+      prenom: cl ? (cl.prenom || "") : "",
+      nom: cl ? cl.nom : "",
+      email: cl ? cl.email : "",
+      telephone: cl ? (cl.telephone || "") : "",
+      entreprise: cl ? (cl.entreprise || "") : "",
+      prestation: d.prestation || "",
+      description: d.description || "",
+      montant: d.montant_total || ""
+    })
+    setShowFormDevis(true)
+    setMsg("")
   }
 
   async function validerLivraison(id) {
@@ -1138,7 +1189,7 @@ function SectionClientsDevis({ db }) {
 
       // Formulaire devis
       showFormDevis && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
-        React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, "Créer un devis"),
+        React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingDevis ? "Modifier le devis " + editingDevis.numero : "Créer un devis"),
         React.createElement("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" } },
           React.createElement("button", { onClick: function() { setShowNewClient(false) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: !showNewClient ? "#0a2e1a" : "#f0ede6", color: !showNewClient ? "#fff" : "#444" } }, "Client existant"),
           React.createElement("button", { onClick: function() { setShowNewClient(true); setFormDevis(Object.assign({}, formDevis, { clientId: "" })) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: showNewClient ? "#0a2e1a" : "#f0ede6", color: showNewClient ? "#fff" : "#444" } }, "+ Nouveau client")
@@ -1210,7 +1261,11 @@ function SectionClientsDevis({ db }) {
           onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id,
           style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
         }, validating === d.id ? "..." : "✓ Valider → 40%"),
-        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ À modifier"),
+        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ " + (d.notes_modification || "Modification demandée")),
+        d.statut === "modification_demandee" && React.createElement("button", {
+          onClick: function() { ouvrirEditionDevis(d) },
+          style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+        }, "✏️ Modifier et renvoyer"),
                 cl && cl.email && React.createElement("button", {
           onClick: function() { renvoyerEmail(d) },
           style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
