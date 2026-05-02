@@ -814,21 +814,39 @@ export default function Admin() {
 }
 
 // ══════════════════════════════════════════════════
-// COMPOSANT SECTION CLIENTS & DEVIS
+// COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
 function SectionClientsDevis({ db }) {
+  const [vue, setVue] = React.useState("devis")
   const [devisList, setDevisList] = React.useState([])
   const [clients, setClients] = React.useState([])
   const [loading, setLoading] = React.useState(true)
-  const [showForm, setShowForm] = React.useState(false)
+  const [msg, setMsg] = React.useState("")
   const [filtre, setFiltre] = React.useState("tous")
-  const [validating, setValidating] = React.useState(null)
-  const [msgLocal, setMsgLocal] = React.useState("")
-  const [submitting, setSubmitting] = React.useState(false)
-  const [showNewClient, setShowNewClient] = React.useState(false)
-  const [form, setForm] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
 
-  const STATUTS = { brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" }, envoye: { label: "Envoyé", c: "#1e40af", bg: "#dbeafe" }, accepte: { label: "Accepté", c: "#065f46", bg: "#d1fae5" }, modification_demandee: { label: "Modif. demandée", c: "#7c3aed", bg: "#ede9fe" }, en_cours: { label: "En cours", c: "#0f766e", bg: "#ccfbf1" }, termine: { label: "Terminé", c: "#1f2937", bg: "#f3f4f6" }, annule: { label: "Annulé", c: "#991b1b", bg: "#fee2e2" } }
+  // États devis
+  const [showFormDevis, setShowFormDevis] = React.useState(false)
+  const [submittingDevis, setSubmittingDevis] = React.useState(false)
+  const [showNewClient, setShowNewClient] = React.useState(false)
+  const [validating, setValidating] = React.useState(null)
+  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+
+  // États clients
+  const [showFormClient, setShowFormClient] = React.useState(false)
+  const [editingClient, setEditingClient] = React.useState(null)
+  const [submittingClient, setSubmittingClient] = React.useState(false)
+  const [clientDetail, setClientDetail] = React.useState(null)
+  const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "" })
+
+  const STATUTS = {
+    brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
+    envoye: { label: "Envoyé", c: "#1e40af", bg: "#dbeafe" },
+    accepte: { label: "Accepté", c: "#065f46", bg: "#d1fae5" },
+    modification_demandee: { label: "Modif. demandée", c: "#7c3aed", bg: "#ede9fe" },
+    en_cours: { label: "En cours", c: "#0f766e", bg: "#ccfbf1" },
+    termine: { label: "Terminé", c: "#1f2937", bg: "#f3f4f6" },
+    annule: { label: "Annulé", c: "#991b1b", bg: "#fee2e2" }
+  }
   const PRESTATIONS = ["Désinsectisation", "Dératisation", "Désinfection", "Anti-termites", "Anti-moustiques", "Punaises de lit", "Reptiles et Serpents", "Contrat d entretien"]
   const inp = { width: "100%", padding: "10px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
@@ -838,7 +856,7 @@ function SectionClientsDevis({ db }) {
   async function charger() {
     setLoading(true)
     const [{ data: devis }, { data: cls }] = await Promise.all([
-      db.from("devis").select("*, clients(nom, prenom, entreprise, email)").order("created_at", { ascending: false }),
+      db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
     ])
     setDevisList(devis || [])
@@ -846,103 +864,329 @@ function SectionClientsDevis({ db }) {
     setLoading(false)
   }
 
-  async function creerDevis() {
-    if ((!form.clientId && !form.nom) || !form.prestation || !form.montant) { setMsgLocal("Remplissez tous les champs obligatoires."); return }
-    setSubmitting(true); setMsgLocal("")
-    let clientId = form.clientId
-    if (!clientId) {
-      const { data: nc, error } = await db.from("clients").insert({ user_id: null, nom: form.nom, prenom: form.prenom, email: form.email, telephone: form.telephone, entreprise: form.entreprise }).select().single()
-      if (error) { setMsgLocal("Erreur client: " + error.message); setSubmitting(false); return }
-      clientId = nc.id
+  // ── CLIENTS ──────────────────────────────────────
+
+  function ouvrirAjoutClient() {
+    setEditingClient(null)
+    setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "" })
+    setShowFormClient(true)
+    setMsg("")
+  }
+
+  function ouvrirEditionClient(c) {
+    setEditingClient(c)
+    setFormClient({ prenom: c.prenom || "", nom: c.nom || "", email: c.email || "", telephone: c.telephone || "", entreprise: c.entreprise || "" })
+    setShowFormClient(true)
+    setMsg("")
+  }
+
+  async function sauvegarderClient() {
+    if (!formClient.nom || !formClient.email) { setMsg("Nom et email obligatoires."); return }
+    setSubmittingClient(true); setMsg("")
+    if (editingClient) {
+      const { error } = await db.from("clients").update(formClient).eq("id", editingClient.id)
+      if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
+      setMsg("✓ Client mis à jour")
+    } else {
+      const { error } = await db.from("clients").insert(formClient)
+      if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
+      setMsg("✓ Client ajouté")
     }
+    setShowFormClient(false); setEditingClient(null)
+    await charger(); setSubmittingClient(false)
+  }
+
+  async function supprimerClient(c) {
+    const devisClient = devisList.filter(function(d) { return d.client_id === c.id })
+    const msg = devisClient.length > 0
+      ? "Ce client a " + devisClient.length + " devis. Supprimer quand même ?"
+      : "Supprimer " + (c.prenom || "") + " " + c.nom + " ?"
+    if (!window.confirm(msg)) return
+    await db.from("devis").delete().eq("client_id", c.id)
+    await db.from("clients").delete().eq("id", c.id)
+    setMsg("✓ Client supprimé")
+    await charger()
+  }
+
+  function voirDevisClient(c) {
+    setClientDetail(c)
+    setVue("devis-client")
+  }
+
+  // ── DEVIS ─────────────────────────────────────────
+
+  async function creerDevis() {
+    if ((!formDevis.clientId && !formDevis.nom) || !formDevis.prestation || !formDevis.montant) {
+      setMsg("Remplissez tous les champs obligatoires."); return
+    }
+    setSubmittingDevis(true); setMsg("")
+    let clientId = formDevis.clientId
+    let clientEmail = "", clientNom = "", clientPrenom = ""
+
+    if (!clientId) {
+      const { data: nc, error } = await db.from("clients").insert({
+        user_id: null, nom: formDevis.nom, prenom: formDevis.prenom,
+        email: formDevis.email, telephone: formDevis.telephone, entreprise: formDevis.entreprise
+      }).select().single()
+      if (error) { setMsg("Erreur client: " + error.message); setSubmittingDevis(false); return }
+      clientId = nc.id; clientEmail = formDevis.email; clientNom = formDevis.nom; clientPrenom = formDevis.prenom
+    } else {
+      const cl = clients.find(function(c) { return c.id === clientId })
+      if (cl) { clientEmail = cl.email; clientNom = cl.nom; clientPrenom = cl.prenom || "" }
+    }
+
     const { data: num } = await db.rpc("generate_devis_numero")
-    const { error: err } = await db.from("devis").insert({ client_id: clientId, numero: num || "DEV-" + Date.now(), prestation: form.prestation, description: form.description, montant_total: parseFloat(form.montant), statut: "envoye", date_envoi: new Date().toISOString() })
-    if (err) { setMsgLocal("Erreur devis: " + err.message); setSubmitting(false); return }
-    setMsgLocal("✓ Devis créé et envoyé au client")
-    setShowForm(false); setShowNewClient(false)
-    setForm({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
-    await charger(); setSubmitting(false)
+    const numero = num || ("DEV-" + Date.now())
+    const { error: err } = await db.from("devis").insert({
+      client_id: clientId, numero: numero, prestation: formDevis.prestation,
+      description: formDevis.description, montant_total: parseFloat(formDevis.montant),
+      statut: "envoye", date_envoi: new Date().toISOString()
+    })
+    if (err) { setMsg("Erreur devis: " + err.message); setSubmittingDevis(false); return }
+
+    // Envoi email si email disponible
+    if (clientEmail) {
+      try {
+        await fetch("/api/send-devis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientEmail, clientNom, clientPrenom,
+            devisNumero: numero, prestation: formDevis.prestation,
+            montant: formDevis.montant, description: formDevis.description
+          })
+        })
+        setMsg("✓ Devis créé et email envoyé à " + clientEmail)
+      } catch(e) {
+        setMsg("✓ Devis créé (email non envoyé: " + e.message + ")")
+      }
+    } else {
+      setMsg("✓ Devis créé (pas d'email pour ce client)")
+    }
+
+    setShowFormDevis(false); setShowNewClient(false)
+    setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+    await charger(); setSubmittingDevis(false)
   }
 
   async function validerLivraison(id) {
     setValidating(id)
     await db.from("devis").update({ statut: "en_cours" }).eq("id", id)
-    setMsgLocal("✓ Livraison validée — le client peut payer le solde 40%")
+    setMsg("✓ Livraison validée — le client peut payer le solde 40%")
     await charger(); setValidating(null)
   }
 
-  const filtres = devisList.filter(function(d) { return filtre === "tous" || d.statut === filtre })
+  async function supprimerDevis(id, numero) {
+    if (!window.confirm("Supprimer le devis " + numero + " ?")) return
+    await db.from("devis").delete().eq("id", id)
+    setMsg("✓ Devis supprimé")
+    await charger()
+  }
+
+  // ── RENDU ─────────────────────────────────────────
+
+  const filtresDevis = vue === "devis-client"
+    ? devisList.filter(function(d) { return d.client_id === (clientDetail && clientDetail.id) })
+    : devisList.filter(function(d) { return filtre === "tous" || d.statut === filtre })
+
+  const s = { card: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px" } }
 
   return React.createElement("div", null,
+
+    // ── Compteurs ──
     React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "12px", marginBottom: "24px" } },
-      [["Clients", clients.length, "#0a2e1a"], ["En attente", devisList.filter(function(d) { return d.statut === "envoye" }).length, "#1e40af"], ["En cours", devisList.filter(function(d) { return d.statut === "en_cours" }).length, "#0f766e"], ["Terminés", devisList.filter(function(d) { return d.statut === "termine" }).length, "#555"]].map(function(s) {
-        return React.createElement("div", { key: s[0], style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px", borderTop: "2px solid " + s[2] } },
-          React.createElement("div", { style: { fontSize: "26px", fontWeight: "300", color: s[2] } }, s[1]),
+      [
+        ["Clients", clients.length, "#0a2e1a"],
+        ["Devis envoyés", devisList.filter(function(d) { return d.statut === "envoye" }).length, "#1e40af"],
+        ["En cours", devisList.filter(function(d) { return d.statut === "en_cours" }).length, "#0f766e"],
+        ["Terminés", devisList.filter(function(d) { return d.statut === "termine" }).length, "#555"]
+      ].map(function(s) {
+        return React.createElement("div", { key: s[0], style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px", borderTop: "3px solid " + s[2] } },
+          React.createElement("div", { style: { fontSize: "28px", fontWeight: "300", color: s[2] } }, s[1]),
           React.createElement("div", { style: { fontSize: "11px", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" } }, s[0])
         )
       })
     ),
-    msgLocal && React.createElement("div", { style: { padding: "12px 16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "6px", color: "#065f46", fontSize: "13px", marginBottom: "18px" } }, msgLocal),
-    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
-      React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Tous les devis"),
-      React.createElement("div", { style: { display: "flex", gap: "10px" } },
-        React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
-        React.createElement("button", { onClick: function() { setShowForm(true); setMsgLocal("") }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau devis")
-      )
+
+    // ── Message ──
+    msg && React.createElement("div", { style: { padding: "12px 16px", backgroundColor: msg.startsWith("Erreur") ? "#fef2f2" : "#f0fdf4", border: "1px solid " + (msg.startsWith("Erreur") ? "#fecaca" : "#bbf7d0"), borderRadius: "6px", color: msg.startsWith("Erreur") ? "#991b1b" : "#065f46", fontSize: "13px", marginBottom: "18px", display: "flex", justifyContent: "space-between" } },
+      msg,
+      React.createElement("span", { onClick: function() { setMsg("") }, style: { cursor: "pointer", opacity: 0.5 } }, "×")
     ),
-    showForm && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
-      React.createElement("h4", { style: { fontSize: "15px", fontWeight: "700", color: "#0a2e1a", marginTop: 0, marginBottom: "16px" } }, "Créer un devis"),
-      React.createElement("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" } },
-        React.createElement("button", { onClick: function() { setShowNewClient(false) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: !showNewClient ? "#0a2e1a" : "#f0ede6", color: !showNewClient ? "#fff" : "#444" } }, "Client existant"),
-        React.createElement("button", { onClick: function() { setShowNewClient(true); setForm(Object.assign({}, form, { clientId: "" })) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: showNewClient ? "#0a2e1a" : "#f0ede6", color: showNewClient ? "#fff" : "#444" } }, "+ Nouveau client")
-      ),
-      !showNewClient
-        ? React.createElement("div", { style: { marginBottom: "14px" } }, React.createElement("label", { style: lbl }, "Client *"), React.createElement("select", { value: form.clientId, onChange: function(e) { setForm(Object.assign({}, form, { clientId: e.target.value })) }, style: inp }, React.createElement("option", { value: "" }, "Choisir"), clients.map(function(c) { return React.createElement("option", { key: c.id, value: c.id }, (c.prenom || "") + " " + c.nom + (c.entreprise ? " — " + c.entreprise : "")) })))
-        : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" } },
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: form.prenom, onChange: function(e) { setForm(Object.assign({}, form, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: form.nom, onChange: function(e) { setForm(Object.assign({}, form, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Email *"), React.createElement("input", { type: "email", value: form.email, onChange: function(e) { setForm(Object.assign({}, form, { email: e.target.value })) }, placeholder: "email@client.com", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: form.telephone, onChange: function(e) { setForm(Object.assign({}, form, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
-            React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: form.entreprise, onChange: function(e) { setForm(Object.assign({}, form, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp }))
-          ),
-      React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
-        React.createElement("div", null, React.createElement("label", { style: lbl }, "Prestation *"), React.createElement("select", { value: form.prestation, onChange: function(e) { setForm(Object.assign({}, form, { prestation: e.target.value })) }, style: inp }, React.createElement("option", { value: "" }, "Choisir"), PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) }))),
-        React.createElement("div", null, React.createElement("label", { style: lbl }, "Montant FCFA *"), React.createElement("input", { type: "number", value: form.montant, onChange: function(e) { setForm(Object.assign({}, form, { montant: e.target.value })) }, placeholder: "150000", style: inp }))
-      ),
-      React.createElement("div", { style: { marginBottom: "18px" } }, React.createElement("label", { style: lbl }, "Description"), React.createElement("textarea", { value: form.description, rows: 3, onChange: function(e) { setForm(Object.assign({}, form, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })),
-      React.createElement("div", { style: { display: "flex", gap: "10px" } },
-        React.createElement("button", { onClick: creerDevis, disabled: submitting, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", opacity: submitting ? 0.7 : 1 } }, submitting ? "Envoi..." : "Créer et envoyer"),
-        React.createElement("button", { onClick: function() { setShowForm(false); setShowNewClient(false) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
-      )
-    ),
-    React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
-      ["tous", "envoye", "accepte", "modification_demandee", "en_cours", "termine"].map(function(st) {
-        return React.createElement("button", { key: st, onClick: function() { setFiltre(st) }, style: { padding: "5px 12px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: filtre === st ? "#0a2e1a" : "#f0ede6", color: filtre === st ? "#fff" : "#444", fontWeight: filtre === st ? "700" : "400" } }, st === "tous" ? "Tous" : (STATUTS[st] ? STATUTS[st].label : st))
+
+    // ── Onglets ──
+    React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
+      [["devis", "📋 Devis"], ["clients", "👥 Clients"]].map(function(t) {
+        const active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
+        return React.createElement("button", {
+          key: t[0],
+          onClick: function() { setVue(t[0]); setClientDetail(null); setMsg("") },
+          style: { padding: "10px 20px", border: "none", borderBottom: active ? "2px solid #0a2e1a" : "2px solid transparent", marginBottom: "-2px", background: "none", fontSize: "13px", fontWeight: active ? "700" : "400", color: active ? "#0a2e1a" : "#888", cursor: "pointer", fontFamily: "inherit" }
+        }, t[1])
       })
     ),
-    loading ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...")
-      : filtres.length === 0 ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun devis.")
-      : filtres.map(function(d) {
-          const st = STATUTS[d.statut] || { label: d.statut, c: "#444", bg: "#f0f0f0" }
-          const cl = d.clients
-          return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px 22px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
-            React.createElement("div", { style: { flex: 1 } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } },
-                React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
-                React.createElement("span", { style: { padding: "3px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
-              ),
-              React.createElement("div", { style: { fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "3px" } }, d.prestation),
-              cl && React.createElement("div", { style: { fontSize: "12px", color: "#666" } }, (cl.prenom || "") + " " + cl.nom + (cl.entreprise ? " — " + cl.entreprise : "") + (cl.email ? " · " + cl.email : "")),
-              d.notes_modification && React.createElement("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "12px", color: "#6b21a8" } }, React.createElement("strong", null, "Modification demandée : "), d.notes_modification)
-            ),
-            React.createElement("div", { style: { textAlign: "right", marginLeft: "20px" } },
-              React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a", marginBottom: "4px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
-              React.createElement("div", { style: { fontSize: "11px", color: "#aaa", marginBottom: "10px" } }, new Date(d.created_at).toLocaleDateString("fr-FR")),
-              d.statut === "en_cours" && React.createElement("button", { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, validating === d.id ? "..." : "✓ Valider → 40%"),
-              d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ À modifier")
+
+    // ════════════════════════════════════
+    // VUE CLIENTS
+    // ════════════════════════════════════
+    vue === "clients" && React.createElement("div", null,
+
+      React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clients.length + " client" + (clients.length > 1 ? "s" : "")),
+        React.createElement("div", { style: { display: "flex", gap: "8px" } },
+          React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
+          React.createElement("button", { onClick: ouvrirAjoutClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau client")
+        )
+      ),
+
+      // Formulaire client
+      showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
+        React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : "Ajouter un client"),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: formClient.prenom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formClient.nom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Email *"), React.createElement("input", { type: "email", value: formClient.email, onChange: function(e) { setFormClient(Object.assign({}, formClient, { email: e.target.value })) }, placeholder: "jean@email.com", style: inp })),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: formClient.telephone, onChange: function(e) { setFormClient(Object.assign({}, formClient, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
+          React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formClient.entreprise, onChange: function(e) { setFormClient(Object.assign({}, formClient, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp }))
+        ),
+        React.createElement("div", { style: { display: "flex", gap: "10px" } },
+          React.createElement("button", { onClick: sauvegarderClient, disabled: submittingClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, submittingClient ? "..." : (editingClient ? "Mettre à jour" : "Ajouter")),
+          React.createElement("button", { onClick: function() { setShowFormClient(false); setEditingClient(null) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        )
+      ),
+
+      // Liste clients
+      loading ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...") :
+      clients.length === 0 ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun client. Ajoutez-en un !") :
+      clients.map(function(c) {
+        const nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
+        return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "16px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+          React.createElement("div", null,
+            React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, (c.prenom || "") + " " + c.nom),
+            React.createElement("div", { style: { fontSize: "12px", color: "#666" } },
+              c.email + (c.telephone ? " · " + c.telephone : "") + (c.entreprise ? " · " + c.entreprise : "")
             )
+          ),
+          React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "center" } },
+            React.createElement("span", { style: { fontSize: "11px", color: "#888", marginRight: "4px" } }, nbDevis + " devis"),
+            React.createElement("button", { onClick: function() { voirDevisClient(c) }, style: { background: "none", border: "1px solid #0a2e1a", color: "#0a2e1a", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "Voir devis"),
+            React.createElement("button", { onClick: function() { ouvrirEditionClient(c) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
+            React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+          )
+        )
+      })
+    ),
+
+    // ════════════════════════════════════
+    // VUE DEVIS D'UN CLIENT SPÉCIFIQUE
+    // ════════════════════════════════════
+    vue === "devis-client" && clientDetail && React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" } },
+        React.createElement("button", { onClick: function() { setVue("clients"); setClientDetail(null) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "← Retour"),
+        React.createElement("div", null,
+          React.createElement("div", { style: { fontWeight: "700", fontSize: "16px", color: "#0a2e1a" } }, (clientDetail.prenom || "") + " " + clientDetail.nom),
+          React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, clientDetail.email + (clientDetail.entreprise ? " · " + clientDetail.entreprise : ""))
+        )
+      ),
+      filtresDevis.length === 0
+        ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun devis pour ce client.")
+        : filtresDevis.map(function(d) { return renduDevis(d) })
+    ),
+
+    // ════════════════════════════════════
+    // VUE DEVIS (tous)
+    // ════════════════════════════════════
+    vue === "devis" && React.createElement("div", null,
+
+      React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Tous les devis"),
+        React.createElement("div", { style: { display: "flex", gap: "8px" } },
+          React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
+          React.createElement("button", { onClick: function() { setShowFormDevis(true); setMsg("") }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau devis")
+        )
+      ),
+
+      // Formulaire devis
+      showFormDevis && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
+        React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, "Créer un devis"),
+        React.createElement("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" } },
+          React.createElement("button", { onClick: function() { setShowNewClient(false) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: !showNewClient ? "#0a2e1a" : "#f0ede6", color: !showNewClient ? "#fff" : "#444" } }, "Client existant"),
+          React.createElement("button", { onClick: function() { setShowNewClient(true); setFormDevis(Object.assign({}, formDevis, { clientId: "" })) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: showNewClient ? "#0a2e1a" : "#f0ede6", color: showNewClient ? "#fff" : "#444" } }, "+ Nouveau client")
+        ),
+        !showNewClient
+          ? React.createElement("div", { style: { marginBottom: "14px" } },
+              React.createElement("label", { style: lbl }, "Client *"),
+              React.createElement("select", { value: formDevis.clientId, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { clientId: e.target.value })) }, style: inp },
+                React.createElement("option", { value: "" }, "Choisir un client..."),
+                clients.map(function(c) { return React.createElement("option", { key: c.id, value: c.id }, (c.prenom || "") + " " + c.nom + (c.entreprise ? " — " + c.entreprise : "")) })
+              )
+            )
+          : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" } },
+              React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: formDevis.prenom, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
+              React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formDevis.nom, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
+              React.createElement("div", null, React.createElement("label", { style: lbl }, "Email *"), React.createElement("input", { type: "email", value: formDevis.email, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { email: e.target.value })) }, placeholder: "jean@email.com", style: inp })),
+              React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: formDevis.telephone, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
+              React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formDevis.entreprise, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp }))
+            ),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Prestation *"), React.createElement("select", { value: formDevis.prestation, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { prestation: e.target.value })) }, style: inp }, React.createElement("option", { value: "" }, "Choisir..."), PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) }))),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "Montant FCFA *"), React.createElement("input", { type: "number", value: formDevis.montant, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montant: e.target.value })) }, placeholder: "150000", style: inp }))
+        ),
+        React.createElement("div", { style: { marginBottom: "18px" } }, React.createElement("label", { style: lbl }, "Description"), React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })),
+        React.createElement("div", { style: { display: "flex", gap: "10px" } },
+          React.createElement("button", { onClick: creerDevis, disabled: submittingDevis, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", opacity: submittingDevis ? 0.7 : 1 } }, submittingDevis ? "Envoi en cours..." : "✉ Créer et envoyer par email"),
+          React.createElement("button", { onClick: function() { setShowFormDevis(false); setShowNewClient(false) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        )
+      ),
+
+      // Filtres
+      React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
+        ["tous", "envoye", "accepte", "modification_demandee", "en_cours", "termine", "annule"].map(function(st) {
+          const count = st === "tous" ? devisList.length : devisList.filter(function(d) { return d.statut === st }).length
+          return React.createElement("button", { key: st, onClick: function() { setFiltre(st) }, style: { padding: "5px 12px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: filtre === st ? "#0a2e1a" : "#f0ede6", color: filtre === st ? "#fff" : "#444", fontWeight: filtre === st ? "700" : "400" } },
+            (st === "tous" ? "Tous" : (STATUTS[st] ? STATUTS[st].label : st)) + " (" + count + ")"
           )
         })
+      ),
+
+      loading ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...") :
+      filtresDevis.length === 0 ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun devis.") :
+      filtresDevis.map(function(d) { return renduDevis(d) })
+    )
   )
+
+  // ── Rendu d'une ligne devis ──
+  function renduDevis(d) {
+    const st = STATUTS[d.statut] || { label: d.statut, c: "#444", bg: "#f0f0f0" }
+    const cl = d.clients
+    return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px 22px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+      React.createElement("div", { style: { flex: 1 } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } },
+          React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
+          React.createElement("span", { style: { padding: "3px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
+        ),
+        React.createElement("div", { style: { fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "3px" } }, d.prestation),
+        cl && React.createElement("div", { style: { fontSize: "12px", color: "#666" } },
+          (cl.prenom || "") + " " + cl.nom + (cl.entreprise ? " — " + cl.entreprise : "") + (cl.email ? " · " + cl.email : "")
+        ),
+        d.notes_modification && React.createElement("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "12px", color: "#6b21a8" } },
+          React.createElement("strong", null, "Modification demandée : "), d.notes_modification
+        )
+      ),
+      React.createElement("div", { style: { textAlign: "right", marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" } },
+        React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
+        React.createElement("div", { style: { fontSize: "11px", color: "#aaa" } }, new Date(d.created_at).toLocaleDateString("fr-FR")),
+        d.statut === "en_cours" && React.createElement("button", {
+          onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id,
+          style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+        }, validating === d.id ? "..." : "✓ Valider → 40%"),
+        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ À modifier"),
+        React.createElement("button", {
+          onClick: function() { supprimerDevis(d.id, d.numero) },
+          style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+        }, "🗑 Supprimer")
+      )
+    )
+  }
 }
  // Mer 15 avr 2026 22:22:43 CEST
