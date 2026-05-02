@@ -1316,6 +1316,7 @@ function SectionClientsDevis({ db }) {
       filtresDevis.length === 0 ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun devis.") :
       filtresDevis.map(function(d) { return renduDevis(d) })
     )
+  )
 
 }
  // Mer 15 avr 2026 22:22:43 CEST
