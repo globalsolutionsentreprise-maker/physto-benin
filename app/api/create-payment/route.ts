@@ -1,13 +1,12 @@
 // app/api/create-payment/route.ts
-// Crée une transaction FedaPay et retourne l'URL de paiement
-
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 const FEDAPAY_SECRET = process.env.FEDAPAY_SECRET_KEY!
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.vercel.app"
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.com"
+const FEDAPAY_BASE = "https://api.fedapay.com/v1"
 
 export async function POST(req: NextRequest) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -17,13 +16,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "JSON invalide" }, { status: 400 })
   }
 
-  const { devisId, typeVersement } = body // typeVersement: '60' | '40'
+  const { devisId, typeVersement } = body
 
   if (!devisId || !typeVersement) {
     return NextResponse.json({ error: "Paramètres manquants" }, { status: 400 })
   }
 
-  // Récupérer le devis et le client
+  // 1. Récupérer le devis et le client
   const { data: devis, error: devisError } = await supabase
     .from("devis")
     .select("*, clients(*)")
@@ -39,7 +38,11 @@ export async function POST(req: NextRequest) {
     ? Math.round(devis.montant_total * 0.6)
     : Math.round(devis.montant_total * 0.4)
 
-  // Créer l'enregistrement paiement en base
+  const description = typeVersement === "60"
+    ? `Acompte 60% — ${devis.prestation} (${devis.numero})`
+    : `Solde 40% — ${devis.prestation} (${devis.numero})`
+
+  // 2. Créer l'enregistrement paiement en base
   const { data: paiement, error: paiementError } = await supabase
     .from("paiements")
     .insert({
@@ -47,42 +50,37 @@ export async function POST(req: NextRequest) {
       client_id: devis.client_id,
       type_versement: typeVersement,
       montant,
-      statut: "en_cours",
+      statut: "en_attente",
     })
     .select()
     .single()
 
   if (paiementError || !paiement) {
-    return NextResponse.json({ error: "Erreur création paiement" }, { status: 500 })
+    return NextResponse.json({ error: "Erreur création paiement: " + paiementError?.message }, { status: 500 })
   }
 
-  // Créer la transaction FedaPay
-  const description = typeVersement === "60"
-    ? `Acompte 60% — ${devis.prestation} (Devis ${devis.numero})`
-    : `Solde 40% — ${devis.prestation} (Devis ${devis.numero})`
+  const headers = {
+    "Authorization": `Bearer ${FEDAPAY_SECRET}`,
+    "Content-Type": "application/json",
+  }
 
-  let fedapayRes: any
+  // 3. Créer la transaction FedaPay
+  let transactionId: string
   try {
-    const res = await fetch("https://api.fedapay.com/v1/transactions", {
+    const txRes = await fetch(`${FEDAPAY_BASE}/transactions`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${FEDAPAY_SECRET}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         description,
         amount: montant,
         currency: { iso: "XOF" },
-        callback_url: `${SITE_URL}/espace-client/paiements?status=success&devis=${devisId}`,
+        callback_url: `${SITE_URL}/espace-client/dashboard?paiement=success&devis=${devisId}`,
         cancel_url: `${SITE_URL}/espace-client/devis/${devisId}?status=cancelled`,
         customer: {
           email: client.email,
           firstname: client.prenom || "",
           lastname: client.nom,
-          phone_number: client.telephone ? {
-            number: client.telephone,
-            country: "BJ"
-          } : undefined,
+          ...(client.telephone ? { phone_number: { number: client.telephone, country: "BJ" } } : {}),
         },
         metadata: {
           paiement_id: paiement.id,
@@ -91,29 +89,54 @@ export async function POST(req: NextRequest) {
         },
       }),
     })
-    fedapayRes = await res.json()
-  } catch (err) {
-    console.error("Erreur FedaPay API:", err)
-    return NextResponse.json({ error: "Erreur FedaPay" }, { status: 502 })
+
+    const txData = await txRes.json()
+    console.log("FedaPay create transaction response:", JSON.stringify(txData))
+
+    // FedaPay retourne { v1: { transaction: { id: ... } } }
+    transactionId = txData?.v1?.transaction?.id
+      || txData?.transaction?.id
+      || txData?.id
+
+    if (!transactionId) {
+      return NextResponse.json({
+        error: "Transaction FedaPay non créée",
+        detail: txData
+      }, { status: 502 })
+    }
+  } catch (err: any) {
+    return NextResponse.json({ error: "Erreur appel FedaPay: " + err.message }, { status: 502 })
   }
 
-  const transactionId = fedapayRes?.v1?.transaction?.id
-  const token = fedapayRes?.v1?.token
+  // 4. Générer le token de paiement
+  let paymentUrl: string
+  try {
+    const tokenRes = await fetch(`${FEDAPAY_BASE}/transactions/${transactionId}/token`, {
+      method: "POST",
+      headers,
+    })
 
-  if (!token) {
-    console.error("FedaPay response inattendue:", fedapayRes)
-    return NextResponse.json({ error: "Pas de token FedaPay" }, { status: 502 })
+    const tokenData = await tokenRes.json()
+    console.log("FedaPay token response:", JSON.stringify(tokenData))
+
+    const token = tokenData?.v1?.token || tokenData?.token
+
+    if (!token) {
+      return NextResponse.json({
+        error: "Token FedaPay non généré",
+        detail: tokenData
+      }, { status: 502 })
+    }
+
+    paymentUrl = `https://checkout.fedapay.com/${token}`
+  } catch (err: any) {
+    return NextResponse.json({ error: "Erreur token FedaPay: " + err.message }, { status: 502 })
   }
 
-  const paymentUrl = `https://checkout.fedapay.com/${token}`
-
-  // Sauvegarder l'URL et l'ID de transaction
+  // 5. Sauvegarder l'ID transaction
   await supabase
     .from("paiements")
-    .update({
-      fedapay_transaction_id: String(transactionId),
-      fedapay_payment_url: paymentUrl,
-    })
+    .update({ fedapay_id: String(transactionId) })
     .eq("id", paiement.id)
 
   return NextResponse.json({ paymentUrl })
