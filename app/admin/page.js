@@ -884,16 +884,27 @@ function SectionClientsDevis({ db }) {
     if (!formClient.nom || !formClient.email) { setMsg("Nom et email obligatoires."); return }
     setSubmittingClient(true); setMsg("")
     if (editingClient) {
+      // Modification : mise à jour directe en base
       const { error } = await db.from("clients").update(formClient).eq("id", editingClient.id)
       if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
       setMsg("✓ Client mis à jour")
+      setShowFormClient(false); setEditingClient(null)
+      await charger(); setSubmittingClient(false)
     } else {
-      const { error } = await db.from("clients").insert(formClient)
-      if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
-      setMsg("✓ Client ajouté")
+      // Nouveau client : appel API qui crée Auth + client + envoie email identifiants
+      try {
+        const res = await fetch("/api/create-client", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formClient)
+        })
+        const data = await res.json()
+        if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setSubmittingClient(false); return }
+        setMsg("✓ " + data.message)
+        setShowFormClient(false)
+        await charger(); setSubmittingClient(false)
+      } catch(e) { setMsg("Erreur réseau: " + e.message); setSubmittingClient(false) }
     }
-    setShowFormClient(false); setEditingClient(null)
-    await charger(); setSubmittingClient(false)
   }
 
   async function supprimerClient(c) {
