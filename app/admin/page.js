@@ -1293,7 +1293,7 @@ function SectionClientsDevis({ db }) {
               "ℹ Les frais de paiement en ligne sont inclus et seront mentionnés sur le devis."
             )
           )
-        ))
+        )
         ),
         React.createElement("div", { style: { marginBottom: "18px" } }, React.createElement("label", { style: lbl }, "Description"), React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })),
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
