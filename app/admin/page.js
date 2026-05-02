@@ -1079,6 +1079,50 @@ function SectionClientsDevis({ db }) {
 
   const s = { card: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px" } }
 
+  // ── Rendu d'une ligne devis ──
+  function renduDevis(d) {
+    const st = STATUTS[d.statut] || { label: d.statut, c: "#444", bg: "#f0f0f0" }
+    const cl = d.clients
+    return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px 22px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+      React.createElement("div", { style: { flex: 1 } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } },
+          React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
+          React.createElement("span", { style: { padding: "3px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
+        ),
+        React.createElement("div", { style: { fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "3px" } }, d.prestation),
+        cl && React.createElement("div", { style: { fontSize: "12px", color: "#666" } },
+          (cl.prenom || "") + " " + cl.nom + (cl.entreprise ? " — " + cl.entreprise : "") + (cl.email ? " · " + cl.email : "")
+        ),
+        d.notes_modification && React.createElement("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "12px", color: "#6b21a8" } },
+          React.createElement("strong", null, "Modification demandée : "), d.notes_modification
+        )
+      ),
+      React.createElement("div", { style: { textAlign: "right", marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" } },
+        React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
+        React.createElement("div", { style: { fontSize: "11px", color: "#aaa" } }, new Date(d.created_at).toLocaleDateString("fr-FR")),
+        d.statut === "en_cours" && React.createElement("button", {
+          onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id,
+          style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+        }, validating === d.id ? "..." : "✓ Valider → 40%"),
+        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ " + (d.notes_modification || "Modification demandée")),
+        d.statut === "modification_demandee" && React.createElement("button", {
+          onClick: function() { ouvrirEditionDevis(d) },
+          style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+        }, "✏️ Modifier et renvoyer"),
+                cl && cl.email && React.createElement("button", {
+          onClick: function() { renvoyerEmail(d) },
+          style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+        }, "\u2709 Renvoyer email"),
+        React.createElement("button", {
+          onClick: function() { supprimerDevis(d.id, d.numero) },
+          style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+        }, "🗑 Supprimer")
+      )
+    )
+  }
+  }
+
+
   return React.createElement("div", null,
 
     // ── Compteurs ──
@@ -1274,46 +1318,5 @@ function SectionClientsDevis({ db }) {
     )
   )
 
-  // ── Rendu d'une ligne devis ──
-  function renduDevis(d) {
-    const st = STATUTS[d.statut] || { label: d.statut, c: "#444", bg: "#f0f0f0" }
-    const cl = d.clients
-    return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px 22px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
-      React.createElement("div", { style: { flex: 1 } },
-        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } },
-          React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
-          React.createElement("span", { style: { padding: "3px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
-        ),
-        React.createElement("div", { style: { fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "3px" } }, d.prestation),
-        cl && React.createElement("div", { style: { fontSize: "12px", color: "#666" } },
-          (cl.prenom || "") + " " + cl.nom + (cl.entreprise ? " — " + cl.entreprise : "") + (cl.email ? " · " + cl.email : "")
-        ),
-        d.notes_modification && React.createElement("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "12px", color: "#6b21a8" } },
-          React.createElement("strong", null, "Modification demandée : "), d.notes_modification
-        )
-      ),
-      React.createElement("div", { style: { textAlign: "right", marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" } },
-        React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
-        React.createElement("div", { style: { fontSize: "11px", color: "#aaa" } }, new Date(d.created_at).toLocaleDateString("fr-FR")),
-        d.statut === "en_cours" && React.createElement("button", {
-          onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id,
-          style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
-        }, validating === d.id ? "..." : "✓ Valider → 40%"),
-        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ " + (d.notes_modification || "Modification demandée")),
-        d.statut === "modification_demandee" && React.createElement("button", {
-          onClick: function() { ouvrirEditionDevis(d) },
-          style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
-        }, "✏️ Modifier et renvoyer"),
-                cl && cl.email && React.createElement("button", {
-          onClick: function() { renvoyerEmail(d) },
-          style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-        }, "\u2709 Renvoyer email"),
-        React.createElement("button", {
-          onClick: function() { supprimerDevis(d.id, d.numero) },
-          style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-        }, "🗑 Supprimer")
-      )
-    )
-  }
 }
  // Mer 15 avr 2026 22:22:43 CEST
