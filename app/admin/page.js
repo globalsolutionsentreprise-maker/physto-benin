@@ -976,6 +976,25 @@ function SectionClientsDevis({ db }) {
     await charger(); setValidating(null)
   }
 
+  async function renvoyerEmail(d) {
+    const cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+    if (!cl || !cl.email) { setMsg("Ce client n'a pas d'email."); return }
+    try {
+      const res = await fetch("/api/send-devis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "",
+          devisNumero: d.numero, prestation: d.prestation,
+          montant: d.montant_total, description: d.description || ""
+        })
+      })
+      const data = await res.json()
+      if (data.success) { setMsg("✓ Email renvoyé à " + cl.email) }
+      else { setMsg("Erreur: " + (data.error || "Échec envoi")) }
+    } catch(e) { setMsg("Erreur réseau: " + e.message) }
+  }
+
   async function supprimerDevis(id, numero) {
     if (!window.confirm("Supprimer le devis " + numero + " ?")) return
     await db.from("devis").delete().eq("id", id)
@@ -1181,6 +1200,10 @@ function SectionClientsDevis({ db }) {
           style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
         }, validating === d.id ? "..." : "✓ Valider → 40%"),
         d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ À modifier"),
+                cl && cl.email && React.createElement("button", {
+          onClick: function() { renvoyerEmail(d) },
+          style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+        }, "\u2709 Renvoyer email"),
         React.createElement("button", {
           onClick: function() { supprimerDevis(d.id, d.numero) },
           style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
