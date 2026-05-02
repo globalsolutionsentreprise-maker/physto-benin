@@ -93,10 +93,10 @@ export async function POST(req: NextRequest) {
     const txData = await txRes.json()
     console.log("FedaPay create transaction response:", JSON.stringify(txData))
 
-    // FedaPay retourne { v1: { transaction: { id: ... } } }
-    transactionId = txData?.v1?.transaction?.id
-      || txData?.transaction?.id
-      || txData?.id
+    // FedaPay retourne { "v1/transaction": { id: ..., payment_url: ... } }
+    const tx = txData?.["v1/transaction"] || txData?.v1?.transaction || txData?.transaction
+    transactionId = tx?.id
+    const directPaymentUrl = tx?.payment_url
 
     if (!transactionId) {
       return NextResponse.json({
@@ -104,30 +104,28 @@ export async function POST(req: NextRequest) {
         detail: txData
       }, { status: 502 })
     }
+
+    // L'URL de paiement est directement dans la réponse
+    if (directPaymentUrl) {
+      await supabase.from("paiements").update({ fedapay_id: String(transactionId) }).eq("id", paiement.id)
+      return NextResponse.json({ paymentUrl: directPaymentUrl })
+    }
   } catch (err: any) {
     return NextResponse.json({ error: "Erreur appel FedaPay: " + err.message }, { status: 502 })
   }
 
-  // 4. Générer le token de paiement
+  // 4. Si pas d'URL directe, générer le token séparément
   let paymentUrl: string
   try {
     const tokenRes = await fetch(`${FEDAPAY_BASE}/transactions/${transactionId}/token`, {
       method: "POST",
       headers,
     })
-
     const tokenData = await tokenRes.json()
-    console.log("FedaPay token response:", JSON.stringify(tokenData))
-
     const token = tokenData?.v1?.token || tokenData?.token
-
     if (!token) {
-      return NextResponse.json({
-        error: "Token FedaPay non généré",
-        detail: tokenData
-      }, { status: 502 })
+      return NextResponse.json({ error: "Token FedaPay non généré", detail: tokenData }, { status: 502 })
     }
-
     paymentUrl = `https://checkout.fedapay.com/${token}`
   } catch (err: any) {
     return NextResponse.json({ error: "Erreur token FedaPay: " + err.message }, { status: 502 })
