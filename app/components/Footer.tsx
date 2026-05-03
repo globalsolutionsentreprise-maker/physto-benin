@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 export default function Footer() {
-  const [coord, setCoord] = useState({ email: "globalsolutionsentreprise@gmail.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "2290153047950" })
+  const [coord, setCoord] = useState({ email: "contact@phyto-benin.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "2290153047950" })
   useEffect(function() {
     supabase.from("parametres").select("cle, valeur").then(function({ data }: { data: any }) {
       if (data) {

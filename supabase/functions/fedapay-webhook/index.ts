@@ -43,20 +43,16 @@ serve(async (req) => {
       date_livraison: new Date().toISOString(),
     }).eq("id", devisId)
 
-    const { data: devisData } = await supabase
-      .from("devis").select("*, clients(*)").eq("id", devisId).single()
-
-    if (devisData) {
-      const { data: numData } = await supabase.rpc("generate_attestation_numero")
-      await supabase.from("attestations").insert({
-        devis_id: devisId,
-        client_id: devisData.client_id,
-        numero: numData || `ATT-${Date.now()}`,
-        prestation: devisData.prestation,
-        montant_total: devisData.montant_total,
-        date_traitement: new Date().toISOString().split("T")[0],
-        technicien: "Équipe GSE",
+    // Déléguer génération attestation + envoi email à l'API Next.js
+    const siteUrl = Deno.env.get("SITE_URL") || "https://phyto-benin.com"
+    try {
+      await fetch(`${siteUrl}/api/generate-attestation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ devisId }),
       })
+    } catch (err) {
+      console.error("Erreur appel generate-attestation:", err)
     }
   }
 

@@ -6,7 +6,7 @@ export default function ContactForm() {
   const FORMSPREE_URL = "https://formspree.io/f/mreorevl"
   const TEL = "+2290153047950"
   const TEL_AFFICHE = "+229 01 53 04 79 50"
-  const EMAIL = "globalsolutionsentreprise@gmail.com"
+  const EMAIL = "contact@phyto-benin.com"
   const WHATSAPP = "https://wa.me/2290153047950"
 
   const [statut, setStatut] = useState("idle")
