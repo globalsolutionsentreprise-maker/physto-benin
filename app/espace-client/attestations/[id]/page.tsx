@@ -85,8 +85,8 @@ export default function AttestationPage() {
           {/* === EN-TÊTE === */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
             <div>
-              <div style={{ fontFamily: "system-ui, sans-serif", fontWeight: "800", fontSize: "26px", color: "#0a2e1a", letterSpacing: "0.05em", marginBottom: "2px" }}>GSE</div>
-              <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "11px", color: "#888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>Global Solutions Entreprise</div>
+              {/* Logo officiel GSE */}
+              <img src="/logo-gse.jpeg" alt="Logo GSE" style={{ width: "72px", height: "72px", objectFit: "contain", marginBottom: "10px", borderRadius: "8px", display: "block" }} />
               <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "11px", color: "#999", lineHeight: "1.8" }}>
                 <div>RCCM : RB/COT/24 B 38910</div>
                 <div>IFU : 3202420126111</div>
@@ -156,12 +156,7 @@ export default function AttestationPage() {
                     <td style={{ fontWeight: "600", color: "#0a2e1a", paddingBottom: "10px" }}>{att.superficie_m2} m²</td>
                   </tr>
                 )}
-                {att.produits_utilises && (
-                  <tr>
-                    <td style={{ color: "#888", paddingBottom: "10px" }}>Produits utilisés :</td>
-                    <td style={{ fontWeight: "600", color: "#0a2e1a", paddingBottom: "10px" }}>{att.produits_utilises}</td>
-                  </tr>
-                )}
+
                 <tr>
                   <td style={{ color: "#888", paddingBottom: "10px" }}>Date du traitement :</td>
                   <td style={{ fontWeight: "700", color: "#0a2e1a", paddingBottom: "10px" }}>{dateFormatee}</td>
@@ -184,7 +179,7 @@ export default function AttestationPage() {
             </p>
           </div>
 
-          {/* === SIGNATURE + QR CODE === */}
+          {/* === SIGNATURE + CACHET + QR CODE === */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingTop: "24px", borderTop: "1px solid #e8e6e0" }}>
 
             {/* Signature */}
@@ -194,6 +189,60 @@ export default function AttestationPage() {
               <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "12px", fontWeight: "700", color: "#0a2e1a" }}>{att.responsable_nom || "Direction GSE"}</div>
               <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "11px", color: "#888" }}>{att.responsable_titre || "Directeur Général"}</div>
               <div style={{ width: "120px", height: "50px", borderBottom: "1.5px solid #0a2e1a", marginTop: "24px" }} />
+            </div>
+
+            {/* Cachet du Directeur Général — reproduction SVG fidèle */}
+            <div style={{ textAlign: "center", margin: "0 16px", paddingBottom: "4px" }}>
+              <div style={{
+                display: "inline-block",
+                border: "2.5px solid #1a237e",
+                borderRadius: "3px",
+                padding: "7px 9px",
+                position: "relative",
+                minWidth: "188px",
+                color: "#1a237e",
+                fontFamily: "system-ui, sans-serif",
+                background: "rgba(255,255,255,0.9)",
+              }}>
+                {/* Double bordure intérieure */}
+                <div style={{ position: "absolute", inset: "3px", border: "1px solid #1a237e", borderRadius: "1px", pointerEvents: "none" }} />
+
+                {/* Ligne 1 : globe + nom */}
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "3px", paddingLeft: "2px" }}>
+                  <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="14" cy="14" r="10.5" stroke="#1a237e" strokeWidth="1.5" fill="none"/>
+                    <ellipse cx="14" cy="14" rx="5.5" ry="10.5" stroke="#1a237e" strokeWidth="1" fill="none"/>
+                    <line x1="3.5" y1="14" x2="24.5" y2="14" stroke="#1a237e" strokeWidth="1"/>
+                    <line x1="5.5" y1="8.5" x2="22.5" y2="8.5" stroke="#1a237e" strokeWidth="0.8"/>
+                    <line x1="5.5" y1="19.5" x2="22.5" y2="19.5" stroke="#1a237e" strokeWidth="0.8"/>
+                    <path d="M17 18 Q23 11 21 6 Q15 10 17 17 Z" fill="#1a237e"/>
+                  </svg>
+                  <div style={{ fontWeight: "800", fontSize: "10px", letterSpacing: "0.06em", lineHeight: "1.25", color: "#1a237e" }}>
+                    GLOBAL SOLUTIONS<br/>ENTREPRISE
+                  </div>
+                </div>
+
+                {/* Séparateur */}
+                <div style={{ borderTop: "1px solid #1a237e", margin: "3px 0" }} />
+
+                {/* Ligne 2 : petits textes gauche + infos droite */}
+                <div style={{ display: "flex", gap: "7px", alignItems: "flex-start" }}>
+                  <div style={{ fontSize: "6.5px", fontWeight: "700", color: "#1a237e", lineHeight: "1.35", flexShrink: 0 }}>
+                    GLOBAL<br/>SOLUTIONS<br/>ENTREPRISE
+                  </div>
+                  <div style={{ fontSize: "7px", color: "#1a237e", lineHeight: "1.55" }}>
+                    <div><strong>N° RCCM</strong> : RB/COT/24 B 38910</div>
+                    <div><strong>N° IFU</strong> : 3202420126111</div>
+                    <div>✆ : +33 06 68 82 52 85</div>
+                    <div>CEL : +229 53 04 78 50</div>
+                  </div>
+                </div>
+
+                {/* Le Directeur Général */}
+                <div style={{ borderTop: "1px solid #1a237e", marginTop: "3px", paddingTop: "3px", textAlign: "center", fontStyle: "italic", fontWeight: "700", fontSize: "9.5px", color: "#1a237e", letterSpacing: "0.03em" }}>
+                  Le Directeur Général
+                </div>
+              </div>
             </div>
 
             {/* QR Code */}
