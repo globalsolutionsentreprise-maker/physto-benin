@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
     const txRes = await fetch(`${FEDAPAY_BASE}/transactions`, {
       method: "POST",
       headers,
+      signal: AbortSignal.timeout(20000),
       body: JSON.stringify({
         description,
         amount: montant,
@@ -111,7 +112,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ paymentUrl: directPaymentUrl })
     }
   } catch (err: any) {
-    return NextResponse.json({ error: "Erreur appel FedaPay: " + err.message }, { status: 502 })
+    console.error("FedaPay fetch error:", err)
+    return NextResponse.json({ error: "Erreur appel FedaPay: " + err.message, cause: err.cause?.toString() }, { status: 502 })
   }
 
   // 4. Si pas d'URL directe, générer le token séparément
@@ -120,6 +122,7 @@ export async function POST(req: NextRequest) {
     const tokenRes = await fetch(`${FEDAPAY_BASE}/transactions/${transactionId}/token`, {
       method: "POST",
       headers,
+      signal: AbortSignal.timeout(20000),
     })
     const tokenData = await tokenRes.json()
     const token = tokenData?.v1?.token || tokenData?.token
