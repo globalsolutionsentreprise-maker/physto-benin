@@ -105,6 +105,15 @@ export default function Accueil() {
       <section style={{ position: "relative", minHeight: "92vh", display: "flex", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", backgroundColor: "#050e07" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/images/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.45 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020904 0%, rgba(2,9,4,0.75) 45%, rgba(2,9,4,0.2) 100%)" }} />
+
+        {/* BADGE AGRÉMENT — haut droite */}
+        <div className="badge-float" style={{ position: "absolute", top: "28px", right: "40px", zIndex: 10, display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(212,169,32,0.13)", border: "1.5px solid rgba(212,169,32,0.55)", padding: "10px 18px", borderRadius: "6px", backdropFilter: "blur(6px)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0 }}>✓</span>
+          <div>
+            <div style={{ fontSize: "10px", fontWeight: "800", color: "#d4a920", letterSpacing: "0.1em", lineHeight: 1.2 }}>AGRÉÉ PAR L'ÉTAT BÉNINOIS</div>
+            <div style={{ fontSize: "9px", color: "rgba(212,169,32,0.7)", letterSpacing: "0.06em", marginTop: "2px" }}>{agrement}</div>
+          </div>
+        </div>
         <div className="hero-padding" style={{ position: "relative", zIndex: 2, padding: "0 60px 80px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.35)", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "6px 16px", borderRadius: "20px", letterSpacing: "0.08em", marginBottom: "28px" }}>
             <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#d4a920" }} />
@@ -141,14 +150,6 @@ export default function Accueil() {
             })}
           </div>
 
-          {/* BADGE AGRÉMENT */}
-          <div style={{ marginTop: "20px", display: "inline-flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(212,169,32,0.1)", border: "1px solid rgba(212,169,32,0.3)", padding: "9px 18px", borderRadius: "4px" }}>
-            <span style={{ color: "#d4a920", fontSize: "14px", fontWeight: "700", lineHeight: 1 }}>✓</span>
-            <div>
-              <div style={{ fontSize: "10px", fontWeight: "700", color: "#d4a920", letterSpacing: "0.1em" }}>AGRÉÉ PAR L'ÉTAT BÉNINOIS</div>
-              <div style={{ fontSize: "9px", color: "rgba(212,169,32,0.6)", letterSpacing: "0.06em", marginTop: "2px" }}>{agrement}</div>
-            </div>
-          </div>
         </div>
       </section>
 
