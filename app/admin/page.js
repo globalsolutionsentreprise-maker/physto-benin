@@ -1268,20 +1268,16 @@ function SectionClientsDevis({ db }) {
       React.createElement("div", { style: { marginBottom: "18px", padding: "16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
         React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", letterSpacing: "0.08em", marginBottom: "12px" } }, "MODALITÉS DE PAIEMENT"),
         React.createElement("div", { style: { marginBottom: "12px" } },
-          React.createElement("label", { style: lbl }, "% acompte à la signature"),
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
-            React.createElement("input", {
-              type: "range", min: "10", max: "100", step: "5",
-              value: formDevis.pctAcompte || "60",
-              onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { pctAcompte: e.target.value })) },
-              style: { flex: 1, accentColor: "#0a2e1a" }
-            }),
-            React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } },
-              React.createElement("span", { style: { minWidth: "42px", textAlign: "center", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", backgroundColor: "#fff", border: "1px solid #d1fae5", padding: "4px 8px", borderRadius: "6px" } }, (formDevis.pctAcompte || "60") + "%"),
-              React.createElement("span", { style: { fontSize: "12px", color: "#888" } }, "+" ),
-              React.createElement("span", { style: { minWidth: "42px", textAlign: "center", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", backgroundColor: "#fff", border: "1px solid #d1fae5", padding: "4px 8px", borderRadius: "6px" } }, (100 - (parseInt(formDevis.pctAcompte) || 60)) + "%"),
-              React.createElement("span", { style: { fontSize: "12px", color: "#888" } }, "solde")
-            )
+          React.createElement("label", { style: lbl }, "Répartition acompte / solde"),
+          React.createElement("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
+            [["50", "50 / 50"], ["60", "60 / 40"], ["70", "70 / 30"], ["100", "100% comptant"]].map(function(opt) {
+              var actif = (formDevis.pctAcompte || "60") === opt[0]
+              return React.createElement("button", {
+                key: opt[0], type: "button",
+                onClick: function() { setFormDevis(Object.assign({}, formDevis, { pctAcompte: opt[0] })) },
+                style: { padding: "9px 16px", borderRadius: "6px", border: actif ? "2px solid #0a2e1a" : "2px solid #d1fae5", backgroundColor: actif ? "#0a2e1a" : "#fff", color: actif ? "#fff" : "#065f46", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+              }, opt[1])
+            })
           )
         ),
         React.createElement("div", null,
