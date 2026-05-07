@@ -792,18 +792,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Créez des devis, gérez les clients et suivez les paiements FedaPay.</p>
-
-              {/* Outil devis iframe */}
-              <div style={{ marginBottom: "28px", border: "1px solid #e8e6e0", borderRadius: "8px", overflow: "hidden" }}>
-                <div style={{ backgroundColor: "#0a2e1a", padding: "12px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ color: "#d4a920", fontWeight: "700", fontSize: "13px" }}>Générateur de devis GSE</span>
-                  <a href="https://globalsolutionsentreprise-maker.github.io/gse-devis/" target="_blank" rel="noopener noreferrer" style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>Plein écran ↗</a>
-                </div>
-                <iframe src="https://globalsolutionsentreprise-maker.github.io/gse-devis/" style={{ width: "100%", height: "520px", border: "none", display: "block" }} title="Générateur de devis" />
-              </div>
-
-              {/* Devis en base */}
-              <SectionClientsDevis db={supabase} />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} />
             </div>
           )}
 
@@ -816,7 +805,7 @@ export default function Admin() {
 // ══════════════════════════════════════════════════
 // COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
-function SectionClientsDevis({ db }) {
+function SectionClientsDevis({ db, agrement }) {
   const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState("devis")
   const [devisList, setDevisList] = React.useState([])
@@ -977,7 +966,7 @@ function SectionClientsDevis({ db }) {
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
       } else if (!enLigne) {
         setMsg("✓ Devis modifié")
-        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement }
+        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
         imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
       setShowFormDevis(false); setEditingDevis(null)
@@ -1010,7 +999,7 @@ function SectionClientsDevis({ db }) {
       setMsg("✓ Devis créé (pas d'email pour ce client)")
     } else {
       setMsg("✓ Devis créé — impression en cours...")
-      var imprimData2 = { numero: numero, clientNom: clientNom, clientPrenom: clientPrenom, clientEmail: clientEmail, clientTelephone: clientTel, clientEntreprise: clientEnt, prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement }
+      var imprimData2 = { numero: numero, clientNom: clientNom, clientPrenom: clientPrenom, clientEmail: clientEmail, clientTelephone: clientTel, clientEntreprise: clientEnt, prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
       imprimerDevis(imprimData2)
     }
 
@@ -1084,7 +1073,7 @@ function SectionClientsDevis({ db }) {
       "</style></head><body>" +
       "<div class=\"noprint\"><button onclick=\"window.print()\">🖨️ Imprimer</button><button class=\"sec-btn\" onclick=\"window.close()\">Fermer</button></div>" +
       "<div class=\"page\">" +
-      "<div class=\"header\"><div class=\"co\">Global Solutions Entreprise</div><div class=\"ti\">DEVIS</div><div class=\"ref\">Réf. " + d.numero + "</div></div>" +
+      "<div class=\"header\"><div class=\"co\">Global Solutions Entreprise" + (d.agrement ? " &nbsp;·&nbsp; Agréé État du Bénin" : "") + "</div><div class=\"ti\">DEVIS</div><div class=\"ref\">Réf. " + d.numero + (d.agrement ? " &nbsp;·&nbsp; " + d.agrement : "") + "</div></div>" +
       "<div class=\"body\">" +
       "<div class=\"meta\">" +
       "<div><div class=\"ml\">Client</div><div class=\"mv\">" + nomClient + "</div>" +
