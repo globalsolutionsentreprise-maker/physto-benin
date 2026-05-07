@@ -829,7 +829,8 @@ function SectionClientsDevis({ db }) {
   const [showNewClient, setShowNewClient] = React.useState(false)
   const [validating, setValidating] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
-  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+  const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
+  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
   const [showFormClient, setShowFormClient] = React.useState(false)
   const [editingClient, setEditingClient] = React.useState(null)
   const [submittingClient, setSubmittingClient] = React.useState(false)
@@ -925,19 +926,35 @@ function SectionClientsDevis({ db }) {
       entreprise: cl ? (cl.entreprise || "") : "",
       prestation: d.prestation || "",
       description: d.description || "",
-      montant: d.montant_net || d.montant_total || ""
+      montantBrut: d.montant_net || d.montant_total || "",
+      remise: "",
+      remiseType: "pct",
+      modeTransmission: "email",
+      pctAcompte: d.pct_acompte ? String(d.pct_acompte) : "60",
+      conditionsPaiement: d.conditions_paiement || "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
     })
     setShowFormDevis(true)
     setMsg("")
   }
 
   async function creerDevis() {
-    if ((!formDevis.clientId && !formDevis.nom) || !formDevis.prestation || !formDevis.montant) {
+    if ((!formDevis.clientId && !formDevis.nom) || !formDevis.prestation || !formDevis.montantBrut) {
       setMsg("Remplissez tous les champs obligatoires."); return
     }
     setSubmittingDevis(true); setMsg("")
-    var montantNet = parseFloat(formDevis.montant)
-    var montantClient = Math.round(montantNet * (1 + COMMISSION_FEDAPAY))
+
+    var brut = parseFloat(formDevis.montantBrut) || 0
+    var remiseVal = formDevis.remise ? parseFloat(formDevis.remise) : 0
+    var remiseMontant = formDevis.remiseType === "pct"
+      ? Math.round(brut * remiseVal / 100)
+      : Math.round(remiseVal)
+    var montantNet = Math.max(0, brut - remiseMontant)
+    var enLigne = formDevis.modeTransmission === "email"
+    var montantClient = enLigne ? Math.round(montantNet * (1 + COMMISSION_FEDAPAY)) : Math.round(montantNet)
+
+    var viderForm = function() {
+      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
+    }
 
     if (editingDevis) {
       var cl = clients.find(function(c) { return c.id === editingDevis.client_id })
@@ -948,50 +965,64 @@ function SectionClientsDevis({ db }) {
         montant_net: montantNet,
         statut: "envoye",
         notes_modification: null,
-        date_envoi: new Date().toISOString()
+        date_envoi: new Date().toISOString(),
+        pct_acompte: parseInt(formDevis.pctAcompte) || 60,
+        conditions_paiement: formDevis.conditionsPaiement || null
       }).eq("id", editingDevis.id)
       if (error) { setMsg("Erreur: " + error.message); setSubmittingDevis(false); return }
-      if (cl && cl.email) {
+      if (enLigne && cl && cl.email) {
         try {
           await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: editingDevis.numero, prestation: formDevis.prestation, montant: montantClient, description: formDevis.description }) })
           setMsg("✓ Devis modifié et renvoyé à " + cl.email)
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
+      } else if (!enLigne) {
+        setMsg("✓ Devis modifié")
+        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement }
+        imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
       setShowFormDevis(false); setEditingDevis(null)
-      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+      viderForm()
       await charger(); setSubmittingDevis(false)
       return
     }
 
     var clientId = formDevis.clientId
-    var clientEmail = "", clientNom = "", clientPrenom = ""
+    var clientEmail = "", clientNom = "", clientPrenom = "", clientTel = "", clientEnt = ""
     if (!clientId) {
       var { data: nc, error: errClient } = await db.from("clients").insert({ user_id: null, nom: formDevis.nom, prenom: formDevis.prenom, email: formDevis.email, telephone: formDevis.telephone, entreprise: formDevis.entreprise }).select().single()
       if (errClient) { setMsg("Erreur client: " + errClient.message); setSubmittingDevis(false); return }
-      clientId = nc.id; clientEmail = formDevis.email; clientNom = formDevis.nom; clientPrenom = formDevis.prenom
+      clientId = nc.id; clientEmail = formDevis.email; clientNom = formDevis.nom; clientPrenom = formDevis.prenom; clientTel = formDevis.telephone; clientEnt = formDevis.entreprise
     } else {
       var cl2 = clients.find(function(c) { return c.id === clientId })
-      if (cl2) { clientEmail = cl2.email; clientNom = cl2.nom; clientPrenom = cl2.prenom || "" }
+      if (cl2) { clientEmail = cl2.email; clientNom = cl2.nom; clientPrenom = cl2.prenom || ""; clientTel = cl2.telephone || ""; clientEnt = cl2.entreprise || "" }
     }
     var { data: num } = await db.rpc("generate_devis_numero")
     var numero = num || ("DEV-" + Date.now())
-    var { error: errDevis } = await db.from("devis").insert({ client_id: clientId, numero: numero, prestation: formDevis.prestation, description: formDevis.description, montant_total: montantClient, montant_net: montantNet, statut: "envoye", date_envoi: new Date().toISOString() })
+    var { error: errDevis } = await db.from("devis").insert({ client_id: clientId, numero: numero, prestation: formDevis.prestation, description: formDevis.description, montant_total: montantClient, montant_net: montantNet, statut: "envoye", date_envoi: new Date().toISOString(), pct_acompte: parseInt(formDevis.pctAcompte) || 60, conditions_paiement: formDevis.conditionsPaiement || null })
     if (errDevis) { setMsg("Erreur devis: " + errDevis.message); setSubmittingDevis(false); return }
-    if (clientEmail) {
+
+    if (enLigne && clientEmail) {
       try {
         await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail, clientNom, clientPrenom, devisNumero: numero, prestation: formDevis.prestation, montant: montantClient, description: formDevis.description }) })
         setMsg("✓ Devis créé et email envoyé à " + clientEmail)
       } catch(e) { setMsg("✓ Devis créé (email non envoyé)") }
-    } else { setMsg("✓ Devis créé (pas d'email pour ce client)") }
+    } else if (enLigne) {
+      setMsg("✓ Devis créé (pas d'email pour ce client)")
+    } else {
+      setMsg("✓ Devis créé — impression en cours...")
+      var imprimData2 = { numero: numero, clientNom: clientNom, clientPrenom: clientPrenom, clientEmail: clientEmail, clientTelephone: clientTel, clientEntreprise: clientEnt, prestation: formDevis.prestation, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement }
+      imprimerDevis(imprimData2)
+    }
+
     setShowFormDevis(false); setShowNewClient(false)
-    setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" })
+    viderForm()
     await charger(); setSubmittingDevis(false)
   }
 
   async function validerLivraison(id) {
     setValidating(id)
     await db.from("devis").update({ statut: "en_cours" }).eq("id", id)
-    setMsg("✓ Livraison validée — le client peut payer le solde 40%")
+    setMsg("✓ Livraison validée — le client peut payer le solde")
     await charger(); setValidating(null)
   }
 
@@ -1011,6 +1042,88 @@ function SectionClientsDevis({ db }) {
     await db.from("devis").delete().eq("id", id)
     setMsg("✓ Devis supprimé")
     await charger()
+  }
+
+  function imprimerDevis(d) {
+    var nomClient = [d.clientPrenom, d.clientNom].filter(Boolean).join(" ")
+    var dateStr = new Date().toLocaleDateString("fr-FR")
+    var validiteDate = new Date(Date.now() + 30 * 24 * 3600 * 1000).toLocaleDateString("fr-FR")
+    var html = "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>Devis " + d.numero + " — GSE</title><style>" +
+      "* { box-sizing: border-box; margin: 0; padding: 0; }" +
+      "body { font-family: Georgia, serif; background: #f5f5f0; }" +
+      ".page { max-width: 720px; margin: 0 auto; background: #fff; }" +
+      ".header { background: #0a2e1a; padding: 32px 40px; }" +
+      ".header .co { color: #d4a920; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }" +
+      ".header .ti { color: #fff; font-size: 26px; font-weight: 300; letter-spacing: 0.05em; }" +
+      ".header .ref { color: rgba(255,255,255,0.55); font-size: 13px; margin-top: 6px; }" +
+      ".body { padding: 36px 40px; }" +
+      ".meta { display: flex; justify-content: space-between; margin-bottom: 28px; gap: 20px; }" +
+      ".ml { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }" +
+      ".mv { font-size: 14px; color: #0a2e1a; font-weight: 700; }" +
+      ".ms { font-size: 12px; color: #666; margin-top: 2px; }" +
+      ".sec { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #e8e6e0; padding-bottom: 6px; margin-bottom: 14px; }" +
+      ".pbox { background: #f8f7f4; border: 1px solid #e8e6e0; border-left: 4px solid #d4a920; border-radius: 6px; padding: 18px 20px; margin-bottom: 24px; }" +
+      ".pname { font-size: 17px; font-weight: 700; color: #0a2e1a; margin-bottom: 6px; }" +
+      ".pdesc { font-size: 13px; color: #555; line-height: 1.6; }" +
+      ".calc { margin-bottom: 24px; }" +
+      ".cr { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f0ede8; font-size: 13px; color: #444; }" +
+      ".cr.remise { color: #065f46; }" +
+      ".cr.total { border-top: 2px solid #0a2e1a; border-bottom: none; padding-top: 12px; margin-top: 4px; font-size: 17px; font-weight: 700; color: #0a2e1a; }" +
+      ".valid { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 12px 16px; font-size: 12px; color: #92400e; margin-bottom: 28px; }" +
+      ".sigs { display: flex; gap: 32px; margin-top: 8px; }" +
+      ".sig { flex: 1; border: 1px solid #e0ddd6; border-radius: 6px; padding: 14px; text-align: center; }" +
+      ".sigl { font-size: 11px; color: #888; margin-bottom: 48px; line-height: 1.5; }" +
+      ".sigl em { display: block; color: #aaa; font-size: 10px; }" +
+      ".sigline { border-top: 1px solid #333; margin-top: 6px; }" +
+      ".footer { background: #0a2e1a; padding: 18px 40px; text-align: center; margin-top: 0; }" +
+      ".footer div { color: #d4a920; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }" +
+      ".noprint { text-align: center; padding: 16px; background: #f0fdf4; }" +
+      ".noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin: 4px; }" +
+      ".noprint button.sec-btn { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }" +
+      "@media print { .noprint { display: none; } body { background: #fff; } }" +
+      "</style></head><body>" +
+      "<div class=\"noprint\"><button onclick=\"window.print()\">🖨️ Imprimer</button><button class=\"sec-btn\" onclick=\"window.close()\">Fermer</button></div>" +
+      "<div class=\"page\">" +
+      "<div class=\"header\"><div class=\"co\">Global Solutions Entreprise</div><div class=\"ti\">DEVIS</div><div class=\"ref\">Réf. " + d.numero + "</div></div>" +
+      "<div class=\"body\">" +
+      "<div class=\"meta\">" +
+      "<div><div class=\"ml\">Client</div><div class=\"mv\">" + nomClient + "</div>" +
+      (d.clientEntreprise ? "<div class=\"ms\">" + d.clientEntreprise + "</div>" : "") +
+      (d.clientEmail ? "<div class=\"ms\">" + d.clientEmail + "</div>" : "") +
+      (d.clientTelephone ? "<div class=\"ms\">" + d.clientTelephone + "</div>" : "") +
+      "</div>" +
+      "<div style=\"text-align:right\"><div class=\"ml\">Date d'émission</div><div class=\"mv\">" + dateStr + "</div><div class=\"ms\">Valide jusqu'au " + validiteDate + "</div></div>" +
+      "</div>" +
+      "<div class=\"sec\">Prestation</div>" +
+      "<div class=\"pbox\"><div class=\"pname\">" + d.prestation + "</div>" +
+      (d.description ? "<div class=\"pdesc\">" + d.description + "</div>" : "") +
+      "</div>" +
+      "<div class=\"sec\">Détail financier</div>" +
+      "<div class=\"calc\">" +
+      "<div class=\"cr\"><span>Prix de base</span><span>" + Number(d.montantBrut).toLocaleString("fr-FR") + " FCFA</span></div>" +
+      (d.remiseMontant > 0 ? "<div class=\"cr remise\"><span>Remise accordée (" + d.remiseLabel + ")</span><span>- " + d.remiseMontant.toLocaleString("fr-FR") + " FCFA</span></div>" : "") +
+      "<div class=\"cr total\"><span>Montant total</span><span>" + Number(d.montantNet).toLocaleString("fr-FR") + " FCFA</span></div>" +
+      "</div>" +
+      (function() {
+        var pA = d.pctAcompte || 60; var pS = 100 - pA
+        var mA = Math.round(Number(d.montantNet) * pA / 100); var mS = Math.round(Number(d.montantNet) * pS / 100)
+        return "<div class=\"sec\" style=\"margin-top:20px\">Modalités de paiement</div>" +
+          "<div style=\"background:#f0fdf4;border:1px solid #d1fae5;border-radius:6px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#065f46\">" +
+          "<div style=\"display:flex;justify-content:space-between;margin-bottom:8px\"><span><strong>" + pA + "% à la signature</strong> — acompte</span><span style=\"font-weight:700\">" + mA.toLocaleString("fr-FR") + " FCFA</span></div>" +
+          "<div style=\"display:flex;justify-content:space-between\"><span><strong>" + pS + "% après prestation</strong> — solde</span><span style=\"font-weight:700\">" + mS.toLocaleString("fr-FR") + " FCFA</span></div>" +
+          (d.conditionsPaiement ? "<div style=\"margin-top:10px;font-size:12px;color:#374151;border-top:1px solid #d1fae5;padding-top:10px\">" + d.conditionsPaiement + "</div>" : "") +
+          "</div>"
+      })() +
+      "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · contact@phyto-benin.com</div>" +
+      "<div class=\"sigs\">" +
+      "<div class=\"sig\"><div class=\"sigl\">Signature du client<em>Bon pour accord</em></div><div class=\"sigline\"></div></div>" +
+      "<div class=\"sig\"><div class=\"sigl\">Pour GSE<em>Cachet et signature</em></div><div class=\"sigline\"></div></div>" +
+      "</div>" +
+      "</div>" +
+      "<div class=\"footer\"><div>Global Solutions Entreprise · Cotonou, Bénin · contact@phyto-benin.com</div></div>" +
+      "</div></body></html>"
+    var w = window.open("", "_blank", "width=820,height=900")
+    if (w) { w.document.write(html); w.document.close() }
   }
 
   function renduDevis(d) {
@@ -1097,16 +1210,83 @@ function SectionClientsDevis({ db }) {
           )
         ),
         React.createElement("div", null,
-          React.createElement("label", { style: lbl }, "Montant net souhaité FCFA *"),
-          React.createElement("input", { type: "number", value: formDevis.montant, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montant: e.target.value })) }, placeholder: "150000", style: inp }),
-          formDevis.montant && !isNaN(parseFloat(formDevis.montant)) ? React.createElement("div", { style: { marginTop: "10px", padding: "14px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px" } },
-            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px" } }, React.createElement("span", null, "Frais paiement (1.85%)"), React.createElement("span", null, "+" + Math.round(parseFloat(formDevis.montant) * COMMISSION_FEDAPAY).toLocaleString("fr-FR") + " FCFA")),
-            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "14px", fontWeight: "700", color: "#0a2e1a", borderTop: "1px solid #e0ddd6", paddingTop: "8px", marginTop: "8px" } }, React.createElement("span", null, "Total client"), React.createElement("span", null, Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY)).toLocaleString("fr-FR") + " FCFA")),
-            React.createElement("div", { style: { display: "flex", gap: "12px", marginTop: "6px", fontSize: "12px", color: "#888" } },
-              React.createElement("span", null, "60% = " + Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY) * 0.6).toLocaleString("fr-FR") + " FCFA"),
-              React.createElement("span", null, "40% = " + Math.round(parseFloat(formDevis.montant) * (1 + COMMISSION_FEDAPAY) * 0.4).toLocaleString("fr-FR") + " FCFA")
+          React.createElement("label", { style: lbl }, "Prix de base FCFA *"),
+          React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montantBrut: e.target.value })) }, placeholder: "200000", style: inp })
+        )
+      ),
+      React.createElement("div", { style: { marginBottom: "12px" } },
+        React.createElement("label", { style: lbl }, "Remise accordée (optionnel)"),
+        React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "stretch" } },
+          React.createElement("div", { style: { display: "flex", borderRadius: "6px", overflow: "hidden", border: "1.5px solid #e0ddd6", flexShrink: 0 } },
+            React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { remiseType: "pct" })) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "pct" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "pct" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "%"),
+            React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { remiseType: "fixe" })) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "fixe" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "fixe" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "FCFA")
+          ),
+          React.createElement("input", { type: "number", value: formDevis.remise, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { remise: e.target.value })) }, placeholder: formDevis.remiseType === "pct" ? "Ex: 10  (= 10%)" : "Ex: 5000", style: Object.assign({}, inp, { flex: 1 }) })
+        )
+      ),
+      (function() {
+        var brut = parseFloat(formDevis.montantBrut) || 0
+        var remiseVal = formDevis.remise ? parseFloat(formDevis.remise) : 0
+        var remiseMontant = formDevis.remiseType === "pct" ? Math.round(brut * remiseVal / 100) : Math.round(remiseVal)
+        var montantNetCalc = Math.max(0, brut - remiseMontant)
+        var enLigne = formDevis.modeTransmission === "email"
+        var fraisFeda = enLigne ? Math.round(montantNetCalc * COMMISSION_FEDAPAY) : 0
+        var montantTotalCalc = montantNetCalc + fraisFeda
+        if (!brut) return null
+        return React.createElement("div", { style: { marginBottom: "14px", padding: "16px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px" } },
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px" } }, React.createElement("span", null, "Prix de base"), React.createElement("span", null, brut.toLocaleString("fr-FR") + " FCFA")),
+          remiseMontant > 0 && React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#065f46", marginBottom: "4px" } },
+            React.createElement("span", null, "Remise (" + (formDevis.remiseType === "pct" ? remiseVal + "%" : remiseMontant.toLocaleString("fr-FR") + " FCFA") + ")"),
+            React.createElement("span", null, "− " + remiseMontant.toLocaleString("fr-FR") + " FCFA")
+          ),
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px", borderTop: "1px solid #e0ddd6", paddingTop: "8px", marginTop: "4px" } }, React.createElement("span", null, "Montant net (GSE reçoit)"), React.createElement("span", { style: { fontWeight: "700" } }, montantNetCalc.toLocaleString("fr-FR") + " FCFA")),
+          enLigne && React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px" } }, React.createElement("span", null, "Frais FedaPay (1.85%)"), React.createElement("span", null, "+ " + fraisFeda.toLocaleString("fr-FR") + " FCFA")),
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", borderTop: "1px solid #e0ddd6", paddingTop: "8px", marginTop: "8px" } }, React.createElement("span", null, "Total client"), React.createElement("span", null, montantTotalCalc.toLocaleString("fr-FR") + " FCFA")),
+          enLigne && (function() {
+            var pctA = Math.min(100, Math.max(1, parseInt(formDevis.pctAcompte) || 60))
+            var pctS = 100 - pctA
+            return React.createElement("div", { style: { display: "flex", gap: "12px", marginTop: "6px", fontSize: "12px", color: "#888" } },
+              React.createElement("span", null, pctA + "% acompte = " + Math.round(montantTotalCalc * pctA / 100).toLocaleString("fr-FR") + " FCFA"),
+              React.createElement("span", null, pctS + "% solde = " + Math.round(montantTotalCalc * pctS / 100).toLocaleString("fr-FR") + " FCFA")
             )
-          ) : null
+          })()
+        )
+      })(),
+      React.createElement("div", { style: { marginBottom: "16px" } },
+        React.createElement("label", { style: lbl }, "Mode de remise au client"),
+        React.createElement("div", { style: { display: "flex", gap: "10px" } },
+          React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { modeTransmission: "email" })) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "email" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "email" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
+            React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "email" ? "#0a2e1a" : "#555" } }, "✉ Envoyer par email"),
+            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Paiement en ligne via FedaPay")
+          ),
+          React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { modeTransmission: "impression" })) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "impression" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "impression" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
+            React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "impression" ? "#0a2e1a" : "#555" } }, "🖨️ Imprimer le devis"),
+            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Remise en main — paiement libre")
+          )
+        )
+      ),
+      React.createElement("div", { style: { marginBottom: "18px", padding: "16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
+        React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", letterSpacing: "0.08em", marginBottom: "12px" } }, "MODALITÉS DE PAIEMENT"),
+        React.createElement("div", { style: { marginBottom: "12px" } },
+          React.createElement("label", { style: lbl }, "% acompte à la signature"),
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
+            React.createElement("input", {
+              type: "range", min: "10", max: "100", step: "5",
+              value: formDevis.pctAcompte || "60",
+              onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { pctAcompte: e.target.value })) },
+              style: { flex: 1, accentColor: "#0a2e1a" }
+            }),
+            React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center" } },
+              React.createElement("span", { style: { minWidth: "42px", textAlign: "center", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", backgroundColor: "#fff", border: "1px solid #d1fae5", padding: "4px 8px", borderRadius: "6px" } }, (formDevis.pctAcompte || "60") + "%"),
+              React.createElement("span", { style: { fontSize: "12px", color: "#888" } }, "+" ),
+              React.createElement("span", { style: { minWidth: "42px", textAlign: "center", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", backgroundColor: "#fff", border: "1px solid #d1fae5", padding: "4px 8px", borderRadius: "6px" } }, (100 - (parseInt(formDevis.pctAcompte) || 60)) + "%"),
+              React.createElement("span", { style: { fontSize: "12px", color: "#888" } }, "solde")
+            )
+          )
+        ),
+        React.createElement("div", null,
+          React.createElement("label", { style: lbl }, "Conditions de paiement (affiché sur le devis)"),
+          React.createElement("textarea", { value: formDevis.conditionsPaiement, rows: 2, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { conditionsPaiement: e.target.value })) }, placeholder: "Ex: Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention.", style: Object.assign({}, inp, { resize: "vertical", fontSize: "13px" }) })
         )
       ),
       React.createElement("div", { style: { marginBottom: "18px" } },
@@ -1114,8 +1294,14 @@ function SectionClientsDevis({ db }) {
         React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })
       ),
       React.createElement("div", { style: { display: "flex", gap: "10px" } },
-        React.createElement("button", { onClick: creerDevis, disabled: submittingDevis, style: { backgroundColor: editingDevis ? "#7c3aed" : "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", opacity: submittingDevis ? 0.7 : 1 } }, submittingDevis ? "Envoi..." : (editingDevis ? "✏️ Modifier et renvoyer" : "✉ Créer et envoyer")),
-        React.createElement("button", { onClick: function() { setShowFormDevis(false); setShowNewClient(false); setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montant: "" }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        React.createElement("button", { onClick: creerDevis, disabled: submittingDevis, style: { backgroundColor: editingDevis ? "#7c3aed" : "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", opacity: submittingDevis ? 0.7 : 1 } },
+          submittingDevis ? "..." : (
+            editingDevis
+              ? (formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer")
+              : (formDevis.modeTransmission === "email" ? "✉ Créer et envoyer" : "🖨️ Créer et imprimer")
+          )
+        ),
+        React.createElement("button", { onClick: function() { setShowFormDevis(false); setShowNewClient(false); setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email" }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
       )
     )
   }

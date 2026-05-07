@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase-client"
 const STATUT_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
   envoye: "En attente de votre réponse",
-  accepte: "Accepté — paiement 60% requis",
+  accepte: "Accepté — paiement acompte requis",
   modification_demandee: "Modification en cours",
   en_cours: "Prestation en cours",
   termine: "Terminé",
@@ -99,8 +99,10 @@ export default function DevisPage() {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "system-ui, sans-serif", color: "#888" }}>Chargement...</div>
   )
 
-  const montant60 = Math.round(devis.montant_total * 0.6)
-  const montant40 = Math.round(devis.montant_total * 0.4)
+  const pctAcompte = devis.pct_acompte || 60
+  const pctSolde = 100 - pctAcompte
+  const montant60 = Math.round(devis.montant_total * pctAcompte / 100)
+  const montant40 = Math.round(devis.montant_total * pctSolde / 100)
   const paie60 = paiements.find(p => p.type_versement === "60" && p.statut === "confirme")
   const paie40 = paiements.find(p => p.type_versement === "40" && p.statut === "confirme")
 
@@ -156,8 +158,8 @@ export default function DevisPage() {
         <div style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "24px", marginBottom: "24px" }}>
           <div style={{ fontSize: "12px", color: "#888", marginBottom: "16px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Plan de paiement</div>
           {[
-            { label: "À la signature du devis", pct: "60%", montant: montant60, confirme: !!paie60 },
-            { label: "À la fin de la prestation", pct: "40%", montant: montant40, confirme: !!paie40 },
+            { label: "À la signature du devis", pct: pctAcompte + "%", montant: montant60, confirme: !!paie60 },
+            { label: "À la fin de la prestation", pct: pctSolde + "%", montant: montant40, confirme: !!paie40 },
           ].map(v => (
             <div key={v.pct} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: "1px solid #f0ede6" }}>
               <div>
@@ -173,6 +175,11 @@ export default function DevisPage() {
               </div>
             </div>
           ))}
+          {devis.conditions_paiement && (
+            <div style={{ marginTop: "12px", padding: "12px 14px", backgroundColor: "#f0fdf4", borderRadius: "8px", fontSize: "13px", color: "#065f46", lineHeight: "1.6" }}>
+              {devis.conditions_paiement}
+            </div>
+          )}
         </div>
 
         {/* Message résultat */}

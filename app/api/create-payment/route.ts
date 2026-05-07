@@ -37,13 +37,15 @@ export async function POST(req: NextRequest) {
   }
 
   const client = devis.clients
+  const pctAcompte = devis.pct_acompte || 60
+  const pctSolde = 100 - pctAcompte
   const montant = typeVersement === "60"
-    ? Math.round(devis.montant_total * 0.6)
-    : Math.round(devis.montant_total * 0.4)
+    ? Math.round(devis.montant_total * pctAcompte / 100)
+    : Math.round(devis.montant_total * pctSolde / 100)
 
   const description = typeVersement === "60"
-    ? `Acompte 60% — ${devis.prestation} (${devis.numero})`
-    : `Solde 40% — ${devis.prestation} (${devis.numero})`
+    ? `Acompte ${pctAcompte}% — ${devis.prestation} (${devis.numero})`
+    : `Solde ${pctSolde}% — ${devis.prestation} (${devis.numero})`
 
   // 2. Créer l'enregistrement paiement en base
   const { data: paiement, error: paiementError } = await supabase
