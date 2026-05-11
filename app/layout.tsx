@@ -97,7 +97,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               ))}
             </div>
 
-            <div className="nav-desktop" style={{ alignItems: "center", gap: "8px" }}>
+            <div className="nav-desktop" style={{ alignItems: "center", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "7px", backgroundColor: "#f0fdf4", border: "1px solid rgba(10,46,26,0.18)", padding: "6px 12px", borderRadius: "5px", marginRight: "4px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "16px", height: "16px", borderRadius: "50%", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "10px", fontWeight: "900", flexShrink: 0 }}>✓</span>
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: "800", color: "#0a2e1a", letterSpacing: "0.07em", lineHeight: 1.1, whiteSpace: "nowrap" }}>AGRÉÉ PAR L'ÉTAT BÉNINOIS</div>
+                  <div style={{ fontSize: "8.5px", color: "#1a6b38", letterSpacing: "0.05em", marginTop: "1px" }}>Autorités sanitaires du Bénin</div>
+                </div>
+              </div>
               <a href="/espace-client" style={{ fontSize: "11px", fontWeight: "700", color: "#0a2e1a", textDecoration: "none", border: "0.5px solid #d4a920", padding: "7px 14px", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap" }}>Espace client</a>
               <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "#25d366", color: "#fff", fontSize: "12px", fontWeight: "600", padding: "9px 14px", borderRadius: "20px", textDecoration: "none" }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="white">

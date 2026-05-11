@@ -146,6 +146,24 @@ export default function DevisPage() {
           )}
         </div>
 
+        {/* Superficie / Prix m² */}
+        {(devis.superficie || devis.prix_m2) && (
+          <div style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "20px 24px", marginBottom: "20px", display: "flex", gap: "32px" }}>
+            {devis.superficie && (
+              <div>
+                <div style={{ fontSize: "11px", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Superficie</div>
+                <div style={{ fontSize: "18px", fontWeight: "600", color: "#0a2e1a" }}>{Number(devis.superficie).toLocaleString("fr-FR")} m²</div>
+              </div>
+            )}
+            {devis.prix_m2 && (
+              <div>
+                <div style={{ fontSize: "11px", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Prix au m²</div>
+                <div style={{ fontSize: "18px", fontWeight: "600", color: "#0a2e1a" }}>{Number(devis.prix_m2).toLocaleString("fr-FR")} FCFA/m²</div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Description */}
         {devis.description && (
           <div style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "24px", marginBottom: "20px" }}>
