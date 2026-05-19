@@ -817,6 +817,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [submittingDevis, setSubmittingDevis] = React.useState(false)
   const [showNewClient, setShowNewClient] = React.useState(false)
   const [validating, setValidating] = React.useState(null)
+  const [generatingAtt, setGeneratingAtt] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
@@ -1043,6 +1044,38 @@ function SectionClientsDevis({ db, agrement }) {
     await charger()
   }
 
+  async function genererAttestation(d) {
+    var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+    setGeneratingAtt(d.id)
+    setMsg("")
+    try {
+      var res = await fetch("/api/generate-attestation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ devisId: d.id })
+      })
+      var data = await res.json()
+      if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setGeneratingAtt(null); return }
+
+      var { data: att } = await db.from("attestations").select("*").eq("id", data.attestationId).single()
+      if (!att) { setMsg("Attestation introuvable après création"); setGeneratingAtt(null); return }
+
+      var siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.com"
+      var verifyUrl = siteUrl + "/verifier/" + att.qr_token
+      var numero = att.numero_unique || att.numero
+      var dateFormatee = new Date(att.date_traitement || att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+      var dateEmission = new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+      var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=" + encodeURIComponent(verifyUrl)
+
+      var html = buildAttestationHtml({ att: att, cl: cl, numero: numero, dateFormatee: dateFormatee, dateEmission: dateEmission, verifyUrl: verifyUrl, qrUrl: qrUrl })
+      var w = window.open("", "_blank", "width=920,height=1050")
+      if (w) { w.document.write(html); w.document.close() }
+      setMsg("✓ Attestation " + numero + (data.alreadyExists ? " (existante)" : " générée") + " — imprimez en PDF")
+    } catch(e) { setMsg("Erreur: " + e.message) }
+    setGeneratingAtt(null)
+    await charger()
+  }
+
   function imprimerDevis(d) {
     var nomClient = [d.clientPrenom, d.clientNom].filter(Boolean).join(" ")
     var dateStr = new Date().toLocaleDateString("fr-FR")
@@ -1150,6 +1183,7 @@ function SectionClientsDevis({ db, agrement }) {
         d.statut === "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier et renvoyer"),
         d.statut !== "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { background: "none", border: "1px solid #d1d5db", color: "#374151", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier"),
         cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉ Renvoyer"),
+        d.statut !== "annule" && React.createElement("button", { onClick: function() { genererAttestation(d) }, disabled: generatingAtt === d.id, style: { background: generatingAtt === d.id ? "#f3f4f6" : "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: generatingAtt === d.id ? "default" : "pointer", fontFamily: "inherit", fontWeight: "600" } }, generatingAtt === d.id ? "..." : "📄 Attestation"),
         React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑 Supprimer")
       )
     )
@@ -1464,5 +1498,102 @@ function SectionClientsDevis({ db, agrement }) {
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null
   )
+}
+
+function buildAttestationHtml({ att, cl, numero, dateFormatee, dateEmission, verifyUrl, qrUrl }) {
+  var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ") || "—"
+  var entreprise = (cl && cl.entreprise) ? cl.entreprise : ""
+  var adresse = (cl && cl.adresse) ? cl.adresse : ""
+  var prestation = att.prestation || "—"
+  var lieu = att.lieu_intervention || "Cotonou, Bénin"
+  var technicien = att.technicien || "Équipe GSE"
+  var responsableNom = att.responsable_nom || "Direction GSE"
+  var responsableTitre = att.responsable_titre || "Directeur Général"
+  var superficie = att.superficie_m2 ? att.superficie_m2 + " m²" : ""
+  var cachetSvg = '<svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="10.5" stroke="#1a237e" stroke-width="1.5" fill="none"/><ellipse cx="14" cy="14" rx="5.5" ry="10.5" stroke="#1a237e" stroke-width="1" fill="none"/><line x1="3.5" y1="14" x2="24.5" y2="14" stroke="#1a237e" stroke-width="1"/><line x1="5.5" y1="8.5" x2="22.5" y2="8.5" stroke="#1a237e" stroke-width="0.8"/><line x1="5.5" y1="19.5" x2="22.5" y2="19.5" stroke="#1a237e" stroke-width="0.8"/><path d="M17 18 Q23 11 21 6 Q15 10 17 17 Z" fill="#1a237e"/></svg>'
+
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Attestation ' + numero + ' — GSE</title><style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: system-ui, sans-serif; background: #f7f7f5; }' +
+    '.noprint { text-align: center; padding: 14px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
+    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+    '.wrap { max-width: 780px; margin: 0 auto; padding: 40px 24px; }' +
+    '.card { background: #fff; border: 1px solid #e8e6e0; border-radius: 4px; padding: 60px 70px; position: relative; font-family: Georgia, serif; }' +
+    '.bar-top { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #0a2e1a; border-radius: 4px 4px 0 0; }' +
+    '.bar-gold { position: absolute; top: 6px; left: 0; right: 0; height: 2px; background: #d4a920; }' +
+    '.bar-bot-gold { position: absolute; bottom: 6px; left: 0; right: 0; height: 2px; background: #d4a920; }' +
+    '.bar-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: #0a2e1a; border-radius: 0 0 4px 4px; }' +
+    'table { width: 100%; border-collapse: collapse; font-family: system-ui, sans-serif; font-size: 14px; }' +
+    'td { vertical-align: top; padding-bottom: 10px; }' +
+    'td:first-child { color: #888; width: 38%; }' +
+    'td:last-child { font-weight: 600; color: #0a2e1a; }' +
+    '.cachet { display: inline-block; border: 2.5px solid #1a237e; border-radius: 3px; padding: 7px 9px; position: relative; min-width: 188px; color: #1a237e; font-family: system-ui, sans-serif; }' +
+    '.cachet-inner { position: absolute; inset: 3px; border: 1px solid #1a237e; border-radius: 1px; pointer-events: none; }' +
+    '@media print { .noprint { display: none; } body { background: #fff; } .wrap { padding: 0; } .card { box-shadow: none; border: none; max-width: 100%; padding: 50px 60px; border-radius: 0; } }' +
+    '</style></head><body>' +
+    '<div class="noprint"><button onclick="window.print()">⬇ Télécharger en PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+    '<div class="wrap"><div class="card">' +
+    '<div class="bar-top"></div><div class="bar-gold"></div>' +
+
+    // En-tête
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px">' +
+    '<div><img src="/logo-gse.jpeg" alt="Logo GSE" style="width:72px;height:72px;object-fit:contain;margin-bottom:10px;border-radius:8px;display:block"><div style="font-family:system-ui,sans-serif;font-size:11px;color:#999;line-height:1.8"><div>RCCM : RB/COT/24 B 38910</div><div>IFU : 3202420126111</div><div>Cotonou, Bénin · +229 01 53 04 79 50</div><div>contact@phyto-benin.com</div></div></div>' +
+    '<div style="text-align:right"><div style="font-family:system-ui,sans-serif;font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Référence</div><div style="font-family:system-ui,sans-serif;font-weight:700;font-size:14px;color:#0a2e1a;border:1.5px solid #0a2e1a;padding:6px 14px;border-radius:4px;margin-bottom:10px">' + numero + '</div><div style="font-family:system-ui,sans-serif;font-size:11px;color:#888">Émis le : ' + dateEmission + '</div></div>' +
+    '</div>' +
+
+    // Titre
+    '<div style="text-align:center;margin-bottom:40px">' +
+    '<div style="font-family:system-ui,sans-serif;font-size:10px;color:#d4a920;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px">Document officiel — République du Bénin</div>' +
+    '<h1 style="font-family:system-ui,sans-serif;font-size:24px;font-weight:700;color:#0a2e1a;margin:0 0 4px;letter-spacing:0.03em;text-transform:uppercase">Attestation de Bonne Fin d\'Exécution</h1>' +
+    '<div style="font-family:system-ui,sans-serif;font-size:13px;color:#888;margin-top:4px">et de Service Fait</div>' +
+    '<div style="width:60px;height:2px;background:#d4a920;margin:14px auto 0"></div>' +
+    '</div>' +
+
+    // Formule juridique
+    '<div style="font-family:system-ui,sans-serif;font-size:14px;color:#333;line-height:1.9;margin-bottom:28px">' +
+    '<p style="margin:0 0 16px">Je soussigné(e), <strong style="color:#0a2e1a">' + responsableNom + '</strong>, en qualité de <strong>' + responsableTitre + '</strong> de <strong>Global Solutions Entreprise (GSE)</strong>, société agréée par l\'État du Bénin pour l\'exercice d\'activités d\'hygiène sanitaire et phytosanitaire,</p>' +
+    '<p style="margin:0;color:#444"><strong>atteste par la présente</strong> que les prestations suivantes ont été réalisées conformément aux obligations contractuelles issues du devis N°&nbsp;<strong style="color:#0a2e1a">' + (att.numero || numero) + '</strong>&nbsp;, dans les règles de l\'art et selon les normes sanitaires en vigueur en République du Bénin :</p>' +
+    '</div>' +
+
+    // Tableau récapitulatif
+    '<div style="background:#f7f7f5;border:1px solid #e8e6e0;border-radius:4px;padding:24px 28px;margin-bottom:28px">' +
+    '<table><tbody>' +
+    '<tr><td>Client bénéficiaire :</td><td style="font-weight:700">' + nomClient + (entreprise ? '<br><span style="font-weight:400;color:#555">' + entreprise + '</span>' : '') + '</td></tr>' +
+    (adresse ? '<tr><td>Adresse :</td><td>' + adresse + '</td></tr>' : '') +
+    '<tr><td>Nature de la prestation :</td><td style="font-weight:700">' + prestation + '</td></tr>' +
+    '<tr><td>Lieu d\'intervention :</td><td>' + lieu + '</td></tr>' +
+    (superficie ? '<tr><td>Superficie traitée :</td><td>' + superficie + '</td></tr>' : '') +
+    '<tr><td>Date du traitement :</td><td style="font-weight:700">' + dateFormatee + '</td></tr>' +
+    '<tr><td style="padding-bottom:0">Technicien responsable :</td><td style="padding-bottom:0">' + technicien + '</td></tr>' +
+    '</tbody></table>' +
+    '</div>' +
+
+    // Déclaration
+    '<div style="font-family:system-ui,sans-serif;font-size:13.5px;color:#444;line-height:1.9;margin-bottom:36px">' +
+    '<p style="margin:0 0 10px">Les travaux ont été exécutés avec diligence et professionnalisme. Les produits employés sont homologués par les autorités sanitaires compétentes. La prestation a donné entière satisfaction.</p>' +
+    '<p style="margin:0;font-style:italic;color:#666;font-size:13px">Cette attestation est délivrée à la demande expresse du client et peut être présentée à toute autorité compétente, administration publique ou partenaire privé pour valoir ce que de droit.</p>' +
+    '</div>' +
+
+    // Signature + Cachet + QR
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;padding-top:24px;border-top:1px solid #e8e6e0">' +
+    '<div><div style="font-family:system-ui,sans-serif;font-size:12px;color:#888;margin-bottom:6px">Fait à Cotonou, le ' + dateEmission + '</div><div style="font-family:system-ui,sans-serif;font-size:12px;color:#888;margin-bottom:16px">Pour Global Solutions Entreprise (GSE)</div><div style="font-family:system-ui,sans-serif;font-size:12px;font-weight:700;color:#0a2e1a">' + responsableNom + '</div><div style="font-family:system-ui,sans-serif;font-size:11px;color:#888">' + responsableTitre + '</div><div style="width:120px;height:50px;border-bottom:1.5px solid #0a2e1a;margin-top:24px"></div></div>' +
+    '<div style="text-align:center;margin:0 16px;padding-bottom:4px">' +
+    '<div class="cachet"><div class="cachet-inner"></div>' +
+    '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;padding-left:2px">' + cachetSvg + '<div style="font-weight:800;font-size:10px;letter-spacing:0.06em;line-height:1.25;color:#1a237e">GLOBAL SOLUTIONS<br>ENTREPRISE</div></div>' +
+    '<div style="border-top:1px solid #1a237e;margin:3px 0"></div>' +
+    '<div style="display:flex;gap:7px;align-items:flex-start"><div style="font-size:6.5px;font-weight:700;color:#1a237e;line-height:1.35;flex-shrink:0">GLOBAL<br>SOLUTIONS<br>ENTREPRISE</div><div style="font-size:7px;color:#1a237e;line-height:1.55"><div><strong>N° RCCM</strong> : RB/COT/24 B 38910</div><div><strong>N° IFU</strong> : 3202420126111</div><div>✆ : +33 06 68 82 52 85</div><div>CEL : +229 53 04 78 50</div></div></div>' +
+    '<div style="border-top:1px solid #1a237e;margin-top:3px;padding-top:3px;text-align:center;font-style:italic;font-weight:700;font-size:9.5px;color:#1a237e;letter-spacing:0.03em">Le Directeur Général</div>' +
+    '</div></div>' +
+    '<div style="text-align:center"><div style="padding:10px;border:1.5px solid #e8e6e0;border-radius:6px;display:inline-block;background:#fff;margin-bottom:6px"><img src="' + qrUrl + '" width="90" height="90" alt="QR Code" /></div><div style="font-family:system-ui,sans-serif;font-size:10px;color:#888;max-width:110px">Scanner pour vérifier l\'authenticité</div></div>' +
+    '</div>' +
+
+    // Avertissement légal
+    '<div style="margin-top:28px;padding:12px 16px;background:#f7f7f5;border:1px solid #e8e6e0;border-radius:4px">' +
+    '<p style="font-family:system-ui,sans-serif;font-size:10px;color:#999;margin:0;line-height:1.6">⚠️ Document généré automatiquement et archivé dans le système sécurisé de Global Solutions Entreprise. Toute falsification, modification ou usage frauduleux de ce document est passible de poursuites judiciaires conformément au droit béninois en vigueur. Authenticité vérifiable à l\'adresse : <span style="color:#0a2e1a">' + verifyUrl + '</span></p>' +
+    '</div>' +
+
+    '<div class="bar-bot-gold"></div><div class="bar-bot"></div>' +
+    '</div></div></body></html>'
 }
  // Mer 15 avr 2026 22:22:43 CEST
