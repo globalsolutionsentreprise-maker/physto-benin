@@ -10,52 +10,72 @@ export async function POST(req) {
   try {
     const { nom, prenom, email, telephone, entreprise } = await req.json()
 
-    if (!nom || !email) {
-      return NextResponse.json({ error: "Nom et email obligatoires" }, { status: 400 })
+    if (!nom) {
+      return NextResponse.json({ error: "Le nom est obligatoire" }, { status: 400 })
     }
 
-    // Générer un mot de passe temporaire
-    const motDePasse = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase() + "!"
+    let userId = null
+    let motDePasse = null
 
-    // 1. Créer le compte Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password: motDePasse,
-      email_confirm: true,
-    })
+    // Créer un compte Auth uniquement si un email est fourni
+    if (email) {
+      motDePasse = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase() + "!"
 
-    if (authError) {
-      // Si l'utilisateur existe déjà dans Auth, on continue
-      if (!authError.message.includes("already been registered")) {
-        return NextResponse.json({ error: "Erreur Auth: " + authError.message }, { status: 500 })
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password: motDePasse,
+        email_confirm: true,
+      })
+
+      if (authError) {
+        if (!authError.message.includes("already been registered")) {
+          return NextResponse.json({ error: "Erreur Auth: " + authError.message }, { status: 500 })
+        }
       }
+
+      userId = authData?.user?.id || null
     }
 
-    const userId = authData?.user?.id || null
-
-    // 2. Créer ou mettre à jour le client dans la table clients
-    const { data: existingClient } = await supabase
-      .from("clients")
-      .select("id")
-      .eq("email", email)
-      .single()
-
+    // Créer ou mettre à jour le client dans la table clients
     let clientId
-    if (existingClient) {
-      // Mettre à jour le user_id si le client existe déjà
-      await supabase.from("clients").update({ user_id: userId, nom, prenom, telephone, entreprise }).eq("email", email)
-      clientId = existingClient.id
+    if (email) {
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("email", email)
+        .single()
+
+      if (existingClient) {
+        await supabase.from("clients").update({ user_id: userId, nom, prenom, telephone, entreprise }).eq("email", email)
+        clientId = existingClient.id
+      } else {
+        const { data: newClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({ user_id: userId, nom, prenom, email, telephone, entreprise })
+          .select()
+          .single()
+        if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
+        clientId = newClient.id
+      }
     } else {
+      // Pas d'email : insertion directe sans compte Auth
       const { data: newClient, error: clientError } = await supabase
         .from("clients")
-        .insert({ user_id: userId, nom, prenom, email, telephone, entreprise })
+        .insert({ user_id: null, nom, prenom, email: null, telephone, entreprise })
         .select()
         .single()
       if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
       clientId = newClient.id
+
+      return NextResponse.json({
+        success: true,
+        clientId,
+        emailEnvoye: false,
+        message: "Client créé (sans email — devis envoyable par WhatsApp)"
+      })
     }
 
-    // 3. Envoyer l'email de bienvenue avec les identifiants
+    // Envoyer l'email de bienvenue avec les identifiants
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.com"
     const nomComplet = [prenom, nom].filter(Boolean).join(" ")
 
@@ -127,7 +147,6 @@ export async function POST(req) {
     const resendData = await resendRes.json()
     if (!resendRes.ok) {
       console.error("Resend error:", resendData)
-      // On ne bloque pas — le client est créé même si l'email échoue
     }
 
     return NextResponse.json({
