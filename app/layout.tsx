@@ -63,6 +63,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             box-shadow: 0 0 0 6px rgba(212,169,32,0.3), 0 6px 20px rgba(10,46,26,0.25) !important;
           }
 
+          @keyframes texteEntree {
+            0%   { opacity: 0; transform: translateX(-12px); }
+            100% { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes byShimmer {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.5; }
+          }
+          .nav-brand-text {
+            animation: texteEntree 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s both;
+          }
+          .nav-brand-by {
+            animation: byShimmer 2.5s ease-in-out 0.8s infinite;
+            display: inline-block;
+          }
+
           @media (max-width: 768px) {
             .nav-desktop { display: none !important; }
             .nav-mobile-btn { display: flex !important; }
@@ -97,8 +113,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="nav-padding" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 40px" }}>
             <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
               <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
-              <div>
-                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span style={{ color: "#d4a920" }}>by</span> GSE</div>
+              <div className="nav-brand-text">
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span className="nav-brand-by" style={{ color: "#d4a920" }}>by</span> GSE</div>
                 <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>
               </div>
             </a>
