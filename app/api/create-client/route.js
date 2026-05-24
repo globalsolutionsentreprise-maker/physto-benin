@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(req) {
   try {
-    const { nom, prenom, email, telephone, entreprise } = await req.json()
+    const { nom, prenom, email, telephone, entreprise, adresse } = await req.json()
 
     if (!nom) {
       return NextResponse.json({ error: "Le nom est obligatoire" }, { status: 400 })
@@ -46,12 +46,12 @@ export async function POST(req) {
         .single()
 
       if (existingClient) {
-        await supabase.from("clients").update({ user_id: userId, nom, prenom, telephone, entreprise }).eq("email", email)
+        await supabase.from("clients").update({ user_id: userId, nom, prenom, telephone, entreprise, adresse }).eq("email", email)
         clientId = existingClient.id
       } else {
         const { data: newClient, error: clientError } = await supabase
           .from("clients")
-          .insert({ user_id: userId, nom, prenom, email, telephone, entreprise })
+          .insert({ user_id: userId, nom, prenom, email, telephone, entreprise, adresse })
           .select()
           .single()
         if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
@@ -61,7 +61,7 @@ export async function POST(req) {
       // Pas d'email : insertion directe sans compte Auth
       const { data: newClient, error: clientError } = await supabase
         .from("clients")
-        .insert({ user_id: null, nom, prenom, email: null, telephone, entreprise })
+        .insert({ user_id: null, nom, prenom, email: null, telephone, entreprise, adresse })
         .select()
         .single()
       if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })

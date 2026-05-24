@@ -829,7 +829,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [editingClient, setEditingClient] = React.useState(null)
   const [submittingClient, setSubmittingClient] = React.useState(false)
   const [clientDetail, setClientDetail] = React.useState(null)
-  const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "" })
+  const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
 
   const STATUTS = {
     brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
@@ -859,14 +859,14 @@ function SectionClientsDevis({ db, agrement }) {
 
   function ouvrirAjoutClient() {
     setEditingClient(null)
-    setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "" })
+    setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
     setShowFormClient(true)
     setMsg("")
   }
 
   function ouvrirEditionClient(c) {
     setEditingClient(c)
-    setFormClient({ prenom: c.prenom || "", nom: c.nom || "", email: c.email || "", telephone: c.telephone || "", entreprise: c.entreprise || "" })
+    setFormClient({ prenom: c.prenom || "", nom: c.nom || "", email: c.email || "", telephone: c.telephone || "", entreprise: c.entreprise || "", adresse: c.adresse || "" })
     setShowFormClient(true)
     setMsg("")
   }
@@ -1725,7 +1725,8 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formClient.nom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Email"), React.createElement("input", { type: "email", value: formClient.email, onChange: function(e) { setFormClient(Object.assign({}, formClient, { email: e.target.value })) }, placeholder: "jean@email.com (optionnel)", style: inp })),
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: formClient.telephone, onChange: function(e) { setFormClient(Object.assign({}, formClient, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
-          React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formClient.entreprise, onChange: function(e) { setFormClient(Object.assign({}, formClient, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp }))
+          React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formClient.entreprise, onChange: function(e) { setFormClient(Object.assign({}, formClient, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp })),
+          React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Adresse"), React.createElement("input", { value: formClient.adresse, onChange: function(e) { setFormClient(Object.assign({}, formClient, { adresse: e.target.value })) }, placeholder: "Ex: Cadjehoun, Cotonou", style: inp }))
         ),
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
           React.createElement("button", { onClick: sauvegarderClient, disabled: submittingClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, submittingClient ? "..." : (editingClient ? "Mettre à jour" : "Ajouter")),
