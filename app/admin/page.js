@@ -819,6 +819,9 @@ function SectionClientsDevis({ db, agrement }) {
   const [validating, setValidating] = React.useState(null)
   const [certModal, setCertModal] = React.useState(null)
   const [certForm, setCertForm] = React.useState({})
+  const [ficheModal, setFicheModal] = React.useState(null)
+  const [ficheForm, setFicheForm] = React.useState({})
+  const [savingFiche, setSavingFiche] = React.useState(false)
   const [editingDevis, setEditingDevis] = React.useState(null)
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
@@ -1140,6 +1143,246 @@ function SectionClientsDevis({ db, agrement }) {
       )
     )
   }
+
+  // ── FICHES DE PASSAGE ──────────────────────────────
+  function ouvrirFicheModal(c) {
+    var now = new Date()
+    var yyyy = now.getFullYear()
+    var mm = String(now.getMonth() + 1).padStart(2, '0')
+    var dd = String(now.getDate()).padStart(2, '0')
+    setFicheForm({
+      nomClient: [(c.prenom || ''), c.nom].filter(Boolean).join(' '),
+      adresse: c.adresse || '',
+      tel: c.telephone || '',
+      mob: '',
+      typePassage: '',
+      prestations: [],
+      autresPrestation: '',
+      lieuPrestation: '',
+      nuisibles: [],
+      autresNuisible: '',
+      produits: { insecticides: '', raticides: '', desinfectants: '', fumigants: '', phytosanitaires: '', autres: '' },
+      produitsCoches: [],
+      dureeDebut: '',
+      dureeFin: '',
+      remarques: '',
+      datePassage: yyyy + '-' + mm + '-' + dd,
+      superviseurNom: '',
+      superviseurContact: '',
+    })
+    setFicheModal({ client: c })
+  }
+
+  async function saveFichePassage() {
+    setSavingFiche(true); setMsg('')
+    try {
+      var { data: numero } = await db.rpc('generate_fiche_numero')
+      var ficheNumero = numero || ('FP-GSE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
+      var { data: fiche, error } = await db.from('fiches_passage').insert({
+        numero_unique: ficheNumero,
+        client_id: ficheModal.client.id,
+        type_passage: ficheForm.typePassage,
+        prestations: ficheForm.prestations,
+        autres_prestation: ficheForm.autresPrestation,
+        lieu_prestation: ficheForm.lieuPrestation,
+        nuisibles: ficheForm.nuisibles,
+        autres_nuisible: ficheForm.autresNuisible,
+        produits: ficheForm.produits,
+        duree_debut: ficheForm.dureeDebut,
+        duree_fin: ficheForm.dureeFin,
+        remarques: ficheForm.remarques,
+        date_passage: ficheForm.datePassage,
+        superviseur_nom: ficheForm.superviseurNom,
+        superviseur_contact: ficheForm.superviseurContact,
+      }).select().single()
+      if (error) { setMsg('Erreur: ' + error.message); setSavingFiche(false); return }
+      var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero)
+      var w = window.open('', '_blank', 'width=920,height=1100')
+      if (w) { w.document.write(html); w.document.close() }
+      setFicheModal(null)
+      setMsg('✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
+    } catch(e) { setMsg('Erreur: ' + e.message) }
+    setSavingFiche(false)
+  }
+
+  function renderFicheModal() {
+    if (!ficheModal) return null
+    var c = ficheModal.client
+    var upd = function(field, val) { setFicheForm(function(prev) { return Object.assign({}, prev, { [field]: val }) }) }
+    var updProd = function(key, val) { setFicheForm(function(prev) { return Object.assign({}, prev, { produits: Object.assign({}, prev.produits, { [key]: val }) }) }) }
+    var toggleArr = function(field, val) { setFicheForm(function(prev) { var arr = prev[field] || []; var next = arr.includes(val) ? arr.filter(function(x) { return x !== val }) : arr.concat(val); return Object.assign({}, prev, { [field]: next }) }) }
+    var inp2 = { width: '100%', padding: '7px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl2 = { display: 'block', fontSize: '10px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }
+    var chkLbl = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#333', cursor: 'pointer', marginRight: '14px' }
+    var chkStyle = { width: '14px', height: '14px', accentColor: '#0a2e1a', cursor: 'pointer' }
+
+    var TYPES_PASSAGE = ['Contractuel', 'Occasionnel', 'Essai', 'Contrôle']
+    var TYPES_PRESTA = ['Désinsectisation', 'Désinfection', 'Dératisation', 'Fumigation', 'Traitement phytosanitaire espèces verts']
+    var NUISIBLES = ['Insectes rampants', 'Insectes volants', 'Rongeurs', 'Microbes']
+    var PRODUITS_CATS = [
+      { key: 'insecticides', label: 'Insecticides (Rampants / Volants)' },
+      { key: 'raticides', label: 'Raticides (Rats / Souris)' },
+      { key: 'desinfectants', label: 'Désinfectants (Bactéries, virus, champignons)' },
+      { key: 'fumigants', label: 'Fumigants' },
+      { key: 'phytosanitaires', label: 'Phytosanitaires (espèces vertes)' },
+      { key: 'autres', label: 'Autres (à préciser)' },
+    ]
+
+    return React.createElement('div', {
+      style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
+      onClick: function(e) { if (e.target === e.currentTarget) setFicheModal(null) }
+    },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '720px', marginTop: '20px', overflow: 'hidden' } },
+
+        // Header
+        React.createElement('div', { style: { background: '#0a2e1a', padding: '18px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          React.createElement('div', null,
+            React.createElement('div', { style: { color: '#d4a920', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '3px' } }, 'Global Solutions Entreprise'),
+            React.createElement('div', { style: { color: '#fff', fontSize: '16px', fontWeight: '700' } }, '📋 Nouvelle fiche de passage')
+          ),
+          React.createElement('button', { onClick: function() { setFicheModal(null) }, style: { background: 'none', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' } }, '×')
+        ),
+
+        React.createElement('div', { style: { padding: '24px' } },
+
+          // Client pré-rempli (lecture seule)
+          React.createElement('div', { style: { background: '#f7f7f5', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#444' } },
+            React.createElement('span', { style: { fontWeight: '700', color: '#0a2e1a' } }, 'Client : '),
+            (c.prenom || '') + ' ' + c.nom + (c.entreprise ? ' — ' + c.entreprise : '') + (c.telephone ? ' · ' + c.telephone : '')
+          ),
+
+          // Adresse / Tel / Mob
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' } },
+            React.createElement('div', { style: { gridColumn: '1/-1' } },
+              React.createElement('label', { style: lbl2 }, 'Adresse'),
+              React.createElement('input', { value: ficheForm.adresse || '', onChange: function(e) { upd('adresse', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Téléphone'),
+              React.createElement('input', { value: ficheForm.tel || '', onChange: function(e) { upd('tel', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Mobile'),
+              React.createElement('input', { value: ficheForm.mob || '', onChange: function(e) { upd('mob', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Date de passage'),
+              React.createElement('input', { type: 'date', value: ficheForm.datePassage || '', onChange: function(e) { upd('datePassage', e.target.value) }, style: inp2 })
+            )
+          ),
+
+          // Type de passage
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, 'Type de passage'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
+              TYPES_PASSAGE.map(function(t) {
+                return React.createElement('label', { key: t, style: chkLbl },
+                  React.createElement('input', { type: 'radio', name: 'typePassage', value: t, checked: ficheForm.typePassage === t, onChange: function() { upd('typePassage', t) }, style: chkStyle }),
+                  t
+                )
+              })
+            )
+          ),
+
+          // Type de prestation
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, 'Type de prestation'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
+              TYPES_PRESTA.map(function(t) {
+                return React.createElement('label', { key: t, style: chkLbl },
+                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.prestations || []).includes(t), onChange: function() { toggleArr('prestations', t) }, style: chkStyle }),
+                  t
+                )
+              })
+            ),
+            React.createElement('div', { style: { marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' } },
+              React.createElement('span', { style: { fontSize: '12px', color: '#666' } }, 'Autres :'),
+              React.createElement('input', { value: ficheForm.autresPrestation || '', onChange: function(e) { upd('autresPrestation', e.target.value) }, placeholder: 'préciser', style: Object.assign({}, inp2, { flex: 1 }) })
+            )
+          ),
+
+          // Lieu
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, 'Lieu de prestation'),
+            React.createElement('input', { value: ficheForm.lieuPrestation || '', onChange: function(e) { upd('lieuPrestation', e.target.value) }, style: inp2 })
+          ),
+
+          // Nuisibles
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, 'Nuisibles présents'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
+              NUISIBLES.map(function(n) {
+                return React.createElement('label', { key: n, style: chkLbl },
+                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.nuisibles || []).includes(n), onChange: function() { toggleArr('nuisibles', n) }, style: chkStyle }),
+                  n
+                )
+              })
+            ),
+            React.createElement('div', { style: { marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' } },
+              React.createElement('span', { style: { fontSize: '12px', color: '#666' } }, 'Autres :'),
+              React.createElement('input', { value: ficheForm.autresNuisible || '', onChange: function(e) { upd('autresNuisible', e.target.value) }, placeholder: 'préciser', style: Object.assign({}, inp2, { flex: 1 }) })
+            )
+          ),
+
+          // Produits phytopharmaceutiques
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, 'Produits phytopharmaceutiques appliqués'),
+            React.createElement('div', { style: { background: '#f7f7f5', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '12px', marginTop: '6px' } },
+              PRODUITS_CATS.map(function(cat) {
+                var coched = (ficheForm.produitsCoches || []).includes(cat.key)
+                return React.createElement('div', { key: cat.key, style: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' } },
+                  React.createElement('input', { type: 'checkbox', checked: coched, onChange: function() { toggleArr('produitsCoches', cat.key) }, style: chkStyle }),
+                  React.createElement('span', { style: { fontSize: '12px', color: '#444', minWidth: '260px' } }, cat.label),
+                  React.createElement('input', { value: (ficheForm.produits || {})[cat.key] || '', onChange: function(e) { updProd(cat.key, e.target.value) }, placeholder: 'Nom du produit utilisé', style: Object.assign({}, inp2, { flex: 1, fontSize: '12px', padding: '5px 8px' }) })
+                )
+              })
+            )
+          ),
+
+          // Durée
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, "Durée — début"),
+              React.createElement('input', { value: ficheForm.dureeDebut || '', onChange: function(e) { upd('dureeDebut', e.target.value) }, placeholder: 'Ex: 08h00', style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Fin'),
+              React.createElement('input', { value: ficheForm.dureeFin || '', onChange: function(e) { upd('dureeFin', e.target.value) }, placeholder: 'Ex: 11h30', style: inp2 })
+            )
+          ),
+
+          // Remarques
+          React.createElement('div', { style: { marginBottom: '20px' } },
+            React.createElement('label', { style: lbl2 }, 'Remarques'),
+            React.createElement('textarea', { value: ficheForm.remarques || '', onChange: function(e) { upd('remarques', e.target.value) }, rows: 3, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          // Superviseur
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' } },
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Superviseur GSE — Nom & Prénom'),
+              React.createElement('input', { value: ficheForm.superviseurNom || '', onChange: function(e) { upd('superviseurNom', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Contact superviseur'),
+              React.createElement('input', { value: ficheForm.superviseurContact || '', onChange: function(e) { upd('superviseurContact', e.target.value) }, style: inp2 })
+            )
+          ),
+
+          // Boutons
+          React.createElement('div', { style: { display: 'flex', gap: '10px' } },
+            React.createElement('button', {
+              onClick: saveFichePassage,
+              disabled: savingFiche,
+              style: { flex: 1, background: '#0a2e1a', color: '#fff', border: 'none', borderRadius: '8px', padding: '13px', fontSize: '14px', fontWeight: '700', cursor: savingFiche ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: savingFiche ? 0.7 : 1 }
+            }, savingFiche ? 'Enregistrement…' : '🖨️ Enregistrer & Imprimer la fiche'),
+            React.createElement('button', { onClick: function() { setFicheModal(null) }, style: { background: '#fff', color: '#0a2e1a', border: '1px solid #0a2e1a', borderRadius: '8px', padding: '13px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler')
+          )
+        )
+      )
+    )
+  }
+  // ── FIN FICHES DE PASSAGE ──────────────────────────
 
   function imprimerDevis(d) {
     var nomClient = [d.clientPrenom, d.clientNom].filter(Boolean).join(" ")
@@ -1503,6 +1746,7 @@ function SectionClientsDevis({ db, agrement }) {
                 React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "center" } },
                   React.createElement("span", { style: { fontSize: "11px", color: "#888", marginRight: "4px" } }, nbDevis + " devis"),
                   React.createElement("button", { onClick: function() { voirDevisClient(c) }, style: { background: "none", border: "1px solid #0a2e1a", color: "#0a2e1a", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "Voir devis"),
+                  React.createElement("button", { onClick: function() { ouvrirFicheModal(c) }, style: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📋 Fiche"),
                   React.createElement("button", { onClick: function() { ouvrirEditionClient(c) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
                   React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
                 )
@@ -1555,6 +1799,7 @@ function SectionClientsDevis({ db, agrement }) {
 
   return React.createElement("div", null,
     certModal ? renderCertModal() : null,
+    ficheModal ? renderFicheModal() : null,
     renderCompteurs(),
     msg ? React.createElement("div", { style: { padding: "12px 16px", backgroundColor: msg.startsWith("Erreur") ? "#fef2f2" : "#f0fdf4", border: "1px solid " + (msg.startsWith("Erreur") ? "#fecaca" : "#bbf7d0"), borderRadius: "6px", color: msg.startsWith("Erreur") ? "#991b1b" : "#065f46", fontSize: "13px", marginBottom: "18px", display: "flex", justifyContent: "space-between" } },
       msg,
@@ -1649,4 +1894,184 @@ function buildCertificatHtml(type, form) {
 
     '</div></body></html>'
 }
+
+function buildFichePassageHtml(form, client, numero) {
+  var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
+  var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
+
+  function chk(checked) {
+    return '<span style="display:inline-block;width:12px;height:12px;border:1.5px solid #333;border-radius:2px;vertical-align:middle;margin-right:4px;background:' + (checked ? '#0a2e1a' : '#fff') + ';text-align:center;line-height:12px;font-size:9px;color:#fff">' + (checked ? '✓' : '') + '</span>'
+  }
+
+  var TYPES_PASSAGE = ['Contractuel', 'Occasionnel', 'Essai', 'Contrôle']
+  var TYPES_PRESTA = ['Désinsectisation', 'Désinfection', 'Dératisation', 'Fumigation', 'Traitement phytosanitaire espèces verts']
+  var NUISIBLES = ['Insectes rampants', 'Insectes volants', 'Rongeurs', 'Microbes']
+  var PRODUITS_CATS = [
+    { key: 'insecticides', label: 'Insecticides (Rampants / Volants)' },
+    { key: 'raticides', label: 'Raticides (Rats / Souris)' },
+    { key: 'desinfectants', label: 'Désinfectants (Bactéries, virus, champignons)' },
+    { key: 'fumigants', label: 'Fumigants' },
+    { key: 'phytosanitaires', label: 'Phytosanitaires (espèces vertes)' },
+    { key: 'autres', label: 'Autres (à préciser)' },
+  ]
+
+  var typesPassageHtml = TYPES_PASSAGE.map(function(t) {
+    return chk(form.typePassage === t) + t
+  }).join('<span style="margin:0 10px;color:#ccc">|</span>')
+
+  var typesPrestHtml = TYPES_PRESTA.map(function(t) {
+    return '<span style="margin-right:14px;white-space:nowrap">' + chk((form.prestations || []).includes(t)) + t + '</span>'
+  }).join('') +
+  (form.autresPrestation ? '<span style="margin-right:14px;white-space:nowrap">' + chk(true) + 'Autres : <u>' + form.autresPrestation + '</u></span>' : '<span style="margin-right:14px;white-space:nowrap">' + chk(false) + 'Autres ___________</span>')
+
+  var nuisiblesHtml = NUISIBLES.map(function(n) {
+    return '<span style="margin-right:14px;white-space:nowrap">' + chk((form.nuisibles || []).includes(n)) + n + '</span>'
+  }).join('') +
+  (form.autresNuisible ? '<span style="margin-right:14px;white-space:nowrap">' + chk(true) + 'Autres : <u>' + form.autresNuisible + '</u></span>' : '<span style="margin-right:14px;white-space:nowrap">' + chk(false) + 'Autres ___________</span>')
+
+  var produitsHtml = PRODUITS_CATS.map(function(cat) {
+    var coched = (form.produitsCoches || []).includes(cat.key)
+    var nom = (form.produits || {})[cat.key] || ''
+    return '<tr>' +
+      '<td style="border:1px solid #ccc;padding:7px 10px;white-space:nowrap">' + chk(coched) + cat.label + '</td>' +
+      '<td style="border:1px solid #ccc;padding:7px 10px;color:#0a2e1a;font-weight:' + (nom ? '600' : '400') + '">' + (nom || '<span style="color:#ccc">___________________________</span>') + '</td>' +
+      '</tr>'
+  }).join('')
+
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">' +
+    '<title>Fiche de Passage ' + numero + ' — GSE</title>' +
+    '<style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; color: #111; background: #f5f5f0; }' +
+    '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
+    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+    '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+    '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
+    '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
+    '.hdr-left .name { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 0.03em; }' +
+    '.hdr-right { text-align: right; }' +
+    '.hdr-right .title { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }' +
+    '.hdr-right .num { color: #d4a920; font-size: 13px; font-weight: 700; margin-top: 4px; }' +
+    '.agr { background: #d4a920; padding: 5px 12px; display: flex; align-items: center; gap: 8px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }' +
+    '.body { padding: 22px 28px; }' +
+    '.section-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #0a2e1a; padding-bottom: 4px; margin-bottom: 10px; }' +
+    '.field-row { display: flex; gap: 0; margin-bottom: 8px; align-items: baseline; }' +
+    '.field-label { font-weight: 700; color: #555; min-width: 90px; font-size: 11.5px; }' +
+    '.field-value { flex: 1; border-bottom: 1px solid #999; min-height: 18px; padding-bottom: 2px; font-size: 12.5px; }' +
+    '.chk-row { line-height: 2; }' +
+    '.sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }' +
+    '.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }' +
+    '.footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }' +
+    '@media print { .noprint { display: none; } body { background: #fff; } .page { max-width: 100%; } }' +
+    '</style></head><body>' +
+
+    '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+
+    '<div class="page">' +
+
+    '<div class="hdr">' +
+    '<div class="hdr-left">' +
+    '<div class="sub">Global Solutions Entreprise</div>' +
+    '<div class="name">Phyto Bénin</div>' +
+    '</div>' +
+    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<div class="hdr-right">' +
+    '<div class="title">Fiche de Passage</div>' +
+    '<div class="num">N° ' + numero + '</div>' +
+    '</div>' +
+    '</div>' +
+
+    '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>' +
+
+    '<div class="body">' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Informations client</div>' +
+    '<div class="field-row"><span class="field-label">Nom du client</span><span class="field-value">' + nomClient + '</span></div>' +
+    '<div class="field-row"><span class="field-label">Adresse</span><span class="field-value">' + (form.adresse || '') + '</span></div>' +
+    '<div style="display:flex;gap:24px">' +
+    '<div class="field-row" style="flex:1"><span class="field-label">Tél.</span><span class="field-value">' + (form.tel || '') + '</span></div>' +
+    '<div class="field-row" style="flex:1"><span class="field-label">Mob.</span><span class="field-value">' + (form.mob || '') + '</span></div>' +
+    '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="section-title">Type de passage</div>' +
+    '<div class="chk-row">' + typesPassageHtml + '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="section-title">Type de prestation</div>' +
+    '<div class="chk-row">' + typesPrestHtml + '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="section-title">Lieu de prestation</div>' +
+    '<div class="field-row"><span class="field-value">' + (form.lieuPrestation || '') + '</span></div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="section-title">Nuisibles présents</div>' +
+    '<div class="chk-row">' + nuisiblesHtml + '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Nom des produits phytopharmaceutiques appliqués</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-top:6px">' +
+    '<thead><tr>' +
+    '<th style="background:#0a2e1a;color:#fff;padding:7px 10px;text-align:left;font-size:11px;width:52%;border:1px solid #0a2e1a">Catégorie de produit</th>' +
+    '<th style="background:#0a2e1a;color:#fff;padding:7px 10px;text-align:left;font-size:11px;border:1px solid #0a2e1a">Produit utilisé</th>' +
+    '</tr></thead>' +
+    '<tbody>' + produitsHtml + '</tbody>' +
+    '</table>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="section-title">Durée de prestation</div>' +
+    '<div style="display:flex;align-items:baseline;gap:12px;font-size:13px">' +
+    'de <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeDebut || '') + '&nbsp;</span>' +
+    'à <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeFin || '') + '&nbsp;</span>' +
+    '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Remarques</div>' +
+    '<div style="border:1px solid #ccc;border-radius:4px;min-height:60px;padding:10px;font-size:13px;line-height:1.6">' + (form.remarques || '') + '</div>' +
+    '</div>' +
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
+
+    '<div>' +
+    '<div class="section-title" style="margin-bottom:8px">Date de passage</div>' +
+    '<div style="font-size:14px;font-weight:700;color:#0a2e1a">' + dateAff + '</div>' +
+    '</div>' +
+
+    '<div></div>' +
+
+    '<div>' +
+    '<div class="sig-title">Pour le client — Nom & Prénom(s)</div>' +
+    '<div class="sig-zone"></div>' +
+    '</div>' +
+
+    '<div>' +
+    '<div class="sig-title">Pour Global Solutions Entreprise</div>' +
+    '<div class="sig-zone">' +
+    (form.superviseurNom ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + form.superviseurNom + '</div>' : '') +
+    (form.superviseurContact ? '<div style="font-size:11px;color:#666;margin-top:2px">' + form.superviseurContact + '</div>' : '') +
+    '</div>' +
+    '</div>' +
+
+    '</div>' +
+
+    '</div>' +
+
+    '<div class="footer">' +
+    'Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
+    '</div>' +
+
+    '</div></body></html>'
+}
+
  // Mer 15 avr 2026 22:22:43 CEST
