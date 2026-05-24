@@ -413,7 +413,7 @@ export default function Admin() {
       <main style={{ minHeight: "100vh", backgroundColor: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "48px 40px", width: "100%", maxWidth: "380px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
           <div style={{ textAlign: "center", marginBottom: "36px" }}>
-            <img src="/logo-gse.jpeg" alt="Logo" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
+            <img src="/logo-gse.jpeg" alt="Logo" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
             <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>Back Office</h1>
             <p style={{ fontSize: "13px", color: "#888" }}>Phyto Bénin</p>
           </div>
@@ -437,7 +437,7 @@ export default function Admin() {
 
       <div style={{ backgroundColor: "#0a2e1a", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img src="/logo-gse.jpeg" alt="Logo" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px" }} />
+          <img src="/logo-gse.jpeg" alt="Logo" className="logo-anime" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px" }} />
           <div>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#d4a920" }}>Back Office Phyto Bénin</div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>
@@ -824,6 +824,12 @@ function SectionClientsDevis({ db, agrement }) {
   const [savingFiche, setSavingFiche] = React.useState(false)
   const [certsList, setCertsList] = React.useState([])
   const [fichesList, setFichesList] = React.useState([])
+  const [filtreDoc, setFiltreDoc] = React.useState("tous")
+  const [contratModal, setContratModal] = React.useState(null)
+  const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
+  const [contratAnalyse, setContratAnalyse] = React.useState(null)
+  const [analysingContrat, setAnalysingContrat] = React.useState(false)
+  const [contratErreur, setContratErreur] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
@@ -1534,6 +1540,7 @@ function SectionClientsDevis({ db, agrement }) {
         cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉ Renvoyer"),
         d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('desinsect', d) }, style: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🪲 Désinsect."),
         d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('derat', d) }, style: { background: "#fefce8", border: "1px solid #fde68a", color: "#92400e", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🐭 Dératisation"),
+        React.createElement("button", { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" }) }, style: { background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📄 Contrat"),
         React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑 Supprimer")
       )
     )
@@ -1555,10 +1562,16 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   function renderOnglets() {
+    var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
-        return React.createElement("button", { key: t[0], onClick: function() { setVue(t[0]); setClientDetail(null); setMsg("") }, style: { padding: "10px 20px", border: "none", borderBottom: active ? "2px solid #0a2e1a" : "2px solid transparent", marginBottom: "-2px", background: "none", fontSize: "13px", fontWeight: active ? "700" : "400", color: active ? "#0a2e1a" : "#888", cursor: "pointer", fontFamily: "inherit" } }, t[1])
+        var badge = t[0] === "documents" && docsEnAttente > 0
+          ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
+          : null
+        return React.createElement("button", { key: t[0], onClick: function() { setVue(t[0]); setClientDetail(null); setMsg("") }, style: { padding: "10px 20px", border: "none", borderBottom: active ? "2px solid #0a2e1a" : "2px solid transparent", marginBottom: "-2px", background: "none", fontSize: "13px", fontWeight: active ? "700" : "400", color: active ? "#0a2e1a" : "#888", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center" } },
+          t[1], badge
+        )
       })
     )
   }
@@ -1829,6 +1842,225 @@ function SectionClientsDevis({ db, agrement }) {
     )
   }
 
+  async function lancerAnalyseContrat() {
+    if (!contratModal) return
+    setAnalysingContrat(true)
+    setContratAnalyse(null)
+    setContratErreur(null)
+    try {
+      var res = await fetch("/api/analyze-contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ devisId: contratModal.id, typeEtablissement: contratForm.typeEtablissement, demandeClient: contratForm.demandeClient, notes: contratForm.notes })
+      })
+      var data = await res.json()
+      if (data.success) {
+        setContratAnalyse(data.analyse)
+      } else {
+        var errMsg = data.error || "Erreur inconnue"
+        if (errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED")) {
+          setContratErreur("Limite API atteinte — réessaie dans 30 secondes.")
+        } else {
+          setContratErreur("Erreur : " + errMsg)
+        }
+      }
+    } catch(e) {
+      setContratErreur("Erreur réseau : " + e.message)
+    }
+    setAnalysingContrat(false)
+  }
+
+  function renderContratModal() {
+    if (!contratModal) return null
+    var d = contratModal
+    var cl = d.clients
+    var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ")
+    var a = contratAnalyse
+
+    var niveauColor = { "CRITIQUE": "#991b1b", "ÉLEVÉ": "#92400e", "MOYEN": "#1e40af", "FAIBLE": "#065f46" }
+    var niveauBg    = { "CRITIQUE": "#fee2e2", "ÉLEVÉ": "#fef3c7", "MOYEN": "#dbeafe", "FAIBLE": "#d1fae5" }
+
+    return React.createElement("div", { style: { position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto", padding: "40px 20px" } },
+      React.createElement("div", { style: { backgroundColor: "#fff", borderRadius: "12px", padding: "32px", width: "100%", maxWidth: "680px", position: "relative" } },
+
+        // Entête modal
+        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" } },
+          React.createElement("div", null,
+            React.createElement("div", { style: { fontSize: "11px", color: "#d4a920", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" } }, "Préparer un contrat"),
+            React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " — " + nomClient),
+            React.createElement("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA · " + (d.prestation || ""))
+          ),
+          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
+        ),
+
+        // Formulaire contexte
+        !a && React.createElement("div", null,
+          React.createElement("div", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "14px" } }, "Contexte complémentaire"),
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
+            React.createElement("div", null,
+              React.createElement("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" } }, "Type d'établissement"),
+              React.createElement("input", { value: contratForm.typeEtablissement, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { typeEtablissement: e.target.value })) }, placeholder: "Ex : boulangerie, bureau, hôtel…", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } })
+            ),
+            React.createElement("div", null,
+              React.createElement("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" } }, "Demande du client"),
+              React.createElement("input", { value: contratForm.demandeClient, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { demandeClient: e.target.value })) }, placeholder: "Ex : trimestriel sur un an", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } })
+            )
+          ),
+          React.createElement("div", { style: { marginBottom: "20px" } },
+            React.createElement("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" } }, "Notes libres"),
+            React.createElement("textarea", { value: contratForm.notes, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { notes: e.target.value })) }, placeholder: "Ex : infestation active signalée, client négocie, production alimentaire à haut risque…", rows: 3, style: { width: "100%", padding: "9px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box", resize: "vertical" } })
+          ),
+          contratErreur && React.createElement("div", { style: { backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px", padding: "12px 14px", marginBottom: "12px", fontSize: "13px", color: "#92400e", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+            contratErreur,
+            React.createElement("span", { onClick: function() { setContratErreur(null) }, style: { cursor: "pointer", opacity: 0.5, marginLeft: "8px" } }, "×")
+          ),
+          React.createElement("button", { onClick: lancerAnalyseContrat, disabled: analysingContrat, style: { width: "100%", backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: analysingContrat ? "wait" : "pointer", fontFamily: "inherit" } },
+            analysingContrat ? "Analyse en cours par l'IA…" : "Analyser avec l'IA"
+          )
+        ),
+
+        // Résultat analyse
+        a && React.createElement("div", null,
+          // Badge niveau de risque
+          React.createElement("div", { style: { display: "flex", gap: "10px", alignItems: "center", marginBottom: "20px", flexWrap: "wrap" } },
+            React.createElement("span", { style: { padding: "4px 14px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", backgroundColor: niveauBg[a.niveauRisque] || "#f0ede6", color: niveauColor[a.niveauRisque] || "#444" } }, "Risque " + a.niveauRisque),
+            React.createElement("span", { style: { padding: "4px 14px", borderRadius: "20px", fontSize: "11px", fontWeight: "700", backgroundColor: "#f0fdf4", color: "#065f46" } }, a.formuleRecommandee),
+            React.createElement("button", { onClick: function() { setContratAnalyse(null) }, style: { marginLeft: "auto", background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "3px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", color: "#888" } }, "↺ Modifier le contexte")
+          ),
+
+          // Profil + justification
+          React.createElement("div", { style: { backgroundColor: "#f8f7f4", borderRadius: "8px", padding: "16px", marginBottom: "16px", borderLeft: "4px solid #0a2e1a" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", marginBottom: "6px" } }, "Profil client"),
+            React.createElement("div", { style: { fontSize: "13px", color: "#333" } }, a.profil),
+            React.createElement("div", { style: { fontSize: "12px", color: "#666", marginTop: "6px", fontStyle: "italic" } }, a.justificationRisque)
+          ),
+
+          // Grille prix / structure
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "16px" } },
+            React.createElement("div", { style: { backgroundColor: "#0a2e1a", borderRadius: "8px", padding: "14px", textAlign: "center" } },
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#d4a920" } }, Number(a.prixSuggere).toLocaleString("fr-FR")),
+              React.createElement("div", { style: { fontSize: "9px", color: "#aaa", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / an")
+            ),
+            React.createElement("div", { style: { backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "14px", textAlign: "center" } },
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#065f46" } }, Number(a.prixTrimestre).toLocaleString("fr-FR")),
+              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / trimestre")
+            ),
+            React.createElement("div", { style: { backgroundColor: "#fef9ee", borderRadius: "8px", padding: "14px", textAlign: "center" } },
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#92400e" } }, a.remiseContrat + "%"),
+              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "remise contrat")
+            )
+          ),
+
+          // Prestations incluses
+          React.createElement("div", { style: { backgroundColor: "#f8f7f4", borderRadius: "8px", padding: "14px", marginBottom: "14px" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", marginBottom: "8px" } }, "Structure recommandée"),
+            React.createElement("div", { style: { fontSize: "12px", color: "#333", display: "flex", gap: "16px", flexWrap: "wrap" } },
+              React.createElement("span", null, "× " + a.frequencePassages + " passages D+D / an"),
+              a.controlesMensuels > 0 && React.createElement("span", null, "× " + a.controlesMensuels + " contrôles mensuels"),
+              a.auditAnnuel && React.createElement("span", null, "✓ Audit annuel")
+            ),
+            React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "6px", fontStyle: "italic" } }, a.justificationFormule)
+          ),
+
+          // Clauses spécifiques
+          a.clausesSpecifiques && a.clausesSpecifiques.length > 0 && React.createElement("div", { style: { marginBottom: "14px" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", marginBottom: "8px" } }, "Clauses spécifiques recommandées"),
+            a.clausesSpecifiques.map(function(c, i) {
+              return React.createElement("div", { key: i, style: { fontSize: "12px", color: "#333", padding: "4px 0", borderBottom: "1px solid #f0ede6" } }, "→ " + c)
+            })
+          ),
+
+          // Points d'attention
+          a.pointsAttention && a.pointsAttention.length > 0 && React.createElement("div", { style: { backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px", padding: "12px 14px", marginBottom: "14px" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#92400e", textTransform: "uppercase", marginBottom: "6px" } }, "Points d'attention"),
+            a.pointsAttention.map(function(p, i) {
+              return React.createElement("div", { key: i, style: { fontSize: "12px", color: "#92400e", padding: "2px 0" } }, "⚠ " + p)
+            })
+          ),
+
+          // Argument commercial
+          React.createElement("div", { style: { backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "12px 14px", marginBottom: "20px" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", marginBottom: "6px" } }, "Argument commercial"),
+            React.createElement("div", { style: { fontSize: "12px", color: "#065f46", fontStyle: "italic" } }, a.argumentCommercial)
+          ),
+
+          // Bouton générer
+          React.createElement("button", {
+            onClick: function() {
+              var params = new URLSearchParams({
+                devisId: d.id,
+                prixAnnuel: a.prixSuggere,
+                prixTrimestre: a.prixTrimestre,
+                formule: a.formuleRecommandee,
+                passages: a.frequencePassages,
+                controles: a.controlesMensuels || 0,
+                duree: a.dureeContrat || 12,
+                paiement: a.paiementRecommande || "trimestriel_avance"
+              })
+              window.open("/api/generate-contract?" + params.toString(), "_blank")
+            },
+            style: { width: "100%", backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+          }, "Générer le contrat Word (.docx)")
+        )
+      )
+    )
+  }
+
+  function renderVueDocuments() {
+    var docs = []
+    certsList.forEach(function(c) {
+      var client = clients.find(function(cl) { return cl.id === c.client_id })
+      docs.push({ _type: "cert", _id: c.id, numero: c.numero_unique, client: client, date: c.created_at, envoye: c.envoye, envoye_at: c.envoye_at, sousType: c.type })
+    })
+    fichesList.forEach(function(f) {
+      var client = clients.find(function(cl) { return cl.id === f.client_id })
+      docs.push({ _type: "fiche", _id: f.id, numero: f.numero_unique, client: client, date: f.created_at, envoye: f.envoye, envoye_at: f.envoye_at })
+    })
+    docs.sort(function(a, b) { return new Date(b.date) - new Date(a.date) })
+
+    var docsFiltres = filtreDoc === "envoyes"
+      ? docs.filter(function(d) { return d.envoye })
+      : filtreDoc === "attente"
+        ? docs.filter(function(d) { return !d.envoye })
+        : docs
+
+    return React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Fiches & Certificats"),
+        React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺")
+      ),
+      React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px" } },
+        [["tous", "Tous (" + docs.length + ")"], ["envoyes", "Envoyés (" + docs.filter(function(d) { return d.envoye }).length + ")"], ["attente", "En attente (" + docs.filter(function(d) { return !d.envoye }).length + ")"]].map(function(f) {
+          return React.createElement("button", { key: f[0], onClick: function() { setFiltreDoc(f[0]) }, style: { padding: "5px 14px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: filtreDoc === f[0] ? "#0a2e1a" : "#f0ede6", color: filtreDoc === f[0] ? "#fff" : "#444", fontWeight: filtreDoc === f[0] ? "700" : "400" } }, f[1])
+        })
+      ),
+      docsFiltres.length === 0
+        ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun document.")
+        : React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "8px" } },
+            docsFiltres.map(function(doc) {
+              var isCert = doc._type === "cert"
+              var icon = isCert ? (doc.sousType === "desinsect" ? "🪲" : "🐭") : "📋"
+              var typeLabel = isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : "Certificat Dératisation") : "Fiche de passage"
+              var clientNom = doc.client ? ((doc.client.prenom || "") + " " + doc.client.nom + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
+              var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "—"
+              return React.createElement("div", { key: doc._type + doc._id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } },
+                React.createElement("span", { style: { fontSize: "22px", flexShrink: 0 } }, icon),
+                React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                  React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, doc.numero || "—"),
+                  React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "2px" } }, typeLabel + " · " + clientNom),
+                  React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, dateStr)
+                ),
+                React.createElement("button", {
+                  onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
+                  title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
+                  style: { background: doc.envoye ? "#0a2e1a" : "#fff", color: doc.envoye ? "#fff" : "#999", border: "1px solid " + (doc.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "20px", padding: "4px 14px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700", flexShrink: 0 }
+                }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?"))
+              )
+            })
+          )
+    )
+  }
+
   function renderVueDevis() {
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
@@ -1858,6 +2090,7 @@ function SectionClientsDevis({ db, agrement }) {
   return React.createElement("div", null,
     certModal ? renderCertModal() : null,
     ficheModal ? renderFicheModal() : null,
+    contratModal ? renderContratModal() : null,
     renderCompteurs(),
     msg ? React.createElement("div", { style: { padding: "12px 16px", backgroundColor: msg.startsWith("Erreur") ? "#fef2f2" : "#f0fdf4", border: "1px solid " + (msg.startsWith("Erreur") ? "#fecaca" : "#bbf7d0"), borderRadius: "6px", color: msg.startsWith("Erreur") ? "#991b1b" : "#065f46", fontSize: "13px", marginBottom: "18px", display: "flex", justifyContent: "space-between" } },
       msg,
@@ -1866,7 +2099,8 @@ function SectionClientsDevis({ db, agrement }) {
     renderOnglets(),
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
-    vue === "devis" ? renderVueDevis() : null
+    vue === "devis" ? renderVueDevis() : null,
+    vue === "documents" ? renderVueDocuments() : null
   )
 }
 
