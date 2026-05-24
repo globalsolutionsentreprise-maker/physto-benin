@@ -78,10 +78,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             animation: byShimmer 2.5s ease-in-out 0.8s infinite;
             display: inline-block;
           }
+          .nav-agrement-mobile { display: none; }
 
           @media (max-width: 768px) {
             .nav-desktop { display: none !important; }
             .nav-mobile-btn { display: flex !important; }
+            .nav-agrement-mobile { display: block !important; }
             .urgband-tags { display: none !important; }
             .hero-padding { padding: 40px 20px 60px !important; }
             .hero-h1 { font-size: 32px !important; }
@@ -116,6 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="nav-brand-text">
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span className="nav-brand-by" style={{ color: "#d4a920" }}>by</span> GSE</div>
                 <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>
+                <div className="nav-agrement-mobile" style={{ fontSize: "9px", color: "#d4a920", fontWeight: "700", marginTop: "1px" }}>✓ APA/26-025/CNGP-BEN</div>
               </div>
             </a>
 
@@ -139,6 +142,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div>
                   <div style={{ fontSize: "10px", fontWeight: "800", color: "#0a2e1a", letterSpacing: "0.07em", lineHeight: 1.1, whiteSpace: "nowrap" }}>AGRÉÉ PAR L'ÉTAT BÉNINOIS</div>
                   <div style={{ fontSize: "8.5px", color: "#1a6b38", letterSpacing: "0.05em", marginTop: "1px" }}>Autorités sanitaires du Bénin</div>
+                  <div style={{ fontSize: "8.5px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.04em", marginTop: "1px" }}>APA/26-025/CNGP-BEN</div>
                 </div>
               </div>
               <a href="/espace-client" style={{ fontSize: "11px", fontWeight: "700", color: "#0a2e1a", textDecoration: "none", border: "0.5px solid #d4a920", padding: "7px 14px", letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap" }}>Espace client</a>
