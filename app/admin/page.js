@@ -2255,7 +2255,30 @@ function buildFichePassageHtml(form, client, numero) {
     '.sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }' +
     '.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }' +
     '.footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }' +
-    '@media print { .noprint { display: none; } body { background: #fff; } .page { max-width: 100%; } }' +
+    '@media print {' +
+    '  @page { size: A4 portrait; margin: 7mm 10mm; }' +
+    '  .noprint { display: none; }' +
+    '  body { background: #fff; font-size: 10px; }' +
+    '  .page { max-width: 100%; }' +
+    '  .hdr { padding: 10px 20px; }' +
+    '  .hdr-left .name { font-size: 15px; }' +
+    '  .hdr-right .title { font-size: 12px; }' +
+    '  .hdr-right .num { font-size: 11px; }' +
+    '  .agr { padding: 3px 10px; font-size: 8.5px; }' +
+    '  .body { padding: 10px 20px; }' +
+    '  .section-title { font-size: 8.5px; margin-bottom: 5px; padding-bottom: 2px; }' +
+    '  .field-row { margin-bottom: 4px; }' +
+    '  .field-label { font-size: 9.5px; min-width: 70px; }' +
+    '  .field-value { font-size: 10px; }' +
+    '  .chk-row { line-height: 1.6; font-size: 10px; }' +
+    '  .sig-zone { min-height: 44px; padding: 6px; }' +
+    '  .sig-title { font-size: 8.5px; }' +
+    '  .footer { padding: 5px 20px; font-size: 8.5px; }' +
+    '  table td, table th { padding: 4px 8px !important; font-size: 9.5px; }' +
+    '  [style*="min-height:60px"] { min-height: 32px !important; }' +
+    '  [style*="margin-bottom:16px"], [style*="margin-bottom:14px"] { margin-bottom: 7px !important; }' +
+    '  [style*="gap:20px"] { gap: 10px !important; }' +
+    '}' +
     '</style></head><body>' +
 
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
