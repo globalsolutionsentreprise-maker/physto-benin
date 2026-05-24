@@ -43,6 +43,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .nav-mobile-btn { display: none; }
           .nav-links-mobile { display: none; }
 
+          @keyframes logoEntree {
+            0%   { opacity: 0; transform: scale(0.7) rotate(-8deg); }
+            60%  { opacity: 1; transform: scale(1.08) rotate(3deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+          }
+          @keyframes logoBrille {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,169,32,0), 0 2px 8px rgba(10,46,26,0.15); }
+            50%       { box-shadow: 0 0 0 5px rgba(212,169,32,0.18), 0 2px 8px rgba(10,46,26,0.15); }
+          }
+          .logo-anime {
+            animation: logoEntree 0.7s cubic-bezier(0.34,1.56,0.64,1) both,
+                       logoBrille 3.5s ease-in-out 0.7s infinite;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+            cursor: pointer;
+          }
+          .logo-anime:hover {
+            transform: scale(1.15) rotate(6deg);
+            box-shadow: 0 0 0 6px rgba(212,169,32,0.3), 0 6px 20px rgba(10,46,26,0.25) !important;
+          }
+
           @media (max-width: 768px) {
             .nav-desktop { display: none !important; }
             .nav-mobile-btn { display: flex !important; }
@@ -76,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, zIndex: 50 }}>
           <div className="nav-padding" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 40px" }}>
             <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
-              <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
+              <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
               <div>
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span style={{ color: "#d4a920" }}>by</span> GSE</div>
                 <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>
