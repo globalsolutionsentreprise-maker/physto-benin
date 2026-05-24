@@ -2152,11 +2152,11 @@ function buildCertificatHtml(type, form) {
     '<p style="margin-bottom:18px;line-height:1.75"><strong>Certifie</strong> conformément à la <strong>loi 91-004 du 11 Février 1991</strong> portant réglementation Phytosanitaire en République du Bénin, et ceux sous la supervision des structures Compétentes du Ministère de l\'Agriculture, de l\'Élevage et de la Pêche (MAEP), de l\'exécution de l\'opération de <strong>' + operationType + '</strong> des locaux appartenant à :</p>' +
 
     '<table style="margin-bottom:18px;border-collapse:collapse;width:100%">' +
-    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold;width:38%">Entreprise bénéficiaire</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.entreprise || '') + '</td></tr>' +
-    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">N° IFU</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.ifu || '') + '</td></tr>' +
-    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">RCCM</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.rccm || '') + '</td></tr>' +
-    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Magasin / Locaux</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.locaux || '') + '</td></tr>' +
-    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Situation Géographique</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.situation || '') + '</td></tr>' +
+    (form.entreprise ? '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold;width:38%">Entreprise bénéficiaire</td><td style="border:1px solid #aaa;padding:7px 12px">' + form.entreprise + '</td></tr>' : '') +
+    (form.ifu ? '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">N° IFU</td><td style="border:1px solid #aaa;padding:7px 12px">' + form.ifu + '</td></tr>' : '') +
+    (form.rccm ? '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">RCCM</td><td style="border:1px solid #aaa;padding:7px 12px">' + form.rccm + '</td></tr>' : '') +
+    (form.locaux ? '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Magasin / Locaux</td><td style="border:1px solid #aaa;padding:7px 12px">' + form.locaux + '</td></tr>' : '') +
+    (form.situation ? '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Situation Géographique</td><td style="border:1px solid #aaa;padding:7px 12px">' + form.situation + '</td></tr>' : '') +
     '</table>' +
 
     '<p style="font-style:italic;margin-bottom:18px;line-height:1.6">' + methode + '</p>' +
