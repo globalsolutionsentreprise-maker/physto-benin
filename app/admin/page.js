@@ -817,7 +817,8 @@ function SectionClientsDevis({ db, agrement }) {
   const [submittingDevis, setSubmittingDevis] = React.useState(false)
   const [showNewClient, setShowNewClient] = React.useState(false)
   const [validating, setValidating] = React.useState(null)
-  const [generatingAtt, setGeneratingAtt] = React.useState(null)
+  const [certModal, setCertModal] = React.useState(null)
+  const [certForm, setCertForm] = React.useState({})
   const [editingDevis, setEditingDevis] = React.useState(null)
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
@@ -1044,36 +1045,100 @@ function SectionClientsDevis({ db, agrement }) {
     await charger()
   }
 
-  async function genererAttestation(d) {
+  function openCertModal(type, d) {
     var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
-    setGeneratingAtt(d.id)
-    setMsg("")
-    try {
-      var res = await fetch("/api/generate-attestation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ devisId: d.id })
-      })
-      var data = await res.json()
-      if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setGeneratingAtt(null); return }
+    var now = new Date()
+    var jour = String(now.getDate()).padStart(2, '0')
+    var mois = String(now.getMonth() + 1).padStart(2, '0')
+    setCertForm({
+      ref: type === 'desinsect' ? '001/26' : '002/26',
+      dateJour: jour,
+      dateMois: mois,
+      entreprise: (cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' '),
+      ifu: '',
+      rccm: '',
+      locaux: d.description || '',
+      situation: (d.lieu_intervention) || (cl && cl.adresse) || '',
+      dateDebut: '',
+      dateFin: '',
+      matiere1: type === 'desinsect' ? 'Deltaméthrine SC 12.5%' : 'Brodifacoum 0.005%',
+      obs1: 'Homologué CNEIP / DPV APV / CNGP-BEN',
+      matiere2: type === 'desinsect' ? 'Cyperméthrine 10 CE' : 'Bromadiolone 0.005%',
+      obs2: 'Homologué CNEIP / DPV APV / CNGP-BEN',
+      matiere3: '',
+      obs3: '',
+    })
+    setCertModal({ type: type, devis: d, cl: cl })
+  }
 
-      var { data: att } = await db.from("attestations").select("*").eq("id", data.attestationId).single()
-      if (!att) { setMsg("Attestation introuvable après création"); setGeneratingAtt(null); return }
+  function genererCertificat() {
+    var html = buildCertificatHtml(certModal.type, certForm)
+    var w = window.open('', '_blank', 'width=920,height=1050')
+    if (w) { w.document.write(html); w.document.close() }
+    setCertModal(null)
+    setMsg('✓ Certificat généré — imprimez ou enregistrez en PDF')
+  }
 
-      var siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.com"
-      var verifyUrl = siteUrl + "/verifier/" + att.qr_token
-      var numero = att.numero_unique || att.numero
-      var dateFormatee = new Date(att.date_traitement || att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-      var dateEmission = new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-      var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=" + encodeURIComponent(verifyUrl)
+  function renderCertModal() {
+    if (!certModal) return null
+    var type = certModal.type
+    var title = type === 'desinsect' ? 'Certificat de Désinsectisation' : 'Certificat de Dératisation'
+    var updateForm = function(field, val) {
+      setCertForm(function(prev) { return Object.assign({}, prev, { [field]: val }) })
+    }
+    var inp2 = { width: '100%', padding: '8px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl2 = { display: 'block', fontSize: '10px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }
+    var pairs = [['matiere1', 'obs1'], ['matiere2', 'obs2'], ['matiere3', 'obs3']]
 
-      var html = buildAttestationHtml({ att: att, cl: cl, numero: numero, dateFormatee: dateFormatee, dateEmission: dateEmission, verifyUrl: verifyUrl, qrUrl: qrUrl })
-      var w = window.open("", "_blank", "width=920,height=1050")
-      if (w) { w.document.write(html); w.document.close() }
-      setMsg("✓ Attestation " + numero + (data.alreadyExists ? " (existante)" : " générée") + " — imprimez en PDF")
-    } catch(e) { setMsg("Erreur: " + e.message) }
-    setGeneratingAtt(null)
-    await charger()
+    return React.createElement('div', {
+      style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
+      onClick: function(e) { if (e.target === e.currentTarget) setCertModal(null) }
+    },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '700px', marginTop: '20px' } },
+
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+          React.createElement('h3', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a', margin: 0 } }, '📋 ' + title),
+          React.createElement('button', { onClick: function() { setCertModal(null) }, style: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888', lineHeight: 1 } }, '×')
+        ),
+
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' } },
+          React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Référence'), React.createElement('input', { value: certForm.ref || '', onChange: function(e) { updateForm('ref', e.target.value) }, style: inp2 })),
+          React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Jour (certif.)'), React.createElement('input', { value: certForm.dateJour || '', onChange: function(e) { updateForm('dateJour', e.target.value) }, placeholder: '24', style: inp2 })),
+          React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Mois (certif.)'), React.createElement('input', { value: certForm.dateMois || '', onChange: function(e) { updateForm('dateMois', e.target.value) }, placeholder: '05', style: inp2 }))
+        ),
+
+        React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
+          React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '12px', textTransform: 'uppercase' } }, 'Informations bénéficiaire'),
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' } },
+            React.createElement('div', { style: { gridColumn: '1/-1' } }, React.createElement('label', { style: lbl2 }, 'Entreprise bénéficiaire'), React.createElement('input', { value: certForm.entreprise || '', onChange: function(e) { updateForm('entreprise', e.target.value) }, style: inp2 })),
+            React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'N° IFU'), React.createElement('input', { value: certForm.ifu || '', onChange: function(e) { updateForm('ifu', e.target.value) }, style: inp2 })),
+            React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'RCCM'), React.createElement('input', { value: certForm.rccm || '', onChange: function(e) { updateForm('rccm', e.target.value) }, style: inp2 })),
+            React.createElement('div', { style: { gridColumn: '1/-1' } }, React.createElement('label', { style: lbl2 }, 'Magasin / Locaux'), React.createElement('input', { value: certForm.locaux || '', onChange: function(e) { updateForm('locaux', e.target.value) }, style: inp2 })),
+            React.createElement('div', { style: { gridColumn: '1/-1' } }, React.createElement('label', { style: lbl2 }, 'Situation Géographique'), React.createElement('input', { value: certForm.situation || '', onChange: function(e) { updateForm('situation', e.target.value) }, style: inp2 }))
+          )
+        ),
+
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
+          React.createElement('div', null, React.createElement('label', { style: lbl2 }, "Date début d'exécution"), React.createElement('input', { value: certForm.dateDebut || '', onChange: function(e) { updateForm('dateDebut', e.target.value) }, placeholder: 'Ex: 20 mai', style: inp2 })),
+          React.createElement('div', null, React.createElement('label', { style: lbl2 }, "Date fin d'exécution"), React.createElement('input', { value: certForm.dateFin || '', onChange: function(e) { updateForm('dateFin', e.target.value) }, placeholder: 'Ex: 22 mai', style: inp2 }))
+        ),
+
+        React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '20px' } },
+          React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '12px', textTransform: 'uppercase' } }, 'Matières actives utilisées'),
+          pairs.map(function(pair, i) {
+            return React.createElement('div', { key: i, style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: i < 2 ? '10px' : 0 } },
+              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Matière active ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')), React.createElement('input', { value: certForm[pair[0]] || '', onChange: function(e) { updateForm(pair[0], e.target.value) }, style: inp2 })),
+              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Observations ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')), React.createElement('input', { value: certForm[pair[1]] || '', onChange: function(e) { updateForm(pair[1], e.target.value) }, style: inp2 }))
+            )
+          })
+        ),
+
+        React.createElement('div', { style: { display: 'flex', gap: '10px' } },
+          React.createElement('button', { onClick: genererCertificat, style: { backgroundColor: '#0a2e1a', color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, '🖨️ Générer le certificat'),
+          React.createElement('button', { onClick: function() { setCertModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '12px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler')
+        )
+      )
+    )
   }
 
   function imprimerDevis(d) {
@@ -1183,7 +1248,8 @@ function SectionClientsDevis({ db, agrement }) {
         d.statut === "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier et renvoyer"),
         d.statut !== "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { background: "none", border: "1px solid #d1d5db", color: "#374151", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier"),
         cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉ Renvoyer"),
-        d.statut !== "annule" && React.createElement("button", { onClick: function() { genererAttestation(d) }, disabled: generatingAtt === d.id, style: { background: generatingAtt === d.id ? "#f3f4f6" : "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: generatingAtt === d.id ? "default" : "pointer", fontFamily: "inherit", fontWeight: "600" } }, generatingAtt === d.id ? "..." : "📄 Attestation"),
+        d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('desinsect', d) }, style: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🪲 Désinsect."),
+        d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('derat', d) }, style: { background: "#fefce8", border: "1px solid #fde68a", color: "#92400e", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🐭 Dératisation"),
         React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑 Supprimer")
       )
     )
@@ -1488,6 +1554,7 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   return React.createElement("div", null,
+    certModal ? renderCertModal() : null,
     renderCompteurs(),
     msg ? React.createElement("div", { style: { padding: "12px 16px", backgroundColor: msg.startsWith("Erreur") ? "#fef2f2" : "#f0fdf4", border: "1px solid " + (msg.startsWith("Erreur") ? "#fecaca" : "#bbf7d0"), borderRadius: "6px", color: msg.startsWith("Erreur") ? "#991b1b" : "#065f46", fontSize: "13px", marginBottom: "18px", display: "flex", justifyContent: "space-between" } },
       msg,
@@ -1500,100 +1567,86 @@ function SectionClientsDevis({ db, agrement }) {
   )
 }
 
-function buildAttestationHtml({ att, cl, numero, dateFormatee, dateEmission, verifyUrl, qrUrl }) {
-  var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ") || "—"
-  var entreprise = (cl && cl.entreprise) ? cl.entreprise : ""
-  var adresse = (cl && cl.adresse) ? cl.adresse : ""
-  var prestation = att.prestation || "—"
-  var lieu = att.lieu_intervention || "Cotonou, Bénin"
-  var technicien = att.technicien || "Équipe GSE"
-  var responsableNom = att.responsable_nom || "Direction GSE"
-  var responsableTitre = att.responsable_titre || "Directeur Général"
-  var superficie = att.superficie_m2 ? att.superficie_m2 + " m²" : ""
-  var cachetSvg = '<svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="10.5" stroke="#1a237e" stroke-width="1.5" fill="none"/><ellipse cx="14" cy="14" rx="5.5" ry="10.5" stroke="#1a237e" stroke-width="1" fill="none"/><line x1="3.5" y1="14" x2="24.5" y2="14" stroke="#1a237e" stroke-width="1"/><line x1="5.5" y1="8.5" x2="22.5" y2="8.5" stroke="#1a237e" stroke-width="0.8"/><line x1="5.5" y1="19.5" x2="22.5" y2="19.5" stroke="#1a237e" stroke-width="0.8"/><path d="M17 18 Q23 11 21 6 Q15 10 17 17 Z" fill="#1a237e"/></svg>'
+function buildCertificatHtml(type, form) {
+  var titre = type === 'desinsect' ? 'CERTIFICAT DE DÉSINSECTISATION' : 'CERTIFICAT DE DÉRATISATION'
+  var operationType = type === 'desinsect' ? 'désinsectisation' : 'dératisation'
+  var methode = type === 'desinsect'
+    ? "L'opération est réalisée par pulvérisation au moyen des produits homologués ci-après."
+    : "L'opération est réalisée par disposition de produit homologué dans les PVC (boîtes d'appâts)."
 
-  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Attestation ' + numero + ' — GSE</title><style>' +
+  var rowsHtml = [
+    [form.matiere1, form.obs1],
+    [form.matiere2, form.obs2],
+    [form.matiere3, form.obs3],
+  ].map(function(r) {
+    return '<tr><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + (r[0] || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + (r[1] || '') + '</td></tr>'
+  }).join('')
+
+  var dateExec = (form.dateDebut && form.dateFin)
+    ? 'du <strong>' + form.dateDebut + '</strong> au <strong>' + form.dateFin + '</strong> 2026'
+    : 'du __________ au __________ 2026'
+
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + titre + ' — GSE</title>' +
+    '<style>' +
     '* { box-sizing: border-box; margin: 0; padding: 0; }' +
-    'body { font-family: system-ui, sans-serif; background: #f7f7f5; }' +
+    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
     '.noprint { text-align: center; padding: 14px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
     '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
     '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '.wrap { max-width: 780px; margin: 0 auto; padding: 40px 24px; }' +
-    '.card { background: #fff; border: 1px solid #e8e6e0; border-radius: 4px; padding: 60px 70px; position: relative; font-family: Georgia, serif; }' +
-    '.bar-top { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #0a2e1a; border-radius: 4px 4px 0 0; }' +
-    '.bar-gold { position: absolute; top: 6px; left: 0; right: 0; height: 2px; background: #d4a920; }' +
-    '.bar-bot-gold { position: absolute; bottom: 6px; left: 0; right: 0; height: 2px; background: #d4a920; }' +
-    '.bar-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: #0a2e1a; border-radius: 0 0 4px 4px; }' +
-    'table { width: 100%; border-collapse: collapse; font-family: system-ui, sans-serif; font-size: 14px; }' +
-    'td { vertical-align: top; padding-bottom: 10px; }' +
-    'td:first-child { color: #888; width: 38%; }' +
-    'td:last-child { font-weight: 600; color: #0a2e1a; }' +
-    '.cachet { display: inline-block; border: 2.5px solid #1a237e; border-radius: 3px; padding: 7px 9px; position: relative; min-width: 188px; color: #1a237e; font-family: system-ui, sans-serif; }' +
-    '.cachet-inner { position: absolute; inset: 3px; border: 1px solid #1a237e; border-radius: 1px; pointer-events: none; }' +
-    '@media print { .noprint { display: none; } body { background: #fff; } .wrap { padding: 0; } .card { box-shadow: none; border: none; max-width: 100%; padding: 50px 60px; border-radius: 0; } }' +
+    '.page { max-width: 760px; margin: 0 auto; padding: 40px 50px; }' +
+    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
     '</style></head><body>' +
-    '<div class="noprint"><button onclick="window.print()">⬇ Télécharger en PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
-    '<div class="wrap"><div class="card">' +
-    '<div class="bar-top"></div><div class="bar-gold"></div>' +
+    '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+    '<div class="page">' +
 
-    // En-tête
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px">' +
-    '<div><img src="/logo-gse.jpeg" alt="Logo GSE" style="width:72px;height:72px;object-fit:contain;margin-bottom:10px;border-radius:8px;display:block"><div style="font-family:system-ui,sans-serif;font-size:11px;color:#999;line-height:1.8"><div>RCCM : RB/COT/24 B 38910</div><div>IFU : 3202420126111</div><div>Cotonou, Bénin · +229 01 53 04 79 50</div><div>contact@phyto-benin.com</div></div></div>' +
-    '<div style="text-align:right"><div style="font-family:system-ui,sans-serif;font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Référence</div><div style="font-family:system-ui,sans-serif;font-weight:700;font-size:14px;color:#0a2e1a;border:1.5px solid #0a2e1a;padding:6px 14px;border-radius:4px;margin-bottom:10px">' + numero + '</div><div style="font-family:system-ui,sans-serif;font-size:11px;color:#888">Émis le : ' + dateEmission + '</div></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">' +
+    '<img src="/logo-gse.jpeg" alt="Logo GSE" style="width:82px;height:82px;object-fit:contain;border-radius:4px">' +
+    '<div style="text-align:right;font-size:13px;line-height:1.9">' +
+    'Cotonou le <strong>' + (form.dateJour || '__') + '</strong> - <strong>' + (form.dateMois || '__') + '</strong> 2026<br>' +
+    '<strong>Réf : ' + (form.ref || '') + '</strong>' +
+    '</div>' +
     '</div>' +
 
-    // Titre
-    '<div style="text-align:center;margin-bottom:40px">' +
-    '<div style="font-family:system-ui,sans-serif;font-size:10px;color:#d4a920;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px">Document officiel — République du Bénin</div>' +
-    '<h1 style="font-family:system-ui,sans-serif;font-size:24px;font-weight:700;color:#0a2e1a;margin:0 0 4px;letter-spacing:0.03em;text-transform:uppercase">Attestation de Bonne Fin d\'Exécution</h1>' +
-    '<div style="font-family:system-ui,sans-serif;font-size:13px;color:#888;margin-top:4px">et de Service Fait</div>' +
-    '<div style="width:60px;height:2px;background:#d4a920;margin:14px auto 0"></div>' +
+    '<h1 style="text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin:0 0 22px;text-transform:uppercase;letter-spacing:0.02em">' + titre + '</h1>' +
+
+    '<p style="margin-bottom:14px;line-height:1.75">La Société <strong>Global Solutions Entreprise (GSE)</strong>, agissant en qualité d\'<strong>Applicateur Agréé</strong>.<br>' +
+    'Référence <strong>APA/26-025/CNGP-BEN</strong> dont police d\'assurance <strong>N°:13901/7010000035</strong></p>' +
+
+    '<p style="margin-bottom:18px;line-height:1.75"><strong>Certifie</strong> conformément à la <strong>loi 91-004 du 11 Février 1991</strong> portant réglementation Phytosanitaire en République du Bénin, et ceux sous la supervision des structures Compétentes du Ministère de l\'Agriculture, de l\'Élevage et de la Pêche (MAEP), de l\'exécution de l\'opération de <strong>' + operationType + '</strong> des locaux appartenant à :</p>' +
+
+    '<table style="margin-bottom:18px;border-collapse:collapse;width:100%">' +
+    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold;width:38%">Entreprise bénéficiaire</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.entreprise || '') + '</td></tr>' +
+    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">N° IFU</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.ifu || '') + '</td></tr>' +
+    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">RCCM</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.rccm || '') + '</td></tr>' +
+    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Magasin / Locaux</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.locaux || '') + '</td></tr>' +
+    '<tr><td style="border:1px solid #aaa;padding:7px 12px;background:#d9d9d9;font-weight:bold">Situation Géographique</td><td style="border:1px solid #aaa;padding:7px 12px">' + (form.situation || '') + '</td></tr>' +
+    '</table>' +
+
+    '<p style="font-style:italic;margin-bottom:18px;line-height:1.6">' + methode + '</p>' +
+
+    '<table style="margin-bottom:20px;border-collapse:collapse;width:100%">' +
+    '<thead><tr>' +
+    '<th style="background:#1a4731;color:#fff;padding:8px 10px;border:1px solid #1a4731;text-align:left;font-size:13px;width:38%;font-weight:bold">Matières actives</th>' +
+    '<th style="background:#1a4731;color:#fff;padding:8px 10px;border:1px solid #1a4731;text-align:left;font-size:13px;font-weight:bold">Observations — Homologués par le CNEIP / DPV APV / CNGP-BEN</th>' +
+    '</tr></thead>' +
+    '<tbody>' + rowsHtml + '</tbody>' +
+    '</table>' +
+
+    '<p style="margin-bottom:10px;line-height:1.75"><strong>Date d\'exécution : ' + dateExec + '</strong><br>' +
+    'L\'opération à valider sous quinzaine confère aux locaux une protection durable (mensuelle, bimensuelle ou trimestrielle).</p>' +
+
+    '<p style="font-style:italic;margin-top:16px;margin-bottom:52px;line-height:1.75">En foi de quoi le présent certificat est délivré pour servir et valoir ce que de droit.</p>' +
+
+    '<div>' +
+    '<p style="font-weight:bold;margin-bottom:6px">Le Directeur Général</p>' +
+    '<div style="height:88px"></div>' +
+    '<p style="font-weight:bold">Kabir Mohamed YAKOUBOU</p>' +
     '</div>' +
 
-    // Formule juridique
-    '<div style="font-family:system-ui,sans-serif;font-size:14px;color:#333;line-height:1.9;margin-bottom:28px">' +
-    '<p style="margin:0 0 16px">Je soussigné(e), <strong style="color:#0a2e1a">' + responsableNom + '</strong>, en qualité de <strong>' + responsableTitre + '</strong> de <strong>Global Solutions Entreprise (GSE)</strong>, société agréée par l\'État du Bénin pour l\'exercice d\'activités d\'hygiène sanitaire et phytosanitaire,</p>' +
-    '<p style="margin:0;color:#444"><strong>atteste par la présente</strong> que les prestations suivantes ont été réalisées conformément aux obligations contractuelles issues du devis N°&nbsp;<strong style="color:#0a2e1a">' + (att.numero || numero) + '</strong>&nbsp;, dans les règles de l\'art et selon les normes sanitaires en vigueur en République du Bénin :</p>' +
+    '<div style="margin-top:36px;padding-top:10px;border-top:1px solid #bbb;font-size:11px;text-align:center;color:#666;line-height:1.6">' +
+    'Global Solutions Entreprise | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN | Cotonou, Bénin' +
     '</div>' +
 
-    // Tableau récapitulatif
-    '<div style="background:#f7f7f5;border:1px solid #e8e6e0;border-radius:4px;padding:24px 28px;margin-bottom:28px">' +
-    '<table><tbody>' +
-    '<tr><td>Client bénéficiaire :</td><td style="font-weight:700">' + nomClient + (entreprise ? '<br><span style="font-weight:400;color:#555">' + entreprise + '</span>' : '') + '</td></tr>' +
-    (adresse ? '<tr><td>Adresse :</td><td>' + adresse + '</td></tr>' : '') +
-    '<tr><td>Nature de la prestation :</td><td style="font-weight:700">' + prestation + '</td></tr>' +
-    '<tr><td>Lieu d\'intervention :</td><td>' + lieu + '</td></tr>' +
-    (superficie ? '<tr><td>Superficie traitée :</td><td>' + superficie + '</td></tr>' : '') +
-    '<tr><td>Date du traitement :</td><td style="font-weight:700">' + dateFormatee + '</td></tr>' +
-    '<tr><td style="padding-bottom:0">Technicien responsable :</td><td style="padding-bottom:0">' + technicien + '</td></tr>' +
-    '</tbody></table>' +
-    '</div>' +
-
-    // Déclaration
-    '<div style="font-family:system-ui,sans-serif;font-size:13.5px;color:#444;line-height:1.9;margin-bottom:36px">' +
-    '<p style="margin:0 0 10px">Les travaux ont été exécutés avec diligence et professionnalisme. Les produits employés sont homologués par les autorités sanitaires compétentes. La prestation a donné entière satisfaction.</p>' +
-    '<p style="margin:0;font-style:italic;color:#666;font-size:13px">Cette attestation est délivrée à la demande expresse du client et peut être présentée à toute autorité compétente, administration publique ou partenaire privé pour valoir ce que de droit.</p>' +
-    '</div>' +
-
-    // Signature + Cachet + QR
-    '<div style="display:flex;justify-content:space-between;align-items:flex-end;padding-top:24px;border-top:1px solid #e8e6e0">' +
-    '<div><div style="font-family:system-ui,sans-serif;font-size:12px;color:#888;margin-bottom:6px">Fait à Cotonou, le ' + dateEmission + '</div><div style="font-family:system-ui,sans-serif;font-size:12px;color:#888;margin-bottom:16px">Pour Global Solutions Entreprise (GSE)</div><div style="font-family:system-ui,sans-serif;font-size:12px;font-weight:700;color:#0a2e1a">' + responsableNom + '</div><div style="font-family:system-ui,sans-serif;font-size:11px;color:#888">' + responsableTitre + '</div><div style="width:120px;height:50px;border-bottom:1.5px solid #0a2e1a;margin-top:24px"></div></div>' +
-    '<div style="text-align:center;margin:0 16px;padding-bottom:4px">' +
-    '<div class="cachet"><div class="cachet-inner"></div>' +
-    '<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;padding-left:2px">' + cachetSvg + '<div style="font-weight:800;font-size:10px;letter-spacing:0.06em;line-height:1.25;color:#1a237e">GLOBAL SOLUTIONS<br>ENTREPRISE</div></div>' +
-    '<div style="border-top:1px solid #1a237e;margin:3px 0"></div>' +
-    '<div style="display:flex;gap:7px;align-items:flex-start"><div style="font-size:6.5px;font-weight:700;color:#1a237e;line-height:1.35;flex-shrink:0">GLOBAL<br>SOLUTIONS<br>ENTREPRISE</div><div style="font-size:7px;color:#1a237e;line-height:1.55"><div><strong>N° RCCM</strong> : RB/COT/24 B 38910</div><div><strong>N° IFU</strong> : 3202420126111</div><div>✆ : +33 06 68 82 52 85</div><div>CEL : +229 53 04 78 50</div></div></div>' +
-    '<div style="border-top:1px solid #1a237e;margin-top:3px;padding-top:3px;text-align:center;font-style:italic;font-weight:700;font-size:9.5px;color:#1a237e;letter-spacing:0.03em">Le Directeur Général</div>' +
-    '</div></div>' +
-    '<div style="text-align:center"><div style="padding:10px;border:1.5px solid #e8e6e0;border-radius:6px;display:inline-block;background:#fff;margin-bottom:6px"><img src="' + qrUrl + '" width="90" height="90" alt="QR Code" /></div><div style="font-family:system-ui,sans-serif;font-size:10px;color:#888;max-width:110px">Scanner pour vérifier l\'authenticité</div></div>' +
-    '</div>' +
-
-    // Avertissement légal
-    '<div style="margin-top:28px;padding:12px 16px;background:#f7f7f5;border:1px solid #e8e6e0;border-radius:4px">' +
-    '<p style="font-family:system-ui,sans-serif;font-size:10px;color:#999;margin:0;line-height:1.6">⚠️ Document généré automatiquement et archivé dans le système sécurisé de Global Solutions Entreprise. Toute falsification, modification ou usage frauduleux de ce document est passible de poursuites judiciaires conformément au droit béninois en vigueur. Authenticité vérifiable à l\'adresse : <span style="color:#0a2e1a">' + verifyUrl + '</span></p>' +
-    '</div>' +
-
-    '<div class="bar-bot-gold"></div><div class="bar-bot"></div>' +
-    '</div></div></body></html>'
+    '</div></body></html>'
 }
  // Mer 15 avr 2026 22:22:43 CEST
