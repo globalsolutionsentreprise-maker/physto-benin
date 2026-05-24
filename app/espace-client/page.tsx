@@ -46,8 +46,8 @@ export default function EspaceClientLogin() {
 
         {/* Logo / En-tête */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <div style={{ display: "inline-block", backgroundColor: "#0a2e1a", padding: "12px 24px", borderRadius: "8px", marginBottom: "20px" }}>
-            <span style={{ color: "#d4a920", fontWeight: "700", fontSize: "18px", letterSpacing: "0.05em" }}>GSE</span>
+          <div style={{ marginBottom: "20px" }}>
+            <img src="/logo-gse.jpeg" alt="Logo GSE" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px" }} />
           </div>
           <h1 style={{ fontSize: "22px", fontWeight: "300", color: "#0a2e1a", margin: "0 0 8px", letterSpacing: "-0.02em" }}>
             Espace client
