@@ -2172,12 +2172,20 @@ function buildCertificatHtml(type, form) {
     '<p style="margin-bottom:10px;line-height:1.75"><strong>Date d\'exécution : ' + dateExec + '</strong><br>' +
     'L\'opération à valider sous quinzaine confère aux locaux une protection durable (mensuelle, bimensuelle ou trimestrielle).</p>' +
 
-    '<p style="font-style:italic;margin-top:16px;margin-bottom:52px;line-height:1.75">En foi de quoi le présent certificat est délivré pour servir et valoir ce que de droit.</p>' +
+    '<p style="font-style:italic;margin-top:16px;margin-bottom:40px;line-height:1.75">En foi de quoi le présent certificat est délivré pour servir et valoir ce que de droit.</p>' +
 
-    '<div>' +
-    '<p style="font-weight:bold;margin-bottom:6px">Le Directeur Général</p>' +
-    '<div style="height:88px"></div>' +
-    '<p style="font-weight:bold">Kabir Mohamed YAKOUBOU</p>' +
+    '<div style="display:flex;gap:32px;margin-top:8px">' +
+    '<div style="flex:1;border:1px solid #ccc;border-radius:4px;padding:14px;text-align:center">' +
+    '<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#444;margin-bottom:6px">Signature du bénéficiaire</p>' +
+    '<p style="font-size:10px;font-style:italic;color:#888;margin-bottom:0">Bon pour accord</p>' +
+    '<div style="height:70px"></div>' +
+    '</div>' +
+    '<div style="flex:1;border:1px solid #ccc;border-radius:4px;padding:14px;text-align:center">' +
+    '<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#444;margin-bottom:6px">Pour Global Solutions Entreprise</p>' +
+    '<p style="font-size:10px;font-style:italic;color:#888;margin-bottom:0">Le Directeur Général</p>' +
+    '<div style="height:40px"></div>' +
+    '<p style="font-weight:bold;font-size:12px">Kabir Mohamed YAKOUBOU</p>' +
+    '</div>' +
     '</div>' +
 
     '<div style="margin-top:36px;padding-top:10px;border-top:1px solid #bbb;font-size:11px;text-align:center;color:#666;line-height:1.6">' +
