@@ -1093,14 +1093,45 @@ function SectionClientsDevis({ db, agrement }) {
     var type = certModal.type
     var devisId = certModal.devis.id
     var clientId = certModal.devis.client_id
+    var editingId = certModal.editingId || null
+    var existingNumero = certModal.existingNumero || null
+    var savedForm = Object.assign({}, certForm)
     setCertModal(null)
     try {
-      var { data: numero } = await db.rpc('generate_certificat_numero', { cert_type: type })
-      var certNumero = numero || ('CERT-' + type.toUpperCase() + '-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
-      await db.from('certificats').insert({ numero_unique: certNumero, devis_id: devisId, client_id: clientId, type: type })
-      setMsg('✓ Certificat ' + certNumero + ' enregistré — imprimez en PDF')
+      if (editingId) {
+        await db.from('certificats').update({ form_data: savedForm }).eq('id', editingId)
+        setMsg('✓ Certificat ' + existingNumero + ' mis à jour — imprimez en PDF')
+      } else {
+        var { data: numero } = await db.rpc('generate_certificat_numero', { cert_type: type })
+        var certNumero = numero || ('CERT-' + type.toUpperCase() + '-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
+        await db.from('certificats').insert({ numero_unique: certNumero, devis_id: devisId, client_id: clientId, type: type, form_data: savedForm })
+        setMsg('✓ Certificat ' + certNumero + ' enregistré — imprimez en PDF')
+      }
       await charger()
     } catch(e) { setMsg('✓ Certificat généré (non enregistré : ' + e.message + ')') }
+  }
+
+  function rouvrirCertModal(cert, devis, client) {
+    var form = cert.form_data || {}
+    setCertForm({
+      ref: form.ref || '',
+      dateJour: form.dateJour || '',
+      dateMois: form.dateMois || '',
+      entreprise: form.entreprise || (client && client.entreprise) || '',
+      ifu: form.ifu || '',
+      rccm: form.rccm || '',
+      locaux: form.locaux || '',
+      situation: form.situation || '',
+      dateDebut: form.dateDebut || '',
+      dateFin: form.dateFin || '',
+      matiere1: form.matiere1 || '',
+      obs1: form.obs1 || '',
+      matiere2: form.matiere2 || '',
+      obs2: form.obs2 || '',
+      matiere3: form.matiere3 || '',
+      obs3: form.obs3 || '',
+    })
+    setCertModal({ type: cert.type, devis: devis || { id: cert.devis_id, client_id: cert.client_id }, cl: client, editingId: cert.id, existingNumero: cert.numero_unique })
   }
 
   function renderCertModal() {
@@ -2057,7 +2088,7 @@ function SectionClientsDevis({ db, agrement }) {
     var docs = []
     certsList.forEach(function(c) {
       var client = clients.find(function(cl) { return cl.id === c.client_id })
-      docs.push({ _type: "cert", _id: c.id, _devisId: c.devis_id, numero: c.numero_unique, client: client, date: c.created_at, envoye: c.envoye, envoye_at: c.envoye_at, sousType: c.type })
+      docs.push({ _type: "cert", _id: c.id, _devisId: c.devis_id, _rawCert: c, numero: c.numero_unique, client: client, date: c.created_at, envoye: c.envoye, envoye_at: c.envoye_at, sousType: c.type })
     })
     fichesList.forEach(function(f) {
       var client = clients.find(function(cl) { return cl.id === f.client_id })
@@ -2105,10 +2136,10 @@ function SectionClientsDevis({ db, agrement }) {
                   }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?")),
                   isCert
                     ? React.createElement("button", {
-                        onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); if (d) openCertModal(doc.sousType, d) },
-                        title: "Régénérer ce certificat",
+                        onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); rouvrirCertModal(doc._rawCert, d, doc.client) },
+                        title: "Modifier ce certificat",
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                      }, "Régénérer")
+                      }, "Modifier")
                     : React.createElement("button", {
                         onClick: function() { reouvrirFicheModal(doc._raw, doc.client) },
                         title: "Modifier cette fiche",
