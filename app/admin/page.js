@@ -1177,6 +1177,42 @@ function SectionClientsDevis({ db, agrement }) {
     await charger()
   }
 
+  async function supprimerCertificat(id) {
+    if (!window.confirm('Supprimer ce certificat ?')) return
+    await db.from('certificats').delete().eq('id', id)
+    await charger()
+  }
+
+  async function supprimerFiche(id) {
+    if (!window.confirm('Supprimer cette fiche ?')) return
+    await db.from('fiches_passage').delete().eq('id', id)
+    await charger()
+  }
+
+  function reouvrirFicheModal(f, client) {
+    setFicheForm({
+      nomClient: [(client && client.prenom) || '', (client && client.nom) || ''].filter(Boolean).join(' '),
+      adresse: (client && client.adresse) || '',
+      tel: (client && client.telephone) || '',
+      mob: '',
+      typePassage: f.type_passage || '',
+      prestations: f.prestations || [],
+      autresPrestation: f.autres_prestation || '',
+      lieuPrestation: f.lieu_prestation || '',
+      nuisibles: f.nuisibles || [],
+      autresNuisible: f.autres_nuisible || '',
+      produits: f.produits || { insecticides: '', raticides: '', desinfectants: '', fumigants: '', phytosanitaires: '', autres: '' },
+      produitsCoches: f.produits ? Object.keys(f.produits).filter(function(k) { return !!f.produits[k] }) : [],
+      dureeDebut: f.duree_debut || '',
+      dureeFin: f.duree_fin || '',
+      remarques: f.remarques || '',
+      datePassage: f.date_passage || '',
+      superviseurNom: f.superviseur_nom || '',
+      superviseurContact: f.superviseur_contact || '',
+    })
+    setFicheModal({ client: client || {}, editingId: f.id, existingNumero: f.numero_unique })
+  }
+
   // ── FICHES DE PASSAGE ──────────────────────────────
   function ouvrirFicheModal(c) {
     var now = new Date()
@@ -1209,11 +1245,7 @@ function SectionClientsDevis({ db, agrement }) {
   async function saveFichePassage() {
     setSavingFiche(true); setMsg('')
     try {
-      var { data: numero } = await db.rpc('generate_fiche_numero')
-      var ficheNumero = numero || ('FP-GSE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
-      var { data: fiche, error } = await db.from('fiches_passage').insert({
-        numero_unique: ficheNumero,
-        client_id: ficheModal.client.id,
+      var ficheData = {
         type_passage: ficheForm.typePassage,
         prestations: ficheForm.prestations,
         autres_prestation: ficheForm.autresPrestation,
@@ -1227,13 +1259,28 @@ function SectionClientsDevis({ db, agrement }) {
         date_passage: ficheForm.datePassage,
         superviseur_nom: ficheForm.superviseurNom,
         superviseur_contact: ficheForm.superviseurContact,
-      }).select().single()
-      if (error) { setMsg('Erreur: ' + error.message); setSavingFiche(false); return }
+      }
+      var ficheNumero
+      var isEditing = !!ficheModal.editingId
+      var opErr
+      if (isEditing) {
+        ficheNumero = ficheModal.existingNumero
+        var upd = await db.from('fiches_passage').update(ficheData).eq('id', ficheModal.editingId)
+        opErr = upd.error
+      } else {
+        var { data: numero } = await db.rpc('generate_fiche_numero')
+        ficheNumero = numero || ('FP-GSE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
+        ficheData.numero_unique = ficheNumero
+        ficheData.client_id = ficheModal.client.id
+        var ins = await db.from('fiches_passage').insert(ficheData).select().single()
+        opErr = ins.error
+      }
+      if (opErr) { setMsg('Erreur: ' + opErr.message); setSavingFiche(false); return }
       var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero)
       var w = window.open('', '_blank', 'width=920,height=1100')
       if (w) { w.document.write(html); w.document.close() }
       setFicheModal(null)
-      setMsg('✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
+      setMsg(isEditing ? '✓ Fiche mise à jour — imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
     } catch(e) { setMsg('Erreur: ' + e.message) }
     setSavingFiche(false)
   }
@@ -2010,11 +2057,11 @@ function SectionClientsDevis({ db, agrement }) {
     var docs = []
     certsList.forEach(function(c) {
       var client = clients.find(function(cl) { return cl.id === c.client_id })
-      docs.push({ _type: "cert", _id: c.id, numero: c.numero_unique, client: client, date: c.created_at, envoye: c.envoye, envoye_at: c.envoye_at, sousType: c.type })
+      docs.push({ _type: "cert", _id: c.id, _devisId: c.devis_id, numero: c.numero_unique, client: client, date: c.created_at, envoye: c.envoye, envoye_at: c.envoye_at, sousType: c.type })
     })
     fichesList.forEach(function(f) {
       var client = clients.find(function(cl) { return cl.id === f.client_id })
-      docs.push({ _type: "fiche", _id: f.id, numero: f.numero_unique, client: client, date: f.created_at, envoye: f.envoye, envoye_at: f.envoye_at })
+      docs.push({ _type: "fiche", _id: f.id, _raw: f, numero: f.numero_unique, client: client, date: f.created_at, envoye: f.envoye, envoye_at: f.envoye_at })
     })
     docs.sort(function(a, b) { return new Date(b.date) - new Date(a.date) })
 
@@ -2050,11 +2097,29 @@ function SectionClientsDevis({ db, agrement }) {
                   React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "2px" } }, typeLabel + " · " + clientNom),
                   React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, dateStr)
                 ),
-                React.createElement("button", {
-                  onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
-                  title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
-                  style: { background: doc.envoye ? "#0a2e1a" : "#fff", color: doc.envoye ? "#fff" : "#999", border: "1px solid " + (doc.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "20px", padding: "4px 14px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700", flexShrink: 0 }
-                }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?"))
+                React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 } },
+                  React.createElement("button", {
+                    onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
+                    title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
+                    style: { background: doc.envoye ? "#0a2e1a" : "#fff", color: doc.envoye ? "#fff" : "#999", border: "1px solid " + (doc.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "20px", padding: "4px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" }
+                  }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?")),
+                  isCert
+                    ? React.createElement("button", {
+                        onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); if (d) openCertModal(doc.sousType, d) },
+                        title: "Régénérer ce certificat",
+                        style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+                      }, "Régénérer")
+                    : React.createElement("button", {
+                        onClick: function() { reouvrirFicheModal(doc._raw, doc.client) },
+                        title: "Modifier cette fiche",
+                        style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+                      }, "Modifier"),
+                  React.createElement("button", {
+                    onClick: function() { isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
+                    title: "Supprimer",
+                    style: { background: "#fff", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+                  }, "Supprimer")
+                )
               )
             })
           )
