@@ -203,43 +203,14 @@ textarea{height:60px;resize:vertical;}
 <div class="toast" id="toast"></div>
 
 <script>
-const DEFAULT_CLIENTS=[
-  {id:1,client:"Mariette BIDI",provenance:"WhatsApp",prestation:"Dératisation & Pulvérisation",montantDevis:58050,statut:"converti",commentaire:"",dateDevis:"2026-03-04",dateFacture:"2026-03-09",montantFacture:58050,depenses:0,paiementsRecus:58050,dateContact:"2026-03-01",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-  {id:2,client:"SOREL",provenance:"Réseau perso",prestation:"Dératisation & Pulvérisation",montantDevis:237875,statut:"echec",commentaire:"Devis supérieur à la proposition reçue",dateDevis:"2026-05-02",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-04-28",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"Prix trop élevé",attestation:"non"},
-  {id:3,client:"GBOSSA (intérieur)",provenance:"Clarisse",prestation:"Dératisation & Pulvérisation",montantDevis:232210,statut:"attente",commentaire:"Domicile – Désinsectisation + Désinfection bactéricide",dateDevis:"2026-05-07",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-05",typePrestation:"Désinsectisation & Désinfection",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-  {id:4,client:"GBOSSA (extérieur)",provenance:"Clarisse",prestation:"Dératisation & Pulvérisation",montantDevis:656708,statut:"attente",commentaire:"Espaces extérieurs – Moustiques, reptiles, phytosanitaire",dateDevis:"2026-05-07",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-05",typePrestation:"Phytosanitaire & Reptiles",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-  {id:5,client:"LOHATODE",provenance:"—",prestation:"Dératisation & Pulvérisation",montantDevis:56993,statut:"devis",commentaire:"Réf. MAJ_DEV-2026-0003 – Contrat en attente de retour",dateDevis:"2026-05-11",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-10",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-  {id:6,client:"DJOKLE",provenance:"—",prestation:"Dératisation & Pulvérisation",montantDevis:14490,statut:"attente",commentaire:"Voisin de LOHATODE",dateDevis:"2026-05-11",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-11",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-  {id:7,client:"DABIRE Brice Aubierge",provenance:"WhatsApp",prestation:"Dératisation & Pulvérisation",montantDevis:79636,statut:"devis",commentaire:"Réf. MAJ_DEV-2026-0005 – Contrat en attente de retour",dateDevis:"2026-05-12",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-10",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
-];
-const DEFAULT_DEP=[
-  {id:1,libelle:"Charges de début de mois",montant:116089,date:"2026-03-01"},
-  {id:2,libelle:"Impôts et frais GSE (1 an)",montant:350000,date:"2026-05-01"},
-];
+const DEFAULT_CLIENTS=[];
+const DEFAULT_DEP=[];
 
 let clients,depGlob,nextId,activeTab="kanban",editId=null,cfilt="",sfilt="",finChart=null,objectifCA=0,anCharts={};
 
-function load(){
-  try{
-    clients=JSON.parse(localStorage.getItem("gse_clients")||"null")||JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
-    depGlob=JSON.parse(localStorage.getItem("gse_dep")||"null")||JSON.parse(JSON.stringify(DEFAULT_DEP));
-    nextId=parseInt(localStorage.getItem("gse_nid")||"8");
-    objectifCA=parseInt(localStorage.getItem("gse_objectif")||"0");
-  }catch(e){
-    clients=JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
-    depGlob=JSON.parse(JSON.stringify(DEFAULT_DEP));
-    nextId=8;
-  }
-}
-function save(){
-  try{
-    localStorage.setItem("gse_clients",JSON.stringify(clients));
-    localStorage.setItem("gse_dep",JSON.stringify(depGlob));
-    localStorage.setItem("gse_nid",String(nextId));
-    if(objectifCA)localStorage.setItem("gse_objectif",String(objectifCA));
-  }catch(e){}
-}
-load();
+function load(){}
+function save(){}
+// Chargement async depuis Supabase via /api/crm-data
 
 const ST=[
   {key:"contact",label:"Premier contact",bg:"#FAEEDA",tc:"#633806",ac:"#BA7517"},
@@ -308,12 +279,12 @@ function renderKanban(){
     if(tot>0)h+=`<div class="k-total" style="color:${s.ac};">${f(tot)} FCFA</div>`;
     if(!cc.length)h+=`<div class="k-empty"><i class="ti ti-inbox" aria-hidden="true"></i><br>Aucun</div>`;
     cc.forEach(c=>{
-      h+=`<div class="cc" onclick="openEdit(${c.id})">
+      h+=`<div class="cc" onclick="openEdit('${c.id}')">
         <div class="cc-name">${c.client}</div>
         <div class="cc-meta"><i class="ti ti-map-pin" style="font-size:11px;" aria-hidden="true"></i> ${c.provenance} · ${fd(c.dateDevis)}</div>
         <div class="cc-amt" style="color:${s.ac};">${f(c.montantDevis)} FCFA</div>
         ${c.commentaire?`<div class="cc-note" title="${c.commentaire}">${c.commentaire}</div>`:""}
-        <select class="cc-mv" onchange="moveCard(${c.id},this.value);this.value=''" onclick="event.stopPropagation()">
+        <select class="cc-mv" onchange="moveCard('${c.id}',this.value);this.value=''" onclick="event.stopPropagation()">
           <option value="">Déplacer vers...</option>
           ${ST.filter(x=>x.key!==s.key).map(x=>`<option value="${x.key}">${x.label}</option>`).join("")}
         </select>
@@ -362,7 +333,7 @@ function applyF(){
       <td><span class="badge" style="${c.attestation==='envoye'?'background:#E1F5EE;color:#04342C;':'background:#F1EFE8;color:#5F5E5A;'}">${c.attestation==='envoye'?'Envoyé':'Non'}</span></td>
       <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
       <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
-      <td><button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openEdit(${c.id})"><i class="ti ti-edit" aria-hidden="true"></i></button></td>
+      <td><button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openEdit('${c.id}')"><i class="ti ti-edit" aria-hidden="true"></i></button></td>
     </tr>`;
   }).join("");
 }
@@ -409,7 +380,7 @@ function renderFinance(){
         ${depGlob.map(d=>`<tr>
           <td>${d.libelle}</td><td>${fd(d.date)}</td>
           <td style="color:#E24B4A;font-weight:500;">${f(d.montant)} FCFA</td>
-          <td><button class="btn-s btn-danger" style="padding:4px 9px;font-size:12px;" onclick="delDep(${d.id})"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+          <td><button class="btn-s btn-danger" style="padding:4px 9px;font-size:12px;" onclick="delDep('${d.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
         </tr>`).join("")}
         <tr><td colspan="2" style="font-weight:500;">Total</td><td style="font-weight:500;color:#E24B4A;">${f(tdg)} FCFA</td><td></td></tr>
       </tbody>
@@ -816,7 +787,10 @@ function renderAnalyse(){
 
 function moveCard(id,ns){
   const c=clients.find(x=>x.id===id);
-  if(c&&ns){c.statut=ns;save();refresh();toast("Déplacé : "+gs(ns).label);}
+  if(c&&ns){
+    c.statut=ns;refresh();toast("Déplacé : "+gs(ns).label);
+    fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'move',id,statut:ns})}).catch(()=>{});
+  }
 }
 
 function openAdd(){editId=null;showModal(formH(null));}
@@ -839,20 +813,24 @@ function openAddDep(){
     </div>`);
 }
 
-function saveDep(){
+async function saveDep(){
   const l=document.getElementById("dl")?.value?.trim();
   const m=parseFloat(document.getElementById("dm")?.value)||0;
   const d=document.getElementById("dd")?.value;
   if(!l||!m){alert("Libellé et montant requis.");return;}
-  const nId=depGlob.length?Math.max(...depGlob.map(x=>x.id))+1:1;
-  depGlob.push({id:nId,libelle:l,montant:m,date:d});
-  save();closeModal();refresh();toast("Dépense enregistrée");
+  try{
+    const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_depense',libelle:l,montant:m,date:d})});
+    const result=await res.json();
+    if(result.dep)depGlob.push(result.dep);
+  }catch(e){}
+  closeModal();refresh();toast("Dépense enregistrée");
 }
 
 function delDep(id){
   if(confirm("Supprimer cette dépense ?")){
     depGlob=depGlob.filter(d=>d.id!==id);
-    save();refresh();toast("Dépense supprimée");
+    refresh();toast("Dépense supprimée");
+    fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'del_depense',id})}).catch(()=>{});
   }
 }
 
@@ -906,13 +884,13 @@ function formH(c){
     </div>
   </div>
   <div class="form-footer">
-    ${ie?`<button class="btn-s btn-danger" onclick="delClient(${c.id})" style="margin-right:auto;"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>`:""}
+    ${ie?`<button class="btn-s btn-danger" onclick="delClient('${c.id}')" style="margin-right:auto;"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>`:""}
     <button class="btn-s" onclick="closeModal()">Annuler</button>
     <button class="btn-p" onclick="saveClient()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
   </div>`;
 }
 
-function saveClient(){
+async function saveClient(){
   const g=id=>document.getElementById(id)?.value||"";
   const gn=id=>parseFloat(g(id))||0;
   const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
@@ -923,18 +901,24 @@ function saveClient(){
   if(editId){
     const i=clients.findIndex(c=>c.id===editId);
     if(i>=0)clients[i]={...clients[i],...d};
+    fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_client',id:editId,...d})}).catch(()=>{});
     toast("Client mis à jour");
   }else{
-    clients.push({id:nextId++,...d});
+    try{
+      const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_client',...d})});
+      const result=await res.json();
+      if(result.id)clients.push({id:result.id,...d});
+    }catch(e){}
     toast("Client ajouté au pipeline");
   }
-  save();closeModal();refresh();
+  closeModal();refresh();
 }
 
 function delClient(id){
   if(confirm("Supprimer ce client définitivement ?")){
     clients=clients.filter(c=>c.id!==id);
-    save();closeModal();refresh();toast("Client supprimé");
+    closeModal();refresh();toast("Client supprimé");
+    fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'del_client',id})}).catch(()=>{});
   }
 }
 
@@ -969,8 +953,22 @@ function sw(tab,btn){
 function render(t){renderKPIs();if(t==="kanban")renderKanban();else if(t==="table")renderTable();else if(t==="finance")renderFinance();else if(t==="analyse")renderAnalyse();}
 function refresh(){render(activeTab);}
 
-render("kanban");
-updateObjectifLabel();
+// Init async — charge les données depuis Supabase
+(async function init(){
+  try{
+    const res=await fetch('/api/crm-data');
+    if(res.ok){
+      const data=await res.json();
+      clients=data.clients||[];
+      depGlob=data.depenses||[];
+      objectifCA=data.objectifCA||parseInt(localStorage.getItem("gse_objectif")||"0");
+    }
+  }catch(e){
+    clients=[];depGlob=[];
+  }
+  updateObjectifLabel();
+  render("kanban");
+})();
 
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 </script>
