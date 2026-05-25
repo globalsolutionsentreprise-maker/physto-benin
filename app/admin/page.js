@@ -406,6 +406,7 @@ export default function Admin() {
     { id: "realisations", label: "Realisations" },
     { id: "equipe", label: "Notre Equipe" },
     { id: "clients", label: "Clients & Devis" },
+    { id: "crm", label: "📊 CRM Pipeline" },
   ]
 
   if (!connecte) {
@@ -793,6 +794,16 @@ export default function Admin() {
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Créez des devis, gérez les clients et suivez les paiements FedaPay.</p>
               <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} />
+            </div>
+          )}
+
+          {onglet === "crm" && (
+            <div style={{ margin: "-32px" }}>
+              <iframe
+                src="/api/crm-frame"
+                title="CRM Pipeline GSE"
+                style={{ width: "100%", height: "calc(100vh - 64px)", border: "none", display: "block" }}
+              />
             </div>
           )}
 

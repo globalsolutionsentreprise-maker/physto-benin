@@ -3,7 +3,8 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // All pages except the CRM frame route
+        source: '/((?!api/crm-frame).*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },

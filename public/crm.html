@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM GSE · Suivi Pipeline</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#F4F7F5;--bg-card:#FFFFFF;--bg-2:#EBF0ED;--bg-3:#DDE6E1;
+  --text:#162820;--text-2:#537066;--text-3:#8AABA0;
+  --border:rgba(0,0,0,0.09);--border-2:rgba(0,0,0,0.16);
+  --primary:#1D9E75;--primary-dk:#0F6E56;--primary-bg:#E1F5EE;
+  --danger:#E24B4A;--warn:#BA7517;
+  --r:10px;--rl:14px;--sh:0 1px 6px rgba(0,0,0,0.07);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#0B1812;--bg-card:#132019;--bg-2:#1A2D22;--bg-3:#233829;
+    --text:#DCF0E8;--text-2:#5EA087;--text-3:#3A6652;
+    --border:rgba(255,255,255,0.09);--border-2:rgba(255,255,255,0.18);
+    --primary-bg:#082E1E;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
+
+/* ── HEADER ── */
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-badge{background:var(--primary);color:#fff;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-name{font-size:15px;font-weight:600;color:var(--text);}
+.logo-sub{font-size:11px;color:var(--text-2);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+
+/* ── BUTTONS ── */
+.btn-p{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 15px;cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.btn-p:hover{background:var(--primary-dk);}
+.btn-s{background:none;border:1px solid var(--border-2);border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;color:var(--text);font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.btn-s:hover{background:var(--bg-2);}
+.btn-danger{color:var(--danger);border-color:rgba(226,75,74,.3);}
+
+/* ── MAIN ── */
+main{max-width:1340px;margin:0 auto;padding:1.5rem;}
+
+/* ── KPI ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+@media(max-width:720px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;}
+.kpi-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
+.kpi-lbl{font-size:11px;color:var(--text-2);margin-bottom:2px;}
+.kpi-val{font-size:22px;font-weight:600;line-height:1.2;}
+.kpi-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
+
+/* ── TABS ── */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.5rem;}
+.tab-btn{padding:9px 18px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);border-bottom:2.5px solid transparent;margin-bottom:-1px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:color .15s;}
+.tab-btn.on{color:var(--text);border-bottom-color:var(--primary);font-weight:500;}
+.tab-btn:hover:not(.on){color:var(--text);}
+
+/* ── KANBAN ── */
+.kanban-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:1rem;align-items:flex-start;}
+.k-col{min-width:205px;flex:1;}
+.k-hdr{padding:8px 10px;border-radius:8px 8px 0 0;font-size:11px;font-weight:600;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.k-cnt{border-radius:99px;padding:1px 7px;font-size:11px;background:rgba(0,0,0,0.12);}
+.k-total{font-size:11px;font-weight:500;margin-bottom:6px;padding:0 2px;}
+.cc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:box-shadow .15s,border-color .15s;}
+.cc:hover{box-shadow:var(--sh);border-color:var(--border-2);}
+.cc-name{font-size:13px;font-weight:500;margin-bottom:3px;}
+.cc-meta{font-size:11px;color:var(--text-2);margin-bottom:5px;}
+.cc-amt{font-size:12px;font-weight:600;margin-bottom:6px;}
+.cc-note{font-size:11px;color:var(--text-2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-mv{width:100%;font-size:11px;color:var(--text-2);background:var(--bg-2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-family:inherit;}
+.k-empty{border:1.5px dashed var(--border-2);border-radius:var(--r);padding:1rem;text-align:center;color:var(--text-3);font-size:12px;}
+
+/* ── TABLE ── */
+.srch-bar{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+.tbl-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead tr{border-bottom:1px solid var(--border);}
+th{padding:10px 14px;font-size:11px;font-weight:500;color:var(--text-2);text-align:left;white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid var(--border);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--bg-2);}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:99px;white-space:nowrap;}
+
+/* ── FINANCE ── */
+.fin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+@media(max-width:600px){.fin-grid{grid-template-columns:1fr 1fr;}}
+.fin-sec{font-size:14px;font-weight:500;margin:1.5rem 0 .75rem;}
+.fin-sec-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal-box{background:var(--bg-card);border-radius:var(--rl);padding:1.5rem;width:100%;max-width:580px;max-height:92vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+.modal-title{font-size:15px;font-weight:500;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;}}
+.fg-full{grid-column:1/-1;}
+.fg-div{grid-column:1/-1;padding-top:10px;border-top:1px solid var(--border);font-size:13px;font-weight:500;}
+.fl{font-size:12px;color:var(--text-2);margin-bottom:3px;display:block;}
+input,select,textarea{font-size:13px;font-family:inherit;width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border-2);border-radius:7px;padding:8px 10px;transition:border-color .15s,box-shadow .15s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(29,158,117,0.15);}
+textarea{height:60px;resize:vertical;}
+.form-footer{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:1.5rem;}
+
+
+/* ── ANALYSE ── */
+.an-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.25rem;}
+.an-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:1.25rem;}
+@media(max-width:820px){.an-grid2,.an-grid3{grid-template-columns:1fr;}}
+.an-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;}
+.an-title{font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;}
+.an-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:1.25rem;}
+@media(max-width:900px){.an-kpis{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:580px){.an-kpis{grid-template-columns:repeat(2,1fr);}}
+.an-kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;}
+.an-kpi-val{font-size:24px;font-weight:700;line-height:1.1;margin-bottom:2px;}
+.an-kpi-lbl{font-size:11px;color:var(--text-2);}
+.an-kpi-sub{font-size:10px;color:var(--text-3);margin-top:3px;}
+.insight-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.25rem;}
+@media(max-width:640px){.insight-grid{grid-template-columns:1fr;}}
+.insight-card{border-radius:10px;padding:.9rem 1rem;display:flex;gap:10px;align-items:flex-start;}
+.insight-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+.insight-txt{font-size:12px;line-height:1.5;color:var(--text);}
+.insight-txt strong{display:block;font-size:13px;margin-bottom:2px;}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;}
+.gauge-svg{width:200px;height:110px;}
+.gauge-val{font-size:28px;font-weight:700;margin-top:4px;}
+.gauge-lbl{font-size:11px;color:var(--text-2);}
+.src-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.src-lbl{font-size:12px;width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.src-bar-bg{flex:1;height:8px;background:var(--bg-2);border-radius:99px;overflow:hidden;}
+.src-bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.src-val{font-size:12px;font-weight:600;width:70px;text-align:right;flex-shrink:0;}
+.funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.funnel-lbl{font-size:12px;width:150px;flex-shrink:0;}
+.funnel-bar{height:28px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;transition:width .4s;min-width:60px;}
+.delai-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.delai-row:last-child{border-bottom:none;}
+.seg-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.seg-lbl{font-size:12px;width:110px;}
+.seg-count{font-size:11px;color:var(--text-3);width:30px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:13px;z-index:300;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-badge"><i class="ti ti-leaf" aria-hidden="true"></i></div>
+    <div>
+      <div class="logo-name">CRM GSE</div>
+      <div class="logo-sub" id="hdr-date"></div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button class="btn-s" onclick="openObjectif()" title="Définir objectif CA" id="btn-obj">
+      <i class="ti ti-target" aria-hidden="true"></i> <span id="lbl-obj">Objectif CA</span>
+    </button>
+    <button class="btn-s" onclick="exportCSV()" title="Exporter CSV">
+      <i class="ti ti-download" aria-hidden="true"></i> Export CSV
+    </button>
+    <button class="btn-p" onclick="openAdd()">
+      <i class="ti ti-plus" aria-hidden="true"></i> Nouveau client
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="kpi-grid" id="kpi"></div>
+
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="sw('kanban',this)">
+      <i class="ti ti-layout-columns" aria-hidden="true"></i> Pipeline
+    </button>
+    <button class="tab-btn" onclick="sw('table',this)">
+      <i class="ti ti-table" aria-hidden="true"></i> Liste clients
+    </button>
+    <button class="tab-btn" onclick="sw('finance',this)">
+      <i class="ti ti-chart-bar" aria-hidden="true"></i> Finances
+    </button>
+    <button class="tab-btn" onclick="sw('analyse',this)">
+      <i class="ti ti-chart-dots" aria-hidden="true"></i> Analyse
+    </button>
+  </div>
+
+  <div id="tab-kanban"></div>
+  <div id="tab-table" style="display:none;"></div>
+  <div id="tab-finance" style="display:none;"></div>
+  <div id="tab-analyse" style="display:none;"></div>
+</main>
+
+<div class="modal-overlay" id="modal" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="mbox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_CLIENTS=[
+  {id:1,client:"Mariette BIDI",provenance:"WhatsApp",prestation:"Dératisation & Pulvérisation",montantDevis:58050,statut:"converti",commentaire:"",dateDevis:"2026-03-04",dateFacture:"2026-03-09",montantFacture:58050,depenses:0,paiementsRecus:58050,dateContact:"2026-03-01",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+  {id:2,client:"SOREL",provenance:"Réseau perso",prestation:"Dératisation & Pulvérisation",montantDevis:237875,statut:"echec",commentaire:"Devis supérieur à la proposition reçue",dateDevis:"2026-05-02",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-04-28",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"Prix trop élevé",attestation:"non"},
+  {id:3,client:"GBOSSA (intérieur)",provenance:"Clarisse",prestation:"Dératisation & Pulvérisation",montantDevis:232210,statut:"attente",commentaire:"Domicile – Désinsectisation + Désinfection bactéricide",dateDevis:"2026-05-07",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-05",typePrestation:"Désinsectisation & Désinfection",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+  {id:4,client:"GBOSSA (extérieur)",provenance:"Clarisse",prestation:"Dératisation & Pulvérisation",montantDevis:656708,statut:"attente",commentaire:"Espaces extérieurs – Moustiques, reptiles, phytosanitaire",dateDevis:"2026-05-07",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-05",typePrestation:"Phytosanitaire & Reptiles",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+  {id:5,client:"LOHATODE",provenance:"—",prestation:"Dératisation & Pulvérisation",montantDevis:56993,statut:"devis",commentaire:"Réf. MAJ_DEV-2026-0003 – Contrat en attente de retour",dateDevis:"2026-05-11",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-10",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+  {id:6,client:"DJOKLE",provenance:"—",prestation:"Dératisation & Pulvérisation",montantDevis:14490,statut:"attente",commentaire:"Voisin de LOHATODE",dateDevis:"2026-05-11",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-11",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+  {id:7,client:"DABIRE Brice Aubierge",provenance:"WhatsApp",prestation:"Dératisation & Pulvérisation",montantDevis:79636,statut:"devis",commentaire:"Réf. MAJ_DEV-2026-0005 – Contrat en attente de retour",dateDevis:"2026-05-12",dateFacture:"",montantFacture:0,depenses:0,paiementsRecus:0,dateContact:"2026-05-10",typePrestation:"Dératisation & Pulvérisation",categorie:"Particulier",zone:"—",motifEchec:"—",attestation:"non"},
+];
+const DEFAULT_DEP=[
+  {id:1,libelle:"Charges de début de mois",montant:116089,date:"2026-03-01"},
+  {id:2,libelle:"Impôts et frais GSE (1 an)",montant:350000,date:"2026-05-01"},
+];
+
+let clients,depGlob,nextId,activeTab="kanban",editId=null,cfilt="",sfilt="",finChart=null,objectifCA=0,anCharts={};
+
+function load(){
+  try{
+    clients=JSON.parse(localStorage.getItem("gse_clients")||"null")||JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+    depGlob=JSON.parse(localStorage.getItem("gse_dep")||"null")||JSON.parse(JSON.stringify(DEFAULT_DEP));
+    nextId=parseInt(localStorage.getItem("gse_nid")||"8");
+    objectifCA=parseInt(localStorage.getItem("gse_objectif")||"0");
+  }catch(e){
+    clients=JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+    depGlob=JSON.parse(JSON.stringify(DEFAULT_DEP));
+    nextId=8;
+  }
+}
+function save(){
+  try{
+    localStorage.setItem("gse_clients",JSON.stringify(clients));
+    localStorage.setItem("gse_dep",JSON.stringify(depGlob));
+    localStorage.setItem("gse_nid",String(nextId));
+    if(objectifCA)localStorage.setItem("gse_objectif",String(objectifCA));
+  }catch(e){}
+}
+load();
+
+const ST=[
+  {key:"contact",label:"Premier contact",bg:"#FAEEDA",tc:"#633806",ac:"#BA7517"},
+  {key:"devis",  label:"Devis envoyé",   bg:"#E6F1FB",tc:"#0C447C",ac:"#185FA5"},
+  {key:"attente",label:"En attente",     bg:"#FFF0C4",tc:"#412402",ac:"#854F0B"},
+  {key:"relance",label:"Relance",        bg:"#FBEAF0",tc:"#72243E",ac:"#993556"},
+  {key:"converti",label:"Converti / Facturé",bg:"#E1F5EE",tc:"#04342C",ac:"#1D9E75"},
+  {key:"echec",  label:"Échec / Perdu", bg:"#F1EFE8",tc:"#2C2C2A",ac:"#5F5E5A"},
+];
+const PRESTATIONS=["Dératisation & Pulvérisation","Dératisation seule","Pulvérisation seule","Désinsectisation & Désinfection","Phytosanitaire & Reptiles","Multi-services (combiné)","Autre"];
+const CATEGORIES=["Particulier","Entreprise","Institution / Administration","Association","Autre"];
+const MOTIFS=["—","Prix trop élevé","Concurrent retenu","Pas de budget","Sans réponse client","Délai de réalisation","Autre"];
+
+const SOURCES=["WhatsApp","Appel téléphonique","Réseau perso","Clarisse","Recommandation","Site web","—"];
+
+const gs=k=>ST.find(s=>s.key===k)||ST[0];
+const f=n=>Math.round(n||0).toLocaleString("fr-FR");
+const fd=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"2-digit"}):"—";
+
+document.getElementById("hdr-date").textContent=new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+
+function renderKPIs(){
+  const tf =clients.reduce((s,c)=>s+(c.montantDevis||0),0);
+  const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
+  const tp =clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
+  const td =clients.reduce((s,c)=>s+(c.depenses||0),0)+depGlob.reduce((s,d)=>s+d.montant,0);
+  const r  =tp-td;
+  const conv=clients.filter(c=>c.statut==="converti").length;
+  const pipe=clients.filter(c=>!["converti","echec"].includes(c.statut)).length;
+  document.getElementById("kpi").innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-file-invoice" aria-hidden="true"></i></div>
+      <div class="kpi-lbl">Total devis</div>
+      <div class="kpi-val">${f(tf)}</div>
+      <div class="kpi-sub">FCFA · ${clients.length} dossier${clients.length>1?"s":""} · ${pipe} en cours</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#E1F5EE;color:#1D9E75;"><i class="ti ti-receipt" aria-hidden="true"></i></div>
+      <div class="kpi-lbl">Total facturé</div>
+      <div class="kpi-val" style="color:#1D9E75;">${f(tfa)}</div>
+      <div class="kpi-sub">FCFA · ${conv} converti${conv>1?"s":""}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#FCEBEB;color:#E24B4A;"><i class="ti ti-arrow-bear-right-2" aria-hidden="true"></i></div>
+      <div class="kpi-lbl">Dépenses totales</div>
+      <div class="kpi-val" style="color:#E24B4A;">${f(td)}</div>
+      <div class="kpi-sub">FCFA (charges + client)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:${r>=0?"#E1F5EE":"#FCEBEB"};color:${r>=0?"#1D9E75":"#E24B4A"};"><i class="ti ti-trending-${r>=0?"up":"down"}" aria-hidden="true"></i></div>
+      <div class="kpi-lbl">Résultat net</div>
+      <div class="kpi-val" style="color:${r>=0?"#1D9E75":"#E24B4A"};">${r>=0?"+":""}${f(r)}</div>
+      <div class="kpi-sub">FCFA · encaissements vs dépenses</div>
+    </div>`;
+}
+
+function renderKanban(){
+  let h="<div class='kanban-board'>";
+  ST.forEach(s=>{
+    const cc=clients.filter(c=>c.statut===s.key);
+    const tot=cc.reduce((sum,c)=>sum+(c.montantDevis||0),0);
+    h+=`<div class="k-col">
+      <div class="k-hdr" style="background:${s.bg};color:${s.tc};">
+        <span>${s.label}</span><span class="k-cnt">${cc.length}</span>
+      </div>`;
+    if(tot>0)h+=`<div class="k-total" style="color:${s.ac};">${f(tot)} FCFA</div>`;
+    if(!cc.length)h+=`<div class="k-empty"><i class="ti ti-inbox" aria-hidden="true"></i><br>Aucun</div>`;
+    cc.forEach(c=>{
+      h+=`<div class="cc" onclick="openEdit(${c.id})">
+        <div class="cc-name">${c.client}</div>
+        <div class="cc-meta"><i class="ti ti-map-pin" style="font-size:11px;" aria-hidden="true"></i> ${c.provenance} · ${fd(c.dateDevis)}</div>
+        <div class="cc-amt" style="color:${s.ac};">${f(c.montantDevis)} FCFA</div>
+        ${c.commentaire?`<div class="cc-note" title="${c.commentaire}">${c.commentaire}</div>`:""}
+        <select class="cc-mv" onchange="moveCard(${c.id},this.value);this.value=''" onclick="event.stopPropagation()">
+          <option value="">Déplacer vers...</option>
+          ${ST.filter(x=>x.key!==s.key).map(x=>`<option value="${x.key}">${x.label}</option>`).join("")}
+        </select>
+      </div>`;
+    });
+    h+="</div>";
+  });
+  h+="</div>";
+  document.getElementById("tab-kanban").innerHTML=h;
+}
+
+function renderTable(){
+  document.getElementById("tab-table").innerHTML=`
+    <div class="srch-bar">
+      <input type="text" placeholder="Rechercher un client, une source..." oninput="cfilt=this.value.toLowerCase();applyF()" style="flex:1;min-width:200px;">
+      <select onchange="sfilt=this.value;applyF()">
+        <option value="">Tous les statuts</option>
+        ${ST.map(s=>`<option value="${s.key}">${s.label}</option>`).join("")}
+      </select>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Client</th><th>Source</th><th>Date devis</th>
+        <th>Montant devis</th><th>Statut</th>
+        <th>Attestation</th><th>Facturé</th><th>Encaissé</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>`;
+  applyF();
+}
+
+function applyF(){
+  let list=[...clients];
+  if(cfilt)list=list.filter(c=>c.client.toLowerCase().includes(cfilt)||(c.provenance||"").toLowerCase().includes(cfilt));
+  if(sfilt)list=list.filter(c=>c.statut===sfilt);
+  const tb=document.getElementById("tbody");
+  if(!tb)return;
+  tb.innerHTML=list.map(c=>{
+    const s=gs(c.statut);
+    return`<tr>
+      <td style="font-weight:500;">${c.client}</td>
+      <td>${c.provenance}</td>
+      <td>${fd(c.dateDevis)}</td>
+      <td>${f(c.montantDevis)}</td>
+      <td><span class="badge" style="background:${s.bg};color:${s.tc};">${s.label}</span></td>
+      <td><span class="badge" style="${c.attestation==='envoye'?'background:#E1F5EE;color:#04342C;':'background:#F1EFE8;color:#5F5E5A;'}">${c.attestation==='envoye'?'Envoyé':'Non'}</span></td>
+      <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
+      <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
+      <td><button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openEdit(${c.id})"><i class="ti ti-edit" aria-hidden="true"></i></button></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderFinance(){
+  const tp =clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
+  const tdc=clients.reduce((s,c)=>s+(c.depenses||0),0);
+  const tdg=depGlob.reduce((s,d)=>s+d.montant,0);
+  const td =tdc+tdg;
+  const tf =clients.reduce((s,c)=>s+(c.montantDevis||0),0);
+  const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
+  const r  =tp-td;
+  document.getElementById("tab-finance").innerHTML=`
+    <div class="fin-grid">
+      <div class="kpi-card"><div class="kpi-lbl">Encaissements clients</div><div class="kpi-val" style="color:#1D9E75;">${f(tp)} FCFA</div></div>
+      <div class="kpi-card"><div class="kpi-lbl">Total dépenses</div><div class="kpi-val" style="color:#E24B4A;">${f(td)} FCFA</div></div>
+      <div class="kpi-card"><div class="kpi-lbl">Résultat net</div><div class="kpi-val" style="color:${r>=0?"#1D9E75":"#E24B4A"};">${r>=0?"+":""}${f(r)} FCFA</div></div>
+    </div>
+
+    <div class="fin-sec">Suivi financier par client</div>
+    <div class="tbl-wrap" style="margin-bottom:1.5rem;"><table>
+      <thead><tr><th>Client</th><th>Statut</th><th>Devis</th><th>Facturé</th><th>Reçu</th><th>Dépenses</th><th>Résultat</th></tr></thead>
+      <tbody>${clients.map(c=>{
+        const s=gs(c.statut);const res=(c.paiementsRecus||0)-(c.depenses||0);
+        return`<tr>
+          <td style="font-weight:500;">${c.client}</td>
+          <td><span class="badge" style="background:${s.bg};color:${s.tc};">${s.label}</span></td>
+          <td>${f(c.montantDevis)}</td>
+          <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
+          <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
+          <td style="color:${c.depenses?"#E24B4A":"var(--text-3)"};">${c.depenses?f(c.depenses):"—"}</td>
+          <td style="font-weight:500;color:${res>0?"#1D9E75":res<0?"#E24B4A":"var(--text-3)"};">${res===0?"—":(res>0?"+":"")+f(res)}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>
+
+    <div class="fin-sec-row">
+      <span class="fin-sec" style="margin:0;">Dépenses générales</span>
+      <button class="btn-s" style="font-size:12px;" onclick="openAddDep()"><i class="ti ti-plus" aria-hidden="true"></i> Ajouter</button>
+    </div>
+    <div class="tbl-wrap" style="margin-bottom:1.5rem;"><table>
+      <thead><tr><th>Libellé</th><th>Date</th><th>Montant</th><th></th></tr></thead>
+      <tbody>
+        ${depGlob.map(d=>`<tr>
+          <td>${d.libelle}</td><td>${fd(d.date)}</td>
+          <td style="color:#E24B4A;font-weight:500;">${f(d.montant)} FCFA</td>
+          <td><button class="btn-s btn-danger" style="padding:4px 9px;font-size:12px;" onclick="delDep(${d.id})"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+        </tr>`).join("")}
+        <tr><td colspan="2" style="font-weight:500;">Total</td><td style="font-weight:500;color:#E24B4A;">${f(tdg)} FCFA</td><td></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="fin-sec">Vue d'ensemble</div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;">
+      <div style="position:relative;width:100%;height:240px;">
+        <canvas id="fchart" role="img" aria-label="Graphique financier GSE">Devis ${f(tf)}, Facturé ${f(tfa)}, Encaissé ${f(tp)}, Dépenses ${f(td)} FCFA</canvas>
+      </div>
+    </div>`;
+  setTimeout(()=>{
+    const cv=document.getElementById("fchart");
+    if(!cv)return;
+    if(finChart){finChart.destroy();finChart=null;}
+    finChart=new Chart(cv,{type:"bar",data:{
+      labels:["Devis total","Facturé","Encaissé","Dépenses"],
+      datasets:[{data:[tf,tfa,tp,td],backgroundColor:["#85B7EB","#5DCAA5","#1D9E75","#E24B4A"],borderRadius:6}]
+    },options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>f(v)}}}}});
+  },80);
+}
+
+
+function updateObjectifLabel(){
+  const el=document.getElementById("lbl-obj");
+  if(el)el.textContent=objectifCA?("Objectif : "+f(objectifCA)+" FCFA"):"Objectif CA";
+}
+
+function openObjectif(){
+  showModal(`
+    <div class="modal-hdr"><span class="modal-title">Objectif CA annuel</span>
+      <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+    <div style="margin-bottom:1.25rem;">
+      <label class="fl">Objectif de chiffre d'affaires annuel (FCFA)</label>
+      <input type="number" id="oca" min="0" placeholder="Ex: 2000000" value="${objectifCA||''}">
+      <p style="font-size:11px;color:var(--text-3);margin-top:6px;">Cet objectif est utilisé dans l'onglet Analyse pour afficher votre taux de progression.</p>
+    </div>
+    <div class="form-footer">
+      <button class="btn-s" onclick="closeModal()">Annuler</button>
+      <button class="btn-p" onclick="saveObjectif()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
+    </div>`);
+}
+
+function saveObjectif(){
+  objectifCA=parseFloat(document.getElementById("oca")?.value)||0;
+  localStorage.setItem("gse_objectif",String(objectifCA));
+  closeModal();updateObjectifLabel();refresh();toast("Objectif CA enregistré");
+}
+
+
+function destroyAnCharts(){
+  Object.values(anCharts).forEach(ch=>{try{ch.destroy();}catch(e){}});
+  anCharts={};
+}
+
+function renderAnalyse(){
+  destroyAnCharts();
+
+  /* ── Calculs ────────────────────────────────────── */
+  const total=clients.length;
+  const conv=clients.filter(c=>c.statut==="converti");
+  const echecs=clients.filter(c=>c.statut==="echec");
+  const actifs=clients.filter(c=>!["converti","echec"].includes(c.statut));
+  const txConv=total?Math.round((conv.length/total)*100):0;
+  const txEchec=total?Math.round((echecs.length/total)*100):0;
+
+  const totalDevis=clients.reduce((s,c)=>s+(c.montantDevis||0),0);
+  const totalFacture=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
+  const totalEncaisse=clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
+  const txRecouvr=totalFacture?Math.round((totalEncaisse/totalFacture)*100):100;
+
+  /* Valeur pondérée pipeline */
+  const wt={contact:.10,devis:.30,attente:.40,relance:.20,converti:1,echec:0};
+  const pipeW=clients.reduce((s,c)=>s+(c.montantDevis||0)*(wt[c.statut]||0),0);
+
+  /* Délais */
+  const convD=conv.filter(c=>c.dateContact&&c.dateDevis);
+  const convF=conv.filter(c=>c.dateDevis&&c.dateFacture);
+  const delaiCD=convD.length?Math.round(convD.reduce((s,c)=>s+(new Date(c.dateDevis)-new Date(c.dateContact))/(864e5),0)/convD.length):null;
+  const delaiDF=convF.length?Math.round(convF.reduce((s,c)=>s+(new Date(c.dateFacture)-new Date(c.dateDevis))/(864e5),0)/convF.length):null;
+  const delaiAll=clients.filter(c=>c.dateContact&&c.dateDevis);
+  const delaiMoyenContact=delaiAll.length?Math.round(delaiAll.reduce((s,c)=>s+(new Date(c.dateDevis)-new Date(c.dateContact))/(864e5),0)/delaiAll.length):null;
+
+  /* Par source */
+  const bySrc={};
+  clients.forEach(c=>{
+    const k=c.provenance||"—";
+    if(!bySrc[k])bySrc[k]={count:0,montant:0,conv:0};
+    bySrc[k].count++;bySrc[k].montant+=(c.montantDevis||0);
+    if(c.statut==="converti")bySrc[k].conv++;
+  });
+  const srcList=Object.entries(bySrc).sort((a,b)=>b[1].montant-a[1].montant);
+  const maxSrcMontant=Math.max(...srcList.map(s=>s[1].montant));
+
+  /* Par type prestation */
+  const byPrest={};
+  clients.forEach(c=>{
+    const k=c.typePrestation||"Non renseigné";
+    if(!byPrest[k])byPrest[k]={count:0,montant:0};
+    byPrest[k].count++;byPrest[k].montant+=(c.montantDevis||0);
+  });
+
+  /* Par catégorie */
+  const byCat={};
+  clients.forEach(c=>{
+    const k=c.categorie||"Non renseigné";
+    if(!byCat[k])byCat[k]={count:0,montant:0};
+    byCat[k].count++;byCat[k].montant+=(c.montantDevis||0);
+  });
+
+  /* Segmentation montant */
+  const seg={petit:0,moyen:0,grand:0};
+  const segM={petit:0,moyen:0,grand:0};
+  clients.forEach(c=>{
+    const m=c.montantDevis||0;
+    if(m<50000){seg.petit++;segM.petit+=m;}
+    else if(m<200000){seg.moyen++;segM.moyen+=m;}
+    else{seg.grand++;segM.grand+=m;}
+  });
+
+  /* Concentration (top 2 clients) */
+  const sorted=[...clients].sort((a,b)=>(b.montantDevis||0)-(a.montantDevis||0));
+  const top2=sorted.slice(0,2).reduce((s,c)=>s+(c.montantDevis||0),0);
+  const concPct=totalDevis?Math.round((top2/totalDevis)*100):0;
+
+  /* Progression objectif */
+  const progPct=objectifCA?Math.min(Math.round((totalEncaisse/objectifCA)*100),100):0;
+
+  /* Par statut (funnel) */
+  const stOrder=["contact","devis","attente","relance","converti","echec"];
+  const stCounts=stOrder.map(k=>({key:k,...ST.find(s=>s.key===k),count:clients.filter(c=>c.statut===k).length,montant:clients.filter(c=>c.statut===k).reduce((s,c)=>s+(c.montantDevis||0),0)}));
+  const maxCount=Math.max(...stCounts.map(s=>s.count),1);
+
+  /* Motifs échec */
+  const byMotif={};
+  echecs.forEach(c=>{const k=c.motifEchec||"—";if(!byMotif[k])byMotif[k]=0;byMotif[k]++;});
+
+  /* Insights automatiques */
+  const insights=[];
+  if(txConv<20)insights.push({type:"warn",ico:"⚠️",title:`Taux de conversion : ${txConv}%`,txt:`Seulement ${conv.length} client${conv.length>1?"s":""} converti${conv.length>1?"s":""} sur ${total}. Un taux < 20 % indique des leviers à activer : relances, révision tarifaire ou ciblage.`});
+  else insights.push({type:"good",ico:"✅",title:`Bon taux de conversion : ${txConv}%`,txt:`${conv.length} client${conv.length>1?"s":""} converti${conv.length>1?"s":""} sur ${total}. Capitalisez sur les canaux et profils qui fonctionnent.`});
+
+  if(concPct>=60)insights.push({type:"warn",ico:"⚡",title:`Concentration élevée : ${concPct}% sur 2 clients`,txt:`Les 2 plus gros dossiers représentent ${concPct}% de votre pipeline. Un risque de dépendance — diversifier le portefeuille.`});
+
+  const bestSrc=srcList[0];
+  if(bestSrc)insights.push({type:"info",ico:"📡",title:`Meilleur canal : ${bestSrc[0]}`,txt:`Source la plus productive avec ${f(bestSrc[1].montant)} FCFA en devis et ${bestSrc[1].count} prospect${bestSrc[1].count>1?"s":""}. Renforcer les actions sur ce canal.`});
+
+  if(actifs.length>=4)insights.push({type:"info",ico:"🔄",title:`${actifs.length} dossiers actifs en cours`,txt:`Pipeline en cours estimé à ${f(pipeW)} FCFA (valeur pondérée). Prioriser les relances sur les dossiers "En attente" pour accélérer la conversion.`});
+
+  if(delaiDF!==null)insights.push({type:"good",ico:"⏱️",title:`Délai devis → facture : ${delaiDF} jour${delaiDF>1?"s":""}`,txt:`Cycle court sur les clients convertis. Objectif : maintenir sous 7 jours pour optimiser la trésorerie.`});
+
+  if(objectifCA&&progPct<50)insights.push({type:"warn",ico:"🎯",title:`Progression objectif : ${progPct}%`,txt:`${f(totalEncaisse)} FCFA encaissés sur un objectif de ${f(objectifCA)} FCFA. Il reste ${f(objectifCA-totalEncaisse)} FCFA à atteindre.`});
+  else if(objectifCA&&progPct>=50)insights.push({type:"good",ico:"🎯",title:`Mi-objectif atteint : ${progPct}%`,txt:`${f(totalEncaisse)} FCFA sur ${f(objectifCA)} FCFA — bonne trajectoire. Maintenir le rythme de conversion.`});
+
+  /* ── Couleurs charts ─────────────────────────────── */
+  const PALETTE=["#1D9E75","#185FA5","#BA7517","#993556","#5F5E5A","#854F0B"];
+
+  /* ── Rendu HTML ─────────────────────────────────── */
+  document.getElementById("tab-analyse").innerHTML=`
+  <!-- KPIs -->
+  <div class="an-kpis">
+    <div class="an-kpi">
+      <div class="an-kpi-val" style="color:#1D9E75;">${txConv}%</div>
+      <div class="an-kpi-lbl">Taux de conversion</div>
+      <div class="an-kpi-sub">${conv.length}/${total} clients</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-val" style="color:#185FA5;">${f(pipeW)}</div>
+      <div class="an-kpi-lbl">Pipeline pondéré (FCFA)</div>
+      <div class="an-kpi-sub">Probabilité réelle</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-val" style="color:${txRecouvr>=100?"#1D9E75":"#BA7517"};">${txRecouvr}%</div>
+      <div class="an-kpi-lbl">Taux de recouvrement</div>
+      <div class="an-kpi-sub">${f(totalEncaisse)} / ${f(totalFacture)} FCFA</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-val" style="color:${delaiDF===null?"var(--text-3)":"#1D9E75"};">${delaiDF!==null?delaiDF+"j":"—"}</div>
+      <div class="an-kpi-lbl">Délai devis → facture</div>
+      <div class="an-kpi-sub">${delaiMoyenContact!==null?"Contact→devis : "+delaiMoyenContact+"j":"Sur clients convertis"}</div>
+    </div>
+    <div class="an-kpi">
+      <div class="an-kpi-val" style="color:#E24B4A;">${txEchec}%</div>
+      <div class="an-kpi-lbl">Taux d'échec</div>
+      <div class="an-kpi-sub">${echecs.length} dossier${echecs.length>1?"s":""} perdu${echecs.length>1?"s":""}</div>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem;">Insights automatiques</div>
+  <div class="insight-grid" style="margin-bottom:1.5rem;">
+    ${insights.map(i=>{
+      const colors={good:"#E1F5EE",warn:"#FFF0C4",info:"#E6F1FB"};
+      return`<div class="insight-card" style="background:${colors[i.type]||"#F1EFE8"}">
+        <div class="insight-ico">${i.ico}</div>
+        <div class="insight-txt"><strong>${i.title}</strong>${i.txt}</div>
+      </div>`;
+    }).join("")}
+  </div>
+
+  <!-- Ligne 1 : Funnel + Objectif CA -->
+  <div class="an-grid2">
+    <div class="an-card">
+      <div class="an-title">Funnel pipeline</div>
+      ${stCounts.map(s=>`
+        <div class="funnel-row">
+          <div class="funnel-lbl">${s.label}</div>
+          <div style="flex:1;">
+            <div class="funnel-bar" style="background:${s.bg};color:${s.tc};width:${Math.max(s.count/maxCount*100,8)}%;">
+              ${s.count} · ${f(s.montant)} F
+            </div>
+          </div>
+        </div>`).join("")}
+    </div>
+    <div class="an-card" style="display:flex;flex-direction:column;">
+      <div class="an-title">Objectif CA annuel</div>
+      ${objectifCA?`
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 110">
+            <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="var(--bg-2)" stroke-width="18" stroke-linecap="round"/>
+            <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#1D9E75" stroke-width="18" stroke-linecap="round"
+              stroke-dasharray="${Math.PI*80}" stroke-dashoffset="${Math.PI*80*(1-progPct/100)}"
+              style="transition:stroke-dashoffset .6s;"/>
+            <text x="100" y="88" text-anchor="middle" font-size="22" font-weight="700" fill="var(--text)">${progPct}%</text>
+            <text x="100" y="104" text-anchor="middle" font-size="10" fill="var(--text-2)">de l'objectif atteint</text>
+          </svg>
+          <div style="display:flex;justify-content:space-between;width:100%;font-size:11px;color:var(--text-2);margin-top:4px;">
+            <span>Encaissé : <strong style="color:#1D9E75;">${f(totalEncaisse)} F</strong></span>
+            <span>Objectif : <strong>${f(objectifCA)} F</strong></span>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-3);">Reste à atteindre : <strong style="color:var(--text);">${f(Math.max(objectifCA-totalEncaisse,0))} FCFA</strong></div>
+        </div>`
+      :`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text-3);">
+          <i class="ti ti-target" style="font-size:32px;"></i>
+          <div style="font-size:12px;text-align:center;">Aucun objectif défini.<br>Cliquez sur <strong style="color:var(--text);">"Objectif CA"</strong> dans le header.</div>
+        </div>`}
+    </div>
+  </div>
+
+  <!-- Ligne 2 : Performance par source + Répartition pipeline (donut) -->
+  <div class="an-grid2">
+    <div class="an-card">
+      <div class="an-title">Performance par canal d'acquisition</div>
+      ${srcList.map(([src,d])=>{
+        const tx=d.count?Math.round((d.conv/d.count)*100):0;
+        const pct=maxSrcMontant?Math.round((d.montant/maxSrcMontant)*100):0;
+        return`<div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:500;">${src}</span>
+            <span style="font-size:11px;color:var(--text-2);">${d.count} prospect${d.count>1?"s":""} · tx conv. <strong style="color:${tx>=30?"#1D9E75":"#BA7517"};">${tx}%</strong></span>
+          </div>
+          <div class="src-bar-bg">
+            <div class="src-bar-fill" style="width:${pct}%;background:var(--primary);"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">${f(d.montant)} FCFA en devis · ${f(d.montant/d.count)} FCFA moy.</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="an-card">
+      <div class="an-title">Répartition pipeline par montant</div>
+      <div style="position:relative;height:200px;"><canvas id="an-donut-st"></canvas></div>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+        ${stCounts.filter(s=>s.montant>0).map((s,i)=>`
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;">
+            <div style="width:10px;height:10px;border-radius:3px;background:${PALETTE[i%PALETTE.length]};flex-shrink:0;"></div>
+            ${s.label} · ${Math.round((s.montant/totalDevis)*100)}%
+          </div>`).join("")}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ligne 3 : Segmentation montant + Catégories -->
+  <div class="an-grid2">
+    <div class="an-card">
+      <div class="an-title">Segmentation par taille de devis</div>
+      <div style="position:relative;height:180px;margin-bottom:12px;"><canvas id="an-bar-seg"></canvas></div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        ${[{lbl:"Petits (< 50 000 F)",n:seg.petit,m:segM.petit,c:"#5DCAA5"},
+           {lbl:"Moyens (50k–200k F)",n:seg.moyen,m:segM.moyen,c:"#185FA5"},
+           {lbl:"Grands (> 200 000 F)",n:seg.grand,m:segM.grand,c:"#BA7517"}].map(s=>`
+          <div class="seg-row">
+            <div class="seg-lbl" style="font-size:11px;">${s.lbl}</div>
+            <div class="seg-count">${s.n}</div>
+            <div style="flex:1;height:8px;background:var(--bg-2);border-radius:99px;overflow:hidden;">
+              <div style="width:${total?Math.round(s.n/total*100):0}%;height:100%;background:${s.c};border-radius:99px;"></div>
+            </div>
+            <div style="font-size:11px;font-weight:600;width:90px;text-align:right;">${f(s.m)} F</div>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div class="an-card">
+      <div class="an-title">Répartition par type de prestation</div>
+      <div style="position:relative;height:180px;margin-bottom:12px;"><canvas id="an-donut-prest"></canvas></div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;">
+        ${Object.entries(byPrest).sort((a,b)=>b[1].montant-a[1].montant).map(([k,v],i)=>`
+          <div class="seg-row">
+            <div style="width:10px;height:10px;border-radius:3px;background:${PALETTE[i%PALETTE.length]};flex-shrink:0;"></div>
+            <div style="flex:1;font-size:11px;">${k}</div>
+            <div style="font-size:11px;font-weight:500;">${v.count} · ${f(v.montant)} F</div>
+          </div>`).join("")}
+      </div>
+    </div>
+  </div>
+
+  <!-- Ligne 4 : Catégories clients + Motifs d'échec -->
+  <div class="an-grid2">
+    <div class="an-card">
+      <div class="an-title">Catégories clients</div>
+      ${Object.entries(byCat).sort((a,b)=>b[1].montant-a[1].montant).map(([k,v],i)=>{
+        const pct=total?Math.round((v.count/total)*100):0;
+        return`<div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:500;">${k}</span>
+            <span style="font-size:11px;color:var(--text-2);">${v.count} client${v.count>1?"s":""} · ${pct}%</span>
+          </div>
+          <div class="src-bar-bg"><div class="src-bar-fill" style="width:${pct}%;background:${PALETTE[i%PALETTE.length]};"></div></div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:3px;">${f(v.montant)} FCFA de devis</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="an-card">
+      <div class="an-title">Analyse des échecs & motifs</div>
+      ${echecs.length===0?`<div style="color:var(--text-3);font-size:12px;text-align:center;padding:2rem 0;"><i class="ti ti-mood-happy" style="font-size:28px;display:block;margin-bottom:8px;"></i>Aucun dossier perdu à ce jour.</div>`:`
+        <div style="margin-bottom:1rem;">
+          ${Object.entries(byMotif).map(([k,v])=>`
+            <div class="delai-row">
+              <span style="font-size:12px;">${k}</span>
+              <span style="font-size:12px;font-weight:600;color:#E24B4A;">${v} cas</span>
+            </div>`).join("")}
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;">
+          ${echecs.map(c=>`
+            <div class="delai-row">
+              <span style="font-size:12px;font-weight:500;">${c.client}</span>
+              <span style="font-size:11px;color:var(--text-2);">${f(c.montantDevis)} FCFA · ${fd(c.dateDevis)}</span>
+            </div>`).join("")}
+        </div>`}
+    </div>
+  </div>
+
+  <!-- Tableau détaillé clients -->
+  <div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:.5rem 0 .75rem;">Classement clients par valeur de devis</div>
+  <div class="tbl-wrap" style="margin-bottom:1.5rem;">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Client</th><th>Zone</th><th>Catégorie</th><th>Canal</th>
+        <th>Prestation</th><th>Devis</th><th>Statut</th><th>Cycle (j)</th><th>Résultat</th>
+      </tr></thead>
+      <tbody>${sorted.map((c,i)=>{
+        const s=gs(c.statut);
+        const cycleJ=c.dateContact&&c.dateDevis?Math.round((new Date(c.dateDevis)-new Date(c.dateContact))/(864e5)):null;
+        const res=(c.paiementsRecus||0)-(c.depenses||0);
+        return`<tr>
+          <td style="color:var(--text-3);font-weight:600;">${i+1}</td>
+          <td style="font-weight:500;">${c.client}</td>
+          <td style="font-size:12px;color:var(--text-2);">${c.zone||"—"}</td>
+          <td style="font-size:12px;">${c.categorie||"—"}</td>
+          <td style="font-size:12px;">${c.provenance}</td>
+          <td style="font-size:11px;color:var(--text-2);">${c.typePrestation||"—"}</td>
+          <td style="font-weight:600;">${f(c.montantDevis)}</td>
+          <td><span class="badge" style="background:${s.bg};color:${s.tc};">${s.label}</span></td>
+          <td style="text-align:center;color:var(--text-3);">${cycleJ!==null?cycleJ+"j":"—"}</td>
+          <td style="font-weight:500;color:${res>0?"#1D9E75":res<0?"#E24B4A":"var(--text-3)"};">${res===0?"—":(res>0?"+":"")+f(res)}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>
+  </div>`;
+
+  /* ── Charts ──────────────────────────────────────── */
+  setTimeout(()=>{
+    /* Donut statuts */
+    const cvSt=document.getElementById("an-donut-st");
+    if(cvSt){
+      const stData=stCounts.filter(s=>s.montant>0);
+      anCharts.donutSt=new Chart(cvSt,{type:"doughnut",data:{
+        labels:stData.map(s=>s.label),
+        datasets:[{data:stData.map(s=>s.montant),backgroundColor:PALETTE,borderWidth:2,borderColor:"var(--bg-card)"}]
+      },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>" "+f(ctx.raw)+" FCFA"}}}}});
+    }
+
+    /* Bar segmentation */
+    const cvSeg=document.getElementById("an-bar-seg");
+    if(cvSeg){
+      anCharts.barSeg=new Chart(cvSeg,{type:"bar",data:{
+        labels:["< 50 000","50k – 200k","> 200 000"],
+        datasets:[{data:[seg.petit,seg.moyen,seg.grand],backgroundColor:["#5DCAA5","#185FA5","#BA7517"],borderRadius:6}]
+      },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{ticks:{stepSize:1},beginAtZero:true}}}});
+    }
+
+    /* Donut prestations */
+    const cvPr=document.getElementById("an-donut-prest");
+    if(cvPr){
+      const prData=Object.entries(byPrest).sort((a,b)=>b[1].montant-a[1].montant);
+      anCharts.donutPr=new Chart(cvPr,{type:"doughnut",data:{
+        labels:prData.map(([k])=>k),
+        datasets:[{data:prData.map(([,v])=>v.montant),backgroundColor:PALETTE,borderWidth:2,borderColor:"var(--bg-card)"}]
+      },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>" "+f(ctx.raw)+" FCFA"}}}}});
+    }
+  },80);
+}
+
+function moveCard(id,ns){
+  const c=clients.find(x=>x.id===id);
+  if(c&&ns){c.statut=ns;save();refresh();toast("Déplacé : "+gs(ns).label);}
+}
+
+function openAdd(){editId=null;showModal(formH(null));}
+function openEdit(id){editId=id;showModal(formH(clients.find(c=>c.id===id)));}
+
+function openAddDep(){
+  showModal(`
+    <div class="modal-hdr"><span class="modal-title">Nouvelle dépense générale</span>
+      <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:1.25rem;">
+      <div><label class="fl">Libellé</label><input type="text" id="dl" placeholder="Ex: Carburant, matériel..."></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label class="fl">Montant (FCFA)</label><input type="number" id="dm" min="0"></div>
+        <div><label class="fl">Date</label><input type="date" id="dd" value="${new Date().toISOString().slice(0,10)}"></div>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-s" onclick="closeModal()">Annuler</button>
+      <button class="btn-p" onclick="saveDep()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
+    </div>`);
+}
+
+function saveDep(){
+  const l=document.getElementById("dl")?.value?.trim();
+  const m=parseFloat(document.getElementById("dm")?.value)||0;
+  const d=document.getElementById("dd")?.value;
+  if(!l||!m){alert("Libellé et montant requis.");return;}
+  const nId=depGlob.length?Math.max(...depGlob.map(x=>x.id))+1:1;
+  depGlob.push({id:nId,libelle:l,montant:m,date:d});
+  save();closeModal();refresh();toast("Dépense enregistrée");
+}
+
+function delDep(id){
+  if(confirm("Supprimer cette dépense ?")){
+    depGlob=depGlob.filter(d=>d.id!==id);
+    save();refresh();toast("Dépense supprimée");
+  }
+}
+
+function showModal(h){document.getElementById("mbox").innerHTML=h;document.getElementById("modal").style.display="flex";}
+function closeModal(){document.getElementById("modal").style.display="none";editId=null;}
+
+function formH(c){
+  const ie=!!c;
+  return`<div class="modal-hdr">
+    <span class="modal-title">${ie?"Modifier · "+c.client:"Nouveau client / prospect"}</span>
+    <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x" aria-hidden="true"></i></button>
+  </div>
+  <div class="form-grid">
+    <div class="fg-full"><label class="fl">Nom du client / prospect *</label><input type="text" id="fc" value="${c?.client||""}"></div>
+    <div>
+      <label class="fl">Source de contact</label>
+      <select id="fp">${SOURCES.map(p=>`<option ${c?.provenance===p?"selected":""}>${p}</option>`).join("")}</select>
+    </div>
+    <div><label class="fl">Date premier contact</label><input type="date" id="fdc" value="${c?.dateContact||new Date().toISOString().slice(0,10)}"></div>
+    <div><label class="fl">Date du devis</label><input type="date" id="fd" value="${c?.dateDevis||new Date().toISOString().slice(0,10)}"></div>
+    <div>
+      <label class="fl">Statut pipeline</label>
+      <select id="fs">${ST.map(s=>`<option value="${s.key}" ${c?.statut===s.key?"selected":""}>${s.label}</option>`).join("")}</select>
+    </div>
+    <div class="fg-full">
+      <label class="fl">Type de prestation</label>
+      <select id="ftp">${PRESTATIONS.map(p=>`<option ${c?.typePrestation===p?"selected":""}>${p}</option>`).join("")}</select>
+    </div>
+    <div>
+      <label class="fl">Catégorie client</label>
+      <select id="fcat">${CATEGORIES.map(p=>`<option ${c?.categorie===p?"selected":""}>${p}</option>`).join("")}</select>
+    </div>
+    <div><label class="fl">Zone géographique</label><input type="text" id="fzone" placeholder="Ex: Cotonou, Akpakpa…" value="${c?.zone||""}"></div>
+    <div><label class="fl">Montant devis (FCFA)</label><input type="number" id="fmd" min="0" value="${c?.montantDevis||""}"></div>
+    <div>
+      <label class="fl">Motif d'échec</label>
+      <select id="fmot">${MOTIFS.map(p=>`<option ${c?.motifEchec===p?"selected":""}>${p}</option>`).join("")}</select>
+    </div>
+    <div class="fg-full"><label class="fl">Commentaire / notes</label><textarea id="fco">${c?.commentaire||""}</textarea></div>
+    <div class="fg-div">Finances</div>
+    <div><label class="fl">Montant facturé (FCFA)</label><input type="number" id="fmf" min="0" value="${c?.montantFacture||""}"></div>
+    <div><label class="fl">Date de facturation</label><input type="date" id="fdf" value="${c?.dateFacture||""}"></div>
+    <div><label class="fl">Paiements reçus (FCFA)</label><input type="number" id="fp2" min="0" value="${c?.paiementsRecus||""}"></div>
+    <div><label class="fl">Dépenses liées (FCFA)</label><input type="number" id="fdp" min="0" value="${c?.depenses||""}"></div>
+    <div class="fg-full">
+      <label class="fl">Attestation</label>
+      <select id="fat">
+        <option value="non" ${!c||c.attestation!=='envoye'?'selected':''}>Non</option>
+        <option value="envoye" ${c?.attestation==='envoye'?'selected':''}>Envoyé</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-footer">
+    ${ie?`<button class="btn-s btn-danger" onclick="delClient(${c.id})" style="margin-right:auto;"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>`:""}
+    <button class="btn-s" onclick="closeModal()">Annuler</button>
+    <button class="btn-p" onclick="saveClient()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
+  </div>`;
+}
+
+function saveClient(){
+  const g=id=>document.getElementById(id)?.value||"";
+  const gn=id=>parseFloat(g(id))||0;
+  const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
+    typePrestation:g("ftp"),categorie:g("fcat"),zone:g("fzone")||"—",
+    motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs"),commentaire:g("fco"),
+    montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),depenses:gn("fdp"),attestation:g("fat")||"non"};
+  if(!d.client){alert("Veuillez saisir le nom du client.");return;}
+  if(editId){
+    const i=clients.findIndex(c=>c.id===editId);
+    if(i>=0)clients[i]={...clients[i],...d};
+    toast("Client mis à jour");
+  }else{
+    clients.push({id:nextId++,...d});
+    toast("Client ajouté au pipeline");
+  }
+  save();closeModal();refresh();
+}
+
+function delClient(id){
+  if(confirm("Supprimer ce client définitivement ?")){
+    clients=clients.filter(c=>c.id!==id);
+    save();closeModal();refresh();toast("Client supprimé");
+  }
+}
+
+function exportCSV(){
+  const hdrs=["N°","Client","Provenance","Type prestation","Catégorie","Zone","Date contact","Date devis","Montant devis","Statut","Motif échec","Attestation","Date facture","Montant facturé","Paiements reçus","Dépenses liées","Commentaire"];
+  const rows=clients.map((c,i)=>[i+1,c.client,c.provenance,c.typePrestation||'',c.categorie||'',c.zone||'',c.dateContact||'',c.dateDevis,c.montantDevis,gs(c.statut).label,c.motifEchec||'',c.attestation==='envoye'?'Envoyé':'Non',c.dateFacture,c.montantFacture,c.paiementsRecus,c.depenses,c.commentaire]);
+  const csv=[hdrs,...rows].map(r=>r.map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="GSE_Pipeline_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();URL.revokeObjectURL(url);
+  toast("Export CSV téléchargé");
+}
+
+let toastTimer;
+function toast(msg){
+  clearTimeout(toastTimer);
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  toastTimer=setTimeout(()=>el.classList.remove("show"),2800);
+}
+
+function sw(tab,btn){
+  activeTab=tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  ["kanban","table","finance","analyse"].forEach(t=>document.getElementById("tab-"+t).style.display=t===tab?"block":"none");
+  render(tab);
+}
+
+function render(t){renderKPIs();if(t==="kanban")renderKanban();else if(t==="table")renderTable();else if(t==="finance")renderFinance();else if(t==="analyse")renderAnalyse();}
+function refresh(){render(activeTab);}
+
+render("kanban");
+updateObjectifLabel();
+
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+</script>
+</body>
+</html>
