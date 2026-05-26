@@ -30,7 +30,7 @@ export async function GET() {
       commentaire: d.description || "",
       dateDevis: d.date_envoi ? d.date_envoi.split("T")[0] : (d.created_at ? d.created_at.split("T")[0] : ""),
       dateFacture: d.date_facture_crm || "",
-      montantFacture: d.montant_facture_crm || 0,
+      montantFacture: d.montant_facture_crm || (d.crm_statut === "converti" ? d.montant_net : 0),
       depenses: d.depenses_client || 0,
       paiementsRecus: d.paiements_recus || 0,
       dateContact: d.date_contact || (d.created_at ? d.created_at.split("T")[0] : ""),
@@ -57,7 +57,12 @@ export async function POST(req) {
   const { action } = body
 
   if (action === "move") {
-    await supabase.from("devis").update({ crm_statut: body.statut }).eq("id", body.id)
+    const updateData = { crm_statut: body.statut }
+    if (body.statut === "converti") {
+      const { data: row } = await supabase.from("devis").select("montant_net, montant_facture_crm").eq("id", body.id).single()
+      if (row && !row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0
+    }
+    await supabase.from("devis").update(updateData).eq("id", body.id)
     return Response.json({ ok: true })
   }
 
