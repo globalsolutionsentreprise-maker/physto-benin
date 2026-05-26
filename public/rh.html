@@ -164,6 +164,7 @@ const POSTES=["Directeur Général","Responsable Commercial","Agent Commercial",
 const STATUTS=[
   {key:"actif",label:"Actif",bg:"#E1F5EE",color:"#0F6E56"},
   {key:"en_essai",label:"En essai",bg:"#FFF8E6",color:"#BA7517"},
+  {key:"prestataire",label:"Prestataire",bg:"#EEF2FF",color:"#4338CA"},
   {key:"inactif",label:"Inactif",bg:"#FCEBEB",color:"#E24B4A"},
 ];
 const INTERV_STATUTS=[
@@ -242,6 +243,7 @@ function render(){renderKPIs();renderEquipe();renderPlanning();renderAlertes();}
 function renderKPIs(){
   const actifs=membres.filter(m=>m.statut==="actif").length;
   const essai=membres.filter(m=>m.statut==="en_essai").length;
+  const presta=membres.filter(m=>m.statut==="prestataire").length;
   const alerts=buildAlerts().length;
   const thisWeek=weekDays(0);
   const intSem=plannings.filter(p=>p.statut==="planifiee"&&thisWeek.some(d=>d.date===p.dateIntervention)).length;
@@ -249,8 +251,8 @@ function renderKPIs(){
     <div class="kpi-card">
       <div class="kpi-ico" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-users"></i></div>
       <div class="kpi-lbl">Personnel actif</div>
-      <div class="kpi-val">${actifs}</div>
-      <div class="kpi-sub">${essai>0?essai+" en période d'essai":membres.length+" enregistrés"}</div>
+      <div class="kpi-val">${actifs+presta}</div>
+      <div class="kpi-sub">${essai>0?essai+" en essai · ":""}${presta>0?presta+" prestataire"+(presta>1?"s":""):membres.length+" enregistrés"}</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-ico" style="background:var(--primary-bg);color:var(--primary);"><i class="ti ti-calendar-check"></i></div>
@@ -383,7 +385,7 @@ function renderPlanning(){
       h+=`<div class="pg-cell${d.isToday?" today-col":""}" onclick="openNewIntervention('${d.date}','${m.id}')">
         ${dayIntervs.map(p=>`<div class="interv-chip ${p.statut}" onclick="event.stopPropagation();openEditInterv('${p.id}')">
           <div style="font-weight:600;">${p.clientNom||"Client"}</div>
-          <div style="opacity:.8;">${p.heureDebut||""}</div>
+          <div style="opacity:.8;">${p.heureDebut||""}${p.montantPrestataire>0?` · ${p.montantPrestataire.toLocaleString("fr-FR")} F`:""}</div>
         </div>`).join("")}
         ${!dayIntervs.length?`<div class="pg-add"><i class="ti ti-plus"></i></div>`:""}
       </div>`;
@@ -530,10 +532,14 @@ function intervForm(p,datePrefill,persPrefill,clientPrefill){
     <div><label class="fl">Date *</label><input type="date" id="idate" value="${p?.dateIntervention||datePrefill||new Date().toISOString().slice(0,10)}"></div>
     <div><label class="fl">Heure</label><input type="time" id="iheure" value="${p?.heureDebut||"08:00"}"></div>
     <div class="fg-full"><label class="fl">Technicien assigné</label>
-      <select id="iper">
+      <select id="iper" onchange="onPersonnelChange(this.value)">
         <option value="">— Non assigné —</option>
-        ${membres.filter(m=>m.statut!=="inactif").map(m=>`<option value="${m.id}" ${(p?.personnelId||persPrefill)===m.id?"selected":""}>${[m.prenom,m.nom].filter(Boolean).join(" ")} · ${m.poste}</option>`).join("")}
+        ${membres.filter(m=>m.statut!=="inactif").map(m=>`<option value="${m.id}" ${(p?.personnelId||persPrefill)===m.id?"selected":""}>${[m.prenom,m.nom].filter(Boolean).join(" ")} · ${m.poste}${m.statut==="prestataire"?" (prestataire)":""}</option>`).join("")}
       </select></div>
+    <div id="imontant-wrap" style="${(()=>{const sel=p?.personnelId||persPrefill;const m=membres.find(m=>m.id===sel);return m?.statut==="prestataire"?"":"opacity:.45;"})()}">
+      <label class="fl">Coût prestataire (FCFA) <span style="font-weight:400;color:var(--text-3);">— laisser 0 si salarié</span></label>
+      <input type="number" id="imontant" min="0" value="${p?.montantPrestataire||0}" placeholder="0">
+    </div>
     <div><label class="fl">Statut</label>
       <select id="ist">${INTERV_STATUTS.map(s=>`<option value="${s.key}" ${p?.statut===s.key?"selected":""}>${s.label}</option>`).join("")}</select></div>
     <div><label class="fl">Adresse / Lieu</label><input id="iadr" value="${p?.adresse||""}"></div>
@@ -546,10 +552,18 @@ function intervForm(p,datePrefill,persPrefill,clientPrefill){
   </div>`;
 }
 
+function onPersonnelChange(val){
+  const m=membres.find(m=>m.id===val);
+  const wrap=document.getElementById("imontant-wrap");
+  if(wrap)wrap.style.opacity=m?.statut==="prestataire"?"1":".45";
+}
+
 async function saveInterv(){
   const g=id=>document.getElementById(id)?.value||"";
+  const montantPrestataire=parseInt(document.getElementById("imontant")?.value||"0")||0;
   const d={clientNom:g("icl").trim(),devisId:g("idev")||null,dateIntervention:g("idate"),
-    heureDebut:g("iheure"),personnelId:g("iper")||null,statut:g("ist"),adresse:g("iadr"),notes:g("ino")};
+    heureDebut:g("iheure"),personnelId:g("iper")||null,statut:g("ist"),adresse:g("iadr"),notes:g("ino"),
+    montantPrestataire};
   if(!d.clientNom){alert("Le nom du client est obligatoire.");return;}
   if(!d.dateIntervention){alert("La date est obligatoire.");return;}
   if(editIntervId){

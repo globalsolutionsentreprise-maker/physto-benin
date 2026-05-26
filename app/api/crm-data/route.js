@@ -12,10 +12,17 @@ function mapStatut(statut) {
 }
 
 export async function GET() {
-  const [{ data: devisList }, { data: depenses }] = await Promise.all([
+  const [{ data: devisList }, { data: depenses }, { data: interventions }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
+    supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
   ])
+
+  // Somme des coûts prestataires par devis
+  const prestByDevis = {}
+  for (const i of (interventions || [])) {
+    if (i.devis_id) prestByDevis[i.devis_id] = (prestByDevis[i.devis_id] || 0) + (i.montant_prestataire || 0)
+  }
 
   const clients = (devisList || []).map(d => {
     const cl = d.clients || {}
@@ -43,6 +50,7 @@ export async function GET() {
       dureeContratMois: d.duree_contrat_mois || 12,
       frequenceIntervention: d.frequence_intervention || "trimestrielle",
       dateDebutContrat: d.date_debut_contrat || "",
+      depensesPrestataires: prestByDevis[d.id] || 0,
     }
   })
 
@@ -50,6 +58,7 @@ export async function GET() {
     id: d.id,
     libelle: d.libelle,
     montant: d.montant,
+    categorie: d.categorie || "autre",
     date: d.date || (d.created_at ? d.created_at.split("T")[0] : ""),
   }))
 
@@ -138,9 +147,9 @@ export async function POST(req) {
   }
 
   if (action === "add_depense") {
-    const { libelle, montant, date } = body
-    const { data: dep } = await supabase.from("depenses_globales").insert({ libelle, montant, date: date || null }).select().single()
-    return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, date: dep.date || dep.created_at?.split("T")[0] || "" } })
+    const { libelle, montant, date, categorie } = body
+    const { data: dep } = await supabase.from("depenses_globales").insert({ libelle, montant, date: date || null, categorie: categorie || "autre" }).select().single()
+    return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, categorie: dep.categorie || "autre", date: dep.date || dep.created_at?.split("T")[0] || "" } })
   }
 
   if (action === "del_depense") {

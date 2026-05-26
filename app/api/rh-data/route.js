@@ -27,6 +27,7 @@ export async function GET() {
     id: i.id, devisId: i.devis_id, personnelId: i.personnel_id,
     dateIntervention: i.date_intervention, heureDebut: i.heure_debut?.slice(0, 5) || "08:00",
     statut: i.statut, clientNom: i.client_nom, adresse: i.adresse, notes: i.notes,
+    montantPrestataire: i.montant_prestataire || 0,
     personnel: i.personnel ? { id: i.personnel.id, nom: [i.personnel.prenom, i.personnel.nom].filter(Boolean).join(" "), poste: i.personnel.poste } : null,
   }))
 
@@ -72,21 +73,23 @@ export async function POST(req) {
   }
 
   if (action === "add_intervention") {
-    const { devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes } = body
+    const { devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes, montantPrestataire } = body
     const { data } = await supabase.from("interventions").insert({
       devis_id: devisId || null, personnel_id: personnelId || null,
       date_intervention: dateIntervention, heure_debut: heureDebut || "08:00",
       statut: statut || "planifiee", client_nom: clientNom, adresse, notes,
+      montant_prestataire: montantPrestataire || 0,
     }).select().single()
     return Response.json({ ok: true, id: data?.id })
   }
 
   if (action === "save_intervention") {
-    const { id, devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes } = body
+    const { id, devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes, montantPrestataire } = body
     await supabase.from("interventions").update({
       devis_id: devisId || null, personnel_id: personnelId || null,
       date_intervention: dateIntervention, heure_debut: heureDebut || "08:00",
       statut: statut || "planifiee", client_nom: clientNom, adresse, notes,
+      montant_prestataire: montantPrestataire || 0,
     }).eq("id", id)
     return Response.json({ ok: true })
   }

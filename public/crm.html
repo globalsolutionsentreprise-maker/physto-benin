@@ -269,7 +269,7 @@ function renderKPIs(){
   const tf =clients.reduce((s,c)=>s+(c.montantDevis||0),0);
   const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
   const tp =clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
-  const td =clients.reduce((s,c)=>s+(c.depenses||0),0)+depGlob.reduce((s,d)=>s+d.montant,0);
+  const td =clients.reduce((s,c)=>s+(c.depenses||0)+(c.depensesPrestataires||0),0)+depGlob.reduce((s,d)=>s+d.montant,0);
   const r  =tfa-td;
   const conv=clients.filter(c=>c.statut==="converti").length;
   const pipe=clients.filter(c=>!["converti","echec"].includes(c.statut)).length;
@@ -378,8 +378,9 @@ function applyF(){
 function renderFinance(){
   const tp =clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
   const tdc=clients.reduce((s,c)=>s+(c.depenses||0),0);
+  const tdp=clients.reduce((s,c)=>s+(c.depensesPrestataires||0),0);
   const tdg=depGlob.reduce((s,d)=>s+d.montant,0);
-  const td =tdc+tdg;
+  const td =tdc+tdp+tdg;
   const tf =clients.reduce((s,c)=>s+(c.montantDevis||0),0);
   const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
   const r  =tfa-td;
@@ -394,14 +395,14 @@ function renderFinance(){
     <div class="tbl-wrap" style="margin-bottom:1.5rem;"><table>
       <thead><tr><th>Client</th><th>Statut</th><th>Devis</th><th>Facturé</th><th>Reçu</th><th>Dépenses</th><th>Résultat</th></tr></thead>
       <tbody>${clients.map(c=>{
-        const s=gs(c.statut);const res=(c.paiementsRecus||0)-(c.depenses||0);
+        const s=gs(c.statut);const depTotal=(c.depenses||0)+(c.depensesPrestataires||0);const res=(c.paiementsRecus||0)-depTotal;
         return`<tr>
           <td style="font-weight:500;">${c.client}</td>
           <td><span class="badge" style="background:${s.bg};color:${s.tc};">${s.label}</span></td>
           <td>${f(c.montantDevis)}</td>
           <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
           <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
-          <td style="color:${c.depenses?"#E24B4A":"var(--text-3)"};">${c.depenses?f(c.depenses):"—"}</td>
+          <td style="color:${depTotal?"#E24B4A":"var(--text-3)"};">${depTotal?f(depTotal):"—"}${c.depensesPrestataires>0?`<div style="font-size:10px;color:#6366F1;">dont ${f(c.depensesPrestataires)} prestataires</div>`:""}</td>
           <td style="font-weight:500;color:${res>0?"#1D9E75":res<0?"#E24B4A":"var(--text-3)"};">${res===0?"—":(res>0?"+":"")+f(res)}</td>
         </tr>`;
       }).join("")}</tbody>
@@ -412,13 +413,14 @@ function renderFinance(){
       <button class="btn-s" style="font-size:12px;" onclick="openAddDep()"><i class="ti ti-plus" aria-hidden="true"></i> Ajouter</button>
     </div>
     <div class="tbl-wrap" style="margin-bottom:1.5rem;"><table>
-      <thead><tr><th>Libellé</th><th>Date</th><th>Montant</th><th></th></tr></thead>
+      <thead><tr><th>Catégorie</th><th>Libellé</th><th>Date</th><th>Montant</th><th></th></tr></thead>
       <tbody>
-        ${depGlob.map(d=>`<tr>
-          <td>${d.libelle}</td><td>${fd(d.date)}</td>
-          <td style="color:#E24B4A;font-weight:500;">${f(d.montant)} FCFA</td>
+        ${depGlob.map(d=>{const cat=DEP_CATS.find(c=>c.key===d.categorie)||DEP_CATS[3];return`<tr>
+          <td style="white-space:nowrap;">${cat.label}</td>
+          <td>${d.libelle}</td><td style="white-space:nowrap;">${fd(d.date)}</td>
+          <td style="color:#E24B4A;font-weight:500;white-space:nowrap;">${f(d.montant)} FCFA</td>
           <td><button class="btn-s btn-danger" style="padding:4px 9px;font-size:12px;" onclick="delDep('${d.id}')"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
-        </tr>`).join("")}
+        </tr>`;}).join("")}
         <tr><td colspan="2" style="font-weight:500;">Total</td><td style="font-weight:500;color:#E24B4A;">${f(tdg)} FCFA</td><td></td></tr>
       </tbody>
     </table></div>
@@ -890,12 +892,22 @@ function moveCard(id,ns){
 function openAdd(){editId=null;showModal(formH(null));}
 function openEdit(id){editId=id;showModal(formH(clients.find(c=>c.id===id)));}
 
+const DEP_CATS=[
+  {key:"transport",label:"🚗 Transport"},
+  {key:"produits",label:"🧪 Produits"},
+  {key:"materiels",label:"🔧 Matériels"},
+  {key:"autre",label:"📌 Autre"},
+];
+
 function openAddDep(){
   showModal(`
     <div class="modal-hdr"><span class="modal-title">Nouvelle dépense générale</span>
       <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x" aria-hidden="true"></i></button></div>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:1.25rem;">
-      <div><label class="fl">Libellé</label><input type="text" id="dl" placeholder="Ex: Carburant, matériel..."></div>
+      <div><label class="fl">Catégorie</label>
+        <select id="dcat">${DEP_CATS.map(c=>`<option value="${c.key}">${c.label}</option>`).join("")}</select>
+      </div>
+      <div><label class="fl">Libellé <span style="color:var(--text-3);font-weight:400;">— préciser si "Autre"</span></label><input type="text" id="dl" placeholder="Ex: Carburant Cotonou, Perméthrine 5L..."></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div><label class="fl">Montant (FCFA)</label><input type="number" id="dm" min="0"></div>
         <div><label class="fl">Date</label><input type="date" id="dd" value="${new Date().toISOString().slice(0,10)}"></div>
@@ -911,9 +923,10 @@ async function saveDep(){
   const l=document.getElementById("dl")?.value?.trim();
   const m=parseFloat(document.getElementById("dm")?.value)||0;
   const d=document.getElementById("dd")?.value;
+  const cat=document.getElementById("dcat")?.value||"autre";
   if(!l||!m){alert("Libellé et montant requis.");return;}
   try{
-    const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_depense',libelle:l,montant:m,date:d})});
+    const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_depense',libelle:l,montant:m,date:d,categorie:cat})});
     const result=await res.json();
     if(result.dep)depGlob.push(result.dep);
   }catch(e){}
