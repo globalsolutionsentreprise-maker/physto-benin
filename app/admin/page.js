@@ -407,6 +407,7 @@ export default function Admin() {
     { id: "equipe", label: "Notre Equipe" },
     { id: "clients", label: "Clients & Devis" },
     { id: "crm", label: "📊 CRM Pipeline" },
+    { id: "rh", label: "👥 Équipe & Planning" },
   ]
 
   if (!connecte) {
@@ -807,6 +808,16 @@ export default function Admin() {
             </div>
           )}
 
+          {onglet === "rh" && (
+            <div style={{ margin: "-32px" }}>
+              <iframe
+                src="/api/rh-frame"
+                title="Équipe & Planning GSE"
+                style={{ width: "100%", height: "calc(100vh - 64px)", border: "none", display: "block" }}
+              />
+            </div>
+          )}
+
         </div>
       </div>
     </main>
@@ -830,6 +841,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [validating, setValidating] = React.useState(null)
   const [certModal, setCertModal] = React.useState(null)
   const [certForm, setCertForm] = React.useState({})
+  const [certSaving, setCertSaving] = React.useState(false)
   const [ficheModal, setFicheModal] = React.useState(null)
   const [ficheForm, setFicheForm] = React.useState({})
   const [savingFiche, setSavingFiche] = React.useState(false)
@@ -1088,38 +1100,47 @@ function SectionClientsDevis({ db, agrement }) {
       dateDebut: '',
       dateFin: '',
       matiere1: type === 'desinsect' ? 'Deltaméthrine SC 12.5%' : 'Brodifacoum 0.005%',
-      obs1: 'Homologué CNEIP / DPV APV / CNGP-BEN',
       matiere2: type === 'desinsect' ? 'Cyperméthrine 10 CE' : 'Bromadiolone 0.005%',
-      obs2: 'Homologué CNEIP / DPV APV / CNGP-BEN',
       matiere3: '',
-      obs3: '',
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
 
-  async function genererCertificat() {
-    var html = buildCertificatHtml(certModal.type, certForm)
-    var w = window.open('', '_blank', 'width=920,height=1050')
-    if (w) { w.document.write(html); w.document.close() }
+  async function saveCertificat() {
+    setCertSaving(true)
     var type = certModal.type
     var devisId = certModal.devis.id
     var clientId = certModal.devis.client_id
     var editingId = certModal.editingId || null
     var existingNumero = certModal.existingNumero || null
     var savedForm = Object.assign({}, certForm)
-    setCertModal(null)
     try {
       if (editingId) {
-        await db.from('certificats').update({ form_data: savedForm }).eq('id', editingId)
-        setMsg('✓ Certificat ' + existingNumero + ' mis à jour — imprimez en PDF')
+        var { error: upErr } = await db.from('certificats').update({ form_data: savedForm }).eq('id', editingId)
+        if (upErr) { setMsg('Erreur: ' + upErr.message); setCertSaving(false); return }
+        setMsg('✓ Certificat ' + existingNumero + ' mis à jour')
       } else {
         var { data: numero } = await db.rpc('generate_certificat_numero', { cert_type: type })
         var certNumero = numero || ('CERT-' + type.toUpperCase() + '-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
-        await db.from('certificats').insert({ numero_unique: certNumero, devis_id: devisId, client_id: clientId, type: type, form_data: savedForm })
-        setMsg('✓ Certificat ' + certNumero + ' enregistré — imprimez en PDF')
+        var { data: inserted, error: insErr } = await db.from('certificats').insert({ numero_unique: certNumero, devis_id: devisId, client_id: clientId, type: type, form_data: savedForm }).select().single()
+        if (insErr) { setMsg('Erreur: ' + insErr.message); setCertSaving(false); return }
+        setCertModal(function(prev) { return Object.assign({}, prev, { editingId: inserted.id, existingNumero: certNumero }) })
+        setMsg('✓ Certificat ' + certNumero + ' sauvegardé')
       }
       await charger()
-    } catch(e) { setMsg('✓ Certificat généré (non enregistré : ' + e.message + ')') }
+    } catch(e) { setMsg('Erreur: ' + e.message) }
+    setCertSaving(false)
+  }
+
+  function imprimerCertificat() {
+    var html = buildCertificatHtml(certModal.type, certForm)
+    var w = window.open('', '_blank', 'width=920,height=1050')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
+  async function genererCertificat() {
+    await saveCertificat()
+    imprimerCertificat()
   }
 
   function rouvrirCertModal(cert, devis, client) {
@@ -1136,11 +1157,8 @@ function SectionClientsDevis({ db, agrement }) {
       dateDebut: form.dateDebut || '',
       dateFin: form.dateFin || '',
       matiere1: form.matiere1 || '',
-      obs1: form.obs1 || '',
       matiere2: form.matiere2 || '',
-      obs2: form.obs2 || '',
       matiere3: form.matiere3 || '',
-      obs3: form.obs3 || '',
     })
     setCertModal({ type: cert.type, devis: devis || { id: cert.devis_id, client_id: cert.client_id }, cl: client, editingId: cert.id, existingNumero: cert.numero_unique })
   }
@@ -1154,7 +1172,7 @@ function SectionClientsDevis({ db, agrement }) {
     }
     var inp2 = { width: '100%', padding: '8px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
     var lbl2 = { display: 'block', fontSize: '10px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }
-    var pairs = [['matiere1', 'obs1'], ['matiere2', 'obs2'], ['matiere3', 'obs3']]
+    var matieres = ['matiere1', 'matiere2', 'matiere3']
 
     return React.createElement('div', {
       style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
@@ -1163,7 +1181,10 @@ function SectionClientsDevis({ db, agrement }) {
       React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '700px', marginTop: '20px' } },
 
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
-          React.createElement('h3', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a', margin: 0 } }, '📋 ' + title),
+          React.createElement('div', null,
+            React.createElement('h3', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a', margin: '0 0 4px' } }, '📋 ' + title),
+            certModal.existingNumero && React.createElement('div', { style: { fontSize: '11px', color: '#065f46', backgroundColor: '#f0fdf4', padding: '3px 8px', borderRadius: '4px', display: 'inline-block' } }, '✓ Sauvegardé : ' + certModal.existingNumero)
+          ),
           React.createElement('button', { onClick: function() { setCertModal(null) }, style: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888', lineHeight: 1 } }, '×')
         ),
 
@@ -1189,19 +1210,32 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement('div', null, React.createElement('label', { style: lbl2 }, "Date fin d'exécution"), React.createElement('input', { value: certForm.dateFin || '', onChange: function(e) { updateForm('dateFin', e.target.value) }, placeholder: 'Ex: 22 mai', style: inp2 }))
         ),
 
-        React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '20px' } },
-          React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '12px', textTransform: 'uppercase' } }, 'Matières actives utilisées'),
-          pairs.map(function(pair, i) {
-            return React.createElement('div', { key: i, style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: i < 2 ? '10px' : 0 } },
-              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Matière active ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')), React.createElement('input', { value: certForm[pair[0]] || '', onChange: function(e) { updateForm(pair[0], e.target.value) }, style: inp2 })),
-              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Observations ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')), React.createElement('input', { value: certForm[pair[1]] || '', onChange: function(e) { updateForm(pair[1], e.target.value) }, style: inp2 }))
+        React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
+          React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' } }, 'Matières actives utilisées'),
+          React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginBottom: '12px' } }, 'Observations : Agrément APA/26-025/CNGP-BEN (fixe sur le certificat)'),
+          matieres.map(function(field, i) {
+            return React.createElement('div', { key: i, style: { marginBottom: i < 2 ? '10px' : 0 } },
+              React.createElement('label', { style: lbl2 }, 'Matière active ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')),
+              React.createElement('input', { value: certForm[field] || '', onChange: function(e) { updateForm(field, e.target.value) }, style: inp2 })
             )
           })
         ),
 
-        React.createElement('div', { style: { display: 'flex', gap: '10px' } },
-          React.createElement('button', { onClick: genererCertificat, style: { backgroundColor: '#0a2e1a', color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, '🖨️ Générer le certificat'),
-          React.createElement('button', { onClick: function() { setCertModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '12px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler')
+        React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', fontSize: '11px', color: '#065f46' } },
+          '✅ Observations fixes sur le certificat : Agrément APA/26-025/CNGP-BEN'
+        ),
+
+        React.createElement('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
+          React.createElement('button', {
+            onClick: saveCertificat,
+            disabled: certSaving,
+            style: { backgroundColor: '#1e40af', color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: certSaving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: certSaving ? 0.7 : 1 }
+          }, certSaving ? '...' : '💾 Sauvegarder'),
+          React.createElement('button', {
+            onClick: imprimerCertificat,
+            style: { backgroundColor: '#0a2e1a', color: '#fff', border: 'none', borderRadius: '6px', padding: '12px 24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+          }, '🖨️ Imprimer / PDF'),
+          React.createElement('button', { onClick: function() { setCertModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '12px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Fermer')
         )
       )
     )
@@ -1223,6 +1257,39 @@ function SectionClientsDevis({ db, agrement }) {
     if (!window.confirm('Supprimer ce certificat ?')) return
     await db.from('certificats').delete().eq('id', id)
     await charger()
+  }
+
+  function apercuCert(cert) {
+    var form = cert.form_data || {}
+    var html = buildCertificatHtml(cert.type, form)
+    var w = window.open('', '_blank', 'width=920,height=1050')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
+  function apercuFiche(fiche, client) {
+    var form = {
+      nomClient: [(client && client.prenom) || '', (client && client.nom) || ''].filter(Boolean).join(' '),
+      adresse: (client && client.adresse) || '',
+      tel: (client && client.telephone) || '',
+      mob: '',
+      typePassage: fiche.type_passage || '',
+      prestations: fiche.prestations || [],
+      autresPrestation: fiche.autres_prestation || '',
+      lieuPrestation: fiche.lieu_prestation || '',
+      nuisibles: fiche.nuisibles || [],
+      autresNuisible: fiche.autres_nuisible || '',
+      produits: fiche.produits || {},
+      produitsCoches: fiche.produits ? Object.keys(fiche.produits).filter(function(k) { return !!fiche.produits[k] }) : [],
+      dureeDebut: fiche.duree_debut || '',
+      dureeFin: fiche.duree_fin || '',
+      remarques: fiche.remarques || '',
+      datePassage: fiche.date_passage || '',
+      superviseurNom: fiche.superviseur_nom || '',
+      superviseurContact: fiche.superviseur_contact || '',
+    }
+    var html = buildFichePassageHtml(form, client || {}, fiche.numero_unique)
+    var w = window.open('', '_blank', 'width=920,height=1100')
+    if (w) { w.document.write(html); w.document.close() }
   }
 
   async function supprimerFiche(id) {
@@ -2139,7 +2206,12 @@ function SectionClientsDevis({ db, agrement }) {
                   React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "2px" } }, typeLabel + " · " + clientNom),
                   React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, dateStr)
                 ),
-                React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 } },
+                React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" } },
+                  React.createElement("button", {
+                    onClick: function() { isCert ? apercuCert(doc._rawCert) : apercuFiche(doc._raw, doc.client) },
+                    title: "Prévisualiser ce document",
+                    style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
+                  }, "👁 Aperçu"),
                   React.createElement("button", {
                     onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
                     title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
@@ -2150,17 +2222,17 @@ function SectionClientsDevis({ db, agrement }) {
                         onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); rouvrirCertModal(doc._rawCert, d, doc.client) },
                         title: "Modifier ce certificat",
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                      }, "Modifier")
+                      }, "✏️ Modifier")
                     : React.createElement("button", {
                         onClick: function() { reouvrirFicheModal(doc._raw, doc.client) },
                         title: "Modifier cette fiche",
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                      }, "Modifier"),
+                      }, "✏️ Modifier"),
                   React.createElement("button", {
                     onClick: function() { isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
                     title: "Supprimer",
                     style: { background: "#fff", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                  }, "Supprimer")
+                  }, "🗑 Supprimer")
                 )
               )
             })
@@ -2218,13 +2290,11 @@ function buildCertificatHtml(type, form) {
     ? "L'opération est réalisée par pulvérisation au moyen des produits homologués ci-après."
     : "L'opération est réalisée par disposition de produit homologué dans les PVC (boîtes d'appâts)."
 
-  var rowsHtml = [
-    [form.matiere1, form.obs1],
-    [form.matiere2, form.obs2],
-    [form.matiere3, form.obs3],
-  ].map(function(r) {
-    return '<tr><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + (r[0] || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + (r[1] || '') + '</td></tr>'
-  }).join('')
+  var rowsHtml = [form.matiere1, form.matiere2, form.matiere3]
+    .filter(function(m) { return m && m.trim() })
+    .map(function(matiere) {
+      return '<tr><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + matiere + '</td><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle;color:#1a4731;font-weight:600">Observations : Agrément APA/26-025/CNGP-BEN</td></tr>'
+    }).join('')
 
   var dateExec = (form.dateDebut && form.dateFin)
     ? 'du <strong>' + form.dateDebut + '</strong> au <strong>' + form.dateFin + '</strong> 2026'

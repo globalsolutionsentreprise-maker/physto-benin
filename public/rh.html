@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Équipe & Planning · GSE</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F4F7F5;--bg-card:#FFFFFF;--bg-2:#EBF0ED;--bg-3:#DDE6E1;
+  --text:#162820;--text-2:#537066;--text-3:#8AABA0;
+  --border:rgba(0,0,0,0.09);--border-2:rgba(0,0,0,0.16);
+  --primary:#1D9E75;--primary-dk:#0F6E56;--primary-bg:#E1F5EE;
+  --danger:#E24B4A;--warn:#BA7517;--warn-bg:#FFF8E6;
+  --r:10px;--rl:14px;--sh:0 1px 6px rgba(0,0,0,0.07);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0B1812;--bg-card:#132019;--bg-2:#1A2D22;--bg-3:#233829;
+  --text:#DCF0E8;--text-2:#5EA087;--text-3:#3A6652;
+  --border:rgba(255,255,255,0.09);--border-2:rgba(255,255,255,0.18);--primary-bg:#082E1E;
+}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
+header{background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-badge{background:var(--primary);color:#fff;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-name{font-size:15px;font-weight:600;}.logo-sub{font-size:11px;color:var(--text-2);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.btn-p{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:8px 15px;cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+.btn-p:hover{background:var(--primary-dk);}
+.btn-s{background:none;border:1px solid var(--border-2);border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;color:var(--text);font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.btn-s:hover{background:var(--bg-2);}
+.btn-danger{color:var(--danger);border-color:rgba(226,75,74,.3);}
+.btn-warn{color:var(--warn);border-color:rgba(186,117,23,.3);}
+main{max-width:1340px;margin:0 auto;padding:1.5rem;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+@media(max-width:720px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;}
+.kpi-lbl{font-size:12px;color:var(--text-2);margin-bottom:4px;}
+.kpi-val{font-size:22px;font-weight:600;}
+.kpi-sub{font-size:11px;color:var(--text-3);margin-top:3px;}
+.kpi-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:8px;}
+.tabs{display:flex;gap:4px;background:var(--bg-card);border-bottom:1px solid var(--border);padding:0 1.5rem;}
+.tab-btn{padding:12px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);border-bottom:2px solid transparent;font-family:inherit;display:flex;align-items:center;gap:6px;transition:color .15s;}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600;}
+.tab-btn .badge{background:var(--danger);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
+.tab-content{display:none;}.tab-content.active{display:block;}
+
+/* Cartes personnel */
+.equipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:1.5rem;}
+.membre-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;cursor:pointer;transition:box-shadow .15s;}
+.membre-card:hover{box-shadow:var(--sh);}
+.mc-top{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+.mc-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.mc-name{font-weight:600;font-size:15px;line-height:1.2;}
+.mc-poste{font-size:12px;color:var(--text-2);margin-top:2px;}
+.mc-docs{display:flex;flex-direction:column;gap:5px;font-size:12px;}
+.doc-row{display:flex;align-items:center;gap:6px;}
+.doc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.statut-badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;}
+
+/* Planning */
+.planning-nav{display:flex;align-items:center;gap:10px;margin-bottom:1rem;}
+.week-label{font-size:15px;font-weight:600;}
+.planning-grid{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.pg-header{display:grid;grid-template-columns:140px repeat(7,1fr);background:var(--bg-2);border-bottom:1px solid var(--border);}
+.pg-hcell{padding:8px 6px;font-size:12px;font-weight:600;color:var(--text-2);text-align:center;}
+.pg-hcell.today{color:var(--primary);}
+.pg-row{display:grid;grid-template-columns:140px repeat(7,1fr);border-bottom:1px solid var(--border);min-height:60px;}
+.pg-row:last-child{border-bottom:none;}
+.pg-name{padding:10px 12px;font-size:13px;font-weight:500;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border);}
+.pg-name .sub{font-size:11px;color:var(--text-3);}
+.pg-cell{border-right:1px solid var(--border);padding:4px;min-height:60px;cursor:pointer;transition:background .1s;}
+.pg-cell:last-child{border-right:none;}
+.pg-cell:hover{background:var(--bg-2);}
+.pg-cell.today-col{background:rgba(29,158,117,0.04);}
+.interv-chip{background:var(--primary-bg);border:1px solid rgba(29,158,117,.25);border-radius:6px;padding:3px 6px;font-size:11px;color:var(--primary-dk);cursor:pointer;margin-bottom:3px;line-height:1.3;}
+.interv-chip.terminee{background:var(--bg-2);color:var(--text-3);border-color:var(--border);}
+.interv-chip.annulee{background:#FCEBEB;color:var(--danger);border-color:rgba(226,75,74,.2);text-decoration:line-through;}
+.pg-add{color:var(--text-3);font-size:18px;display:flex;align-items:center;justify-content:center;height:100%;opacity:0.5;}
+
+/* Non assignées */
+.non-ass{background:var(--warn-bg);border:1px solid rgba(186,117,23,.3);border-radius:var(--r);padding:1rem;margin-bottom:1rem;}
+.na-title{font-size:13px;font-weight:600;color:var(--warn);margin-bottom:8px;}
+.na-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.na-chip{background:#fff;border:1px solid rgba(186,117,23,.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;}
+.na-chip:hover{background:var(--warn-bg);}
+
+/* Alertes */
+.alert-list{display:flex;flex-direction:column;gap:8px;margin-top:1rem;}
+.alert-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;display:flex;gap:10px;align-items:flex-start;}
+.alert-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+.alert-body{flex:1;}
+.alert-title{font-weight:600;font-size:13px;}
+.alert-sub{font-size:12px;color:var(--text-2);margin-top:2px;}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--bg-card);border-radius:var(--rl);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);z-index:2;}
+.modal-title{font-size:16px;font-weight:600;}
+.form-body{padding:1.25rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg-full{grid-column:1/-1;}
+.fg-div{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding-top:6px;}
+label.fl{display:block;font-size:12px;color:var(--text-2);margin-bottom:4px;}
+input,select,textarea{width:100%;border:1px solid var(--border-2);border-radius:8px;padding:8px 11px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(29,158,117,.15);}
+textarea{height:70px;resize:vertical;}
+.form-footer{display:flex;justify-content:flex-end;gap:8px;padding:.75rem 1.25rem 1.25rem;border-top:1px solid var(--border);}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:#162820;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;z-index:300;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;}
+.toast.show{opacity:1;transform:none;}
+.empty-state{text-align:center;padding:3rem;color:var(--text-3);}
+.empty-state i{font-size:40px;display:block;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-badge"><i class="ti ti-users" style="font-size:18px;"></i></div>
+    <div>
+      <div class="logo-name">Équipe & Planning</div>
+      <div class="logo-sub" id="hdr-date"></div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button class="btn-s" onclick="openNewIntervention()"><i class="ti ti-calendar-plus"></i> Intervention</button>
+    <button class="btn-p" onclick="openNewMembre()"><i class="ti ti-user-plus"></i> Membre</button>
+  </div>
+</header>
+
+<nav class="tabs" id="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('equipe')" id="tab-btn-equipe"><i class="ti ti-id-badge"></i> Équipe</button>
+  <button class="tab-btn" onclick="switchTab('planning')" id="tab-btn-planning"><i class="ti ti-calendar-week"></i> Planning</button>
+  <button class="tab-btn" onclick="switchTab('alertes')" id="tab-btn-alertes"><i class="ti ti-bell"></i> Alertes <span class="badge" id="alert-badge" style="display:none;"></span></button>
+</nav>
+
+<main>
+  <div class="kpi-grid" id="kpi"></div>
+  <div class="tab-content active" id="tab-equipe"></div>
+  <div class="tab-content" id="tab-planning"></div>
+  <div class="tab-content" id="tab-alertes"></div>
+</main>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="mbox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── État global ───────────────────────────────────────────────────────────────
+let membres=[], plannings=[], contratsCRM=[];
+let activeTab="equipe", editMembreId=null, editIntervId=null;
+let weekOffset=0;
+
+// ── Données statiques ────────────────────────────────────────────────────────
+const POSTES=["Directeur Général","Responsable Commercial","Agent Commercial","Technicien Phytosanitaire","Technicien","Autre"];
+const STATUTS=[
+  {key:"actif",label:"Actif",bg:"#E1F5EE",color:"#0F6E56"},
+  {key:"en_essai",label:"En essai",bg:"#FFF8E6",color:"#BA7517"},
+  {key:"inactif",label:"Inactif",bg:"#FCEBEB",color:"#E24B4A"},
+];
+const INTERV_STATUTS=[
+  {key:"planifiee",label:"Planifiée",color:"#1D9E75"},
+  {key:"terminee",label:"Terminée",color:"#537066"},
+  {key:"annulee",label:"Annulée",color:"#E24B4A"},
+];
+const PALETTE=["#185FA5","#1D9E75","#BA7517","#8B5CF6","#E24B4A","#0891B2"];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fd=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"2-digit"}):"—";
+const fdShort=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}):"";
+const initiales=m=>(((m.prenom||"").charAt(0)+(m.nom||"").charAt(0))||"?").toUpperCase();
+const colorOf=(id,arr)=>PALETTE[arr.findIndex(x=>x.id===id)%PALETTE.length]||PALETTE[0];
+
+function docStatut(dateStr,seuil=90){
+  if(!dateStr)return"absent";
+  const days=(new Date(dateStr+"T00:00:00")-new Date())/86400000;
+  if(days<0)return"expire";
+  if(days<seuil)return"proche";
+  return"ok";
+}
+function docDot(statut){
+  const map={ok:"#1D9E75",proche:"#BA7517",expire:"#E24B4A",absent:"#CBD5E1"};
+  return`<span class="doc-dot" style="background:${map[statut]||map.absent};"></span>`;
+}
+function docLabel(statut,date){
+  if(statut==="absent")return`<span style="color:var(--text-3);">Non renseigné</span>`;
+  if(statut==="expire")return`<span style="color:var(--danger);">Expiré le ${fd(date)}</span>`;
+  if(statut==="proche")return`<span style="color:var(--warn);">Expire le ${fd(date)}</span>`;
+  return`<span style="color:var(--text-2);">Valide jusqu'au ${fd(date)}</span>`;
+}
+function contratStatut(m){
+  if(!m.contratDate)return"absent";
+  if(!m.contratDureeMois||m.contratDureeMois===0)return"ok"; // indéterminé
+  const expiry=new Date(m.contratDate+"T00:00:00");
+  expiry.setMonth(expiry.getMonth()+m.contratDureeMois);
+  const expiryStr=expiry.toISOString().slice(0,10);
+  return docStatut(expiryStr,60);
+}
+function contratExpiry(m){
+  if(!m.contratDate||!m.contratDureeMois||m.contratDureeMois===0)return null;
+  const d=new Date(m.contratDate+"T00:00:00");
+  d.setMonth(d.getMonth()+m.contratDureeMois);
+  return d.toISOString().slice(0,10);
+}
+
+function weekDays(offset){
+  const today=new Date();today.setHours(0,0,0,0);
+  const dow=today.getDay()||7;
+  const monday=new Date(today);monday.setDate(today.getDate()-dow+1+offset*7);
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(monday);d.setDate(monday.getDate()+i);
+    return{date:d.toISOString().slice(0,10),label:d.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"}),isToday:d.toDateString()===today.toDateString()};
+  });
+}
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"),2500);
+}
+
+// ── Chargement ────────────────────────────────────────────────────────────────
+async function loadData(){
+  try{
+    const r=await fetch("/api/rh-data");
+    const d=await r.json();
+    membres=d.membres||[];plannings=d.plannings||[];contratsCRM=d.contratsCRM||[];
+  }catch(e){membres=[];plannings=[];contratsCRM=[];}
+  render();
+}
+
+// ── Rendu principal ───────────────────────────────────────────────────────────
+function render(){renderKPIs();renderEquipe();renderPlanning();renderAlertes();}
+
+function renderKPIs(){
+  const actifs=membres.filter(m=>m.statut==="actif").length;
+  const essai=membres.filter(m=>m.statut==="en_essai").length;
+  const alerts=buildAlerts().length;
+  const thisWeek=weekDays(0);
+  const intSem=plannings.filter(p=>p.statut==="planifiee"&&thisWeek.some(d=>d.date===p.dateIntervention)).length;
+  document.getElementById("kpi").innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-users"></i></div>
+      <div class="kpi-lbl">Personnel actif</div>
+      <div class="kpi-val">${actifs}</div>
+      <div class="kpi-sub">${essai>0?essai+" en période d'essai":membres.length+" enregistrés"}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:var(--primary-bg);color:var(--primary);"><i class="ti ti-calendar-check"></i></div>
+      <div class="kpi-lbl">Interventions cette semaine</div>
+      <div class="kpi-val">${intSem}</div>
+      <div class="kpi-sub">${plannings.filter(p=>p.statut==="planifiee").length} planifiées au total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#FFF8E6;color:#BA7517;"><i class="ti ti-file-text"></i></div>
+      <div class="kpi-lbl">Contrats à jour</div>
+      <div class="kpi-val">${membres.filter(m=>contratStatut(m)==="ok").length} / ${membres.length}</div>
+      <div class="kpi-sub">${membres.filter(m=>contratStatut(m)==="absent").length} sans contrat enregistré</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico" style="background:#FCEBEB;color:#E24B4A;"><i class="ti ti-bell"></i></div>
+      <div class="kpi-lbl">Alertes actives</div>
+      <div class="kpi-val" style="color:${alerts>0?"var(--danger)":"var(--text)"};">${alerts}</div>
+      <div class="kpi-sub">${alerts>0?"Action requise":"Tout est à jour"}</div>
+    </div>`;
+  const badge=document.getElementById("alert-badge");
+  if(alerts>0){badge.textContent=alerts;badge.style.display="inline";}else{badge.style.display="none";}
+}
+
+function renderEquipe(){
+  const el=document.getElementById("tab-equipe");
+  if(!membres.length){
+    el.innerHTML=`<div class="empty-state"><i class="ti ti-user-off"></i>Aucun membre enregistré<br><br><button class="btn-p" onclick="openNewMembre()"><i class="ti ti-user-plus"></i> Ajouter le premier membre</button></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="equipe-grid">${membres.map(m=>{
+    const cs=contratStatut(m);
+    const cip=docStatut(m.cipExpiration,90);
+    const ce=contratExpiry(m);
+    const intCount=plannings.filter(p=>p.personnelId===m.id&&p.statut==="planifiee").length;
+    const st=STATUTS.find(s=>s.key===m.statut)||STATUTS[0];
+    const col=colorOf(m.id,membres);
+    return`<div class="membre-card" onclick="openEditMembre('${m.id}')">
+      <div class="mc-top">
+        <div class="mc-avatar" style="background:${col}22;color:${col};">${initiales(m)}</div>
+        <div>
+          <div class="mc-name">${[m.prenom,m.nom].filter(Boolean).join(" ")}</div>
+          <div class="mc-poste">${m.poste}</div>
+        </div>
+      </div>
+      <div class="mc-docs">
+        <div class="doc-row">${docDot(cs)}<span style="font-weight:500;">Contrat : </span>${
+          cs==="absent"?`<span style="color:var(--text-3);">Non renseigné</span>`:
+          cs==="ok"&&!m.contratDureeMois?`<span style="color:var(--text-2);">Indéterminé</span>`:
+          docLabel(cs,ce)
+        }</div>
+        <div class="doc-row">${docDot(cip)}<span style="font-weight:500;">CIP : </span>${
+          m.cipNumero?`N° ${m.cipNumero} — ${docLabel(cip,m.cipExpiration)}`:`<span style="color:var(--text-3);">Non renseigné</span>`
+        }</div>
+      </div>
+      <div class="mc-footer">
+        <span class="statut-badge" style="background:${st.bg};color:${st.color};">${st.label}</span>
+        <span style="font-size:12px;color:var(--text-2);"><i class="ti ti-calendar" style="font-size:11px;"></i> ${intCount} intervention${intCount>1?"s":""}</span>
+      </div>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function renderPlanning(){
+  const el=document.getElementById("tab-planning");
+  const days=weekDays(weekOffset);
+  const label=`${fdShort(days[0].date)} – ${fd(days[6].date)}`;
+
+  // Interventions non assignées
+  const nonAss=plannings.filter(p=>!p.personnelId&&p.statut==="planifiee");
+
+  // Contrats CRM à planifier ce mois
+  const curMonth=new Date().toISOString().slice(0,7);
+  const aAssigner=contratsCRM.filter(c=>{
+    if(!c.dateDebut)return false;
+    // Calculer les mois d'intervention
+    const freq={mensuelle:1,bimestrielle:2,trimestrielle:3,semestrielle:6,annuelle:12}[c.frequence]||3;
+    const start=new Date(c.dateDebut+"T00:00:00");
+    for(let i=0;i<(c.duree||12);i+=freq){
+      const d=new Date(start);d.setMonth(d.getMonth()+i);
+      if(d.toISOString().slice(0,7)===curMonth){
+        // Vérifier si déjà planifiée
+        const deja=plannings.some(p=>p.devisId===c.id&&p.dateIntervention.startsWith(curMonth));
+        return!deja;
+      }
+    }
+    return false;
+  });
+
+  let h=`
+    <div class="planning-nav">
+      <button class="btn-s" onclick="weekOffset--;renderPlanning()"><i class="ti ti-chevron-left"></i></button>
+      <button class="btn-s" onclick="weekOffset=0;renderPlanning()">Aujourd'hui</button>
+      <button class="btn-s" onclick="weekOffset++;renderPlanning()"><i class="ti ti-chevron-right"></i></button>
+      <span class="week-label">${label}</span>
+    </div>`;
+
+  if(aAssigner.length){
+    h+=`<div class="non-ass">
+      <div class="na-title"><i class="ti ti-alert-triangle"></i> Interventions contrats à planifier ce mois</div>
+      <div class="na-chips">${aAssigner.map(c=>`<div class="na-chip" onclick="openNewIntervention(null,'${c.id}','${c.clientNom}')">📋 ${c.clientNom} · ${c.frequence||""}</div>`).join("")}</div>
+    </div>`;
+  }
+
+  if(nonAss.length){
+    h+=`<div class="non-ass" style="background:#F0F4FF;border-color:rgba(24,95,165,.3);">
+      <div class="na-title" style="color:#185FA5;"><i class="ti ti-user-question"></i> Interventions sans technicien assigné</div>
+      <div class="na-chips">${nonAss.map(p=>`<div class="na-chip" style="border-color:rgba(24,95,165,.3);" onclick="openEditInterv('${p.id}')">${p.clientNom||"Client"} · ${fdShort(p.dateIntervention)}</div>`).join("")}</div>
+    </div>`;
+  }
+
+  h+=`<div class="planning-grid">
+    <div class="pg-header">
+      <div class="pg-hcell" style="text-align:left;">Technicien</div>
+      ${days.map(d=>`<div class="pg-hcell${d.isToday?" today":""}">${d.label}</div>`).join("")}
+    </div>`;
+
+  const affichage=membres.filter(m=>m.statut!=="inactif");
+  if(!affichage.length){
+    h+=`<div style="padding:2rem;text-align:center;color:var(--text-3);grid-column:1/-1;">Ajoutez des membres pour voir le planning</div>`;
+  }
+  affichage.forEach(m=>{
+    const col=colorOf(m.id,membres);
+    h+=`<div class="pg-row">
+      <div class="pg-name" style="border-left:3px solid ${col};">
+        <span style="font-weight:600;font-size:12px;">${[m.prenom,m.nom].filter(Boolean).join(" ")}</span>
+        <span class="sub">${m.poste}</span>
+      </div>`;
+    days.forEach(d=>{
+      const dayIntervs=plannings.filter(p=>p.personnelId===m.id&&p.dateIntervention===d.date);
+      h+=`<div class="pg-cell${d.isToday?" today-col":""}" onclick="openNewIntervention('${d.date}','${m.id}')">
+        ${dayIntervs.map(p=>`<div class="interv-chip ${p.statut}" onclick="event.stopPropagation();openEditInterv('${p.id}')">
+          <div style="font-weight:600;">${p.clientNom||"Client"}</div>
+          <div style="opacity:.8;">${p.heureDebut||""}</div>
+        </div>`).join("")}
+        ${!dayIntervs.length?`<div class="pg-add"><i class="ti ti-plus"></i></div>`:""}
+      </div>`;
+    });
+    h+="</div>";
+  });
+
+  h+="</div>";
+  el.innerHTML=h;
+}
+
+function buildAlerts(){
+  const alerts=[];
+  membres.forEach(m=>{
+    const cs=contratStatut(m);
+    if(cs==="absent")alerts.push({type:"danger",icon:"ti-file-x",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat`,sub:"Aucun contrat enregistré",action:()=>openEditMembre(m.id)});
+    if(cs==="expire")alerts.push({type:"danger",icon:"ti-file-alert",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat expiré`,sub:`Expiré le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
+    if(cs==="proche")alerts.push({type:"warn",icon:"ti-file-time",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat`,sub:`Expire le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
+    const cip=docStatut(m.cipExpiration,90);
+    if(cip==="expire")alerts.push({type:"danger",icon:"ti-id-badge-off",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — CIP expirée`,sub:`Expirée le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
+    if(cip==="proche")alerts.push({type:"warn",icon:"ti-id-badge",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — CIP`,sub:`Expire le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
+  });
+  const soon=new Date();soon.setDate(soon.getDate()+7);
+  plannings.filter(p=>p.statut==="planifiee"&&new Date(p.dateIntervention+"T00:00:00")<=soon&&new Date(p.dateIntervention+"T00:00:00")>=new Date()).forEach(p=>{
+    alerts.push({type:"info",icon:"ti-calendar-event",title:`Intervention : ${p.clientNom||"Client"}`,sub:`${fd(p.dateIntervention)} ${p.heureDebut?`à ${p.heureDebut}`:""} · ${p.personnel?.nom||"Non assigné"}`,action:()=>openEditInterv(p.id)});
+  });
+  return alerts;
+}
+
+function renderAlertes(){
+  const el=document.getElementById("tab-alertes");
+  const alerts=buildAlerts();
+  if(!alerts.length){
+    el.innerHTML=`<div class="empty-state"><i class="ti ti-check" style="color:var(--primary);"></i>Aucune alerte — tout est à jour !</div>`;
+    return;
+  }
+  const colors={danger:"#FCEBEB",warn:"#FFF8E6",info:"var(--primary-bg)"};
+  const textColors={danger:"var(--danger)",warn:"var(--warn)",info:"var(--primary)"};
+  el.innerHTML=`<div class="alert-list">${alerts.map((a,i)=>`
+    <div class="alert-item" style="border-left:3px solid ${textColors[a.type]};" onclick="${a.action.toString().includes("openEdit")?"("+a.action.toString()+")()":`void(0)`}" style="cursor:pointer;">
+      <div class="alert-icon" style="background:${colors[a.type]};color:${textColors[a.type]};"><i class="ti ${a.icon}"></i></div>
+      <div class="alert-body">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-sub">${a.sub}</div>
+      </div>
+    </div>`).join("")}</div>`;
+  // Re-attach click handlers
+  const items=el.querySelectorAll(".alert-item");
+  alerts.forEach((a,i)=>{if(items[i])items[i].onclick=a.action;});
+}
+
+// ── Navigation onglets ───────────────────────────────────────────────────────
+function switchTab(tab){
+  activeTab=tab;
+  ["equipe","planning","alertes"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("active",t===tab);
+    document.getElementById("tab-btn-"+t).classList.toggle("active",t===tab);
+  });
+}
+
+// ── Modal membre ─────────────────────────────────────────────────────────────
+function openNewMembre(){editMembreId=null;showModal(membreForm(null));}
+function openEditMembre(id){editMembreId=id;showModal(membreForm(membres.find(m=>m.id===id)));}
+
+function membreForm(m){
+  return`<div class="modal-hdr">
+    <span class="modal-title">${m?"Modifier · "+[m.prenom,m.nom].filter(Boolean).join(" "):"Nouveau membre"}</span>
+    <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="form-body"><div class="form-grid">
+    <div><label class="fl">Prénom</label><input id="mp" value="${m?.prenom||""}"></div>
+    <div><label class="fl">Nom *</label><input id="mn" value="${m?.nom||""}"></div>
+    <div class="fg-full"><label class="fl">Poste / Rôle</label>
+      <select id="mpo">${POSTES.map(p=>`<option ${m?.poste===p?"selected":""}>${p}</option>`).join("")}</select></div>
+    <div><label class="fl">Téléphone</label><input id="mt" value="${m?.telephone||""}"></div>
+    <div><label class="fl">Email</label><input id="me" type="email" value="${m?.email||""}"></div>
+    <div><label class="fl">Statut</label>
+      <select id="ms">${STATUTS.map(s=>`<option value="${s.key}" ${m?.statut===s.key?"selected":""}>${s.label}</option>`).join("")}</select></div>
+    <div><label class="fl">Date d'embauche</label><input type="date" id="mde" value="${m?.dateEmbauche||""}"></div>
+    <div class="fg-div">Contrat</div>
+    <div><label class="fl">Date de signature</label><input type="date" id="mcd" value="${m?.contratDate||""}"></div>
+    <div><label class="fl">Durée (mois) — 0 = indéterminée</label><input type="number" id="mcm" min="0" value="${m?.contratDureeMois||0}"></div>
+    <div class="fg-div">CIP / Pièce d'identité</div>
+    <div><label class="fl">Numéro CIP</label><input id="mcip" value="${m?.cipNumero||""}"></div>
+    <div><label class="fl">Date d'expiration</label><input type="date" id="mcipx" value="${m?.cipExpiration||""}"></div>
+    <div class="fg-full"><label class="fl">Notes</label><textarea id="mno">${m?.notes||""}</textarea></div>
+  </div></div>
+  <div class="form-footer">
+    ${m?`<button class="btn-s btn-danger" onclick="delMembre('${m.id}')" style="margin-right:auto;"><i class="ti ti-trash"></i> Supprimer</button>`:""}
+    <button class="btn-s" onclick="closeModal()">Annuler</button>
+    <button class="btn-p" onclick="saveMembre()"><i class="ti ti-check"></i> Enregistrer</button>
+  </div>`;
+}
+
+async function saveMembre(){
+  const g=id=>document.getElementById(id)?.value||"";
+  const d={nom:g("mn").trim(),prenom:g("mp").trim(),poste:g("mpo"),telephone:g("mt"),email:g("me"),
+    statut:g("ms"),dateEmbauche:g("mde")||null,contratDate:g("mcd")||null,
+    contratDureeMois:parseInt(g("mcm"))||0,cipNumero:g("mcip"),cipExpiration:g("mcipx")||null,notes:g("mno")};
+  if(!d.nom){alert("Le nom est obligatoire.");return;}
+  if(editMembreId){
+    await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_personnel",id:editMembreId,...d})});
+    const i=membres.findIndex(m=>m.id===editMembreId);
+    if(i>=0)membres[i]={...membres[i],...d};
+    toast("Membre mis à jour");
+  }else{
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_personnel",...d})});
+    const r=await res.json();
+    if(r.id)membres.push({id:r.id,...d});
+    toast("Membre ajouté");
+  }
+  closeModal();render();
+}
+
+function delMembre(id){
+  if(confirm("Supprimer ce membre ? Ses interventions resteront mais ne seront plus assignées.")){
+    fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_personnel",id})}).catch(()=>{});
+    membres=membres.filter(m=>m.id!==id);
+    plannings.forEach(p=>{if(p.personnelId===id)p.personnelId=null;});
+    closeModal();render();toast("Membre supprimé");
+  }
+}
+
+// ── Modal intervention ───────────────────────────────────────────────────────
+function openNewIntervention(date,personnelId,clientNomPrefill){
+  editIntervId=null;
+  showModal(intervForm(null,date,personnelId,clientNomPrefill));
+}
+function openEditInterv(id){
+  editIntervId=id;
+  showModal(intervForm(plannings.find(p=>p.id===id)));
+}
+
+function intervForm(p,datePrefill,persPrefill,clientPrefill){
+  const crmOpts=contratsCRM.map(c=>`<option value="${c.id}">${c.clientNom}</option>`).join("");
+  return`<div class="modal-hdr">
+    <span class="modal-title">${p?"Modifier l'intervention":"Nouvelle intervention"}</span>
+    <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="form-body"><div class="form-grid">
+    <div class="fg-full"><label class="fl">Client *</label><input id="icl" placeholder="Nom du client" value="${p?.clientNom||clientPrefill||""}"></div>
+    <div class="fg-full"><label class="fl">Lié à un contrat CRM</label>
+      <select id="idev"><option value="">— Aucun contrat lié —</option>${crmOpts}</select></div>
+    <div><label class="fl">Date *</label><input type="date" id="idate" value="${p?.dateIntervention||datePrefill||new Date().toISOString().slice(0,10)}"></div>
+    <div><label class="fl">Heure</label><input type="time" id="iheure" value="${p?.heureDebut||"08:00"}"></div>
+    <div class="fg-full"><label class="fl">Technicien assigné</label>
+      <select id="iper">
+        <option value="">— Non assigné —</option>
+        ${membres.filter(m=>m.statut!=="inactif").map(m=>`<option value="${m.id}" ${(p?.personnelId||persPrefill)===m.id?"selected":""}>${[m.prenom,m.nom].filter(Boolean).join(" ")} · ${m.poste}</option>`).join("")}
+      </select></div>
+    <div><label class="fl">Statut</label>
+      <select id="ist">${INTERV_STATUTS.map(s=>`<option value="${s.key}" ${p?.statut===s.key?"selected":""}>${s.label}</option>`).join("")}</select></div>
+    <div><label class="fl">Adresse / Lieu</label><input id="iadr" value="${p?.adresse||""}"></div>
+    <div class="fg-full"><label class="fl">Notes</label><textarea id="ino">${p?.notes||""}</textarea></div>
+  </div></div>
+  <div class="form-footer">
+    ${p?`<button class="btn-s btn-danger" onclick="delInterv('${p.id}')" style="margin-right:auto;"><i class="ti ti-trash"></i> Supprimer</button>`:""}
+    <button class="btn-s" onclick="closeModal()">Annuler</button>
+    <button class="btn-p" onclick="saveInterv()"><i class="ti ti-check"></i> Enregistrer</button>
+  </div>`;
+}
+
+async function saveInterv(){
+  const g=id=>document.getElementById(id)?.value||"";
+  const d={clientNom:g("icl").trim(),devisId:g("idev")||null,dateIntervention:g("idate"),
+    heureDebut:g("iheure"),personnelId:g("iper")||null,statut:g("ist"),adresse:g("iadr"),notes:g("ino")};
+  if(!d.clientNom){alert("Le nom du client est obligatoire.");return;}
+  if(!d.dateIntervention){alert("La date est obligatoire.");return;}
+  if(editIntervId){
+    await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_intervention",id:editIntervId,...d})});
+    const i=plannings.findIndex(p=>p.id===editIntervId);
+    if(i>=0){
+      const pers=membres.find(m=>m.id===d.personnelId);
+      plannings[i]={...plannings[i],...d,personnel:pers?{id:pers.id,nom:[pers.prenom,pers.nom].filter(Boolean).join(" "),poste:pers.poste}:null};
+    }
+    toast("Intervention mise à jour");
+  }else{
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_intervention",...d})});
+    const r=await res.json();
+    if(r.id){
+      const pers=membres.find(m=>m.id===d.personnelId);
+      plannings.push({id:r.id,...d,personnel:pers?{id:pers.id,nom:[pers.prenom,pers.nom].filter(Boolean).join(" "),poste:pers.poste}:null});
+    }
+    toast("Intervention planifiée");
+  }
+  closeModal();render();
+}
+
+function delInterv(id){
+  if(confirm("Supprimer cette intervention ?")){
+    fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_intervention",id})}).catch(()=>{});
+    plannings=plannings.filter(p=>p.id!==id);
+    closeModal();render();toast("Intervention supprimée");
+  }
+}
+
+function showModal(h){document.getElementById("mbox").innerHTML=h;document.getElementById("modal").classList.add("open");}
+function closeModal(){document.getElementById("modal").classList.remove("open");editMembreId=null;editIntervId=null;}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById("hdr-date").textContent=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+loadData();
+</script>
+</body>
+</html>
