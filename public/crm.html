@@ -237,7 +237,7 @@ function renderKPIs(){
   const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
   const tp =clients.reduce((s,c)=>s+(c.paiementsRecus||0),0);
   const td =clients.reduce((s,c)=>s+(c.depenses||0),0)+depGlob.reduce((s,d)=>s+d.montant,0);
-  const r  =tp-td;
+  const r  =tfa-td;
   const conv=clients.filter(c=>c.statut==="converti").length;
   const pipe=clients.filter(c=>!["converti","echec"].includes(c.statut)).length;
   document.getElementById("kpi").innerHTML=`
@@ -263,7 +263,7 @@ function renderKPIs(){
       <div class="kpi-ico" style="background:${r>=0?"#E1F5EE":"#FCEBEB"};color:${r>=0?"#1D9E75":"#E24B4A"};"><i class="ti ti-trending-${r>=0?"up":"down"}" aria-hidden="true"></i></div>
       <div class="kpi-lbl">Résultat net</div>
       <div class="kpi-val" style="color:${r>=0?"#1D9E75":"#E24B4A"};">${r>=0?"+":""}${f(r)}</div>
-      <div class="kpi-sub">FCFA · encaissements vs dépenses</div>
+      <div class="kpi-sub">FCFA · facturé vs dépenses</div>
     </div>`;
 }
 
@@ -345,7 +345,7 @@ function renderFinance(){
   const td =tdc+tdg;
   const tf =clients.reduce((s,c)=>s+(c.montantDevis||0),0);
   const tfa=clients.reduce((s,c)=>s+(c.montantFacture||0),0);
-  const r  =tp-td;
+  const r  =tfa-td;
   document.getElementById("tab-finance").innerHTML=`
     <div class="fin-grid">
       <div class="kpi-card"><div class="kpi-lbl">Encaissements clients</div><div class="kpi-val" style="color:#1D9E75;">${f(tp)} FCFA</div></div>
