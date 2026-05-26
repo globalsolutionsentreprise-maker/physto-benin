@@ -39,6 +39,10 @@ export async function GET() {
       zone: d.zone || "—",
       motifEchec: d.motif_echec || "—",
       attestation: d.attestation_crm || "non",
+      typeContrat: d.type_crm || "ponctuel",
+      dureeContratMois: d.duree_contrat_mois || 12,
+      frequenceIntervention: d.frequence_intervention || "trimestrielle",
+      dateDebutContrat: d.date_debut_contrat || "",
     }
   })
 
@@ -67,7 +71,7 @@ export async function POST(req) {
   }
 
   if (action === "save_client") {
-    const { id, statut, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis } = body
+    const { id, statut, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
     await supabase.from("devis").update({
       crm_statut: statut,
       provenance,
@@ -82,12 +86,16 @@ export async function POST(req) {
       montant_facture_crm: montantFacture || 0,
       description: commentaire,
       montant_net: montantDevis || 0,
+      type_crm: typeContrat || "ponctuel",
+      duree_contrat_mois: dureeContratMois || 12,
+      frequence_intervention: frequenceIntervention || "trimestrielle",
+      date_debut_contrat: dateDebutContrat || null,
     }).eq("id", id)
     return Response.json({ ok: true })
   }
 
   if (action === "add_client") {
-    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation } = body
+    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
     // Créer un client Supabase
     const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
@@ -114,6 +122,10 @@ export async function POST(req) {
       attestation_crm: attestation || "non",
       date_facture_crm: dateFacture || null,
       montant_facture_crm: montantFacture || 0,
+      type_crm: typeContrat || "ponctuel",
+      duree_contrat_mois: dureeContratMois || 12,
+      frequence_intervention: frequenceIntervention || "trimestrielle",
+      date_debut_contrat: dateDebutContrat || null,
     }).select().single()
 
     return Response.json({ ok: true, id: newDevis?.id })

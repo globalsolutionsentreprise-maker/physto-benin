@@ -226,6 +226,39 @@ const MOTIFS=["—","Prix trop élevé","Concurrent retenu","Pas de budget","San
 
 const SOURCES=["WhatsApp","Appel téléphonique","Réseau perso","Clarisse","Recommandation","Site web","—"];
 
+const FREQ_OPTS=[
+  {key:"mensuelle",label:"Mensuelle",mois:1},
+  {key:"bimestrielle",label:"Bimestrielle (2 mois)",mois:2},
+  {key:"trimestrielle",label:"Trimestrielle (3 mois)",mois:3},
+  {key:"semestrielle",label:"Semestrielle (6 mois)",mois:6},
+  {key:"annuelle",label:"Annuelle",mois:12},
+];
+const freqLabel=k=>(FREQ_OPTS.find(o=>o.key===k)||FREQ_OPTS[2]).label.split(" (")[0];
+const freqMois=k=>(FREQ_OPTS.find(o=>o.key===k)||FREQ_OPTS[2]).mois;
+
+function interventionDates(c){
+  if(c.typeContrat!=="contrat"||!c.dateDebutContrat)return[];
+  const start=new Date(c.dateDebutContrat+"T00:00:00");
+  const duree=c.dureeContratMois||12;
+  const freq=freqMois(c.frequenceIntervention);
+  const dates=[];
+  for(let i=0;i<duree;i+=freq){
+    const d=new Date(start);
+    d.setMonth(d.getMonth()+i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+  return dates;
+}
+function nextIntervention(c){
+  const today=new Date();today.setHours(0,0,0,0);
+  return interventionDates(c).find(d=>new Date(d+"T00:00:00")>=today)||null;
+}
+function montantParIntervention(c){
+  const freq=freqMois(c.frequenceIntervention);
+  const nb=(c.dureeContratMois||12)/freq;
+  return Math.round((c.montantDevis||0)/nb);
+}
+
 const gs=k=>ST.find(s=>s.key===k)||ST[0];
 const f=n=>Math.round(n||0).toLocaleString("fr-FR");
 const fd=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"2-digit"}):"—";
@@ -279,10 +312,14 @@ function renderKanban(){
     if(tot>0)h+=`<div class="k-total" style="color:${s.ac};">${f(tot)} FCFA</div>`;
     if(!cc.length)h+=`<div class="k-empty"><i class="ti ti-inbox" aria-hidden="true"></i><br>Aucun</div>`;
     cc.forEach(c=>{
+      const ni=nextIntervention(c);
+      const niSoon=ni&&(new Date(ni+"T00:00:00")-new Date())<30*86400000;
       h+=`<div class="cc" onclick="openEdit('${c.id}')">
         <div class="cc-name">${c.client}</div>
         <div class="cc-meta"><i class="ti ti-map-pin" style="font-size:11px;" aria-hidden="true"></i> ${c.provenance} · ${fd(c.dateDevis)}</div>
-        <div class="cc-amt" style="color:${s.ac};">${f(c.montantDevis)} FCFA</div>
+        <div class="cc-amt" style="color:${s.ac};">${f(c.montantDevis)} FCFA${c.typeContrat==="contrat"?` <span style="font-size:10px;opacity:.7;">/ ${c.dureeContratMois||12}m</span>`:""}</div>
+        ${c.typeContrat==="contrat"?`<div style="display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary-dk);border-radius:5px;padding:2px 7px;font-size:11px;margin-top:3px;font-weight:500;"><i class="ti ti-repeat" style="font-size:11px;"></i> Contrat · ${freqLabel(c.frequenceIntervention)}</div>`:""}
+        ${ni?`<div style="font-size:11px;margin-top:3px;color:${niSoon?"var(--warn)":"var(--text-2)"};"><i class="ti ti-calendar-event" style="font-size:11px;"></i> ${niSoon?"⚠ ":""}Intervention : ${fd(ni)}</div>`:""}
         ${c.commentaire?`<div class="cc-note" title="${c.commentaire}">${c.commentaire}</div>`:""}
         <select class="cc-mv" onchange="moveCard('${c.id}',this.value);this.value=''" onclick="event.stopPropagation()">
           <option value="">Déplacer vers...</option>
@@ -391,7 +428,64 @@ function renderFinance(){
       <div style="position:relative;width:100%;height:240px;">
         <canvas id="fchart" role="img" aria-label="Graphique financier GSE">Devis ${f(tf)}, Facturé ${f(tfa)}, Encaissé ${f(tp)}, Dépenses ${f(td)} FCFA</canvas>
       </div>
-    </div>`;
+    </div>
+
+    ${(()=>{
+      const contrats=clients.filter(c=>c.typeContrat==="contrat"&&c.statut!=="echec");
+      if(!contrats.length)return`<div style="margin-top:1.5rem;padding:1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);color:var(--text-3);text-align:center;font-size:13px;"><i class="ti ti-repeat" style="font-size:18px;display:block;margin-bottom:6px;"></i>Aucun contrat récurrent — ouvrez une fiche client et choisissez "Contrat récurrent"</div>`;
+      const today=new Date();
+      const months=Array.from({length:12},(_,i)=>{
+        const d=new Date(today.getFullYear(),today.getMonth()+i,1);
+        return{ym:d.toISOString().slice(0,7),label:d.toLocaleDateString("fr-FR",{month:"short",year:"2-digit"})};
+      });
+      const mCA=months.map(m=>contrats.reduce((s,c)=>{
+        const mpi=montantParIntervention(c);
+        const hit=interventionDates(c).some(d=>d.slice(0,7)===m.ym);
+        return s+(hit?mpi:0);
+      },0));
+      const totalCA=mCA.reduce((a,b)=>a+b,0);
+      const caAn=contrats.reduce((s,c)=>s+(c.montantDevis||0),0);
+      const nextAlerts=contrats.filter(c=>{const ni=nextIntervention(c);return ni&&(new Date(ni+"T00:00:00")-today)<30*86400000;});
+      return`
+      <div class="fin-sec" style="margin-top:1.5rem;">Contrats récurrents <span style="background:var(--primary-bg);color:var(--primary);border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600;">${contrats.length}</span></div>
+      ${nextAlerts.length?`<div style="background:#FFF8E6;border:1px solid #F0C040;border-radius:var(--r);padding:.75rem 1rem;margin-bottom:1rem;display:flex;gap:.5rem;align-items:flex-start;font-size:13px;">
+        <i class="ti ti-alert-triangle" style="color:#BA7517;flex-shrink:0;margin-top:1px;"></i>
+        <div><b>Interventions dans les 30 jours :</b> ${nextAlerts.map(c=>`<b>${c.client}</b> (${fd(nextIntervention(c))})`).join(" · ")}</div>
+      </div>`:""}
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:1rem;">
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+          <div><div style="font-size:11px;color:var(--text-3);margin-bottom:2px;">CA récurrent total</div><div style="font-size:18px;font-weight:700;color:var(--primary);">${f(caAn)} FCFA</div></div>
+          <div><div style="font-size:11px;color:var(--text-3);margin-bottom:2px;">Projection 12 mois</div><div style="font-size:18px;font-weight:700;color:#185FA5;">${f(totalCA)} FCFA</div></div>
+          <div><div style="font-size:11px;color:var(--text-3);margin-bottom:2px;">Contrats actifs</div><div style="font-size:18px;font-weight:700;">${contrats.length}</div></div>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Client</th><th>Fréquence</th><th>Montant/inter.</th>
+          ${months.map(m=>`<th style="min-width:52px;text-align:center;">${m.label}</th>`).join("")}
+        </tr></thead>
+        <tbody>
+        ${contrats.map(c=>{
+          const mpi=montantParIntervention(c);
+          const ni=nextIntervention(c);
+          const niSoon=ni&&(new Date(ni+"T00:00:00")-today)<30*86400000;
+          return`<tr>
+            <td><b>${c.client}</b>${niSoon?` <span style="font-size:10px;color:var(--warn);">⚠</span>`:""}${ni?`<div style="font-size:10px;color:var(--text-3);">Prochain : ${fd(ni)}</div>`:""}</td>
+            <td style="font-size:12px;">${freqLabel(c.frequenceIntervention)}</td>
+            <td style="color:var(--primary);font-weight:500;">${f(mpi)} FCFA</td>
+            ${months.map(m=>{
+              const hit=interventionDates(c).some(d=>d.slice(0,7)===m.ym);
+              const isNiMonth=ni&&ni.slice(0,7)===m.ym;
+              return`<td style="text-align:center;${hit?`background:${isNiMonth?"rgba(29,158,117,0.18)":"rgba(29,158,117,0.07)"};color:var(--primary);font-weight:600;font-size:12px;`:"color:var(--text-3);font-size:11px;"}">${hit?f(mpi):"·"}</td>`;
+            }).join("")}
+          </tr>`;
+        }).join("")}
+        <tr style="font-weight:600;border-top:2px solid var(--border-2);">
+          <td colspan="3" style="color:var(--text-2);">CA récurrent mensuel</td>
+          ${mCA.map(v=>`<td style="text-align:center;font-size:12px;${v>0?"color:var(--primary);":"color:var(--text-3);"}">${v>0?f(v):"—"}</td>`).join("")}
+        </tr>
+        </tbody>
+      </table></div>`;
+    })()}`;
   setTimeout(()=>{
     const cv=document.getElementById("fchart");
     if(!cv)return;
@@ -864,7 +958,21 @@ function formH(c){
       <select id="fcat">${CATEGORIES.map(p=>`<option ${c?.categorie===p?"selected":""}>${p}</option>`).join("")}</select>
     </div>
     <div><label class="fl">Zone géographique</label><input type="text" id="fzone" placeholder="Ex: Cotonou, Akpakpa…" value="${c?.zone||""}"></div>
-    <div><label class="fl">Montant devis (FCFA)</label><input type="number" id="fmd" min="0" value="${c?.montantDevis||""}"></div>
+    <div><label class="fl">Montant total (FCFA)</label><input type="number" id="fmd" min="0" value="${c?.montantDevis||""}"></div>
+    <div class="fg-full">
+      <label class="fl">Nature de l'engagement</label>
+      <select id="ftc" onchange="toggleContrat()">
+        <option value="ponctuel" ${!c||c.typeContrat!=="contrat"?"selected":""}>Devis ponctuel</option>
+        <option value="contrat" ${c?.typeContrat==="contrat"?"selected":""}>Contrat récurrent</option>
+      </select>
+    </div>
+    <div id="fg-contrat" style="${c?.typeContrat==="contrat"?"":"display:none;"}display:contents;">
+      <div><label class="fl">Durée du contrat (mois)</label><input type="number" id="fdur" min="1" max="60" value="${c?.dureeContratMois||12}"></div>
+      <div><label class="fl">Fréquence d'intervention</label>
+        <select id="ffreq">${FREQ_OPTS.map(o=>`<option value="${o.key}" ${c?.frequenceIntervention===o.key?"selected":""}>${o.label}</option>`).join("")}</select>
+      </div>
+      <div><label class="fl">Date de début du contrat</label><input type="date" id="fdeb" value="${c?.dateDebutContrat||""}"></div>
+    </div>
     <div>
       <label class="fl">Motif d'échec</label>
       <select id="fmot">${MOTIFS.map(p=>`<option ${c?.motifEchec===p?"selected":""}>${p}</option>`).join("")}</select>
@@ -890,13 +998,21 @@ function formH(c){
   </div>`;
 }
 
+function toggleContrat(){
+  const isContrat=document.getElementById("ftc")?.value==="contrat";
+  const el=document.getElementById("fg-contrat");
+  if(el)el.style.display=isContrat?"contents":"none";
+}
+
 async function saveClient(){
   const g=id=>document.getElementById(id)?.value||"";
   const gn=id=>parseFloat(g(id))||0;
   const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
     typePrestation:g("ftp"),categorie:g("fcat"),zone:g("fzone")||"—",
     motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs"),commentaire:g("fco"),
-    montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),depenses:gn("fdp"),attestation:g("fat")||"non"};
+    montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),depenses:gn("fdp"),attestation:g("fat")||"non",
+    typeContrat:g("ftc")||"ponctuel",dureeContratMois:gn("fdur")||12,
+    frequenceIntervention:g("ffreq")||"trimestrielle",dateDebutContrat:g("fdeb")||""};
   if(!d.client){alert("Veuillez saisir le nom du client.");return;}
   if(editId){
     const i=clients.findIndex(c=>c.id===editId);
