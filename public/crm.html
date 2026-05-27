@@ -207,6 +207,7 @@ const DEFAULT_CLIENTS=[];
 const DEFAULT_DEP=[];
 
 let clients,depGlob,nextId,activeTab="kanban",editId=null,cfilt="",sfilt="",finChart=null,objectifCA=0,anCharts={};
+let currentDepItems=[];
 
 function load(){}
 function save(){}
@@ -616,6 +617,13 @@ function renderAnalyse(){
   const byMotif={};
   echecs.forEach(c=>{const k=c.motifEchec||"—";if(!byMotif[k])byMotif[k]=0;byMotif[k]++;});
 
+  /* Dépenses par catégorie (client + globales) */
+  const depCatTotals={transport:0,produits:0,materiels:0,autre:0};
+  clients.forEach(c=>(c.depensesItems||[]).forEach(i=>{const k=i.categorie||"autre";if(depCatTotals[k]!==undefined)depCatTotals[k]+=i.montant||0;}));
+  depGlob.forEach(d=>{const k=d.categorie||"autre";if(depCatTotals[k]!==undefined)depCatTotals[k]+=d.montant||0;});
+  const totalDepCat=Object.values(depCatTotals).reduce((s,v)=>s+v,0);
+  const depPrestaTotal=clients.reduce((s,c)=>s+(c.depensesPrestataires||0),0);
+
   /* Insights automatiques */
   const insights=[];
   if(txConv<20)insights.push({type:"warn",ico:"⚠️",title:`Taux de conversion : ${txConv}%`,txt:`Seulement ${conv.length} client${conv.length>1?"s":""} converti${conv.length>1?"s":""} sur ${total}. Un taux < 20 % indique des leviers à activer : relances, révision tarifaire ou ciblage.`});
@@ -819,6 +827,44 @@ function renderAnalyse(){
     </div>
   </div>
 
+  <!-- Répartition des dépenses par catégorie -->
+  <div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:.5rem 0 .75rem;">Répartition des dépenses par catégorie</div>
+  <div class="an-grid" style="margin-bottom:1.5rem;">
+    <div class="an-block" style="grid-column:span 2;">
+      ${totalDepCat===0&&depPrestaTotal===0?`<div style="color:var(--text-3);font-size:12px;text-align:center;padding:2rem 0;">Aucune dépense détaillée renseignée. Ouvrez une fiche client pour ajouter des dépenses par catégorie.</div>`:`
+      <div style="display:grid;gap:10px;">
+        ${[
+          {key:"transport",label:"🚗 Transport",color:"#185FA5"},
+          {key:"produits",label:"🧪 Produits",color:"#1D9E75"},
+          {key:"materiels",label:"🔧 Matériels",color:"#BA7517"},
+          {key:"autre",label:"📌 Autre",color:"#6366F1"},
+        ].map(cat=>{
+          const v=depCatTotals[cat.key]||0;
+          const pct=totalDepCat?Math.round((v/(totalDepCat+depPrestaTotal))*100):0;
+          return`<div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+              <span>${cat.label}</span><span style="font-weight:600;">${f(v)} FCFA <span style="color:var(--text-3);font-weight:400;">(${pct}%)</span></span>
+            </div>
+            <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${cat.color};border-radius:3px;transition:width .4s;"></div>
+            </div>
+          </div>`;
+        }).join("")}
+        ${depPrestaTotal>0?`<div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+            <span>👷 Prestataires</span><span style="font-weight:600;">${f(depPrestaTotal)} FCFA <span style="color:var(--text-3);font-weight:400;">(${totalDepCat?Math.round((depPrestaTotal/(totalDepCat+depPrestaTotal))*100):0}%)</span></span>
+          </div>
+          <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
+            <div style="height:100%;width:${totalDepCat?Math.round((depPrestaTotal/(totalDepCat+depPrestaTotal))*100):0}%;background:#8B5CF6;border-radius:3px;"></div>
+          </div>
+        </div>`:""}
+        <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;font-size:12px;font-weight:600;">
+          <span>Total dépenses</span><span style="color:#E24B4A;">${f(totalDepCat+depPrestaTotal)} FCFA</span>
+        </div>
+      </div>`}
+    </div>
+  </div>
+
   <!-- Tableau détaillé clients -->
   <div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin:.5rem 0 .75rem;">Classement clients par valeur de devis</div>
   <div class="tbl-wrap" style="margin-bottom:1.5rem;">
@@ -890,7 +936,60 @@ function moveCard(id,ns){
 }
 
 function openAdd(){editId=null;showModal(formH(null));}
-function openEdit(id){editId=id;showModal(formH(clients.find(c=>c.id===id)));}
+function openEdit(id){editId=id;const c=clients.find(c=>c.id===id);currentDepItems=[...(c?.depensesItems||[])];showModal(formH(c));renderDepItems();}
+
+function renderDepItems(){
+  const wrap=document.getElementById("dep-items-wrap");
+  const tot=document.getElementById("dep-total-wrap");
+  if(!wrap)return;
+  if(!currentDepItems.length){wrap.innerHTML="";if(tot)tot.textContent="";return;}
+  const total=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);
+  wrap.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;">
+    <thead><tr style="color:var(--text-3);">
+      <th style="text-align:left;padding:3px 4px;">Catégorie</th>
+      <th style="text-align:left;padding:3px 4px;">Libellé</th>
+      <th style="text-align:right;padding:3px 4px;">Montant</th>
+      <th style="width:28px;"></th>
+    </tr></thead>
+    <tbody>${currentDepItems.map(i=>{
+      const cat=DEP_CATS.find(c=>c.key===i.categorie)||DEP_CATS[3];
+      return`<tr style="border-top:1px solid var(--border);">
+        <td style="padding:4px;">${cat.label}</td>
+        <td style="padding:4px;">${i.libelle||"—"}</td>
+        <td style="padding:4px;text-align:right;">${(i.montant||0).toLocaleString("fr-FR")} F</td>
+        <td style="padding:4px;text-align:center;"><button onclick="delDepClient('${i.id}')" style="background:none;border:none;cursor:pointer;color:#E24B4A;padding:0;font-size:14px;" title="Supprimer"><i class="ti ti-trash"></i></button></td>
+      </tr>`;
+    }).join("")}</tbody>
+  </table>`;
+  if(tot)tot.textContent=`Total dépenses : ${total.toLocaleString("fr-FR")} FCFA`;
+}
+
+async function addDepClient(){
+  const devisId=editId;if(!devisId)return;
+  const cat=document.getElementById("ndcat")?.value||"autre";
+  const lib=(document.getElementById("ndlib")?.value||"").trim();
+  const mt=parseInt(document.getElementById("ndmt")?.value||"0")||0;
+  if(!lib&&!mt)return;
+  const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_dep_client",devisId,libelle:lib,montant:mt,categorie:cat})});
+  const r=await res.json();
+  if(r.ok&&r.dep){
+    currentDepItems.push(r.dep);
+    // Mettre à jour le client local
+    const c=clients.find(c=>c.id===devisId);
+    if(c){c.depensesItems=[...currentDepItems];c.depenses=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);}
+    document.getElementById("ndlib").value="";
+    document.getElementById("ndmt").value="";
+    renderDepItems();
+  }
+}
+
+async function delDepClient(depId){
+  await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_dep_client",id:depId})});
+  currentDepItems=currentDepItems.filter(i=>i.id!==depId);
+  const c=clients.find(c=>c.id===editId);
+  if(c){c.depensesItems=[...currentDepItems];c.depenses=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);}
+  renderDepItems();
+}
 
 const DEP_CATS=[
   {key:"transport",label:"🚗 Transport"},
@@ -995,7 +1094,19 @@ function formH(c){
     <div><label class="fl">Montant facturé (FCFA)</label><input type="number" id="fmf" min="0" value="${c?.montantFacture||""}"></div>
     <div><label class="fl">Date de facturation</label><input type="date" id="fdf" value="${c?.dateFacture||""}"></div>
     <div><label class="fl">Paiements reçus (FCFA)</label><input type="number" id="fp2" min="0" value="${c?.paiementsRecus||""}"></div>
-    <div><label class="fl">Dépenses liées (FCFA)</label><input type="number" id="fdp" min="0" value="${c?.depenses||""}"></div>
+    <div class="fg-full">
+      <label class="fl" style="margin-bottom:6px;">Dépenses liées <span style="font-weight:400;color:var(--text-3);font-size:11px;">— détail par catégorie</span></label>
+      <div id="dep-items-wrap" style="margin-bottom:8px;"></div>
+      <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:0 0 120px;">
+          <select id="ndcat" style="width:100%;">${DEP_CATS.map(c=>`<option value="${c.key}">${c.label}</option>`).join("")}</select>
+        </div>
+        <div style="flex:1;min-width:120px;"><input id="ndlib" placeholder="Libellé (ex: Perméthrine 5L)" style="width:100%;"></div>
+        <div style="flex:0 0 100px;"><input type="number" id="ndmt" min="0" placeholder="Montant" style="width:100%;"></div>
+        <button class="btn-s" onclick="addDepClient()" style="white-space:nowrap;"><i class="ti ti-plus"></i> Ajouter</button>
+      </div>
+      <div id="dep-total-wrap" style="text-align:right;font-size:12px;color:var(--text-3);margin-top:4px;"></div>
+    </div>
     <div class="fg-full">
       <label class="fl">Attestation</label>
       <select id="fat">
@@ -1023,7 +1134,7 @@ async function saveClient(){
   const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
     typePrestation:g("ftp"),categorie:g("fcat"),zone:g("fzone")||"—",
     motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs"),commentaire:g("fco"),
-    montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),depenses:gn("fdp"),attestation:g("fat")||"non",
+    montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),attestation:g("fat")||"non",
     typeContrat:g("ftc")||"ponctuel",dureeContratMois:gn("fdur")||12,
     frequenceIntervention:g("ffreq")||"trimestrielle",dateDebutContrat:g("fdeb")||""};
   if(!d.client){alert("Veuillez saisir le nom du client.");return;}

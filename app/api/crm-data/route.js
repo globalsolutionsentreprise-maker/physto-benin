@@ -12,10 +12,11 @@ function mapStatut(statut) {
 }
 
 export async function GET() {
-  const [{ data: devisList }, { data: depenses }, { data: interventions }] = await Promise.all([
+  const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
+    supabase.from("depenses_devis").select("*").order("created_at"),
   ])
 
   // Somme des coûts prestataires par devis
@@ -24,9 +25,22 @@ export async function GET() {
     if (i.devis_id) prestByDevis[i.devis_id] = (prestByDevis[i.devis_id] || 0) + (i.montant_prestataire || 0)
   }
 
+  // Dépenses détaillées par devis
+  const depItemsByDevis = {}
+  for (const d of (depDevis || [])) {
+    if (!depItemsByDevis[d.devis_id]) depItemsByDevis[d.devis_id] = []
+    depItemsByDevis[d.devis_id].push({
+      id: d.id, libelle: d.libelle, montant: d.montant || 0,
+      categorie: d.categorie || "autre",
+      date: d.date || (d.created_at ? d.created_at.split("T")[0] : ""),
+    })
+  }
+
   const clients = (devisList || []).map(d => {
     const cl = d.clients || {}
     const nom = [cl.prenom, cl.nom].filter(Boolean).join(" ") || cl.entreprise || "Client"
+    const items = depItemsByDevis[d.id] || []
+    const depensesItemsTotal = items.reduce((s, i) => s + (i.montant || 0), 0)
     return {
       id: d.id,
       client: nom,
@@ -38,7 +52,8 @@ export async function GET() {
       dateDevis: d.date_envoi ? d.date_envoi.split("T")[0] : (d.created_at ? d.created_at.split("T")[0] : ""),
       dateFacture: d.date_facture_crm || "",
       montantFacture: d.montant_facture_crm || (d.crm_statut === "converti" ? d.montant_net : 0),
-      depenses: d.depenses_client || 0,
+      depenses: depensesItemsTotal || d.depenses_client || 0,
+      depensesItems: items,
       paiementsRecus: d.paiements_recus || 0,
       dateContact: d.date_contact || (d.created_at ? d.created_at.split("T")[0] : ""),
       typePrestation: d.prestation || "",
@@ -80,7 +95,7 @@ export async function POST(req) {
   }
 
   if (action === "save_client") {
-    const { id, statut, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
+    const { id, statut, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
     await supabase.from("devis").update({
       crm_statut: statut,
       provenance,
@@ -88,7 +103,6 @@ export async function POST(req) {
       categorie,
       motif_echec: motifEchec,
       paiements_recus: paiementsRecus || 0,
-      depenses_client: depenses || 0,
       date_contact: dateContact || null,
       attestation_crm: attestation,
       date_facture_crm: dateFacture || null,
@@ -104,14 +118,10 @@ export async function POST(req) {
   }
 
   if (action === "add_client") {
-    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, depenses, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
-    // Créer un client Supabase
+    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
     const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
-
-    // Générer un numéro de devis
     const { data: num } = await supabase.rpc("generate_devis_numero")
-
     const { data: newDevis } = await supabase.from("devis").insert({
       client_id: newClient.id,
       numero: num,
@@ -126,7 +136,6 @@ export async function POST(req) {
       categorie,
       motif_echec: motifEchec,
       paiements_recus: paiementsRecus || 0,
-      depenses_client: depenses || 0,
       date_contact: dateContact || null,
       attestation_crm: attestation || "non",
       date_facture_crm: dateFacture || null,
@@ -136,12 +145,10 @@ export async function POST(req) {
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
-
     return Response.json({ ok: true, id: newDevis?.id })
   }
 
   if (action === "del_client") {
-    // Supprimer uniquement le devis (pas le client Supabase)
     await supabase.from("devis").delete().eq("id", body.id)
     return Response.json({ ok: true })
   }
@@ -154,6 +161,19 @@ export async function POST(req) {
 
   if (action === "del_depense") {
     await supabase.from("depenses_globales").delete().eq("id", body.id)
+    return Response.json({ ok: true })
+  }
+
+  if (action === "add_dep_client") {
+    const { devisId, libelle, montant, categorie, date } = body
+    const { data: dep } = await supabase.from("depenses_devis").insert({
+      devis_id: devisId, libelle, montant: montant || 0, categorie: categorie || "autre", date: date || null,
+    }).select().single()
+    return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, categorie: dep.categorie || "autre", date: dep.date || dep.created_at?.split("T")[0] || "" } })
+  }
+
+  if (action === "del_dep_client") {
+    await supabase.from("depenses_devis").delete().eq("id", body.id)
     return Response.json({ ok: true })
   }
 
