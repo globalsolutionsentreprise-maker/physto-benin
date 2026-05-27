@@ -155,7 +155,7 @@ textarea{height:70px;resize:vertical;}
 
 <script>
 // ── État global ───────────────────────────────────────────────────────────────
-let membres=[], plannings=[], contratsCRM=[];
+let membres=[], plannings=[], contratsCRM=[], tousCRM=[];
 let activeTab="equipe", editMembreId=null, editIntervId=null;
 let weekOffset=0;
 
@@ -232,7 +232,7 @@ async function loadData(){
   try{
     const r=await fetch("/api/rh-data");
     const d=await r.json();
-    membres=d.membres||[];plannings=d.plannings||[];contratsCRM=d.contratsCRM||[];
+    membres=d.membres||[];plannings=d.plannings||[];contratsCRM=d.contratsCRM||[];tousCRM=d.tousCRM||[];
   }catch(e){membres=[];plannings=[];contratsCRM=[];}
   render();
 }
@@ -520,13 +520,18 @@ function openEditInterv(id){
 }
 
 function intervForm(p,datePrefill,persPrefill,clientPrefill){
-  const crmOpts=contratsCRM.map(c=>`<option value="${c.id}">${c.clientNom}</option>`).join("");
+  const crmOpts=contratsCRM.map(c=>`<option value="${c.id}" ${p?.devisId===c.id?"selected":""}>${c.clientNom}</option>`).join("");
+  const clientOpts=tousCRM.map(c=>`<option value="${c.nom}" data-devisid="${c.devisId}" ${(p?.clientNom||clientPrefill)===c.nom?"selected":""}>${c.nom}</option>`).join("");
   return`<div class="modal-hdr">
     <span class="modal-title">${p?"Modifier l'intervention":"Nouvelle intervention"}</span>
     <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x"></i></button>
   </div>
   <div class="form-body"><div class="form-grid">
-    <div class="fg-full"><label class="fl">Client *</label><input id="icl" placeholder="Nom du client" value="${p?.clientNom||clientPrefill||""}"></div>
+    <div class="fg-full"><label class="fl">Client *</label>
+      <select id="icl" onchange="onClientChange(this)">
+        <option value="">— Sélectionner un client —</option>
+        ${clientOpts}
+      </select></div>
     <div class="fg-full"><label class="fl">Lié à un contrat CRM</label>
       <select id="idev"><option value="">— Aucun contrat lié —</option>${crmOpts}</select></div>
     <div><label class="fl">Date *</label><input type="date" id="idate" value="${p?.dateIntervention||datePrefill||new Date().toISOString().slice(0,10)}"></div>
@@ -556,6 +561,16 @@ function onPersonnelChange(val){
   const m=membres.find(m=>m.id===val);
   const wrap=document.getElementById("imontant-wrap");
   if(wrap)wrap.style.opacity=m?.statut==="prestataire"?"1":".45";
+}
+
+function onClientChange(sel){
+  const opt=sel.options[sel.selectedIndex];
+  const devisId=opt?.dataset?.devisid||"";
+  const idev=document.getElementById("idev");
+  if(idev&&devisId){
+    const match=Array.from(idev.options).find(o=>o.value===devisId);
+    if(match)idev.value=devisId;
+  }
 }
 
 async function saveInterv(){

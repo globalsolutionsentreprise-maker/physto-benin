@@ -8,10 +8,11 @@ const supabase = createClient(
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const [{ data: personnel }, { data: interventions }, { data: devisList }] = await Promise.all([
+  const [{ data: personnel }, { data: interventions }, { data: devisList }, { data: tousDevis }] = await Promise.all([
     supabase.from("personnel").select("*").order("nom"),
     supabase.from("interventions").select("*, personnel(id,nom,prenom,poste)").order("date_intervention"),
     supabase.from("devis").select("id, type_crm, frequence_intervention, duree_contrat_mois, date_debut_contrat, montant_net, prestation, clients(nom,prenom,entreprise)").eq("type_crm", "contrat"),
+    supabase.from("devis").select("id, type_crm, crm_statut, clients(nom,prenom,entreprise)").neq("crm_statut", "echec").order("created_at", { ascending: false }),
   ])
 
   const membres = (personnel || []).map(p => ({
@@ -37,7 +38,20 @@ export async function GET() {
     return { id: d.id, clientNom: nom, typeContrat: d.type_crm, frequence: d.frequence_intervention, duree: d.duree_contrat_mois, dateDebut: d.date_debut_contrat, montant: d.montant_net, prestation: d.prestation }
   })
 
-  return Response.json({ membres, plannings, contratsCRM })
+  // Tous les clients CRM (non-échec) pour le dropdown d'intervention
+  const seen = new Set()
+  const tousCRM = (tousDevis || []).reduce((acc, d) => {
+    const cl = d.clients || {}
+    const nom = [cl.prenom, cl.nom].filter(Boolean).join(" ") || cl.entreprise || ""
+    if (nom && !seen.has(nom)) {
+      seen.add(nom)
+      const contrat = contratsCRM.find(c => c.clientNom === nom)
+      acc.push({ nom, devisId: contrat?.id || d.id })
+    }
+    return acc
+  }, []).sort((a, b) => a.nom.localeCompare(b.nom, "fr"))
+
+  return Response.json({ membres, plannings, contratsCRM, tousCRM })
 }
 
 export async function POST(req) {
