@@ -1099,9 +1099,7 @@ function SectionClientsDevis({ db, agrement }) {
       situation: (d.lieu_intervention) || (cl && cl.adresse) || '',
       dateDebut: '',
       dateFin: '',
-      matiere1: type === 'desinsect' ? 'Deltaméthrine SC 12.5%' : 'Brodifacoum 0.005%',
-      matiere2: type === 'desinsect' ? 'Cyperméthrine 10 CE' : 'Bromadiolone 0.005%',
-      matiere3: '',
+      matieres: type === 'desinsect' ? 'Deltaméthrine SC 12.5%\nCyperméthrine 10 CE' : 'Brodifacoum 0.005%\nBromadiolone 0.005%',
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
@@ -1156,9 +1154,7 @@ function SectionClientsDevis({ db, agrement }) {
       situation: form.situation || '',
       dateDebut: form.dateDebut || '',
       dateFin: form.dateFin || '',
-      matiere1: form.matiere1 || '',
-      matiere2: form.matiere2 || '',
-      matiere3: form.matiere3 || '',
+      matieres: form.matieres || [form.matiere1, form.matiere2, form.matiere3].filter(Boolean).join('\n') || '',
     })
     setCertModal({ type: cert.type, devis: devis || { id: cert.devis_id, client_id: cert.client_id }, cl: client, editingId: cert.id, existingNumero: cert.numero_unique })
   }
@@ -1172,8 +1168,6 @@ function SectionClientsDevis({ db, agrement }) {
     }
     var inp2 = { width: '100%', padding: '8px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
     var lbl2 = { display: 'block', fontSize: '10px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' }
-    var matieres = ['matiere1', 'matiere2', 'matiere3']
-
     return React.createElement('div', {
       style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
       onClick: function(e) { if (e.target === e.currentTarget) setCertModal(null) }
@@ -1211,14 +1205,8 @@ function SectionClientsDevis({ db, agrement }) {
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
-          React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '4px', textTransform: 'uppercase' } }, 'Matières actives utilisées'),
-          React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginBottom: '12px' } }, 'Observations : Agrément APA/26-025/CNGP-BEN (fixe sur le certificat)'),
-          matieres.map(function(field, i) {
-            return React.createElement('div', { key: i, style: { marginBottom: i < 2 ? '10px' : 0 } },
-              React.createElement('label', { style: lbl2 }, 'Matière active ' + (i + 1) + (i === 2 ? ' (optionnel)' : '')),
-              React.createElement('input', { value: certForm[field] || '', onChange: function(e) { updateForm(field, e.target.value) }, style: inp2 })
-            )
-          })
+          React.createElement('label', { style: lbl2 }, 'Matières actives utilisées'),
+          React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: Deltaméthrine SC 12.5%\nCyperméthrine 10 CE', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', fontSize: '11px', color: '#065f46' } },
@@ -2290,11 +2278,9 @@ function buildCertificatHtml(type, form) {
     ? "L'opération est réalisée par pulvérisation au moyen des produits homologués ci-après."
     : "L'opération est réalisée par disposition de produit homologué dans les PVC (boîtes d'appâts)."
 
-  var rowsHtml = [form.matiere1, form.matiere2, form.matiere3]
-    .filter(function(m) { return m && m.trim() })
-    .map(function(matiere) {
-      return '<tr><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle">' + matiere + '</td><td style="border:1px solid #bbb;padding:9px 10px;height:32px;vertical-align:middle;color:#1a4731;font-weight:600">Observations : Agrément APA/26-025/CNGP-BEN</td></tr>'
-    }).join('')
+  var rowsHtml = (form.matieres || '').trim()
+    ? '<tr><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line">' + (form.matieres || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600">Agrément APA/26-025/CNGP-BEN</td></tr>'
+    : ''
 
   var dateExec = (form.dateDebut && form.dateFin)
     ? 'du <strong>' + form.dateDebut + '</strong> au <strong>' + form.dateFin + '</strong> 2026'
