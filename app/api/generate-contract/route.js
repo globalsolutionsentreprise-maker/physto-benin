@@ -1,63 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { readFileSync } from "fs"
-import { join } from "path"
-import {
-  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  ImageRun, AlignmentType, WidthType, BorderStyle, ShadingType,
-  convertMillimetersToTwip, VerticalAlign, TableLayoutType
-} from "docx"
 
 export const dynamic = "force-dynamic"
-
-const VERT = "0a2e1a"
-const OR = "d4a920"
-const GRIS = "555555"
-const BEIGE = "f5f5f0"
-const BEIGE2 = "f0f0eb"
-
-function mm(n) { return convertMillimetersToTwip(n) }
-
-const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "auto" }
-const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER, insideHorizontal: NO_BORDER, insideVertical: NO_BORDER }
-const GRID_BORDER = { style: BorderStyle.SINGLE, size: 2, color: "cccccc" }
-const GRID_BORDERS = { top: GRID_BORDER, bottom: GRID_BORDER, left: GRID_BORDER, right: GRID_BORDER, insideHorizontal: GRID_BORDER, insideVertical: GRID_BORDER }
-
-function shading(fill) {
-  return { type: ShadingType.CLEAR, color: "auto", fill }
-}
-
-function runs(...items) {
-  return items.map(item => {
-    if (typeof item === "string") return new TextRun({ text: item, size: 19 })
-    return new TextRun({ text: item.text || "", size: item.size || 19, bold: item.bold, italics: item.italic, color: item.color, break: item.break })
-  })
-}
-
-function para(children, opts = {}) {
-  return new Paragraph({
-    alignment: opts.align || AlignmentType.LEFT,
-    spacing: { before: opts.before ?? 60, after: opts.after ?? 60 },
-    ...(opts.bullet ? { bullet: { level: 0 } } : {}),
-    children: Array.isArray(children) ? children : [children]
-  })
-}
-
-function secTitle(text) {
-  return new Paragraph({
-    spacing: { before: 240, after: 80 },
-    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: VERT, space: 4 } },
-    children: [new TextRun({ text, bold: true, size: 22, color: VERT })]
-  })
-}
-
-function bullet(text) {
-  return para(new TextRun({ text, size: 19 }), { bullet: true, before: 50, after: 50 })
-}
-
-function spacer(before = 120) {
-  return new Paragraph({ spacing: { before, after: 0 }, children: [] })
-}
 
 export async function GET(req) {
   const supabase = createClient(
@@ -90,397 +34,327 @@ export async function GET(req) {
     const client     = devis.clients || {}
     const nomClient  = [client.prenom, client.nom].filter(Boolean).join(" ")
     const entreprise = client.entreprise || nomClient
-    const remisePct  = remisePassed > 0 ? remisePassed : (prixTrim * 4 > 0 ? Math.round((1 - prixAnnuel / (prixTrim * 4)) * 100) : 0)
-    const prixRef    = remisePct > 0 ? Math.round(prixAnnuel / (1 - remisePct / 100)) : prixTrim * 4
+    const adresse    = client.adresse || "Cotonou, Bénin"
+    const telephone  = client.telephone || "_______________"
+    const superficie = devis.superficie ? devis.superficie.toLocaleString("fr-FR") + " m²" : "_______________"
     const montant    = (devis.montant_total || devis.montant || 0).toLocaleString("fr-FR")
     const typeEtabLabel = typeEtablissement || "_______________"
     const prestationLabel = Array.isArray(devis.prestations) && devis.prestations.length > 0
       ? devis.prestations.join(" + ")
       : devis.prestation || "Désinsectisation + Dératisation"
 
-    let logoData = null
-    try {
-      logoData = readFileSync(join(process.cwd(), "public", "logo-gse.jpeg"))
-    } catch {}
+    const remisePct  = remisePassed > 0 ? remisePassed : (prixTrim * 4 > 0 ? Math.round((1 - prixAnnuel / (prixTrim * 4)) * 100) : 0)
+    const prixRef    = remisePct > 0 ? Math.round(prixAnnuel / (1 - remisePct / 100)) : prixTrim * 4
+    const remiseMontant = prixRef - prixAnnuel
 
-    // Helper: party cell
-    function partyCell(titre, rows, fill = BEIGE) {
-      return new TableCell({
-        shading: shading(fill),
-        borders: NO_BORDERS,
-        margins: { top: mm(3), bottom: mm(3), left: mm(4), right: mm(4) },
-        children: [
-          para(new TextRun({ text: titre, bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
-          ...rows.map(([k, v]) => para([
-            new TextRun({ text: k + " : ", bold: true, size: 18, color: GRIS }),
-            new TextRun({ text: v || "_______________", size: 18 })
-          ], { before: 40, after: 40 }))
-        ]
-      })
+    function esc(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
     }
 
-    // Helper: finance row
-    function finRow(label, value, header = false, bg = null) {
-      const fill = header ? VERT : (bg || "ffffff")
-      const textColor = header ? OR : undefined
-      return new TableRow({
-        children: [
-          new TableCell({
-            shading: shading(fill),
-            borders: NO_BORDERS,
-            margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-            children: [para(new TextRun({ text: label, bold: header, size: 18, color: textColor }), { before: 60, after: 60 })]
-          }),
-          new TableCell({
-            shading: shading(fill),
-            borders: NO_BORDERS,
-            margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-            children: [para(new TextRun({ text: value, bold: header, size: 18, color: textColor }), { align: AlignmentType.CENTER, before: 60, after: 60 })]
-          })
-        ]
-      })
+    function artTitle(text) {
+      return `<div class="art-title">${esc(text)}</div>`
     }
 
-    // Helper: services row
-    function servRow(freq, nature, details, bg = "ffffff") {
-      return new TableRow({
-        children: [
-          new TableCell({
-            shading: shading(bg),
-            margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-            children: [para(new TextRun({ text: freq, size: 17 }), { before: 60, after: 60 })]
-          }),
-          new TableCell({
-            shading: shading(bg),
-            margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-            children: [para(new TextRun({ text: nature, size: 17 }), { before: 60, after: 60 })]
-          }),
-          new TableCell({
-            shading: shading(bg),
-            margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-            children: details.map(d => para(new TextRun({ text: d, size: 17 }), { before: 30, after: 30 }))
-          })
-        ]
-      })
+    function li(text) {
+      return `<li>${esc(text)}</li>`
     }
 
-    const doc = new Document({
-      sections: [{
-        properties: {
-          page: {
-            margin: { top: mm(18), bottom: mm(18), left: mm(22), right: mm(22) }
-          }
-        },
-        children: [
+    function paiementArticle() {
+      if (paiement === "mensuel") return `
+        <ul class="clauses">
+          ${li("Le paiement s'effectue par mensualité, en avance, avant le début de chaque mois de prestation.")}
+          ${li("Aucune prestation ne sera réalisée en l'absence de règlement du mois correspondant.")}
+          ${li("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire.")}
+          ${li("Tout retard de paiement supérieur à 10 jours suspend l'exécution du contrat.")}
+        </ul>`
+      if (paiement === "annuel") return `
+        <ul class="clauses">
+          ${li("Le règlement s'effectue en une seule fois, en avance, avant le démarrage du contrat.")}
+          ${li("Le paiement intégral conditionne le lancement des prestations.")}
+          ${li("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire.")}
+          ${li("En cas de résiliation anticipée par le Client, les trimestres non consommés ne sont pas remboursés.")}
+        </ul>`
+      return `
+        <ul class="clauses">
+          ${li("Le paiement s'effectue par trimestre, en avance, avant tout passage trimestriel.")}
+          ${li("Aucune prestation ne sera réalisée en l'absence de règlement du trimestre correspondant.")}
+          ${li("Les contrôles mensuels intermédiaires sont inclus dans le forfait trimestriel.")}
+          ${li("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire.")}
+          ${li("Tout retard de paiement supérieur à 15 jours suspend l'exécution du contrat.")}
+        </ul>`
+    }
 
-          // ── EN-TÊTE ──
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [
-                new TableCell({
-                  width: { size: mm(32), type: WidthType.DXA },
-                  verticalAlign: VerticalAlign.CENTER,
-                  borders: NO_BORDERS,
-                  children: [
-                    logoData
-                      ? new Paragraph({ spacing: { before: 0, after: 0 }, children: [new ImageRun({ data: logoData, transformation: { width: mm(26), height: mm(26) }, type: "jpg" })] })
-                      : spacer(0)
-                  ]
-                }),
-                new TableCell({
-                  verticalAlign: VerticalAlign.CENTER,
-                  borders: NO_BORDERS,
-                  margins: { left: mm(4) },
-                  children: [
-                    para(new TextRun({ text: "GLOBAL SOLUTIONS ENTREPRISE", bold: true, size: 26, color: VERT }), { before: 0, after: 40 }),
-                    para(new TextRun({ text: "Dératisation · Désinsectisation · Désinfection", italics: true, size: 18, color: GRIS }), { before: 0, after: 40 }),
-                    para(new TextRun({ text: "Agrément État du Bénin — N° APA-26-025/CNGP-BEN", bold: true, size: 18, color: OR }), { before: 0, after: 40 }),
-                    para(new TextRun({ text: "Ilot 3535, Cotonou  |  +229 53 04 79 50  |  contact@phyto-benin.com  |  RCCM RB/COT/24 B 38910", size: 16, color: GRIS }), { before: 0, after: 0 }),
-                  ]
-                })
-              ]
-            })]
-          }),
+    function paiementLabel() {
+      if (paiement === "mensuel") return `Paiement mensuel en avance`
+      if (paiement === "annuel") return `Paiement annuel en avance (intégral)`
+      return `Paiement trimestriel en avance`
+    }
 
-          spacer(140),
+    function paiementMontant() {
+      if (paiement === "mensuel") return `${Math.round(prixAnnuel / 12).toLocaleString("fr-FR")} FCFA / mois`
+      if (paiement === "annuel") return `${prixAnnuel.toLocaleString("fr-FR")} FCFA (règlement unique)`
+      return `${prixTrim.toLocaleString("fr-FR")} FCFA / trimestre`
+    }
 
-          // ── TITRE ──
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [new TableCell({
-                shading: shading(VERT),
-                borders: NO_BORDERS,
-                margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
-                children: [para(new TextRun({ text: "CONTRAT D'ENTRETIEN ANNUEL", bold: true, size: 26, color: OR }), { align: AlignmentType.CENTER, before: 0, after: 0 })]
-              })]
-            })]
-          }),
+    const controleRow = controles > 0 ? `
+      <tr>
+        <td>× ${controles} / an<br><small>(mensuelle inter-trim.)</small></td>
+        <td>Contrôle des stations à rongeurs</td>
+        <td>
+          — Vérification état et consommation des appâts<br>
+          — Rechargement si nécessaire<br>
+          — Rapport succinct transmis au Client
+        </td>
+      </tr>` : ""
 
-          spacer(140),
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Contrat ${esc(entreprise)} — GSE</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #f5f5f0; }
+.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }
+.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }
+.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }
+.page { max-width: 780px; margin: 0 auto; background: #fff; }
+.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }
+.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+.hdr-left .name { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }
+.hdr-right { text-align: right; }
+.hdr-right .title { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.hdr-right .ref { color: #d4a920; font-size: 12px; margin-top: 4px; }
+.agr { background: #d4a920; padding: 5px 12px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }
+.body { padding: 24px 32px; }
+.ref-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.ref-cell { background: #f5f5f0; border-radius: 6px; padding: 10px 12px; text-align: center; }
+.ref-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.ref-value { font-size: 13px; font-weight: 700; color: #0a2e1a; }
+.parties { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.party-box { background: #f5f5f0; border-radius: 6px; padding: 12px 14px; }
+.party-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #0a2e1a; padding-bottom: 4px; margin-bottom: 8px; }
+.party-row { display: flex; gap: 6px; margin-bottom: 4px; font-size: 11.5px; line-height: 1.4; }
+.party-key { font-weight: 700; color: #555; min-width: 90px; flex-shrink: 0; }
+.party-val { color: #111; }
+.art-title { font-size: 11px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #0a2e1a; padding-bottom: 4px; margin-top: 18px; margin-bottom: 10px; }
+p.art-text { font-size: 12px; line-height: 1.65; margin-bottom: 8px; }
+.note-box { background: #f0fdf4; border: 1px solid #d1fae5; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: #065f46; margin-bottom: 12px; }
+table.services { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11.5px; }
+table.services th { background: #0a2e1a; color: #d4a920; padding: 7px 10px; text-align: left; font-size: 11px; }
+table.services td { border: 1px solid #ccc; padding: 7px 10px; vertical-align: top; line-height: 1.5; }
+table.services tr:nth-child(odd) td { background: #fafaf8; }
+table.finances { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 12px; }
+table.finances th { background: #0a2e1a; color: #d4a920; padding: 7px 12px; text-align: left; }
+table.finances td { border: 1px solid #ddd; padding: 7px 12px; }
+table.finances tr.total td { background: #0a2e1a; color: #d4a920; font-weight: 700; font-size: 13px; }
+table.finances tr.alt td { background: #f5f5f0; }
+ul.clauses { padding-left: 18px; margin-bottom: 10px; }
+ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
+.sub-title { font-size: 12px; font-weight: 700; color: #0a2e1a; margin-top: 14px; margin-bottom: 6px; }
+.sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
+.sig-box { border: 1px solid #ccc; border-radius: 6px; padding: 14px; }
+.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.sig-sub { font-size: 10px; color: #888; font-style: italic; margin-bottom: 4px; }
+.sig-line { height: 56px; }
+.sig-date { font-size: 11px; color: #888; margin-top: 6px; }
+.sig-name { font-weight: 700; font-size: 12px; margin-top: 4px; }
+.gse-footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }
+@media print {
+  .noprint { display: none; }
+  body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 10px; }
+  .page { max-width: 100%; }
+  @page { size: A4 portrait; margin: 7mm 10mm; }
+  .hdr { padding: 8px 16px; }
+  .hdr img { width: 40px !important; height: 40px !important; }
+  .body { padding: 10px 18px; }
+  .art-title { margin-top: 12px; }
+  .sigs { margin-top: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="noprint">
+  <button onclick="window.print()">🖨️ Imprimer / PDF</button>
+  <button class="sec" onclick="window.close()">Fermer</button>
+</div>
+<div class="page">
 
-          // ── RÉFÉRENCES ──
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [
-                ["Réf. contrat", "CONT-GSE-2026-____"],
-                ["Date de signature", "___ / ___ / 2026"],
-                ["Durée", duree + " mois"]
-              ].map(([label, value]) => new TableCell({
-                shading: shading(BEIGE),
-                borders: NO_BORDERS,
-                margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-                children: [new Paragraph({
-                  alignment: AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 },
-                  children: [
-                    new TextRun({ text: label + "\n", size: 16, color: GRIS }),
-                    new TextRun({ text: value, bold: true, size: 20, color: VERT, break: 1 })
-                  ]
-                })]
-              }))
-            })]
-          }),
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="sub">Global Solutions Entreprise</div>
+      <div class="name">Phyto Bénin</div>
+    </div>
+    <img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
+    <div class="hdr-right">
+      <div class="title">Contrat d'entretien annuel</div>
+      <div class="ref">Réf. CONT-GSE-2026-____</div>
+    </div>
+  </div>
+  <div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>
 
-          spacer(140),
+  <div class="body">
 
-          // ── ART 1 ─ PARTIES ──
-          secTitle("ARTICLE 1 — PARTIES CONTRACTANTES"),
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [
-                partyCell("PRESTATAIRE", [
-                  ["Société", "Global Solutions Entreprise (GSE)"],
-                  ["Agrément", "N° APA-26-025/CNGP-BEN"],
-                  ["RCCM", "RB/COT/24 B 38910"],
-                  ["IFU", "3202420126111"],
-                  ["Adresse", "Ilot 3535, Cotonou, Bénin"],
-                  ["Téléphone", "+229 53 04 79 50"],
-                  ["Email", "contact@phyto-benin.com"],
-                ]),
-                partyCell("CLIENT", [
-                  ["Dénomination", entreprise],
-                  ["Représentant", nomClient],
-                  ["Adresse", client.adresse || "Cotonou, Bénin"],
-                  ["Téléphone", client.telephone || "_______________"],
-                  ["Type d'établissement", typeEtabLabel],
-                  ["Superficie", devis.superficie ? devis.superficie + " m²" : "_______________"],
-                ]),
-              ]
-            })]
-          }),
+    <div class="ref-grid">
+      <div class="ref-cell"><div class="ref-label">Réf. contrat</div><div class="ref-value">CONT-GSE-2026-____</div></div>
+      <div class="ref-cell"><div class="ref-label">Date de signature</div><div class="ref-value">___ / ___ / 2026</div></div>
+      <div class="ref-cell"><div class="ref-label">Durée</div><div class="ref-value">${duree} mois</div></div>
+    </div>
 
-          // ── ART 2 ─ OBJET ──
-          secTitle("ARTICLE 2 — OBJET DU CONTRAT"),
-          para(new TextRun({ text: "Le présent contrat a pour objet la réalisation par GSE d'un programme annuel d'entretien sanitaire conformément aux recommandations du rapport de visite technique et dans le respect de la loi 91-004 du 11 Février 1991 portant réglementation Phytosanitaire en République du Bénin.", size: 19 })),
-          para([
-            new TextRun({ text: "Note : ", bold: true, size: 19, color: VERT }),
-            new TextRun({ text: `L'intervention initiale (devis ${devis.numero}) est facturée séparément à ${montant} FCFA et doit être réglée avant démarrage du présent contrat.`, size: 19, italics: true })
-          ], { before: 0, after: 60 }),
+    ${artTitle("Article 1 — Parties contractantes")}
+    <div class="parties">
+      <div class="party-box">
+        <div class="party-title">Prestataire</div>
+        <div class="party-row"><span class="party-key">Société :</span><span class="party-val">Global Solutions Entreprise (GSE)</span></div>
+        <div class="party-row"><span class="party-key">Agrément :</span><span class="party-val">N° APA-26-025/CNGP-BEN</span></div>
+        <div class="party-row"><span class="party-key">RCCM :</span><span class="party-val">RB/COT/24 B 38910</span></div>
+        <div class="party-row"><span class="party-key">IFU :</span><span class="party-val">3202420126111</span></div>
+        <div class="party-row"><span class="party-key">Adresse :</span><span class="party-val">Ilot 3535, Cotonou, Bénin</span></div>
+        <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">+229 53 04 79 50</span></div>
+        <div class="party-row"><span class="party-key">Email :</span><span class="party-val">contact@phyto-benin.com</span></div>
+      </div>
+      <div class="party-box">
+        <div class="party-title">Client</div>
+        <div class="party-row"><span class="party-key">Dénomination :</span><span class="party-val">${esc(entreprise)}</span></div>
+        <div class="party-row"><span class="party-key">Représentant :</span><span class="party-val">${esc(nomClient)}</span></div>
+        <div class="party-row"><span class="party-key">Adresse :</span><span class="party-val">${esc(adresse)}</span></div>
+        <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">${esc(telephone)}</span></div>
+        <div class="party-row"><span class="party-key">Type d'établ. :</span><span class="party-val">${esc(typeEtabLabel)}</span></div>
+        <div class="party-row"><span class="party-key">Superficie :</span><span class="party-val">${esc(superficie)}</span></div>
+      </div>
+    </div>
 
-          // ── ART 3 ─ PRESTATIONS ──
-          secTitle(`ARTICLE 3 — PRESTATIONS INCLUSES (${formule})`),
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: GRID_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              // Header
-              new TableRow({
-                tableHeader: true,
-                children: ["Fréquence", "Nature de l'intervention", "Détail"].map(h =>
-                  new TableCell({
-                    shading: shading(VERT),
-                    margins: { top: mm(2), bottom: mm(2), left: mm(3), right: mm(3) },
-                    children: [para(new TextRun({ text: h, bold: true, size: 18, color: OR }), { align: AlignmentType.CENTER, before: 60, after: 60 })]
-                  })
-                )
-              }),
-              servRow(
-                `× ${passages} / an\n(trimestrielle)`,
-                prestationLabel,
-                [
-                  "— Traitement insecticide rémanent : murs, plinthes, zones d'ombre",
-                  "— Dératisation : vérification et rechargement des stations",
-                  "— Inspection visuelle complète",
-                  "— Fiche de passage + Attestation GSE à chaque intervention"
-                ],
-                BEIGE2
-              ),
-              ...(controles > 0 ? [servRow(
-                `× ${controles} / an\n(mensuelle inter-trim.)`,
-                "Contrôle des stations\nà rongeurs",
-                [
-                  "— Vérification état et consommation des appâts",
-                  "— Rechargement si nécessaire",
-                  "— Rapport succinct transmis au Client"
-                ]
-              )] : []),
-              servRow(
-                "× 1 / an\n(fin de contrat)",
-                "Audit de conformité\nsanitaire annuel",
-                [
-                  "— Bilan complet du plan IPM sur 12 mois",
-                  "— Rapport écrit utilisable lors de contrôles sanitaires officiels"
-                ],
-                BEIGE2
-              ),
-            ]
-          }),
+    ${artTitle("Article 2 — Objet du contrat")}
+    <p class="art-text">Le présent contrat a pour objet la réalisation par GSE d'un programme annuel d'entretien sanitaire conformément aux recommandations du rapport de visite technique et dans le respect de la loi 91-004 du 11 Février 1991 portant réglementation Phytosanitaire en République du Bénin.</p>
+    <div class="note-box">
+      <strong>Note :</strong> L'intervention initiale (devis ${esc(devis.numero)}) est facturée séparément à ${esc(montant)} FCFA et doit être réglée avant démarrage du présent contrat.
+    </div>
 
-          spacer(80),
+    ${artTitle(`Article 3 — Prestations incluses (${esc(formule)})`)}
+    <table class="services">
+      <thead>
+        <tr>
+          <th style="width:18%">Fréquence</th>
+          <th style="width:28%">Nature de l'intervention</th>
+          <th>Détail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>× ${passages} / an<br><small>(trimestrielle)</small></td>
+          <td>${esc(prestationLabel)}</td>
+          <td>
+            — Traitement insecticide rémanent : murs, plinthes, zones d'ombre<br>
+            — Dératisation : vérification et rechargement des stations<br>
+            — Inspection visuelle complète<br>
+            — Fiche de passage + Attestation GSE à chaque intervention
+          </td>
+        </tr>
+        ${controleRow}
+        <tr>
+          <td>× 1 / an<br><small>(fin de contrat)</small></td>
+          <td>Audit de conformité sanitaire annuel</td>
+          <td>
+            — Bilan complet du plan IPM sur 12 mois<br>
+            — Rapport écrit utilisable lors de contrôles sanitaires officiels
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-          // ── ART 4 ─ FINANCES ──
-          secTitle("ARTICLE 4 — CONDITIONS FINANCIÈRES"),
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: GRID_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              finRow("Désignation", "Montant", true),
-              finRow(`Prix de référence — ${passages} passages ponctuels`, prixRef.toLocaleString("fr-FR") + " FCFA", false, BEIGE),
-              finRow(`Remise contrat annuel (${remisePct} %)`, "− " + (prixRef - prixAnnuel).toLocaleString("fr-FR") + " FCFA"),
-              finRow("MONTANT ANNUEL DU CONTRAT (TTC)", prixAnnuel.toLocaleString("fr-FR") + " FCFA", true),
-              finRow("Paiement trimestriel en avance", prixTrim.toLocaleString("fr-FR") + " FCFA / trimestre", false, BEIGE),
-            ]
-          }),
-          spacer(40),
-          para(new TextRun({ text: `* L'intervention initiale ${devis.numero} (${montant} FCFA) est facturée séparément.`, size: 17, italics: true, color: GRIS }), { before: 0, after: 80 }),
+    ${artTitle("Article 4 — Conditions financières")}
+    <table class="finances">
+      <thead>
+        <tr><th>Désignation</th><th style="width:35%;text-align:right">Montant</th></tr>
+      </thead>
+      <tbody>
+        <tr class="alt">
+          <td>Prix de référence — ${passages} passages ponctuels</td>
+          <td style="text-align:right">${prixRef.toLocaleString("fr-FR")} FCFA</td>
+        </tr>
+        <tr>
+          <td>Remise contrat annuel (${remisePct} %)</td>
+          <td style="text-align:right">− ${remiseMontant.toLocaleString("fr-FR")} FCFA</td>
+        </tr>
+        <tr class="total">
+          <td>MONTANT ANNUEL DU CONTRAT (TTC)</td>
+          <td style="text-align:right">${prixAnnuel.toLocaleString("fr-FR")} FCFA</td>
+        </tr>
+        <tr class="alt">
+          <td>${paiementLabel()}</td>
+          <td style="text-align:right">${paiementMontant()}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">* L'intervention initiale ${esc(devis.numero)} (${esc(montant)} FCFA) est facturée séparément.</p>
 
-          // ── ART 5 ─ PAIEMENT ──
-          secTitle("ARTICLE 5 — MODALITÉS DE PAIEMENT"),
-          ...(paiement === "mensuel" ? [
-            bullet("Le paiement s'effectue par mensualité, en avance, avant le début de chaque mois de prestation."),
-            bullet("Aucune prestation ne sera réalisée en l'absence de règlement du mois correspondant."),
-            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
-            bullet("Tout retard de paiement supérieur à 10 jours suspend l'exécution du contrat."),
-          ] : paiement === "annuel" ? [
-            bullet("Le règlement s'effectue en une seule fois, en avance, avant le démarrage du contrat."),
-            bullet("Le paiement intégral conditionne le lancement des prestations."),
-            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
-            bullet("En cas de résiliation anticipée par le Client, les trimestres non consommés ne sont pas remboursés."),
-          ] : [
-            bullet("Le paiement s'effectue par trimestre, en avance, avant tout passage trimestriel."),
-            bullet("Aucune prestation ne sera réalisée en l'absence de règlement du trimestre correspondant."),
-            bullet("Les contrôles mensuels intermédiaires sont inclus dans le forfait trimestriel."),
-            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
-            bullet("Tout retard de paiement supérieur à 15 jours suspend l'exécution du contrat."),
-          ]),
+    ${artTitle("Article 5 — Modalités de paiement")}
+    ${paiementArticle()}
 
-          // ── ART 6 ─ DURÉE ──
-          secTitle("ARTICLE 6 — DURÉE ET RENOUVELLEMENT"),
-          bullet(`Le contrat est conclu pour une durée de ${duree} mois à compter de la date de signature.`),
-          bullet(`À l'échéance, il est reconduit tacitement pour une nouvelle période de ${duree} mois, sauf dénonciation.`),
-          bullet("La date du premier passage sera fixée d'un commun accord dans les 30 jours suivant la signature."),
+    ${artTitle("Article 6 — Durée et renouvellement")}
+    <ul class="clauses">
+      ${li(`Le contrat est conclu pour une durée de ${duree} mois à compter de la date de signature.`)}
+      ${li(`À l'échéance, il est reconduit tacitement pour une nouvelle période de ${duree} mois, sauf dénonciation.`)}
+      ${li("La date du premier passage sera fixée d'un commun accord dans les 30 jours suivant la signature.")}
+    </ul>
 
-          // ── ART 7 ─ RÉSILIATION ──
-          secTitle("ARTICLE 7 — RÉSILIATION"),
-          bullet("Chaque partie peut résilier le contrat avec un préavis écrit d'un trimestre complet."),
-          bullet("Toute résiliation en cours de trimestre ne donne droit à aucun remboursement."),
-          bullet("En cas de résiliation anticipée du Client, les trimestres restants sont dus à GSE."),
-          bullet("GSE peut résilier sans préavis en cas de non-paiement ou d'impossibilité d'accès répétée."),
+    ${artTitle("Article 7 — Résiliation")}
+    <ul class="clauses">
+      ${li("Chaque partie peut résilier le contrat avec un préavis écrit d'un trimestre complet.")}
+      ${li("Toute résiliation en cours de trimestre ne donne droit à aucun remboursement.")}
+      ${li("En cas de résiliation anticipée du Client, les trimestres restants sont dus à GSE.")}
+      ${li("GSE peut résilier sans préavis en cas de non-paiement ou d'impossibilité d'accès répétée.")}
+    </ul>
 
-          // ── ART 8 ─ OBLIGATIONS ──
-          secTitle("ARTICLE 8 — OBLIGATIONS DES PARTIES"),
-          para(new TextRun({ text: "8.1  Obligations de GSE", bold: true, size: 20, color: VERT }), { before: 80, after: 40 }),
-          bullet("Réaliser les interventions aux dates convenues par des techniciens certifiés."),
-          bullet("Utiliser exclusivement des produits homologués par l'État du Bénin."),
-          bullet("Remettre une fiche de passage + attestation après chaque intervention trimestrielle."),
-          bullet("Transmettre le rapport d'audit annuel au plus tard 15 jours après la dernière intervention."),
-          para(new TextRun({ text: "8.2  Obligations du Client", bold: true, size: 20, color: VERT }), { before: 80, after: 40 }),
-          bullet("Garantir l'accès libre au site dans les 72h suivant la notification de passage par GSE."),
-          bullet("Tout refus d'accès injustifié est décompté comme passage effectué."),
-          bullet("Mettre en œuvre les recommandations d'hygiène émises par GSE."),
-          bullet("Informer GSE de tout changement affectant le site."),
+    ${artTitle("Article 8 — Obligations des parties")}
+    <div class="sub-title">8.1 &nbsp; Obligations de GSE</div>
+    <ul class="clauses">
+      ${li("Réaliser les interventions aux dates convenues par des techniciens certifiés.")}
+      ${li("Utiliser exclusivement des produits homologués par l'État du Bénin.")}
+      ${li("Remettre une fiche de passage + attestation après chaque intervention trimestrielle.")}
+      ${li("Transmettre le rapport d'audit annuel au plus tard 15 jours après la dernière intervention.")}
+    </ul>
+    <div class="sub-title">8.2 &nbsp; Obligations du Client</div>
+    <ul class="clauses">
+      ${li("Garantir l'accès libre au site dans les 72h suivant la notification de passage par GSE.")}
+      ${li("Tout refus d'accès injustifié est décompté comme passage effectué.")}
+      ${li("Mettre en œuvre les recommandations d'hygiène émises par GSE.")}
+      ${li("Informer GSE de tout changement affectant le site.")}
+    </ul>
 
-          // ── ART 9 ─ RESPONSABILITÉ ──
-          secTitle("ARTICLE 9 — LIMITATION DE RESPONSABILITÉ"),
-          para(new TextRun({ text: "GSE ne saurait être tenu responsable des recontaminations résultant du non-respect par le Client des recommandations d'hygiène transmises. Le rapport de visite technique GSE fait foi en cas de litige.", size: 19 })),
+    ${artTitle("Article 9 — Limitation de responsabilité")}
+    <p class="art-text">GSE ne saurait être tenu responsable des recontaminations résultant du non-respect par le Client des recommandations d'hygiène transmises. Le rapport de visite technique GSE fait foi en cas de litige.</p>
 
-          // ── ART 10 ─ RÉVISION ──
-          secTitle("ARTICLE 10 — RÉVISION TARIFAIRE"),
-          para(new TextRun({ text: "Le tarif annuel peut être révisé à chaque renouvellement sur notification écrite 30 jours avant l'échéance.", size: 19 }), { after: 80 }),
+    ${artTitle("Article 10 — Révision tarifaire")}
+    <p class="art-text">Le tarif annuel peut être révisé à chaque renouvellement sur notification écrite 30 jours avant l'échéance.</p>
 
-          spacer(120),
+    <div class="sigs">
+      <div class="sig-box">
+        <div class="sig-title">Signature du client</div>
+        <div class="sig-sub">${esc(entreprise)} — Bon pour accord</div>
+        <div class="sig-line"></div>
+        <div class="sig-date">À Cotonou, le ___ / ___ / 2026</div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-title">Pour Global Solutions Entreprise</div>
+        <div class="sig-sub">Le Directeur Général</div>
+        <div class="sig-line"></div>
+        <div class="sig-name">Kabir Mohamed YAKOUBOU</div>
+        <div class="sig-date">À Cotonou, le ___ / ___ / 2026</div>
+      </div>
+    </div>
 
-          // ── SIGNATURES ──
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [
-                new TableCell({
-                  shading: shading(BEIGE),
-                  borders: NO_BORDERS,
-                  margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
-                  children: [
-                    para(new TextRun({ text: "Pour le Client", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
-                    para(new TextRun({ text: entreprise, size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
-                    para(new TextRun({ text: "Bon pour accord — Signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
-                    para(new TextRun({ text: "_".repeat(36), size: 18 }), { align: AlignmentType.CENTER, before: 0, after: 60 }),
-                    para(new TextRun({ text: "À Cotonou, le ___ / ___ / 2026", size: 17, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 80 }),
-                  ]
-                }),
-                new TableCell({
-                  shading: shading(BEIGE),
-                  borders: NO_BORDERS,
-                  margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
-                  children: [
-                    para(new TextRun({ text: "Pour GSE", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
-                    para(new TextRun({ text: "Global Solutions Entreprise", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
-                    para(new TextRun({ text: "Cachet et signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
-                    para(new TextRun({ text: "_".repeat(36), size: 18 }), { align: AlignmentType.CENTER, before: 0, after: 60 }),
-                    para(new TextRun({ text: "À Cotonou, le ___ / ___ / 2026", size: 17, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 80 }),
-                  ]
-                })
-              ]
-            })]
-          }),
+  </div>
 
-          spacer(100),
+  <div class="gse-footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
 
-          // ── PIED DE PAGE ──
-          new Table({
-            layout: TableLayoutType.FIXED,
-            borders: NO_BORDERS,
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [new TableRow({
-              children: [new TableCell({
-                shading: shading(VERT),
-                borders: NO_BORDERS,
-                margins: { top: mm(3), bottom: mm(3), left: mm(4), right: mm(4) },
-                children: [para(new TextRun({ text: "Global Solutions Entreprise  ·  Cotonou, Bénin  ·  contact@phyto-benin.com  ·  +229 53 04 79 50", size: 16, color: OR }), { align: AlignmentType.CENTER, before: 80, after: 80 })]
-              })]
-            })]
-          }),
+</div>
+</body>
+</html>`
 
-        ]
-      }]
-    })
-
-    const buffer = await Packer.toBuffer(doc)
-
-    const nomFichier = `GSE_Contrat_${(client.nom || "client").replace(/\s+/g, "_")}_${new Date().getFullYear()}.docx`
-      .replace(/[^a-zA-Z0-9_.-]/g, "")
-
-    return new NextResponse(buffer, {
+    return new NextResponse(html, {
       status: 200,
-      headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="${nomFichier}"`,
-      }
+      headers: { "Content-Type": "text/html; charset=utf-8" }
     })
 
   } catch (err) {
