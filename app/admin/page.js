@@ -861,6 +861,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [submittingClient, setSubmittingClient] = React.useState(false)
   const [clientDetail, setClientDetail] = React.useState(null)
   const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
+  const [pipelineExpanded, setPipelineExpanded] = React.useState(null)
 
   const STATUTS = {
     brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
@@ -890,6 +891,13 @@ function SectionClientsDevis({ db, agrement }) {
     setCertsList(certs || [])
     setFichesList(fiches || [])
     setLoading(false)
+  }
+
+  async function saveParcours(devisId, newParcours) {
+    await db.from('devis').update({ parcours: newParcours }).eq('id', devisId)
+    setDevisList(function(prev) {
+      return prev.map(function(d) { return d.id === devisId ? Object.assign({}, d, { parcours: newParcours }) : d })
+    })
   }
 
   function ouvrirAjoutClient() {
@@ -1708,7 +1716,7 @@ function SectionClientsDevis({ db, agrement }) {
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -2150,6 +2158,138 @@ function SectionClientsDevis({ db, agrement }) {
     )
   }
 
+  function renderVuePipeline() {
+    var COLONNES = [
+      { id: 'visite',       label: '🔍 Visite',        color: '#7c3aed' },
+      { id: 'facture',      label: '💰 Facture',        color: '#0f766e' },
+      { id: 'intervention', label: '🔧 Intervention',   color: '#1e40af' },
+      { id: 'certificat',   label: '📋 Certificat',     color: '#b45309' },
+      { id: 'encaissement', label: '💳 Encaissement',   color: '#0a2e1a' },
+      { id: 'cloture',      label: '✅ Clôturé',        color: '#16a34a' },
+    ]
+
+    var ETAPES = [
+      { id: 'contact',             label: 'Contact initial',       auto: true },
+      { id: 'visite',              label: 'Visite de site',        auto: false },
+      { id: 'rapport_visite',      label: 'Rapport de synthèse',   auto: false },
+      { id: 'devis',               label: 'Devis',                 auto: true },
+      { id: 'facture',             label: 'Facture',               auto: false },
+      { id: 'intervention',        label: 'Intervention',          auto: false },
+      { id: 'fiche',               label: 'Fiche de passage',      auto: true },
+      { id: 'rapport_intervention',label: "Rapport d'intervention", auto: false },
+      { id: 'certificat',          label: 'Certificat GSE',        auto: true },
+      { id: 'encaissement',        label: 'Encaissement vérifié',  auto: false },
+    ]
+
+    function isEtapeDone(d, etapeId) {
+      var p = d.parcours || {}
+      var hasFiche = fichesList.some(function(f) { return f.devis_id === d.id })
+      var hasCert = certsList.some(function(c) { return c.devis_id === d.id })
+      if (etapeId === 'contact') return true
+      if (etapeId === 'devis') return true
+      if (etapeId === 'fiche') return hasFiche
+      if (etapeId === 'certificat') return hasCert
+      return !!(p[etapeId] && p[etapeId].done)
+    }
+
+    function getColonne(d) {
+      var p = d.parcours || {}
+      var hasFiche = fichesList.some(function(f) { return f.devis_id === d.id })
+      var hasCert = certsList.some(function(c) { return c.devis_id === d.id })
+      if (hasCert && p.encaissement && p.encaissement.done) return 'cloture'
+      if (hasCert) return 'encaissement'
+      if ((p.intervention && p.intervention.done) || hasFiche) return 'certificat'
+      if (p.facture && p.facture.done) return 'intervention'
+      if (p.visite && p.visite.done) return 'facture'
+      return 'visite'
+    }
+
+    function getProgress(d) {
+      var done = ETAPES.filter(function(e) { return isEtapeDone(d, e.id) }).length
+      return Math.round((done / ETAPES.length) * 100)
+    }
+
+    function toggleEtape(d, etapeId, currentDone) {
+      var p = Object.assign({}, d.parcours || {})
+      p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      saveParcours(d.id, p)
+    }
+
+    function getNomClient(d) {
+      var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+      if (!cl) return 'Client inconnu'
+      return cl.entreprise || [cl.prenom, cl.nom].filter(Boolean).join(' ')
+    }
+
+    function renderChecklist(d) {
+      return React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '6px', padding: '10px', marginTop: '10px' } },
+        React.createElement('div', { style: { fontSize: '10px', fontWeight: '700', color: '#888', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' } }, 'Parcours complet'),
+        ETAPES.map(function(etape) {
+          var done = isEtapeDone(d, etape.id)
+          var p = d.parcours || {}
+          var date = p[etape.id] && p[etape.id].date ? p[etape.id].date : null
+          return React.createElement('div', { key: etape.id, style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', borderBottom: '1px solid #eee' } },
+            etape.auto
+              ? React.createElement('span', { style: { fontSize: '13px', opacity: done ? 1 : 0.3, flexShrink: 0 } }, done ? '✅' : '⬜')
+              : React.createElement('button', {
+                  onClick: function() { toggleEtape(d, etape.id, done) },
+                  title: done ? 'Marquer non fait' : 'Marquer fait',
+                  style: { background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', padding: 0, flexShrink: 0 }
+                }, done ? '✅' : '⬜'),
+            React.createElement('span', { style: { fontSize: '11px', color: done ? '#0a2e1a' : '#888', flex: 1, fontWeight: done ? '600' : '400' } }, etape.label),
+            etape.auto
+              ? React.createElement('span', { style: { fontSize: '9px', color: '#bbb', backgroundColor: '#e8e6e0', borderRadius: '3px', padding: '1px 4px' } }, 'auto')
+              : date ? React.createElement('span', { style: { fontSize: '9px', color: '#aaa' } }, date) : null
+          )
+        })
+      )
+    }
+
+    function renderCard(d) {
+      var progress = getProgress(d)
+      var expanded = pipelineExpanded === d.id
+      var nomClient = getNomClient(d)
+      var montant = d.montant_ttc ? Number(d.montant_ttc).toLocaleString('fr-FR') + ' F' : ''
+      return React.createElement('div', { key: d.id, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', gap: '8px' }, onClick: function() { setPipelineExpanded(expanded ? null : d.id) } },
+          React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+            React.createElement('div', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, nomClient),
+            d.numero ? React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginTop: '2px' } }, d.numero) : null,
+            montant ? React.createElement('div', { style: { fontSize: '11px', color: '#1e40af', fontWeight: '600', marginTop: '4px' } }, montant) : null
+          ),
+          React.createElement('div', { style: { textAlign: 'right', flexShrink: 0 } },
+            React.createElement('div', { style: { fontSize: '10px', color: progress === 100 ? '#16a34a' : '#888', fontWeight: '700' } }, progress + '%'),
+            React.createElement('div', { style: { width: '40px', height: '3px', backgroundColor: '#e8e6e0', borderRadius: '2px', marginTop: '3px' } },
+              React.createElement('div', { style: { width: progress + '%', height: '100%', backgroundColor: progress === 100 ? '#16a34a' : '#0a2e1a', borderRadius: '2px', transition: 'width 0.3s' } })
+            ),
+            React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginTop: '4px' } }, expanded ? '▲' : '▼')
+          )
+        ),
+        expanded ? renderChecklist(d) : null
+      )
+    }
+
+    return React.createElement('div', null,
+      React.createElement('div', { style: { fontSize: '13px', color: '#888', marginBottom: '20px' } }, 'Suivi du parcours client — de la visite jusqu\'à l\'encaissement.'),
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(6, minmax(190px, 1fr))', gap: '10px', overflowX: 'auto', paddingBottom: '12px' } },
+        COLONNES.map(function(col) {
+          var devisColonne = devisList.filter(function(d) { return getColonne(d) === col.id })
+          return React.createElement('div', { key: col.id },
+            React.createElement('div', { style: { backgroundColor: col.color, color: '#fff', borderRadius: '8px 8px 0 0', padding: '10px 12px', fontSize: '12px', fontWeight: '700', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+              col.label,
+              React.createElement('span', { style: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '1px 8px', fontSize: '11px' } }, devisColonne.length)
+            ),
+            React.createElement('div', { style: { backgroundColor: '#f2f0ec', borderRadius: '0 0 8px 8px', padding: '8px', minHeight: '180px' } },
+              devisColonne.length === 0
+                ? React.createElement('div', { style: { textAlign: 'center', color: '#ccc', fontSize: '11px', paddingTop: '24px' } }, '—')
+                : devisColonne.map(function(d) { return renderCard(d) })
+            )
+          )
+        })
+      )
+    )
+  }
+
   function renderVueDocuments() {
     var docs = []
     certsList.forEach(function(c) {
@@ -2267,6 +2407,7 @@ function SectionClientsDevis({ db, agrement }) {
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null,
+    vue === "pipeline" ? renderVuePipeline() : null,
     vue === "documents" ? renderVueDocuments() : null
   )
 }
