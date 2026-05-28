@@ -863,6 +863,9 @@ function SectionClientsDevis({ db, agrement }) {
   const [generatingRapportInterv, setGeneratingRapportInterv] = React.useState(false)
   const [rapportIntervPhase, setRapportIntervPhase] = React.useState('saisie')
   const [rapportIntervErreurIA, setRapportIntervErreurIA] = React.useState(null)
+  const [interventionsList, setInterventionsList] = React.useState([])
+  const [meteoData, setMeteoData] = React.useState(null)
+  const [loadingMeteo, setLoadingMeteo] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
@@ -896,13 +899,14 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
       db.from("fiches_passage").select("*").order("created_at", { ascending: false }),
       db.from("rapports_visite").select("*").order("created_at", { ascending: false }),
       db.from("rapports_intervention").select("*").order("created_at", { ascending: false }),
+      db.from("interventions").select("*, personnel(id,nom,prenom)").order("date_intervention"),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
@@ -910,6 +914,7 @@ function SectionClientsDevis({ db, agrement }) {
     setFichesList(fiches || [])
     setRapportsVisite(rVisite || [])
     setRapportsInterv(rInterv || [])
+    setInterventionsList(intervs || [])
     setLoading(false)
   }
 
@@ -1271,7 +1276,9 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function supprimerCertificat(id) {
     if (!window.confirm('Supprimer ce certificat ?')) return
-    await db.from('certificats').delete().eq('id', id)
+    var { error } = await db.from('certificats').delete().eq('id', id)
+    if (error) { setMsg('Erreur suppression : ' + error.message); return }
+    setMsg('✓ Certificat supprimé')
     await charger()
   }
 
@@ -1329,9 +1336,11 @@ function SectionClientsDevis({ db, agrement }) {
       technicien: '',
       notesTechnicien: '',
       photos: [],
+      datesProposees: [],
     })
     setRapportVisitePhase('saisie')
     setRapportVisiteErreurIA(null)
+    setMeteoData(null)
   }
 
   function ouvrirRapportVisite(rapport, devis, client) {
@@ -1349,9 +1358,11 @@ function SectionClientsDevis({ db, agrement }) {
       technicien: rapport.technicien || '',
       notesTechnicien: rapport.notes_technicien || '',
       photos: rapport.photos || [],
+      datesProposees: rapport.dates_proposees || [],
     })
     setRapportVisitePhase('genere')
     setRapportVisiteErreurIA(null)
+    setMeteoData(null)
   }
 
   async function uploaderPhotoRapport(file, setUploading, formSetter) {
@@ -1434,6 +1445,7 @@ function SectionClientsDevis({ db, agrement }) {
       technicien: rapportVisiteForm.technicien,
       notes_technicien: rapportVisiteForm.notesTechnicien || null,
       photos: rapportVisiteForm.photos || [],
+      dates_proposees: rapportVisiteForm.datesProposees || [],
     }
     if (editingId) {
       await db.from('rapports_visite').update(data).eq('id', editingId)
@@ -1576,6 +1588,55 @@ function SectionClientsDevis({ db, agrement }) {
             React.createElement('textarea', { value: rapportVisiteForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 3, style: Object.assign({}, inp2, { resize: 'vertical' }) })
           ),
 
+          React.createElement('div', { style: { backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '14px', marginBottom: '16px' } },
+            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' } },
+              React.createElement('label', { style: Object.assign({}, lbl2, { color: '#0369a1', margin: 0 }) }, '📅 Dates d\'intervention proposées (météo)'),
+              React.createElement('button', {
+                onClick: function() {
+                  setLoadingMeteo(true)
+                  fetch('/api/meteo-cotonou')
+                    .then(function(r) { return r.json() })
+                    .then(function(d) { setMeteoData(d); setLoadingMeteo(false) })
+                    .catch(function() { setLoadingMeteo(false) })
+                },
+                disabled: loadingMeteo,
+                style: { background: '#0369a1', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 14px', fontSize: '11px', fontWeight: '700', cursor: loadingMeteo ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: loadingMeteo ? 0.6 : 1 }
+              }, loadingMeteo ? '⏳ Chargement...' : '🌤 Consulter météo 14 j')
+            ),
+            (rapportVisiteForm.datesProposees || []).length > 0
+              ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' } },
+                  (rapportVisiteForm.datesProposees || []).map(function(d) {
+                    return React.createElement('span', { key: d, style: { display: 'inline-flex', alignItems: 'center', gap: '5px', backgroundColor: '#0369a1', color: '#fff', borderRadius: '20px', padding: '4px 12px', fontSize: '12px', fontWeight: '600' } },
+                      d,
+                      React.createElement('button', { onClick: function() { upd('datesProposees', (rapportVisiteForm.datesProposees || []).filter(function(x) { return x !== d })) }, style: { background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: '0 0 0 4px', fontSize: '14px', lineHeight: 1 } }, '×')
+                    )
+                  })
+                )
+              : React.createElement('p', { style: { fontSize: '12px', color: '#64748b', marginBottom: '8px' } }, 'Aucune date sélectionnée. Cliquez sur « Consulter météo » puis choisissez les créneaux favorables.'),
+            meteoData && meteoData.days
+              ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px' } },
+                  meteoData.days.map(function(d) {
+                    var selected = (rapportVisiteForm.datesProposees || []).includes(d.dateFr)
+                    var bg = selected ? '#0369a1' : d.suitable ? '#f0fdf4' : '#fef2f2'
+                    var color = selected ? '#fff' : d.suitable ? '#065f46' : '#991b1b'
+                    var border = selected ? '#0369a1' : d.suitable ? '#bbf7d0' : '#fecaca'
+                    return React.createElement('button', {
+                      key: d.date,
+                      onClick: function() {
+                        var dates = rapportVisiteForm.datesProposees || []
+                        upd('datesProposees', selected ? dates.filter(function(x) { return x !== d.dateFr }) : dates.concat(d.dateFr))
+                      },
+                      title: d.label + ' — ' + d.rain + 'mm · ' + d.tempMax + '°C',
+                      style: { background: bg, color: color, border: '1px solid ' + border, borderRadius: '8px', padding: '6px 8px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', minWidth: '82px', lineHeight: '1.4' }
+                    },
+                      React.createElement('div', { style: { fontWeight: '700' } }, d.icon + ' ' + d.dateFr),
+                      React.createElement('div', { style: { fontSize: '9px', opacity: 0.85 } }, d.rain + 'mm · ' + d.tempMax + '°C')
+                    )
+                  })
+                )
+              : null
+          ),
+
           (rapportVisiteForm.photos || []).length > 0 ? React.createElement('div', { style: section },
             React.createElement('label', { style: lbl2 }, '📷 Photos (' + (rapportVisiteForm.photos || []).length + ')'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
@@ -1598,10 +1659,16 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   function ouvrirNouveauRapportInterv(devis, client) {
+    var technicienStr = ''
+    var techNoms = interventionsList
+      .filter(function(i) { return i.devis_id === devis.id && i.personnel })
+      .map(function(i) { return [i.personnel.prenom, i.personnel.nom].filter(Boolean).join(' ') })
+    var unique = techNoms.filter(function(n, idx, arr) { return arr.indexOf(n) === idx })
+    technicienStr = unique.join(', ')
     setRapportIntervModal({ devis, client, editingId: null })
     setRapportIntervForm({
       dateIntervention: new Date().toISOString().split('T')[0],
-      technicien: '',
+      technicien: technicienStr,
       zonesTraitees: '',
       produitsUtilises: '',
       methodeApplication: '',
@@ -1866,7 +1933,7 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   // ── FICHES DE PASSAGE ──────────────────────────────
-  function ouvrirFicheModal(c) {
+  function ouvrirFicheModal(c, devis) {
     var now = new Date()
     var yyyy = now.getFullYear()
     var mm = String(now.getMonth() + 1).padStart(2, '0')
@@ -1878,7 +1945,7 @@ function SectionClientsDevis({ db, agrement }) {
       mob: '',
       typePassage: '',
       prestations: [],
-      autresPrestation: '',
+      autresPrestation: devis ? (devis.prestation || '') : '',
       lieuPrestation: '',
       nuisibles: [],
       autresNuisible: '',
@@ -1891,7 +1958,7 @@ function SectionClientsDevis({ db, agrement }) {
       superviseurNom: '',
       superviseurContact: '',
     })
-    setFicheModal({ client: c })
+    setFicheModal({ client: c, devis: devis || null })
   }
 
   async function saveFichePassage() {
@@ -1924,6 +1991,7 @@ function SectionClientsDevis({ db, agrement }) {
         ficheNumero = numero || ('FP-GSE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
         ficheData.numero_unique = ficheNumero
         ficheData.client_id = ficheModal.client.id
+        if (ficheModal.devis) ficheData.devis_id = ficheModal.devis.id
         var ins = await db.from('fiches_passage').insert(ficheData).select().single()
         opErr = ins.error
       }
@@ -2641,6 +2709,7 @@ function SectionClientsDevis({ db, agrement }) {
             cl.email && React.createElement('button', { onClick: function() { renvoyerEmail(d) }, style: { background: 'none', border: '1px solid #bfdbfe', color: '#1e40af', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✉ Renvoyer devis'),
             React.createElement('button', { onClick: function() { ouvrirNouveauRapportVisite(d, cl) }, style: { background: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🔍 Rapport visite'),
             React.createElement('button', { onClick: function() { ouvrirNouveauRapportInterv(d, cl) }, style: { background: '#fff7ed', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📊 Rapport interv.'),
+            React.createElement('button', { onClick: function() { ouvrirFicheModal(cl, d) }, style: { background: '#f5f3ff', border: '1px solid #ddd6fe', color: '#5b21b6', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📋 Fiche de passage'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
             React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '' }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
@@ -3110,19 +3179,29 @@ var GSE_DOC_STYLES = '<style>' +
   '.sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }' +
   '.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }' +
   '.gse-footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }' +
+  '.photos-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; page-break-inside: avoid; }' +
+  '.photos-grid > div { aspect-ratio: 1; overflow: hidden; border-radius: 6px; border: 1px solid #e0ddd6; }' +
+  '.photos-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }' +
   '@media print {' +
   '  @page { size: A4 portrait; margin: 7mm 10mm; }' +
   '  .noprint { display: none; }' +
-  '  body { background: #fff; font-size: 11px; }' +
+  '  body { background: #fff; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
   '  .page { max-width: 100%; }' +
-  '  .hdr { padding: 10px 20px; }' +
-  '  .agr { padding: 3px 10px; font-size: 8.5px; }' +
-  '  .body { padding: 10px 20px; }' +
-  '  .section { margin-bottom: 8px; }' +
-  '  .section-title { font-size: 8.5px; }' +
-  '  .value-box { padding: 5px 8px; font-size: 10px; min-height: 22px; }' +
-  '  .sig-zone { min-height: 44px; padding: 6px; }' +
-  '  .gse-footer { padding: 5px 20px; font-size: 8.5px; }' +
+  '  .hdr { padding: 8px 16px; }' +
+  '  .hdr-left .name { font-size: 15px; }' +
+  '  .hdr img { width: 44px !important; height: 44px !important; }' +
+  '  .agr { padding: 3px 10px; font-size: 8px; }' +
+  '  .body { padding: 8px 16px; }' +
+  '  .section { margin-bottom: 6px; }' +
+  '  .section-title { font-size: 8px; padding-bottom: 2px; margin-bottom: 5px; }' +
+  '  .value-box { padding: 4px 7px; font-size: 9.5px; min-height: 18px; line-height: 1.4; }' +
+  '  .grid2 { gap: 8px; }' +
+  '  .sig-zone { min-height: 38px; padding: 5px; }' +
+  '  .sig-title { font-size: 8px; }' +
+  '  .gse-footer { padding: 4px 16px; font-size: 8px; }' +
+  '  .photos-grid { grid-template-columns: repeat(5,1fr); gap: 4px; }' +
+  '  .photos-grid > div { aspect-ratio: unset; height: 62px; }' +
+  '  .photos-grid img { height: 62px; }' +
   '}'
 
 function gseHeader(title, ref) {
@@ -3440,10 +3519,17 @@ function buildRapportVisiteHtml(form, client, devis) {
     '<div class="section"><div class="section-title">Recommandations</div><div class="value-box">' + (form.recommandations || '—') + '</div></div>' +
     '<div class="section"><div class="section-title">Observations techniques</div><div class="value-box">' + (form.observations || '—') + '</div></div>' +
 
+    ((form.datesProposees && form.datesProposees.length > 0) ? (
+      '<div class="section"><div class="section-title">📅 Dates d\'intervention proposées</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px 0">' +
+      form.datesProposees.map(function(d) { return '<span style="background:#0a2e1a;color:#d4a920;border-radius:20px;padding:4px 16px;font-size:12px;font-weight:700;display:inline-block">' + d + '</span>' }).join('') +
+      '</div></div>'
+    ) : '') +
+
     ((form.photos && form.photos.length > 0) ? (
       '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
-      form.photos.map(function(url, i) { return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6"><img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block"/></div>' }).join('') +
+      '<div class="photos-grid">' +
+      form.photos.map(function(url, i) { return '<div><img src="' + url + '" alt="Photo ' + (i+1) + '"/></div>' }).join('') +
       '</div></div>'
     ) : '') +
 
@@ -3486,8 +3572,8 @@ function buildRapportIntervHtml(form, client, devis) {
 
     ((form.photos && form.photos.length > 0) ? (
       '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
-      form.photos.map(function(url, i) { return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6"><img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block"/></div>' }).join('') +
+      '<div class="photos-grid">' +
+      form.photos.map(function(url, i) { return '<div><img src="' + url + '" alt="Photo ' + (i+1) + '"/></div>' }).join('') +
       '</div></div>'
     ) : '') +
 
