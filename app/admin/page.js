@@ -2123,11 +2123,14 @@ function SectionClientsDevis({ db, agrement }) {
     var html = "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>Devis " + d.numero + " — GSE</title><style>" +
       "* { box-sizing: border-box; margin: 0; padding: 0; }" +
       "body { font-family: Georgia, serif; background: #f5f5f0; }" +
-      ".page { max-width: 720px; margin: 0 auto; background: #fff; }" +
-      ".header { background: #0a2e1a; padding: 32px 40px; }" +
-      ".header .co { color: #d4a920; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }" +
-      ".header .ti { color: #fff; font-size: 26px; font-weight: 300; letter-spacing: 0.05em; }" +
-      ".header .ref { color: rgba(255,255,255,0.55); font-size: 13px; margin-top: 6px; }" +
+      ".page { max-width: 780px; margin: 0 auto; background: #fff; }" +
+      ".hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }" +
+      ".hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }" +
+      ".hdr-left .name { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }" +
+      ".hdr-right { text-align: right; }" +
+      ".hdr-right .title { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }" +
+      ".hdr-right .ref { color: #d4a920; font-size: 12px; margin-top: 4px; }" +
+      ".agr { background: #d4a920; padding: 5px 12px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }" +
       ".body { padding: 36px 40px; }" +
       ".meta { display: flex; justify-content: space-between; margin-bottom: 28px; gap: 20px; }" +
       ".ml { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }" +
@@ -2142,21 +2145,17 @@ function SectionClientsDevis({ db, agrement }) {
       ".cr.remise { color: #065f46; }" +
       ".cr.total { border-top: 2px solid #0a2e1a; border-bottom: none; padding-top: 12px; margin-top: 4px; font-size: 17px; font-weight: 700; color: #0a2e1a; }" +
       ".valid { background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 12px 16px; font-size: 12px; color: #92400e; margin-bottom: 28px; }" +
-      ".sigs { display: flex; gap: 32px; margin-top: 8px; }" +
-      ".sig { flex: 1; border: 1px solid #e0ddd6; border-radius: 6px; padding: 14px; text-align: center; }" +
-      ".sigl { font-size: 11px; color: #888; margin-bottom: 48px; line-height: 1.5; }" +
-      ".sigl em { display: block; color: #aaa; font-size: 10px; }" +
-      ".sigline { border-top: 1px solid #333; margin-top: 6px; }" +
-      ".footer { background: #0a2e1a; padding: 18px 40px; text-align: center; margin-top: 0; }" +
-      ".footer div { color: #d4a920; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }" +
-      ".noprint { text-align: center; padding: 16px; background: #f0fdf4; }" +
+      ".sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }" +
+      ".sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }" +
+      ".gse-footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }" +
+      ".noprint { text-align: center; padding: 16px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }" +
       ".noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin: 4px; }" +
       ".noprint button.sec-btn { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }" +
-      "@media print { .noprint { display: none; } body { background: #fff; } }" +
+      "@media print { .noprint { display: none; } body { background: #fff; } @page { size: A4 portrait; margin: 7mm 10mm; } }" +
       "</style></head><body>" +
       "<div class=\"noprint\"><button onclick=\"window.print()\">🖨️ Imprimer</button><button class=\"sec-btn\" onclick=\"window.close()\">Fermer</button></div>" +
       "<div class=\"page\">" +
-      "<div class=\"header\"><div class=\"co\">Global Solutions Entreprise" + (d.agrement ? " &nbsp;·&nbsp; Agréé État du Bénin" : "") + "</div><div class=\"ti\">DEVIS</div><div class=\"ref\">Réf. " + d.numero + (d.agrement ? " &nbsp;·&nbsp; " + d.agrement : "") + "</div></div>" +
+      gseHeader('DEVIS', 'Réf. ' + d.numero) +
       "<div class=\"body\">" +
       "<div class=\"meta\">" +
       "<div><div class=\"ml\">Client</div><div class=\"mv\">" + nomClient + "</div>" +
@@ -2188,12 +2187,9 @@ function SectionClientsDevis({ db, agrement }) {
           "</div>"
       })() +
       "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · contact@phyto-benin.com</div>" +
-      "<div class=\"sigs\">" +
-      "<div class=\"sig\"><div class=\"sigl\">Signature du client<em>Bon pour accord</em></div><div class=\"sigline\"></div></div>" +
-      "<div class=\"sig\"><div class=\"sigl\">Pour GSE<em>Cachet et signature</em></div><div class=\"sigline\"></div></div>" +
+      gseSigs() +
       "</div>" +
-      "</div>" +
-      "<div class=\"footer\"><div>Global Solutions Entreprise · Cotonou, Bénin · contact@phyto-benin.com</div></div>" +
+      gseFooter() +
       "</div></body></html>"
     var w = window.open("", "_blank", "width=820,height=900")
     if (w) { w.document.write(html); w.document.close() }
@@ -3091,6 +3087,64 @@ function SectionClientsDevis({ db, agrement }) {
   )
 }
 
+var GSE_DOC_STYLES = '<style>' +
+  '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+  'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #f5f5f0; }' +
+  '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
+  '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+  '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+  '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+  '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
+  '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
+  '.hdr-left .name { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }' +
+  '.hdr-right { text-align: right; }' +
+  '.hdr-right .title { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }' +
+  '.hdr-right .ref { color: #d4a920; font-size: 12px; margin-top: 4px; }' +
+  '.agr { background: #d4a920; padding: 5px 12px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }' +
+  '.body { padding: 22px 28px; }' +
+  '.section { margin-bottom: 14px; }' +
+  '.section-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #0a2e1a; padding-bottom: 4px; margin-bottom: 8px; }' +
+  '.value-box { border: 1px solid #e0ddd6; border-radius: 4px; padding: 8px 12px; min-height: 28px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }' +
+  '.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }' +
+  '.badge { display: inline-block; padding: 3px 10px; border-radius: 4px; color: #fff; font-weight: 700; font-size: 12px; }' +
+  '.sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }' +
+  '.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }' +
+  '.gse-footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }' +
+  '@media print {' +
+  '  @page { size: A4 portrait; margin: 7mm 10mm; }' +
+  '  .noprint { display: none; }' +
+  '  body { background: #fff; font-size: 11px; }' +
+  '  .page { max-width: 100%; }' +
+  '  .hdr { padding: 10px 20px; }' +
+  '  .agr { padding: 3px 10px; font-size: 8.5px; }' +
+  '  .body { padding: 10px 20px; }' +
+  '  .section { margin-bottom: 8px; }' +
+  '  .section-title { font-size: 8.5px; }' +
+  '  .value-box { padding: 5px 8px; font-size: 10px; min-height: 22px; }' +
+  '  .sig-zone { min-height: 44px; padding: 6px; }' +
+  '  .gse-footer { padding: 5px 20px; font-size: 8.5px; }' +
+  '}'
+
+function gseHeader(title, ref) {
+  return '<div class="hdr">' +
+    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
+    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<div class="hdr-right"><div class="title">' + title + '</div>' + (ref ? '<div class="ref">' + ref + '</div>' : '') + '</div>' +
+    '</div>' +
+    '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>'
+}
+
+function gseSigs() {
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px">' +
+    '<div><div class="sig-title">Signature du client</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888">Bon pour accord</p><div style="height:60px"></div></div></div>' +
+    '<div><div class="sig-title">Pour Global Solutions Entreprise</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888;margin-bottom:4px">Le Directeur Général</p><div style="height:40px"></div><p style="font-weight:700;font-size:12px">Kabir Mohamed YAKOUBOU</p></div></div>' +
+    '</div>'
+}
+
+function gseFooter() {
+  return '<div class="gse-footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
+}
+
 function buildCertificatHtml(type, form) {
   var titre = type === 'desinsect' ? 'CERTIFICAT DE DÉSINSECTISATION' : 'CERTIFICAT DE DÉRATISATION'
   var operationType = type === 'desinsect' ? 'désinsectisation' : 'dératisation'
@@ -3106,28 +3160,15 @@ function buildCertificatHtml(type, form) {
     ? 'du <strong>' + form.dateDebut + '</strong> au <strong>' + form.dateFin + '</strong> 2026'
     : 'du __________ au __________ 2026'
 
+  var dateRef = 'Cotonou le ' + (form.dateJour || '__') + ' - ' + (form.dateMois || '__') + ' 2026 &nbsp;·&nbsp; Réf : ' + (form.ref || '')
+
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + titre + ' — GSE</title>' +
-    '<style>' +
-    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
-    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
-    '.noprint { text-align: center; padding: 14px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
-    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
-    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '.page { max-width: 760px; margin: 0 auto; padding: 40px 50px; }' +
-    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
+    GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
     '<div class="page">' +
-
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">' +
-    '<img src="/logo-gse.jpeg" alt="Logo GSE" style="width:82px;height:82px;object-fit:contain;border-radius:4px">' +
-    '<div style="text-align:right;font-size:13px;line-height:1.9">' +
-    'Cotonou le <strong>' + (form.dateJour || '__') + '</strong> - <strong>' + (form.dateMois || '__') + '</strong> 2026<br>' +
-    '<strong>Réf : ' + (form.ref || '') + '</strong>' +
-    '</div>' +
-    '</div>' +
-
-    '<h1 style="text-align:center;font-size:17px;font-weight:bold;text-decoration:underline;margin:0 0 22px;text-transform:uppercase;letter-spacing:0.02em">' + titre + '</h1>' +
+    gseHeader(titre, dateRef) +
+    '<div class="body">' +
 
     '<p style="margin-bottom:14px;line-height:1.75">La Société <strong>Global Solutions Entreprise (GSE)</strong>, agissant en qualité d\'<strong>Applicateur Agréé</strong>.<br>' +
     'Référence <strong>APA/26-025/CNGP-BEN</strong> dont police d\'assurance <strong>N°:13901/7010000035</strong></p>' +
@@ -3155,26 +3196,11 @@ function buildCertificatHtml(type, form) {
     '<p style="margin-bottom:10px;line-height:1.75"><strong>Date d\'exécution : ' + dateExec + '</strong><br>' +
     'L\'opération à valider sous quinzaine confère aux locaux une protection durable (mensuelle, bimensuelle ou trimestrielle).</p>' +
 
-    '<p style="font-style:italic;margin-top:16px;margin-bottom:40px;line-height:1.75">En foi de quoi le présent certificat est délivré pour servir et valoir ce que de droit.</p>' +
+    '<p style="font-style:italic;margin-top:16px;margin-bottom:24px;line-height:1.75">En foi de quoi le présent certificat est délivré pour servir et valoir ce que de droit.</p>' +
 
-    '<div style="display:flex;gap:32px;margin-top:8px">' +
-    '<div style="flex:1;border:1px solid #ccc;border-radius:4px;padding:14px;text-align:center">' +
-    '<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#444;margin-bottom:6px">Signature du bénéficiaire</p>' +
-    '<p style="font-size:10px;font-style:italic;color:#888;margin-bottom:0">Bon pour accord</p>' +
-    '<div style="height:70px"></div>' +
+    gseSigs() +
     '</div>' +
-    '<div style="flex:1;border:1px solid #ccc;border-radius:4px;padding:14px;text-align:center">' +
-    '<p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#444;margin-bottom:6px">Pour Global Solutions Entreprise</p>' +
-    '<p style="font-size:10px;font-style:italic;color:#888;margin-bottom:0">Le Directeur Général</p>' +
-    '<div style="height:40px"></div>' +
-    '<p style="font-weight:bold;font-size:12px">Kabir Mohamed YAKOUBOU</p>' +
-    '</div>' +
-    '</div>' +
-
-    '<div style="margin-top:36px;padding-top:10px;border-top:1px solid #bbb;font-size:11px;text-align:center;color:#666;line-height:1.6">' +
-    'Global Solutions Entreprise | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN | Cotonou, Bénin' +
-    '</div>' +
-
+    gseFooter() +
     '</div></body></html>'
 }
 
@@ -3386,35 +3412,12 @@ function buildRapportVisiteHtml(form, client, devis) {
   var niveauColor = form.niveauInfestation === 'Faible' ? '#16a34a' : form.niveauInfestation === 'Élevé' ? '#dc2626' : '#d97706'
   var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport de visite — GSE</title>' +
-    '<style>' +
-    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
-    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
-    '.noprint { text-align: center; padding: 14px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; }' +
-    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
-    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
-    '.page { max-width: 720px; margin: 0 auto; padding: 36px 48px; }' +
-    '.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0a2e1a; }' +
-    '.logo-block { font-size: 18px; font-weight: 700; color: #0a2e1a; line-height: 1.3; }' +
-    '.logo-block .sub { font-size: 11px; color: #888; font-weight: 400; margin-top: 2px; }' +
-    '.doc-title { font-size: 20px; font-weight: 700; color: #0369a1; text-align: right; line-height: 1.2; }' +
-    '.doc-ref { font-size: 10px; color: #aaa; text-align: right; margin-top: 4px; }' +
-    '.section { margin-bottom: 18px; }' +
-    '.section-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }' +
-    '.value-box { border: 1px solid #e0ddd6; border-radius: 6px; padding: 10px 14px; font-size: 13px; line-height: 1.6; background: #fafaf8; min-height: 36px; }' +
-    '.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }' +
-    '.badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #fff; }' +
-    '.sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; padding-top: 18px; border-top: 1px solid #e8e6e0; }' +
-    '.sig-box { border: 1px solid #ccc; border-radius: 6px; height: 80px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 11px; color: #888; }' +
-    '.footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 28px; padding-top: 12px; border-top: 1px solid #e8e6e0; line-height: 1.6; }' +
+    GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
     '<div class="page">' +
-
-    '<div class="header">' +
-    '<div class="logo-block">GSE — Global Solutions Entreprise<div class="sub">Phyto Bénin · Applicateur Agréé APA/26-025/CNGP-BEN</div></div>' +
-    '<div><div class="doc-title">RAPPORT DE VISITE</div><div class="doc-ref">Date : ' + dateStr + '</div></div>' +
-    '</div>' +
+    gseHeader('RAPPORT DE VISITE', 'Date : ' + dateStr) +
+    '<div class="body">' +
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
@@ -3433,35 +3436,20 @@ function buildRapportVisiteHtml(form, client, devis) {
     '<div><div class="section-title">Niveau d\'infestation</div><div class="value-box"><span class="badge" style="background:' + niveauColor + '">' + (form.niveauInfestation || '—') + '</span></div></div>' +
     '</div>' +
 
-    '<div class="section"><div class="section-title">Zones infestées</div><div class="value-box" style="white-space:pre-line">' + (form.zonesInfestees || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Recommandations</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Observations complémentaires</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
-
-    (form.notesTechnicien ? (
-      '<div class="section" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px">' +
-      '<div class="section-title" style="color:#92400e">Notes du technicien (retour terrain)</div>' +
-      '<div style="font-size:13px;line-height:1.7;white-space:pre-line;color:#111">' + form.notesTechnicien + '</div>' +
-      '</div>'
-    ) : '') +
+    '<div class="section"><div class="section-title">Zones infestées</div><div class="value-box">' + (form.zonesInfestees || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations</div><div class="value-box">' + (form.recommandations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations techniques</div><div class="value-box">' + (form.observations || '—') + '</div></div>' +
 
     ((form.photos && form.photos.length > 0) ? (
-      '<div class="section">' +
-      '<div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
+      '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
-      form.photos.map(function(url, i) {
-        return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6">' +
-          '<img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
-          '</div>'
-      }).join('') +
+      form.photos.map(function(url, i) { return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6"><img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block"/></div>' }).join('') +
       '</div></div>'
     ) : '') +
 
-    '<div class="sigs">' +
-    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
-    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature GSE / Technicien</div><div class="sig-box">Nom : ___________________</div></div>' +
+    gseSigs() +
     '</div>' +
-
-    '<div class="footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>' +
+    gseFooter() +
     '</div></body></html>'
 }
 
@@ -3469,34 +3457,12 @@ function buildRapportIntervHtml(form, client, devis) {
   var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
   var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport d\'intervention — GSE</title>' +
-    '<style>' +
-    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
-    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
-    '.noprint { text-align: center; padding: 14px; background: #fff7ed; border-bottom: 1px solid #fed7aa; }' +
-    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
-    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
-    '.page { max-width: 720px; margin: 0 auto; padding: 36px 48px; }' +
-    '.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0a2e1a; }' +
-    '.logo-block { font-size: 18px; font-weight: 700; color: #0a2e1a; line-height: 1.3; }' +
-    '.logo-block .sub { font-size: 11px; color: #888; font-weight: 400; margin-top: 2px; }' +
-    '.doc-title { font-size: 20px; font-weight: 700; color: #c2410c; text-align: right; line-height: 1.2; }' +
-    '.doc-ref { font-size: 10px; color: #aaa; text-align: right; margin-top: 4px; }' +
-    '.section { margin-bottom: 18px; }' +
-    '.section-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }' +
-    '.value-box { border: 1px solid #e0ddd6; border-radius: 6px; padding: 10px 14px; font-size: 13px; line-height: 1.6; background: #fafaf8; min-height: 36px; }' +
-    '.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }' +
-    '.sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; padding-top: 18px; border-top: 1px solid #e8e6e0; }' +
-    '.sig-box { border: 1px solid #ccc; border-radius: 6px; height: 80px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 11px; color: #888; }' +
-    '.footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 28px; padding-top: 12px; border-top: 1px solid #e8e6e0; line-height: 1.6; }' +
+    GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
     '<div class="page">' +
-
-    '<div class="header">' +
-    '<div class="logo-block">GSE — Global Solutions Entreprise<div class="sub">Phyto Bénin · Applicateur Agréé APA/26-025/CNGP-BEN</div></div>' +
-    '<div><div class="doc-title">RAPPORT D\'INTERVENTION</div><div class="doc-ref">Date : ' + dateStr + '</div></div>' +
-    '</div>' +
+    gseHeader("RAPPORT D'INTERVENTION", 'Date : ' + dateStr) +
+    '<div class="body">' +
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
@@ -3510,38 +3476,23 @@ function buildRapportIntervHtml(form, client, devis) {
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Méthode d\'application</div><div class="value-box">' + (form.methodeApplication || '—') + '</div></div>' +
-    '<div><div class="section-title">Zones traitées</div><div class="value-box" style="white-space:pre-line">' + (form.zonesTraitees || '—') + '</div></div>' +
+    '<div><div class="section-title">Zones traitées</div><div class="value-box">' + (form.zonesTraitees || '—') + '</div></div>' +
     '</div>' +
 
-    '<div class="section"><div class="section-title">Produits utilisés</div><div class="value-box" style="white-space:pre-line">' + (form.produitsUtilises || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box" style="white-space:pre-line">' + (form.resultats || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Observations</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
-
-    (form.notesTechnicien ? (
-      '<div class="section" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px">' +
-      '<div class="section-title" style="color:#92400e">Notes du technicien (retour terrain)</div>' +
-      '<div style="font-size:13px;line-height:1.7;white-space:pre-line;color:#111">' + form.notesTechnicien + '</div>' +
-      '</div>'
-    ) : '') +
+    '<div class="section"><div class="section-title">Produits utilisés</div><div class="value-box">' + (form.produitsUtilises || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box">' + (form.resultats || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations</div><div class="value-box">' + (form.observations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box">' + (form.recommandations || '—') + '</div></div>' +
 
     ((form.photos && form.photos.length > 0) ? (
-      '<div class="section">' +
-      '<div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
+      '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
-      form.photos.map(function(url, i) {
-        return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6">' +
-          '<img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
-          '</div>'
-      }).join('') +
+      form.photos.map(function(url, i) { return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6"><img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block"/></div>' }).join('') +
       '</div></div>'
     ) : '') +
 
-    '<div class="sigs">' +
-    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
-    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature GSE / Technicien</div><div class="sig-box">Nom : ___________________</div></div>' +
+    gseSigs() +
     '</div>' +
-
-    '<div class="footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>' +
+    gseFooter() +
     '</div></body></html>'
 }
