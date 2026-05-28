@@ -65,6 +65,12 @@ CONTEXTE COMPLÉMENTAIRE
 - Type d'établissement : ${typeEtablissement || "Non précisé"}
 - Demande du client : ${demandeClient || "Non précisé"}
 - Notes : ${notes || "Aucune"}
+
+RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
+1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / 4). Dans ce cas, justificationPrix = "Prix négocié — utilisé tel quel sans modification."
+2. Si le client a ${nbFiches} fiches de passage ou ${nbDevisAntérieurs} devis antérieurs, c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché.
+3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
+4. Sois agile : si le contexte donne assez d'informations, propose une recommandation directe et concrète. Évite les réponses génériques.
 ---
 
 Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT avec le JSON, sans markdown) :

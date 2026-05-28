@@ -65,14 +65,16 @@ export async function GET(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    const url         = new URL(req.url)
-    const devisId     = url.searchParams.get("devisId")
-    const prixAnnuel  = parseInt(url.searchParams.get("prixAnnuel") || "200000")
-    const prixTrim    = parseInt(url.searchParams.get("prixTrimestre") || "50000")
-    const formule     = url.searchParams.get("formule") || "Formule Intégrale"
-    const passages    = parseInt(url.searchParams.get("passages") || "4")
-    const controles   = parseInt(url.searchParams.get("controles") || "8")
-    const duree       = parseInt(url.searchParams.get("duree") || "12")
+    const url              = new URL(req.url)
+    const devisId          = url.searchParams.get("devisId")
+    const prixAnnuel       = parseInt(url.searchParams.get("prixAnnuel") || "200000")
+    const prixTrim         = parseInt(url.searchParams.get("prixTrimestre") || "50000")
+    const formule          = url.searchParams.get("formule") || "Formule Intégrale"
+    const passages         = parseInt(url.searchParams.get("passages") || "4")
+    const controles        = parseInt(url.searchParams.get("controles") || "8")
+    const duree            = parseInt(url.searchParams.get("duree") || "12")
+    const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
+    const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -90,6 +92,10 @@ export async function GET(req) {
     const prixRef    = prixTrim * 4
     const remisePct  = prixRef > 0 ? Math.round((1 - prixAnnuel / prixRef) * 100) : 0
     const montant    = (devis.montant_total || devis.montant || 0).toLocaleString("fr-FR")
+    const typeEtabLabel = typeEtablissement || "_______________"
+    const prestationLabel = Array.isArray(devis.prestations) && devis.prestations.length > 0
+      ? devis.prestations.join(" + ")
+      : devis.prestation || "Désinsectisation + Dératisation"
 
     let logoData = null
     try {
@@ -210,7 +216,7 @@ export async function GET(req) {
                 shading: shading(VERT),
                 borders: NO_BORDERS,
                 margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
-                children: [para(new TextRun({ text: "CONTRAT D'ENTRETIEN ANNUEL — PLAN HYGIÈNE ALIMENTAIRE", bold: true, size: 26, color: OR }), { align: AlignmentType.CENTER, before: 0, after: 0 })]
+                children: [para(new TextRun({ text: "CONTRAT D'ENTRETIEN ANNUEL", bold: true, size: 26, color: OR }), { align: AlignmentType.CENTER, before: 0, after: 0 })]
               })]
             })]
           }),
@@ -267,7 +273,7 @@ export async function GET(req) {
                   ["Représentant", nomClient],
                   ["Adresse", client.adresse || "Cotonou, Bénin"],
                   ["Téléphone", client.telephone || "_______________"],
-                  ["Type d'établissement", "Boulangerie — production alimentaire"],
+                  ["Type d'établissement", typeEtabLabel],
                   ["Superficie", devis.superficie ? devis.superficie + " m²" : "_______________"],
                 ]),
               ]
@@ -302,7 +308,7 @@ export async function GET(req) {
               }),
               servRow(
                 `× ${passages} / an\n(trimestrielle)`,
-                "Désinsectisation +\nDératisation complètes",
+                prestationLabel,
                 [
                   "— Traitement insecticide rémanent : murs, plinthes, zones d'ombre",
                   "— Dératisation : vérification et rechargement des stations",
@@ -353,11 +359,23 @@ export async function GET(req) {
 
           // ── ART 5 ─ PAIEMENT ──
           secTitle("ARTICLE 5 — MODALITÉS DE PAIEMENT"),
-          bullet("Le paiement s'effectue par trimestre, en avance, avant tout passage trimestriel."),
-          bullet("Aucune prestation ne sera réalisée en l'absence de règlement du trimestre correspondant."),
-          bullet("Les contrôles mensuels intermédiaires sont inclus dans le forfait trimestriel."),
-          bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
-          bullet("Tout retard de paiement supérieur à 15 jours suspend l'exécution du contrat."),
+          ...(paiement === "mensuel" ? [
+            bullet("Le paiement s'effectue par mensualité, en avance, avant le début de chaque mois de prestation."),
+            bullet("Aucune prestation ne sera réalisée en l'absence de règlement du mois correspondant."),
+            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
+            bullet("Tout retard de paiement supérieur à 10 jours suspend l'exécution du contrat."),
+          ] : paiement === "annuel" ? [
+            bullet("Le règlement s'effectue en une seule fois, en avance, avant le démarrage du contrat."),
+            bullet("Le paiement intégral conditionne le lancement des prestations."),
+            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
+            bullet("En cas de résiliation anticipée par le Client, les trimestres non consommés ne sont pas remboursés."),
+          ] : [
+            bullet("Le paiement s'effectue par trimestre, en avance, avant tout passage trimestriel."),
+            bullet("Aucune prestation ne sera réalisée en l'absence de règlement du trimestre correspondant."),
+            bullet("Les contrôles mensuels intermédiaires sont inclus dans le forfait trimestriel."),
+            bullet("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire."),
+            bullet("Tout retard de paiement supérieur à 15 jours suspend l'exécution du contrat."),
+          ]),
 
           // ── ART 6 ─ DURÉE ──
           secTitle("ARTICLE 6 — DURÉE ET RENOUVELLEMENT"),
