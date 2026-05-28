@@ -847,6 +847,14 @@ function SectionClientsDevis({ db, agrement }) {
   const [savingFiche, setSavingFiche] = React.useState(false)
   const [certsList, setCertsList] = React.useState([])
   const [fichesList, setFichesList] = React.useState([])
+  const [rapportsVisite, setRapportsVisite] = React.useState([])
+  const [rapportsInterv, setRapportsInterv] = React.useState([])
+  const [rapportVisiteModal, setRapportVisiteModal] = React.useState(null)
+  const [rapportVisiteForm, setRapportVisiteForm] = React.useState({})
+  const [savingRapportVisite, setSavingRapportVisite] = React.useState(false)
+  const [rapportIntervModal, setRapportIntervModal] = React.useState(null)
+  const [rapportIntervForm, setRapportIntervForm] = React.useState({})
+  const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
@@ -880,16 +888,20 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
       db.from("fiches_passage").select("*").order("created_at", { ascending: false }),
+      db.from("rapports_visite").select("*").order("created_at", { ascending: false }),
+      db.from("rapports_intervention").select("*").order("created_at", { ascending: false }),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
     setCertsList(certs || [])
     setFichesList(fiches || [])
+    setRapportsVisite(rVisite || [])
+    setRapportsInterv(rInterv || [])
     setLoading(false)
   }
 
@@ -1292,6 +1304,301 @@ function SectionClientsDevis({ db, agrement }) {
     if (!window.confirm('Supprimer cette fiche ?')) return
     await db.from('fiches_passage').delete().eq('id', id)
     await charger()
+  }
+
+  function ouvrirNouveauRapportVisite(devis, client) {
+    setRapportVisiteModal({ devis, client, editingId: null })
+    setRapportVisiteForm({
+      dateVisite: new Date().toISOString().split('T')[0],
+      adresseSite: client.adresse || '',
+      descriptionSite: devis.prestation || '',
+      nuisibles: [],
+      autresNuisible: '',
+      zonesInfestees: '',
+      niveauInfestation: 'Moyen',
+      recommandations: '',
+      observations: '',
+      technicien: '',
+    })
+  }
+
+  function ouvrirRapportVisite(rapport, devis, client) {
+    setRapportVisiteModal({ devis, client, editingId: rapport.id })
+    setRapportVisiteForm({
+      dateVisite: rapport.date_visite || '',
+      adresseSite: rapport.adresse_site || '',
+      descriptionSite: rapport.description_site || '',
+      nuisibles: rapport.nuisibles || [],
+      autresNuisible: rapport.autres_nuisible || '',
+      zonesInfestees: rapport.zones_infestees || '',
+      niveauInfestation: rapport.niveau_infestation || 'Moyen',
+      recommandations: rapport.recommandations || '',
+      observations: rapport.observations || '',
+      technicien: rapport.technicien || '',
+    })
+  }
+
+  async function sauvegarderRapportVisite() {
+    if (!rapportVisiteModal) return
+    setSavingRapportVisite(true)
+    var { devis, client, editingId } = rapportVisiteModal
+    var data = {
+      devis_id: devis.id,
+      client_id: client.id,
+      date_visite: rapportVisiteForm.dateVisite || null,
+      adresse_site: rapportVisiteForm.adresseSite,
+      description_site: rapportVisiteForm.descriptionSite,
+      nuisibles: rapportVisiteForm.nuisibles,
+      autres_nuisible: rapportVisiteForm.autresNuisible,
+      zones_infestees: rapportVisiteForm.zonesInfestees,
+      niveau_infestation: rapportVisiteForm.niveauInfestation,
+      recommandations: rapportVisiteForm.recommandations,
+      observations: rapportVisiteForm.observations,
+      technicien: rapportVisiteForm.technicien,
+    }
+    if (editingId) {
+      await db.from('rapports_visite').update(data).eq('id', editingId)
+    } else {
+      var now = new Date()
+      var num = 'RV-' + now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+      data.numero_unique = num
+      await db.from('rapports_visite').insert(data)
+    }
+    await charger()
+    setSavingRapportVisite(false)
+    var html = buildRapportVisiteHtml(rapportVisiteForm, client, devis)
+    var w = window.open('', '_blank', 'width=920,height=1100')
+    if (w) { w.document.write(html); w.document.close() }
+    setRapportVisiteModal(null)
+  }
+
+  function renderRapportVisiteModal() {
+    if (!rapportVisiteModal) return null
+    var { client, devis } = rapportVisiteModal
+    var upd = function(k, v) { setRapportVisiteForm(function(prev) { return Object.assign({}, prev, { [k]: v }) }) }
+    var toggleNuisible = function(n) {
+      setRapportVisiteForm(function(prev) {
+        var arr = prev.nuisibles || []
+        return Object.assign({}, prev, { nuisibles: arr.includes(n) ? arr.filter(function(x) { return x !== n }) : arr.concat(n) })
+      })
+    }
+    var NUISIBLES = ['Cafards', 'Rats', 'Souris', 'Moustiques', 'Mouches', 'Fourmis', 'Termites', 'Punaises de lit', 'Serpents']
+    var NIVEAUX = ['Faible', 'Moyen', 'Élevé']
+    var inp2 = { width: '100%', padding: '8px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl2 = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
+    var section = { marginBottom: '16px' }
+    return React.createElement('div', { style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' } },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '680px', padding: '28px' } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+          React.createElement('div', null,
+            React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, '🔍 Rapport de visite'),
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '') + ' · ' + devis.prestation)
+          ),
+          React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
+        ),
+
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, 'Date de visite'),
+            React.createElement('input', { type: 'date', value: rapportVisiteForm.dateVisite || '', onChange: function(e) { upd('dateVisite', e.target.value) }, style: inp2 })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, 'Technicien'),
+            React.createElement('input', { value: rapportVisiteForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Nom du technicien', style: inp2 })
+          )
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Adresse du site'),
+          React.createElement('input', { value: rapportVisiteForm.adresseSite || '', onChange: function(e) { upd('adresseSite', e.target.value) }, placeholder: 'Adresse complète', style: inp2 })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Description du site / type de bâtiment'),
+          React.createElement('input', { value: rapportVisiteForm.descriptionSite || '', onChange: function(e) { upd('descriptionSite', e.target.value) }, placeholder: 'Ex: Restaurant, bureau 2 étages...', style: inp2 })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Nuisibles observés'),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+            NUISIBLES.map(function(n) {
+              var checked = (rapportVisiteForm.nuisibles || []).includes(n)
+              return React.createElement('label', { key: n, style: { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', cursor: 'pointer', padding: '5px 10px', borderRadius: '20px', border: '1px solid ' + (checked ? '#0a2e1a' : '#e0ddd6'), backgroundColor: checked ? '#f0fdf4' : '#fff', fontWeight: checked ? '600' : '400' } },
+                React.createElement('input', { type: 'checkbox', checked: checked, onChange: function() { toggleNuisible(n) }, style: { display: 'none' } }),
+                n
+              )
+            }),
+            React.createElement('input', { value: rapportVisiteForm.autresNuisible || '', onChange: function(e) { upd('autresNuisible', e.target.value) }, placeholder: 'Autres...', style: Object.assign({}, inp2, { width: '140px', padding: '5px 8px' }) })
+          )
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Zones infestées'),
+          React.createElement('textarea', { value: rapportVisiteForm.zonesInfestees || '', onChange: function(e) { upd('zonesInfestees', e.target.value) }, rows: 2, placeholder: 'Ex: cuisine, réserve, cave...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, "Niveau d'infestation"),
+          React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+            NIVEAUX.map(function(n) {
+              var sel = rapportVisiteForm.niveauInfestation === n
+              var color = n === 'Faible' ? '#16a34a' : n === 'Moyen' ? '#d97706' : '#dc2626'
+              return React.createElement('button', { key: n, onClick: function() { upd('niveauInfestation', n) }, style: { padding: '7px 18px', borderRadius: '6px', border: '1.5px solid ' + (sel ? color : '#e0ddd6'), backgroundColor: sel ? color : '#fff', color: sel ? '#fff' : '#666', fontSize: '12px', fontWeight: sel ? '700' : '400', cursor: 'pointer', fontFamily: 'inherit' } }, n)
+            })
+          )
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Recommandations'),
+          React.createElement('textarea', { value: rapportVisiteForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 3, placeholder: 'Traitements recommandés, fréquence...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Observations complémentaires'),
+          React.createElement('textarea', { value: rapportVisiteForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, placeholder: 'Remarques, accès, contraintes...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
+          React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+          React.createElement('button', { onClick: sauvegarderRapportVisite, disabled: savingRapportVisite, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportVisite ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+        )
+      )
+    )
+  }
+
+  function ouvrirNouveauRapportInterv(devis, client) {
+    setRapportIntervModal({ devis, client, editingId: null })
+    setRapportIntervForm({
+      dateIntervention: new Date().toISOString().split('T')[0],
+      technicien: '',
+      zonesTraitees: '',
+      produitsUtilises: '',
+      methodeApplication: '',
+      dureeIntervention: '',
+      resultats: '',
+      observations: '',
+      recommandations: '',
+    })
+  }
+
+  function ouvrirRapportInterv(rapport, devis, client) {
+    setRapportIntervModal({ devis, client, editingId: rapport.id })
+    setRapportIntervForm({
+      dateIntervention: rapport.date_intervention || '',
+      technicien: rapport.technicien || '',
+      zonesTraitees: rapport.zones_traitees || '',
+      produitsUtilises: rapport.produits_utilises || '',
+      methodeApplication: rapport.methode_application || '',
+      dureeIntervention: rapport.duree_intervention || '',
+      resultats: rapport.resultats || '',
+      observations: rapport.observations || '',
+      recommandations: rapport.recommandations || '',
+    })
+  }
+
+  async function sauvegarderRapportInterv() {
+    if (!rapportIntervModal) return
+    setSavingRapportInterv(true)
+    var { devis, client, editingId } = rapportIntervModal
+    var data = {
+      devis_id: devis.id,
+      client_id: client.id,
+      date_intervention: rapportIntervForm.dateIntervention || null,
+      technicien: rapportIntervForm.technicien,
+      zones_traitees: rapportIntervForm.zonesTraitees,
+      produits_utilises: rapportIntervForm.produitsUtilises,
+      methode_application: rapportIntervForm.methodeApplication,
+      duree_intervention: rapportIntervForm.dureeIntervention,
+      resultats: rapportIntervForm.resultats,
+      observations: rapportIntervForm.observations,
+      recommandations: rapportIntervForm.recommandations,
+    }
+    if (editingId) {
+      await db.from('rapports_intervention').update(data).eq('id', editingId)
+    } else {
+      var now = new Date()
+      var num = 'RI-' + now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+      data.numero_unique = num
+      await db.from('rapports_intervention').insert(data)
+    }
+    await charger()
+    setSavingRapportInterv(false)
+    var html = buildRapportIntervHtml(rapportIntervForm, client, devis)
+    var w = window.open('', '_blank', 'width=920,height=1100')
+    if (w) { w.document.write(html); w.document.close() }
+    setRapportIntervModal(null)
+  }
+
+  function renderRapportIntervModal() {
+    if (!rapportIntervModal) return null
+    var { client, devis } = rapportIntervModal
+    var upd = function(k, v) { setRapportIntervForm(function(prev) { return Object.assign({}, prev, { [k]: v }) }) }
+    var inp2 = { width: '100%', padding: '8px 10px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl2 = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
+    var section = { marginBottom: '16px' }
+    return React.createElement('div', { style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' } },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '680px', padding: '28px' } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+          React.createElement('div', null,
+            React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, "📊 Rapport d'intervention"),
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '') + ' · ' + devis.prestation)
+          ),
+          React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
+        ),
+
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, "Date d'intervention"),
+            React.createElement('input', { type: 'date', value: rapportIntervForm.dateIntervention || '', onChange: function(e) { upd('dateIntervention', e.target.value) }, style: inp2 })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, 'Technicien(s)'),
+            React.createElement('input', { value: rapportIntervForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Noms des techniciens', style: inp2 })
+          )
+        ),
+
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, "Méthode d'application"),
+            React.createElement('input', { value: rapportIntervForm.methodeApplication || '', onChange: function(e) { upd('methodeApplication', e.target.value) }, placeholder: 'Ex: Pulvérisation, appâtage...', style: inp2 })
+          ),
+          React.createElement('div', null,
+            React.createElement('label', { style: lbl2 }, "Durée de l'intervention"),
+            React.createElement('input', { value: rapportIntervForm.dureeIntervention || '', onChange: function(e) { upd('dureeIntervention', e.target.value) }, placeholder: 'Ex: 2h30', style: inp2 })
+          )
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Zones traitées'),
+          React.createElement('textarea', { value: rapportIntervForm.zonesTraitees || '', onChange: function(e) { upd('zonesTraitees', e.target.value) }, rows: 2, placeholder: 'Ex: cuisine, réserve, toilettes, couloirs...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Produits utilisés'),
+          React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, placeholder: 'Nom des produits, doses, homologations...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Résultats obtenus'),
+          React.createElement('textarea', { value: rapportIntervForm.resultats || '', onChange: function(e) { upd('resultats', e.target.value) }, rows: 2, placeholder: 'Ex: Élimination totale, réduction significative...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Observations'),
+          React.createElement('textarea', { value: rapportIntervForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, placeholder: 'Difficultés rencontrées, état général des lieux...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, 'Recommandations / suivi'),
+          React.createElement('textarea', { value: rapportIntervForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 2, placeholder: 'Ex: Revisiter dans 15 jours, colmater les fissures...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+        ),
+
+        React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
+          React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+          React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+        )
+      )
+    )
   }
 
   function reouvrirFicheModal(f, client) {
@@ -1959,12 +2266,12 @@ function SectionClientsDevis({ db, agrement }) {
     var ETAPES_DB = [
       { id: 'contact',              label: 'Contact',              icon: '📞', auto: true },
       { id: 'visite',               label: 'Visite de site',       icon: '🔍', auto: false },
-      { id: 'rapport_visite',       label: 'Rapport synthèse',     icon: '📝', auto: false },
+      { id: 'rapport_visite',       label: 'Rapport synthèse',     icon: '📝', auto: true },
       { id: 'devis',                label: 'Devis',                icon: '📄', auto: true },
       { id: 'facture',              label: 'Facture',              icon: '💰', auto: false },
       { id: 'intervention',         label: 'Intervention',         icon: '🔧', auto: false },
       { id: 'fiche',                label: 'Fiche de passage',     icon: '📋', auto: true },
-      { id: 'rapport_intervention', label: "Rapport d'interv.",    icon: '📊', auto: false },
+      { id: 'rapport_intervention', label: "Rapport d'interv.",    icon: '📊', auto: true },
       { id: 'certificat',           label: 'Certificat GSE',       icon: '🏆', auto: true },
       { id: 'encaissement',         label: 'Encaissement',         icon: '💳', auto: false },
     ]
@@ -1974,6 +2281,8 @@ function SectionClientsDevis({ db, agrement }) {
       if (etapeId === 'contact' || etapeId === 'devis') return true
       if (etapeId === 'fiche') return fichesList.some(function(f) { return f.devis_id === d.id })
       if (etapeId === 'certificat') return certsList.some(function(c) { return c.devis_id === d.id })
+      if (etapeId === 'rapport_visite') return rapportsVisite.some(function(r) { return r.devis_id === d.id })
+      if (etapeId === 'rapport_intervention') return rapportsInterv.some(function(r) { return r.devis_id === d.id })
       return !!(p[etapeId] && p[etapeId].done)
     }
 
@@ -1993,6 +2302,8 @@ function SectionClientsDevis({ db, agrement }) {
       var progress = progressDossier(d)
       var certsDevis = certsList.filter(function(c) { return c.devis_id === d.id })
       var fichesDevis = fichesList.filter(function(f) { return f.devis_id === d.id })
+      var rapVisiteDevis = rapportsVisite.filter(function(r) { return r.devis_id === d.id })
+      var rapIntervDevis = rapportsInterv.filter(function(r) { return r.devis_id === d.id })
       var p = d.parcours || {}
 
       return React.createElement('div', { key: d.id, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', marginBottom: '16px', overflow: 'hidden' } },
@@ -2041,9 +2352,29 @@ function SectionClientsDevis({ db, agrement }) {
             )
           ),
 
-          (certsDevis.length > 0 || fichesDevis.length > 0) && React.createElement('div', { style: { marginBottom: '14px' } },
+          (certsDevis.length > 0 || fichesDevis.length > 0 || rapVisiteDevis.length > 0 || rapIntervDevis.length > 0) && React.createElement('div', { style: { marginBottom: '14px' } },
             React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Documents'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+              rapVisiteDevis.map(function(r) {
+                return React.createElement('div', { key: r.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #bae6fd', backgroundColor: '#f0f9ff', borderRadius: '8px', padding: '8px 12px' } },
+                  React.createElement('span', null, '🔍'),
+                  React.createElement('div', null,
+                    React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, r.numero_unique || 'Rapport visite'),
+                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, r.date_visite ? new Date(r.date_visite).toLocaleDateString('fr-FR') : 'Rapport de visite')
+                  ),
+                  React.createElement('button', { onClick: function() { ouvrirRapportVisite(r, d, cl) }, style: { background: 'none', border: '1px solid #bae6fd', color: '#0369a1', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
+                )
+              }),
+              rapIntervDevis.map(function(r) {
+                return React.createElement('div', { key: r.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #fed7aa', backgroundColor: '#fff7ed', borderRadius: '8px', padding: '8px 12px' } },
+                  React.createElement('span', null, '📊'),
+                  React.createElement('div', null,
+                    React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, r.numero_unique || "Rapport intervention"),
+                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, r.date_intervention ? new Date(r.date_intervention).toLocaleDateString('fr-FR') : "Rapport d'intervention")
+                  ),
+                  React.createElement('button', { onClick: function() { ouvrirRapportInterv(r, d, cl) }, style: { background: 'none', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
+                )
+              }),
               certsDevis.map(function(cert) {
                 return React.createElement('div', { key: cert.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + (cert.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: cert.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: '8px', padding: '8px 12px' } },
                   React.createElement('span', null, cert.type === 'desinsect' ? '🪲' : '🐭'),
@@ -2072,6 +2403,8 @@ function SectionClientsDevis({ db, agrement }) {
             d.statut === 'en_cours' && React.createElement('button', { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, validating === d.id ? '...' : '✓ Valider livraison'),
             React.createElement('button', { onClick: function() { ouvrirEditionDevis(d) }, style: { background: 'none', border: '1px solid #d1d5db', color: '#374151', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✏️ Modifier devis'),
             cl.email && React.createElement('button', { onClick: function() { renvoyerEmail(d) }, style: { background: 'none', border: '1px solid #bfdbfe', color: '#1e40af', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✉ Renvoyer devis'),
+            React.createElement('button', { onClick: function() { ouvrirNouveauRapportVisite(d, cl) }, style: { background: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🔍 Rapport visite'),
+            React.createElement('button', { onClick: function() { ouvrirNouveauRapportInterv(d, cl) }, style: { background: '#fff7ed', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📊 Rapport interv.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
             React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '' }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
@@ -2501,6 +2834,8 @@ function SectionClientsDevis({ db, agrement }) {
   return React.createElement("div", null,
     certModal ? renderCertModal() : null,
     ficheModal ? renderFicheModal() : null,
+    rapportVisiteModal ? renderRapportVisiteModal() : null,
+    rapportIntervModal ? renderRapportIntervModal() : null,
     contratModal ? renderContratModal() : null,
     renderCompteurs(),
     msg ? React.createElement("div", { style: { padding: "12px 16px", backgroundColor: msg.startsWith("Erreur") ? "#fef2f2" : "#f0fdf4", border: "1px solid " + (msg.startsWith("Erreur") ? "#fecaca" : "#bbf7d0"), borderRadius: "6px", color: msg.startsWith("Erreur") ? "#991b1b" : "#065f46", fontSize: "13px", marginBottom: "18px", display: "flex", justifyContent: "space-between" } },
@@ -2805,4 +3140,130 @@ function buildFichePassageHtml(form, client, numero) {
     '</div></body></html>'
 }
 
- // Mer 15 avr 2026 22:22:43 CEST
+function buildRapportVisiteHtml(form, client, devis) {
+  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+  var nuisiblesStr = (form.nuisibles || []).concat(form.autresNuisible ? [form.autresNuisible] : []).join(', ') || '—'
+  var niveauColor = form.niveauInfestation === 'Faible' ? '#16a34a' : form.niveauInfestation === 'Élevé' ? '#dc2626' : '#d97706'
+  var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport de visite — GSE</title>' +
+    '<style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
+    '.noprint { text-align: center; padding: 14px; background: #f0f9ff; border-bottom: 1px solid #bae6fd; }' +
+    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
+    '.page { max-width: 720px; margin: 0 auto; padding: 36px 48px; }' +
+    '.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0a2e1a; }' +
+    '.logo-block { font-size: 18px; font-weight: 700; color: #0a2e1a; line-height: 1.3; }' +
+    '.logo-block .sub { font-size: 11px; color: #888; font-weight: 400; margin-top: 2px; }' +
+    '.doc-title { font-size: 20px; font-weight: 700; color: #0369a1; text-align: right; line-height: 1.2; }' +
+    '.doc-ref { font-size: 10px; color: #aaa; text-align: right; margin-top: 4px; }' +
+    '.section { margin-bottom: 18px; }' +
+    '.section-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }' +
+    '.value-box { border: 1px solid #e0ddd6; border-radius: 6px; padding: 10px 14px; font-size: 13px; line-height: 1.6; background: #fafaf8; min-height: 36px; }' +
+    '.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }' +
+    '.badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #fff; }' +
+    '.sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; padding-top: 18px; border-top: 1px solid #e8e6e0; }' +
+    '.sig-box { border: 1px solid #ccc; border-radius: 6px; height: 80px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 11px; color: #888; }' +
+    '.footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 28px; padding-top: 12px; border-top: 1px solid #e8e6e0; line-height: 1.6; }' +
+    '</style></head><body>' +
+    '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+    '<div class="page">' +
+
+    '<div class="header">' +
+    '<div class="logo-block">GSE — Global Solutions Entreprise<div class="sub">Phyto Bénin · Applicateur Agréé APA/26-025/CNGP-BEN</div></div>' +
+    '<div><div class="doc-title">RAPPORT DE VISITE</div><div class="doc-ref">Date : ' + dateStr + '</div></div>' +
+    '</div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
+    '<div><div class="section-title">Adresse du site</div><div class="value-box">' + (form.adresseSite || '—') + '</div></div>' +
+    '</div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '—') + '</div></div>' +
+    '<div><div class="section-title">Technicien</div><div class="value-box">' + (form.technicien || '—') + '</div></div>' +
+    '</div>' +
+
+    '<div class="section"><div class="section-title">Description du site</div><div class="value-box">' + (form.descriptionSite || '—') + '</div></div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Nuisibles observés</div><div class="value-box">' + nuisiblesStr + '</div></div>' +
+    '<div><div class="section-title">Niveau d\'infestation</div><div class="value-box"><span class="badge" style="background:' + niveauColor + '">' + (form.niveauInfestation || '—') + '</span></div></div>' +
+    '</div>' +
+
+    '<div class="section"><div class="section-title">Zones infestées</div><div class="value-box" style="white-space:pre-line">' + (form.zonesInfestees || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations complémentaires</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
+
+    '<div class="sigs">' +
+    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
+    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature GSE / Technicien</div><div class="sig-box">Nom : ___________________</div></div>' +
+    '</div>' +
+
+    '<div class="footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>' +
+    '</div></body></html>'
+}
+
+function buildRapportIntervHtml(form, client, devis) {
+  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+  var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport d\'intervention — GSE</title>' +
+    '<style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #fff; }' +
+    '.noprint { text-align: center; padding: 14px; background: #fff7ed; border-bottom: 1px solid #fed7aa; }' +
+    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+    '@media print { .noprint { display: none; } body { background: #fff; } .page { padding: 24px 36px; } }' +
+    '.page { max-width: 720px; margin: 0 auto; padding: 36px 48px; }' +
+    '.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0a2e1a; }' +
+    '.logo-block { font-size: 18px; font-weight: 700; color: #0a2e1a; line-height: 1.3; }' +
+    '.logo-block .sub { font-size: 11px; color: #888; font-weight: 400; margin-top: 2px; }' +
+    '.doc-title { font-size: 20px; font-weight: 700; color: #c2410c; text-align: right; line-height: 1.2; }' +
+    '.doc-ref { font-size: 10px; color: #aaa; text-align: right; margin-top: 4px; }' +
+    '.section { margin-bottom: 18px; }' +
+    '.section-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }' +
+    '.value-box { border: 1px solid #e0ddd6; border-radius: 6px; padding: 10px 14px; font-size: 13px; line-height: 1.6; background: #fafaf8; min-height: 36px; }' +
+    '.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }' +
+    '.sigs { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; padding-top: 18px; border-top: 1px solid #e8e6e0; }' +
+    '.sig-box { border: 1px solid #ccc; border-radius: 6px; height: 80px; display: flex; align-items: flex-end; padding: 8px 10px; font-size: 11px; color: #888; }' +
+    '.footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 28px; padding-top: 12px; border-top: 1px solid #e8e6e0; line-height: 1.6; }' +
+    '</style></head><body>' +
+    '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+    '<div class="page">' +
+
+    '<div class="header">' +
+    '<div class="logo-block">GSE — Global Solutions Entreprise<div class="sub">Phyto Bénin · Applicateur Agréé APA/26-025/CNGP-BEN</div></div>' +
+    '<div><div class="doc-title">RAPPORT D\'INTERVENTION</div><div class="doc-ref">Date : ' + dateStr + '</div></div>' +
+    '</div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
+    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '—') + '</div></div>' +
+    '</div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Technicien(s)</div><div class="value-box">' + (form.technicien || '—') + '</div></div>' +
+    '<div><div class="section-title">Durée de l\'intervention</div><div class="value-box">' + (form.dureeIntervention || '—') + '</div></div>' +
+    '</div>' +
+
+    '<div class="grid2 section">' +
+    '<div><div class="section-title">Méthode d\'application</div><div class="value-box">' + (form.methodeApplication || '—') + '</div></div>' +
+    '<div><div class="section-title">Zones traitées</div><div class="value-box" style="white-space:pre-line">' + (form.zonesTraitees || '—') + '</div></div>' +
+    '</div>' +
+
+    '<div class="section"><div class="section-title">Produits utilisés</div><div class="value-box" style="white-space:pre-line">' + (form.produitsUtilises || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box" style="white-space:pre-line">' + (form.resultats || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
+
+    '<div class="sigs">' +
+    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
+    '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature GSE / Technicien</div><div class="sig-box">Nom : ___________________</div></div>' +
+    '</div>' +
+
+    '<div class="footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>' +
+    '</div></body></html>'
+}
