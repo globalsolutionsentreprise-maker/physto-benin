@@ -1980,17 +1980,150 @@ function SectionClientsDevis({ db, agrement }) {
 
   function renderVueDevisClient() {
     if (!clientDetail) return null
-    return React.createElement("div", null,
-      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" } },
-        React.createElement("button", { onClick: function() { setVue("clients"); setClientDetail(null) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "← Retour"),
-        React.createElement("div", null,
-          React.createElement("div", { style: { fontWeight: "700", fontSize: "16px", color: "#0a2e1a" } }, (clientDetail.prenom || "") + " " + clientDetail.nom),
-          React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, clientDetail.email + (clientDetail.entreprise ? " · " + clientDetail.entreprise : ""))
+    var cl = clientDetail
+    var devisClient = devisList.filter(function(d) { return d.client_id === cl.id })
+
+    var ETAPES_DB = [
+      { id: 'contact',              label: 'Contact',              icon: '📞', auto: true },
+      { id: 'visite',               label: 'Visite de site',       icon: '🔍', auto: false },
+      { id: 'rapport_visite',       label: 'Rapport synthèse',     icon: '📝', auto: false },
+      { id: 'devis',                label: 'Devis',                icon: '📄', auto: true },
+      { id: 'facture',              label: 'Facture',              icon: '💰', auto: false },
+      { id: 'intervention',         label: 'Intervention',         icon: '🔧', auto: false },
+      { id: 'fiche',                label: 'Fiche de passage',     icon: '📋', auto: true },
+      { id: 'rapport_intervention', label: "Rapport d'interv.",    icon: '📊', auto: false },
+      { id: 'certificat',           label: 'Certificat GSE',       icon: '🏆', auto: true },
+      { id: 'encaissement',         label: 'Encaissement',         icon: '💳', auto: false },
+    ]
+
+    function etapeDone(d, etapeId) {
+      var p = d.parcours || {}
+      if (etapeId === 'contact' || etapeId === 'devis') return true
+      if (etapeId === 'fiche') return fichesList.some(function(f) { return f.devis_id === d.id })
+      if (etapeId === 'certificat') return certsList.some(function(c) { return c.devis_id === d.id })
+      return !!(p[etapeId] && p[etapeId].done)
+    }
+
+    function progressDossier(d) {
+      return Math.round(ETAPES_DB.filter(function(e) { return etapeDone(d, e.id) }).length / ETAPES_DB.length * 100)
+    }
+
+    function toggleDB(d, etapeId) {
+      var currentDone = etapeDone(d, etapeId)
+      var p = Object.assign({}, d.parcours || {})
+      p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      saveParcours(d.id, p)
+    }
+
+    function renderDossier(d) {
+      var st = STATUTS[d.statut] || { label: d.statut, c: '#444', bg: '#f0f0f0' }
+      var progress = progressDossier(d)
+      var certsDevis = certsList.filter(function(c) { return c.devis_id === d.id })
+      var fichesDevis = fichesList.filter(function(f) { return f.devis_id === d.id })
+      var p = d.parcours || {}
+
+      return React.createElement('div', { key: d.id, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', marginBottom: '16px', overflow: 'hidden' } },
+
+        React.createElement('div', { style: { backgroundColor: '#f8f7f4', padding: '14px 20px', borderBottom: '1px solid #e8e6e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          React.createElement('div', null,
+            React.createElement('span', { style: { fontSize: '11px', fontWeight: '700', color: '#d4a920' } }, d.numero),
+            React.createElement('span', { style: { marginLeft: '8px', padding: '2px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', backgroundColor: st.bg, color: st.c } }, st.label),
+            React.createElement('div', { style: { fontSize: '14px', fontWeight: '600', color: '#0a2e1a', marginTop: '4px' } }, d.prestation)
+          ),
+          React.createElement('div', { style: { textAlign: 'right' } },
+            React.createElement('div', { style: { fontSize: '18px', fontWeight: '700', color: '#0a2e1a' } }, Number(d.montant_total).toLocaleString('fr-FR') + ' FCFA'),
+            React.createElement('div', { style: { fontSize: '11px', color: '#aaa' } }, new Date(d.created_at).toLocaleDateString('fr-FR'))
+          )
+        ),
+
+        React.createElement('div', { style: { padding: '16px 20px' } },
+
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '5px' } },
+              React.createElement('span', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' } }, 'Progression'),
+              React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: progress === 100 ? '#16a34a' : '#0a2e1a' } }, progress + '%')
+            ),
+            React.createElement('div', { style: { height: '5px', backgroundColor: '#e8e6e0', borderRadius: '3px' } },
+              React.createElement('div', { style: { width: progress + '%', height: '100%', backgroundColor: progress === 100 ? '#16a34a' : '#0a2e1a', borderRadius: '3px', transition: 'width 0.4s' } })
+            )
+          ),
+
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' } }, 'Parcours client'),
+            React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' } },
+              ETAPES_DB.map(function(etape) {
+                var done = etapeDone(d, etape.id)
+                var date = p[etape.id] && p[etape.id].date ? p[etape.id].date : null
+                return React.createElement('div', { key: etape.id,
+                  onClick: function() { if (!etape.auto) toggleDB(d, etape.id) },
+                  title: etape.auto ? 'Détecté automatiquement' : (done ? 'Cliquer pour annuler' : 'Cliquer pour valider'),
+                  style: { backgroundColor: done ? '#f0fdf4' : '#f8f7f4', border: '1px solid ' + (done ? '#bbf7d0' : '#e8e6e0'), borderRadius: '8px', padding: '8px 4px', textAlign: 'center', cursor: etape.auto ? 'default' : 'pointer' }
+                },
+                  React.createElement('div', { style: { fontSize: '15px', marginBottom: '3px' } }, done ? '✅' : '⬜'),
+                  React.createElement('div', { style: { fontSize: '9px', color: done ? '#065f46' : '#888', fontWeight: done ? '700' : '400', lineHeight: 1.3 } }, etape.label),
+                  !etape.auto && date ? React.createElement('div', { style: { fontSize: '8px', color: '#aaa', marginTop: '2px' } }, date) : null,
+                  etape.auto ? React.createElement('div', { style: { fontSize: '8px', color: '#bbb', marginTop: '2px' } }, 'auto') : null
+                )
+              })
+            )
+          ),
+
+          (certsDevis.length > 0 || fichesDevis.length > 0) && React.createElement('div', { style: { marginBottom: '14px' } },
+            React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Documents'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+              certsDevis.map(function(cert) {
+                return React.createElement('div', { key: cert.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + (cert.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: cert.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: '8px', padding: '8px 12px' } },
+                  React.createElement('span', null, cert.type === 'desinsect' ? '🪲' : '🐭'),
+                  React.createElement('div', null,
+                    React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, cert.numero_unique),
+                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, cert.type === 'desinsect' ? 'Certificat désinsect.' : 'Certificat dératisation')
+                  ),
+                  React.createElement('button', { onClick: function() { toggleCertEnvoye(cert) }, style: { background: cert.envoye ? '#0a2e1a' : '#fff', color: cert.envoye ? '#fff' : '#999', border: '1px solid ' + (cert.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, cert.envoye ? '✓ Envoyé' : 'Marquer envoyé'),
+                  React.createElement('button', { onClick: function() { rouvrirCertModal(cert, d, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
+                )
+              }),
+              fichesDevis.map(function(fiche) {
+                return React.createElement('div', { key: fiche.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + (fiche.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: fiche.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: '8px', padding: '8px 12px' } },
+                  React.createElement('span', null, '📋'),
+                  React.createElement('div', null,
+                    React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, fiche.numero_unique),
+                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, 'Fiche de passage')
+                  ),
+                  React.createElement('button', { onClick: function() { toggleFicheEnvoye(fiche) }, style: { background: fiche.envoye ? '#0a2e1a' : '#fff', color: fiche.envoye ? '#fff' : '#999', border: '1px solid ' + (fiche.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, fiche.envoye ? '✓ Remis' : 'Marquer remis')
+                )
+              })
+            )
+          ),
+
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '12px', borderTop: '1px solid #f0ede8' } },
+            d.statut === 'en_cours' && React.createElement('button', { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, validating === d.id ? '...' : '✓ Valider livraison'),
+            React.createElement('button', { onClick: function() { ouvrirEditionDevis(d) }, style: { background: 'none', border: '1px solid #d1d5db', color: '#374151', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✏️ Modifier devis'),
+            cl.email && React.createElement('button', { onClick: function() { renvoyerEmail(d) }, style: { background: 'none', border: '1px solid #bfdbfe', color: '#1e40af', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✉ Renvoyer devis'),
+            d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
+            d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
+            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '' }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
+            React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
+          )
+        )
+      )
+    }
+
+    return React.createElement('div', null,
+      React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '24px' } },
+        React.createElement('button', { onClick: function() { setVue('clients'); setClientDetail(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '6px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, marginTop: '4px' } }, '← Retour'),
+        React.createElement('div', { style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', padding: '16px 20px', flex: 1 } },
+          React.createElement('div', { style: { fontSize: '18px', fontWeight: '700', color: '#0a2e1a', marginBottom: '4px' } }, [(cl.prenom || ''), cl.nom].filter(Boolean).join(' ') + (cl.entreprise ? ' — ' + cl.entreprise : '')),
+          React.createElement('div', { style: { fontSize: '12px', color: '#666', display: 'flex', gap: '16px', flexWrap: 'wrap' } },
+            cl.email ? React.createElement('span', null, '✉ ' + cl.email) : null,
+            cl.telephone ? React.createElement('span', null, '📱 ' + cl.telephone) : null,
+            cl.adresse ? React.createElement('span', null, '📍 ' + cl.adresse) : null
+          )
         )
       ),
-      filtresDevis.length === 0
-        ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun devis pour ce client.")
-        : React.createElement("div", null, filtresDevis.map(function(d) { return renduDevis(d) }))
+      React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a', marginBottom: '14px' } }, devisClient.length + ' dossier(s)'),
+      devisClient.length === 0
+        ? React.createElement('div', { style: { textAlign: 'center', padding: '40px', backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', color: '#888' } }, 'Aucun devis pour ce client.')
+        : devisClient.map(function(d) { return renderDossier(d) })
     )
   }
 
