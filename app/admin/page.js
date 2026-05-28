@@ -1655,45 +1655,31 @@ function SectionClientsDevis({ db, agrement }) {
   function renduDevis(d) {
     var st = STATUTS[d.statut] || { label: d.statut, c: "#444", bg: "#f0f0f0" }
     var cl = d.clients
-    var certsDevis = certsList.filter(function(c) { return c.devis_id === d.id })
-    return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px 22px", marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+    var clientObj = cl || clients.find(function(c) { return c.id === d.client_id })
+    return React.createElement("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "16px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
       React.createElement("div", { style: { flex: 1 } },
-        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" } },
           React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
-          React.createElement("span", { style: { padding: "3px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
+          React.createElement("span", { style: { padding: "2px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
         ),
-        React.createElement("div", { style: { fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "3px" } }, d.prestation),
-        cl && React.createElement("div", { style: { fontSize: "12px", color: "#666" } }, (cl.prenom || "") + " " + cl.nom + (cl.entreprise ? " — " + cl.entreprise : "") + (cl.email ? " · " + cl.email : "")),
-        d.notes_modification && React.createElement("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "12px", color: "#6b21a8" } },
-          React.createElement("strong", null, "Modification demandée : "), d.notes_modification
-        ),
-        certsDevis.length > 0 && React.createElement("div", { style: { marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "6px" } },
-          certsDevis.map(function(cert) {
-            var label = cert.type === 'desinsect' ? '🪲' : '🐭'
-            return React.createElement("div", { key: cert.id, style: { display: "flex", alignItems: "center", gap: "6px", background: cert.envoye ? "#f0fdf4" : "#fafaf8", border: "1px solid " + (cert.envoye ? "#bbf7d0" : "#e0ddd6"), borderRadius: "20px", padding: "3px 10px", fontSize: "11px" } },
-              React.createElement("span", { style: { color: "#555" } }, label + " " + cert.numero_unique),
-              React.createElement("button", {
-                onClick: function() { toggleCertEnvoye(cert) },
-                title: cert.envoye ? ("Envoyé le " + new Date(cert.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
-                style: { background: cert.envoye ? "#0a2e1a" : "#fff", color: cert.envoye ? "#fff" : "#999", border: "1px solid " + (cert.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "10px", padding: "1px 8px", fontSize: "10px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" }
-              }, cert.envoye ? "✓ Envoyé" : "Envoyé ?")
-            )
-          })
+        React.createElement("div", { style: { fontSize: "14px", fontWeight: "600", color: "#0a2e1a", marginBottom: "2px" } }, d.prestation),
+        cl && React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, [(cl.prenom || ""), cl.nom].filter(Boolean).join(" ") + (cl.entreprise ? " — " + cl.entreprise : "")),
+        d.statut === "modification_demandee" && React.createElement("div", { style: { marginTop: "6px", padding: "6px 10px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "11px", color: "#6b21a8" } },
+          React.createElement("strong", null, "⚠ Modification : "), d.notes_modification
         )
       ),
-      React.createElement("div", { style: { textAlign: "right", marginLeft: "20px", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" } },
-        React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
-        d.montant_net && React.createElement("div", { style: { fontSize: "11px", color: "#aaa" } }, "dont " + Math.round(d.montant_total - d.montant_net).toLocaleString("fr-FR") + " FCFA frais"),
+      React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", marginLeft: "20px" } },
+        React.createElement("div", { style: { fontSize: "16px", fontWeight: "700", color: "#0a2e1a" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA"),
         React.createElement("div", { style: { fontSize: "11px", color: "#bbb" } }, new Date(d.created_at).toLocaleDateString("fr-FR")),
-        d.statut === "en_cours" && React.createElement("button", { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, validating === d.id ? "..." : "✓ Valider → 40%"),
-        d.statut === "modification_demandee" && React.createElement("div", { style: { fontSize: "11px", color: "#7c3aed", backgroundColor: "#ede9fe", padding: "6px 10px", borderRadius: "6px" } }, "⚠ " + (d.notes_modification || "Modification demandée")),
-        d.statut === "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier et renvoyer"),
-        d.statut !== "modification_demandee" && React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { background: "none", border: "1px solid #d1d5db", color: "#374151", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier"),
-        cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉ Renvoyer"),
-        d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('desinsect', d) }, style: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🪲 Désinsect."),
-        d.statut !== "annule" && React.createElement("button", { onClick: function() { openCertModal('derat', d) }, style: { background: "#fefce8", border: "1px solid #fde68a", color: "#92400e", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🐭 Dératisation"),
-        React.createElement("button", { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" }) }, style: { background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📄 Contrat"),
-        React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑 Supprimer")
+        React.createElement("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" } },
+          clientObj && React.createElement("button", { onClick: function() { voirDevisClient(clientObj) }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "📊 Dashboard"),
+          d.statut === "en_cours" && React.createElement("button", { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, validating === d.id ? "..." : "✓ Valider"),
+          d.statut === "modification_demandee"
+            ? React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier")
+            : React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { background: "none", border: "1px solid #d1d5db", color: "#374151", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
+          cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉"),
+          React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+        )
       )
     )
   }
@@ -1945,33 +1931,20 @@ function SectionClientsDevis({ db, agrement }) {
           ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun client.")
           : React.createElement("div", null, clients.map(function(c) {
               var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
-              var fichesClient = fichesList.filter(function(f) { return f.client_id === c.id })
-              return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "16px 20px", marginBottom: "8px" } },
-                React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
-                  React.createElement("div", null,
-                    React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, (c.prenom || "") + " " + c.nom),
-                    React.createElement("div", { style: { fontSize: "12px", color: "#666" } }, c.email + (c.telephone ? " · " + c.telephone : "") + (c.entreprise ? " · " + c.entreprise : ""))
-                  ),
-                  React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "center" } },
-                    React.createElement("span", { style: { fontSize: "11px", color: "#888", marginRight: "4px" } }, nbDevis + " devis"),
-                    React.createElement("button", { onClick: function() { voirDevisClient(c) }, style: { background: "none", border: "1px solid #0a2e1a", color: "#0a2e1a", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "Voir devis"),
-                    React.createElement("button", { onClick: function() { ouvrirFicheModal(c) }, style: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#065f46", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📋 Fiche"),
-                    React.createElement("button", { onClick: function() { ouvrirEditionClient(c) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
-                    React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "6px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+              var nbDocs = certsList.filter(function(cert) { return cert.client_id === c.id }).length + fichesList.filter(function(f) { return f.client_id === c.id }).length
+              return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                React.createElement("div", null,
+                  React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, [(c.prenom || ""), c.nom].filter(Boolean).join(" ") + (c.entreprise ? " — " + c.entreprise : "")),
+                  React.createElement("div", { style: { fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap" } },
+                    c.email ? React.createElement("span", null, c.email) : null,
+                    c.telephone ? React.createElement("span", null, c.telephone) : null,
+                    React.createElement("span", { style: { color: "#0a2e1a", fontWeight: "600" } }, nbDevis + " devis · " + nbDocs + " docs")
                   )
                 ),
-                fichesClient.length > 0 && React.createElement("div", { style: { marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "6px" } },
-                  fichesClient.map(function(fiche) {
-                    return React.createElement("div", { key: fiche.id, style: { display: "flex", alignItems: "center", gap: "6px", background: fiche.envoye ? "#f0fdf4" : "#fafaf8", border: "1px solid " + (fiche.envoye ? "#bbf7d0" : "#e0ddd6"), borderRadius: "20px", padding: "3px 10px", fontSize: "11px" } },
-                      React.createElement("span", { style: { color: "#555" } }, "📋 " + fiche.numero_unique),
-                      React.createElement("span", { style: { color: "#aaa" } }, new Date(fiche.created_at).toLocaleDateString("fr-FR")),
-                      React.createElement("button", {
-                        onClick: function() { toggleFicheEnvoye(fiche) },
-                        title: fiche.envoye ? ("Remis le " + new Date(fiche.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme remis",
-                        style: { background: fiche.envoye ? "#0a2e1a" : "#fff", color: fiche.envoye ? "#fff" : "#999", border: "1px solid " + (fiche.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "10px", padding: "1px 8px", fontSize: "10px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" }
-                      }, fiche.envoye ? "✓ Remis" : "Remis ?")
-                    )
-                  })
+                React.createElement("div", { style: { display: "flex", gap: "6px" } },
+                  React.createElement("button", { onClick: function() { voirDevisClient(c) }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "📊 Tableau de bord"),
+                  React.createElement("button", { onClick: function() { ouvrirEditionClient(c) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
+                  React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
                 )
               )
             }))
@@ -2380,25 +2353,23 @@ function SectionClientsDevis({ db, agrement }) {
 
     function renderCard(d) {
       var progress = getProgress(d)
-      var expanded = pipelineExpanded === d.id
       var nomClient = getNomClient(d)
-      var montant = d.montant_ttc ? Number(d.montant_ttc).toLocaleString('fr-FR') + ' F' : ''
-      return React.createElement('div', { key: d.id, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' } },
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', gap: '8px' }, onClick: function() { setPipelineExpanded(expanded ? null : d.id) } },
-          React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-            React.createElement('div', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, nomClient),
-            d.numero ? React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginTop: '2px' } }, d.numero) : null,
-            montant ? React.createElement('div', { style: { fontSize: '11px', color: '#1e40af', fontWeight: '600', marginTop: '4px' } }, montant) : null
+      var montant = d.montant_total ? Number(d.montant_total).toLocaleString('fr-FR') + ' F' : ''
+      var clientObj = d.clients || clients.find(function(c) { return c.id === d.client_id })
+      return React.createElement('div', { key: d.id,
+        onClick: function() { if (clientObj) { setClientDetail(clientObj); setVue('devis-client') } },
+        title: 'Ouvrir le tableau de bord',
+        style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.15s' }
+      },
+        React.createElement('div', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '2px' } }, nomClient),
+        d.numero ? React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginBottom: '4px' } }, d.numero) : null,
+        montant ? React.createElement('div', { style: { fontSize: '11px', color: '#1e40af', fontWeight: '600', marginBottom: '6px' } }, montant) : null,
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
+          React.createElement('div', { style: { flex: 1, height: '3px', backgroundColor: '#e8e6e0', borderRadius: '2px' } },
+            React.createElement('div', { style: { width: progress + '%', height: '100%', backgroundColor: progress === 100 ? '#16a34a' : '#0a2e1a', borderRadius: '2px' } })
           ),
-          React.createElement('div', { style: { textAlign: 'right', flexShrink: 0 } },
-            React.createElement('div', { style: { fontSize: '10px', color: progress === 100 ? '#16a34a' : '#888', fontWeight: '700' } }, progress + '%'),
-            React.createElement('div', { style: { width: '40px', height: '3px', backgroundColor: '#e8e6e0', borderRadius: '2px', marginTop: '3px' } },
-              React.createElement('div', { style: { width: progress + '%', height: '100%', backgroundColor: progress === 100 ? '#16a34a' : '#0a2e1a', borderRadius: '2px', transition: 'width 0.3s' } })
-            ),
-            React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginTop: '4px' } }, expanded ? '▲' : '▼')
-          )
-        ),
-        expanded ? renderChecklist(d) : null
+          React.createElement('span', { style: { fontSize: '10px', color: progress === 100 ? '#16a34a' : '#888', fontWeight: '700', flexShrink: 0 } }, progress + '%')
+        )
       )
     }
 
