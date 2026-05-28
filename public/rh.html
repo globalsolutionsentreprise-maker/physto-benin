@@ -576,7 +576,10 @@ function onClientChange(sel){
 async function saveInterv(){
   const g=id=>document.getElementById(id)?.value||"";
   const montantPrestataire=parseInt(document.getElementById("imontant")?.value||"0")||0;
-  const d={clientNom:g("icl").trim(),devisId:g("idev")||null,dateIntervention:g("idate"),
+  const clSel=document.getElementById("icl");
+  const clOpt=clSel?.options[clSel?.selectedIndex];
+  const devisIdFallback=clOpt?.dataset?.devisid||"";
+  const d={clientNom:g("icl").trim(),devisId:g("idev")||devisIdFallback||null,dateIntervention:g("idate"),
     heureDebut:g("iheure"),personnelId:g("iper")||null,statut:g("ist"),adresse:g("iadr"),notes:g("ino"),
     montantPrestataire};
   if(!d.clientNom){alert("Le nom du client est obligatoire.");return;}
