@@ -852,9 +852,11 @@ function SectionClientsDevis({ db, agrement }) {
   const [rapportVisiteModal, setRapportVisiteModal] = React.useState(null)
   const [rapportVisiteForm, setRapportVisiteForm] = React.useState({})
   const [savingRapportVisite, setSavingRapportVisite] = React.useState(false)
+  const [uploadingPhotoVisite, setUploadingPhotoVisite] = React.useState(false)
   const [rapportIntervModal, setRapportIntervModal] = React.useState(null)
   const [rapportIntervForm, setRapportIntervForm] = React.useState({})
   const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
+  const [uploadingPhotoInterv, setUploadingPhotoInterv] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
@@ -1319,6 +1321,8 @@ function SectionClientsDevis({ db, agrement }) {
       recommandations: '',
       observations: '',
       technicien: '',
+      notesTechnicien: '',
+      photos: [],
     })
   }
 
@@ -1335,7 +1339,24 @@ function SectionClientsDevis({ db, agrement }) {
       recommandations: rapport.recommandations || '',
       observations: rapport.observations || '',
       technicien: rapport.technicien || '',
+      notesTechnicien: rapport.notes_technicien || '',
+      photos: rapport.photos || [],
     })
+  }
+
+  async function uploaderPhotoRapport(file, setUploading, formSetter) {
+    setUploading(true)
+    var ext = file.name.split('.').pop()
+    var nom = 'rapports/' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext
+    var { error } = await db.storage.from('realisations').upload(nom, file, { upsert: false })
+    if (error) { setUploading(false); return }
+    var { data: urlData } = db.storage.from('realisations').getPublicUrl(nom)
+    formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).concat(urlData.publicUrl) }) })
+    setUploading(false)
+  }
+
+  function supprimerPhotoRapport(url, formSetter) {
+    formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).filter(function(u) { return u !== url }) }) })
   }
 
   async function sauvegarderRapportVisite() {
@@ -1355,6 +1376,8 @@ function SectionClientsDevis({ db, agrement }) {
       recommandations: rapportVisiteForm.recommandations,
       observations: rapportVisiteForm.observations,
       technicien: rapportVisiteForm.technicien,
+      notes_technicien: rapportVisiteForm.notesTechnicien || null,
+      photos: rapportVisiteForm.photos || [],
     }
     if (editingId) {
       await db.from('rapports_visite').update(data).eq('id', editingId)
@@ -1458,9 +1481,30 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement('textarea', { value: rapportVisiteForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, placeholder: 'Remarques, accès, contraintes...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
         ),
 
+        React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '14px' }) },
+          React.createElement('label', { style: Object.assign({}, lbl2, { color: '#92400e' }) }, '📝 Notes du technicien (retour terrain)'),
+          React.createElement('textarea', { value: rapportVisiteForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 5, placeholder: 'Décris ce que tu as observé sur le terrain, les difficultés rencontrées, l\'état des lieux, les zones problématiques, tes impressions...', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fcd34d' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
+            (rapportVisiteForm.photos || []).map(function(url, i) {
+              return React.createElement('div', { key: i, style: { position: 'relative' } },
+                React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportVisiteForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+              )
+            })
+          ),
+          React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingPhotoVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600' } },
+            React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoVisite, setRapportVisiteForm) }) }, disabled: uploadingPhotoVisite }),
+            uploadingPhotoVisite ? '⏳ Envoi...' : '+ Ajouter des photos'
+          )
+        ),
+
         React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
           React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-          React.createElement('button', { onClick: sauvegarderRapportVisite, disabled: savingRapportVisite, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportVisite ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+          React.createElement('button', { onClick: sauvegarderRapportVisite, disabled: savingRapportVisite || uploadingPhotoVisite, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportVisite ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
         )
       )
     )
@@ -1478,6 +1522,8 @@ function SectionClientsDevis({ db, agrement }) {
       resultats: '',
       observations: '',
       recommandations: '',
+      notesTechnicien: '',
+      photos: [],
     })
   }
 
@@ -1493,6 +1539,8 @@ function SectionClientsDevis({ db, agrement }) {
       resultats: rapport.resultats || '',
       observations: rapport.observations || '',
       recommandations: rapport.recommandations || '',
+      notesTechnicien: rapport.notes_technicien || '',
+      photos: rapport.photos || [],
     })
   }
 
@@ -1512,6 +1560,8 @@ function SectionClientsDevis({ db, agrement }) {
       resultats: rapportIntervForm.resultats,
       observations: rapportIntervForm.observations,
       recommandations: rapportIntervForm.recommandations,
+      notes_technicien: rapportIntervForm.notesTechnicien || null,
+      photos: rapportIntervForm.photos || [],
     }
     if (editingId) {
       await db.from('rapports_intervention').update(data).eq('id', editingId)
@@ -1593,9 +1643,30 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement('textarea', { value: rapportIntervForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 2, placeholder: 'Ex: Revisiter dans 15 jours, colmater les fissures...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
         ),
 
+        React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '14px' }) },
+          React.createElement('label', { style: Object.assign({}, lbl2, { color: '#92400e' }) }, '📝 Notes du technicien (retour terrain)'),
+          React.createElement('textarea', { value: rapportIntervForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 5, placeholder: 'Décris ce que tu as observé, les difficultés, l\'état après traitement, les zones encore à risque, ce qu\'il faut surveiller...', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fcd34d' }) })
+        ),
+
+        React.createElement('div', { style: section },
+          React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
+            (rapportIntervForm.photos || []).map(function(url, i) {
+              return React.createElement('div', { key: i, style: { position: 'relative' } },
+                React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportIntervForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+              )
+            })
+          ),
+          React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #fed7aa', backgroundColor: '#fff7ed', cursor: uploadingPhotoInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#c2410c', fontWeight: '600' } },
+            React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
+            uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
+          )
+        ),
+
         React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
           React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-          React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+          React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv || uploadingPhotoInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
         )
       )
     )
@@ -3197,6 +3268,25 @@ function buildRapportVisiteHtml(form, client, devis) {
     '<div class="section"><div class="section-title">Recommandations</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
     '<div class="section"><div class="section-title">Observations complémentaires</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
 
+    (form.notesTechnicien ? (
+      '<div class="section" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px">' +
+      '<div class="section-title" style="color:#92400e">Notes du technicien (retour terrain)</div>' +
+      '<div style="font-size:13px;line-height:1.7;white-space:pre-line;color:#111">' + form.notesTechnicien + '</div>' +
+      '</div>'
+    ) : '') +
+
+    ((form.photos && form.photos.length > 0) ? (
+      '<div class="section">' +
+      '<div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
+      form.photos.map(function(url, i) {
+        return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6">' +
+          '<img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+          '</div>'
+      }).join('') +
+      '</div></div>'
+    ) : '') +
+
     '<div class="sigs">' +
     '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
     '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature GSE / Technicien</div><div class="sig-box">Nom : ___________________</div></div>' +
@@ -3258,6 +3348,25 @@ function buildRapportIntervHtml(form, client, devis) {
     '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box" style="white-space:pre-line">' + (form.resultats || '—') + '</div></div>' +
     '<div class="section"><div class="section-title">Observations</div><div class="value-box" style="white-space:pre-line">' + (form.observations || '—') + '</div></div>' +
     '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box" style="white-space:pre-line">' + (form.recommandations || '—') + '</div></div>' +
+
+    (form.notesTechnicien ? (
+      '<div class="section" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px">' +
+      '<div class="section-title" style="color:#92400e">Notes du technicien (retour terrain)</div>' +
+      '<div style="font-size:13px;line-height:1.7;white-space:pre-line;color:#111">' + form.notesTechnicien + '</div>' +
+      '</div>'
+    ) : '') +
+
+    ((form.photos && form.photos.length > 0) ? (
+      '<div class="section">' +
+      '<div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px">' +
+      form.photos.map(function(url, i) {
+        return '<div style="aspect-ratio:1;overflow:hidden;border-radius:6px;border:1px solid #e0ddd6">' +
+          '<img src="' + url + '" alt="Photo ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+          '</div>'
+      }).join('') +
+      '</div></div>'
+    ) : '') +
 
     '<div class="sigs">' +
     '<div><div style="font-size:11px;font-weight:700;color:#444;margin-bottom:6px">Signature client</div><div class="sig-box">Nom : ___________________</div></div>' +
