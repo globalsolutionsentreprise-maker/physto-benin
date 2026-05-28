@@ -8,7 +8,7 @@ const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemi
 export async function POST(req) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
   try {
     const { devisId, typeEtablissement, demandeClient, notes } = await req.json()
