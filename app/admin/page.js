@@ -2922,7 +2922,7 @@ function SectionClientsDevis({ db, agrement }) {
               window.open("/api/generate-contract?" + params.toString(), "_blank")
             },
             style: { width: "100%", backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
-          }, "Générer le contrat Word (.docx)")
+          }, "📄 Générer le contrat")
         )
       )
     )
