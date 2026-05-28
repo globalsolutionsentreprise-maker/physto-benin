@@ -857,6 +857,12 @@ function SectionClientsDevis({ db, agrement }) {
   const [rapportIntervForm, setRapportIntervForm] = React.useState({})
   const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
   const [uploadingPhotoInterv, setUploadingPhotoInterv] = React.useState(false)
+  const [generatingRapportVisite, setGeneratingRapportVisite] = React.useState(false)
+  const [rapportVisitePhase, setRapportVisitePhase] = React.useState('saisie')
+  const [rapportVisiteErreurIA, setRapportVisiteErreurIA] = React.useState(null)
+  const [generatingRapportInterv, setGeneratingRapportInterv] = React.useState(false)
+  const [rapportIntervPhase, setRapportIntervPhase] = React.useState('saisie')
+  const [rapportIntervErreurIA, setRapportIntervErreurIA] = React.useState(null)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
@@ -1324,6 +1330,8 @@ function SectionClientsDevis({ db, agrement }) {
       notesTechnicien: '',
       photos: [],
     })
+    setRapportVisitePhase('saisie')
+    setRapportVisiteErreurIA(null)
   }
 
   function ouvrirRapportVisite(rapport, devis, client) {
@@ -1342,6 +1350,8 @@ function SectionClientsDevis({ db, agrement }) {
       notesTechnicien: rapport.notes_technicien || '',
       photos: rapport.photos || [],
     })
+    setRapportVisitePhase('genere')
+    setRapportVisiteErreurIA(null)
   }
 
   async function uploaderPhotoRapport(file, setUploading, formSetter) {
@@ -1357,6 +1367,52 @@ function SectionClientsDevis({ db, agrement }) {
 
   function supprimerPhotoRapport(url, formSetter) {
     formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).filter(function(u) { return u !== url }) }) })
+  }
+
+  async function genererRapportVisiteIA() {
+    if (!rapportVisiteModal) return
+    setGeneratingRapportVisite(true)
+    setRapportVisiteErreurIA(null)
+    var { devis, client } = rapportVisiteModal
+    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+    try {
+      var res = await fetch('/api/analyze-rapport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'visite',
+          notes: rapportVisiteForm.notesTechnicien,
+          photos: rapportVisiteForm.photos || [],
+          context: { clientNom, adresse: rapportVisiteForm.adresseSite, date: rapportVisiteForm.dateVisite, technicien: rapportVisiteForm.technicien, prestation: devis.prestation },
+        })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.success) {
+        setRapportVisiteErreurIA(data.error || 'Erreur inconnue')
+      } else {
+        var r = data.rapport
+        setRapportVisiteForm(function(prev) {
+          return Object.assign({}, prev, {
+            descriptionSite: r.descriptionSite || prev.descriptionSite || '',
+            nuisibles: Array.isArray(r.nuisibles) ? r.nuisibles : prev.nuisibles || [],
+            zonesInfestees: r.zonesInfestees || prev.zonesInfestees || '',
+            niveauInfestation: r.niveauInfestation || prev.niveauInfestation || 'Moyen',
+            observations: r.observations || prev.observations || '',
+            recommandations: r.recommandations || prev.recommandations || '',
+          })
+        })
+        setRapportVisitePhase('genere')
+      }
+    } catch(e) { setRapportVisiteErreurIA(e.message) }
+    setGeneratingRapportVisite(false)
+  }
+
+  function imprimerRapportVisite() {
+    if (!rapportVisiteModal) return
+    var { client, devis } = rapportVisiteModal
+    var html = buildRapportVisiteHtml(rapportVisiteForm, client, devis)
+    var w = window.open('', '_blank', 'width=920,height=1100')
+    if (w) { w.document.write(html); w.document.close() }
   }
 
   async function sauvegarderRapportVisite() {
@@ -1389,10 +1445,7 @@ function SectionClientsDevis({ db, agrement }) {
     }
     await charger()
     setSavingRapportVisite(false)
-    var html = buildRapportVisiteHtml(rapportVisiteForm, client, devis)
-    var w = window.open('', '_blank', 'width=920,height=1100')
-    if (w) { w.document.write(html); w.document.close() }
-    setRapportVisiteModal(null)
+    setMsg('✓ Rapport de visite enregistré')
   }
 
   function renderRapportVisiteModal() {
@@ -1412,6 +1465,7 @@ function SectionClientsDevis({ db, agrement }) {
     var section = { marginBottom: '16px' }
     return React.createElement('div', { style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' } },
       React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '680px', padding: '28px' } },
+
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, '🔍 Rapport de visite'),
@@ -1436,75 +1490,108 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement('input', { value: rapportVisiteForm.adresseSite || '', onChange: function(e) { upd('adresseSite', e.target.value) }, placeholder: 'Adresse complète', style: inp2 })
         ),
 
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Description du site / type de bâtiment'),
-          React.createElement('input', { value: rapportVisiteForm.descriptionSite || '', onChange: function(e) { upd('descriptionSite', e.target.value) }, placeholder: 'Ex: Restaurant, bureau 2 étages...', style: inp2 })
-        ),
+        rapportVisitePhase === 'saisie' ? React.createElement(React.Fragment, null,
 
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Nuisibles observés'),
-          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
-            NUISIBLES.map(function(n) {
-              var checked = (rapportVisiteForm.nuisibles || []).includes(n)
-              return React.createElement('label', { key: n, style: { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', cursor: 'pointer', padding: '5px 10px', borderRadius: '20px', border: '1px solid ' + (checked ? '#0a2e1a' : '#e0ddd6'), backgroundColor: checked ? '#f0fdf4' : '#fff', fontWeight: checked ? '600' : '400' } },
-                React.createElement('input', { type: 'checkbox', checked: checked, onChange: function() { toggleNuisible(n) }, style: { display: 'none' } }),
-                n
-              )
-            }),
-            React.createElement('input', { value: rapportVisiteForm.autresNuisible || '', onChange: function(e) { upd('autresNuisible', e.target.value) }, placeholder: 'Autres...', style: Object.assign({}, inp2, { width: '140px', padding: '5px 8px' }) })
-          )
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Zones infestées'),
-          React.createElement('textarea', { value: rapportVisiteForm.zonesInfestees || '', onChange: function(e) { upd('zonesInfestees', e.target.value) }, rows: 2, placeholder: 'Ex: cuisine, réserve, cave...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, "Niveau d'infestation"),
-          React.createElement('div', { style: { display: 'flex', gap: '8px' } },
-            NIVEAUX.map(function(n) {
-              var sel = rapportVisiteForm.niveauInfestation === n
-              var color = n === 'Faible' ? '#16a34a' : n === 'Moyen' ? '#d97706' : '#dc2626'
-              return React.createElement('button', { key: n, onClick: function() { upd('niveauInfestation', n) }, style: { padding: '7px 18px', borderRadius: '6px', border: '1.5px solid ' + (sel ? color : '#e0ddd6'), backgroundColor: sel ? color : '#fff', color: sel ? '#fff' : '#666', fontSize: '12px', fontWeight: sel ? '700' : '400', cursor: 'pointer', fontFamily: 'inherit' } }, n)
-            })
-          )
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Recommandations'),
-          React.createElement('textarea', { value: rapportVisiteForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 3, placeholder: 'Traitements recommandés, fréquence...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Observations complémentaires'),
-          React.createElement('textarea', { value: rapportVisiteForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, placeholder: 'Remarques, accès, contraintes...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '14px' }) },
-          React.createElement('label', { style: Object.assign({}, lbl2, { color: '#92400e' }) }, '📝 Notes du technicien (retour terrain)'),
-          React.createElement('textarea', { value: rapportVisiteForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 5, placeholder: 'Décris ce que tu as observé sur le terrain, les difficultés rencontrées, l\'état des lieux, les zones problématiques, tes impressions...', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fcd34d' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
-          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
-            (rapportVisiteForm.photos || []).map(function(url, i) {
-              return React.createElement('div', { key: i, style: { position: 'relative' } },
-                React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
-                React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportVisiteForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
-              )
-            })
+          React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fffbeb', border: '2px solid #fcd34d', borderRadius: '10px', padding: '16px' }) },
+            React.createElement('label', { style: Object.assign({}, lbl2, { color: '#92400e', fontSize: '12px' }) }, '📝 Notes brutes du technicien'),
+            React.createElement('p', { style: { fontSize: '12px', color: '#78350f', marginBottom: '10px', lineHeight: '1.5' } }, 'Colle ici ce que le technicien t\'a envoyé. L\'IA va rédiger le rapport professionnel à partir de ces notes et des photos.'),
+            React.createElement('textarea', { value: rapportVisiteForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 7, placeholder: 'Ex : "Appart 3ème étage, plein de cafards dans la cuisine surtout sous l\'évier et derrière le frigo, aussi quelques-uns dans les WC. Pas de rats mais des traces. Client dit que ça dure depuis 2 semaines..."', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fcd34d', fontSize: '13px', lineHeight: '1.6' }) })
           ),
-          React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingPhotoVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600' } },
-            React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoVisite, setRapportVisiteForm) }) }, disabled: uploadingPhotoVisite }),
-            uploadingPhotoVisite ? '⏳ Envoi...' : '+ Ajouter des photos'
-          )
-        ),
 
-        React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
-          React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-          React.createElement('button', { onClick: sauvegarderRapportVisite, disabled: savingRapportVisite || uploadingPhotoVisite, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportVisite ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
+              (rapportVisiteForm.photos || []).map(function(url, i) {
+                return React.createElement('div', { key: i, style: { position: 'relative' } },
+                  React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                  React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportVisiteForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+                )
+              })
+            ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingPhotoVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600' } },
+              React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoVisite, setRapportVisiteForm) }) }, disabled: uploadingPhotoVisite }),
+              uploadingPhotoVisite ? '⏳ Envoi...' : '+ Ajouter des photos'
+            )
+          ),
+
+          rapportVisiteErreurIA ? React.createElement('div', { style: { backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 14px', fontSize: '12px', color: '#991b1b', marginBottom: '14px' } }, '❌ ' + rapportVisiteErreurIA) : null,
+
+          React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
+            React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+            React.createElement('button', {
+              onClick: genererRapportVisiteIA,
+              disabled: generatingRapportVisite || uploadingPhotoVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length)) ? 0.5 : 1 }
+            }, generatingRapportVisite ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
+          )
+
+        ) : React.createElement(React.Fragment, null,
+
+          React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '12px', color: '#166534', fontWeight: '600' } },
+            '✅ Rapport généré par l\'IA — vérifiez et modifiez si nécessaire avant d\'enregistrer'
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Description du site'),
+            React.createElement('textarea', { value: rapportVisiteForm.descriptionSite || '', onChange: function(e) { upd('descriptionSite', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Nuisibles observés'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+              NUISIBLES.map(function(n) {
+                var checked = (rapportVisiteForm.nuisibles || []).includes(n)
+                return React.createElement('label', { key: n, style: { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', cursor: 'pointer', padding: '5px 10px', borderRadius: '20px', border: '1px solid ' + (checked ? '#0a2e1a' : '#e0ddd6'), backgroundColor: checked ? '#f0fdf4' : '#fff', fontWeight: checked ? '600' : '400' } },
+                  React.createElement('input', { type: 'checkbox', checked: checked, onChange: function() { toggleNuisible(n) }, style: { display: 'none' } }),
+                  n
+                )
+              }),
+              React.createElement('input', { value: rapportVisiteForm.autresNuisible || '', onChange: function(e) { upd('autresNuisible', e.target.value) }, placeholder: 'Autres...', style: Object.assign({}, inp2, { width: '140px', padding: '5px 8px' }) })
+            )
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, "Niveau d'infestation"),
+            React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+              NIVEAUX.map(function(n) {
+                var sel = rapportVisiteForm.niveauInfestation === n
+                var color = n === 'Faible' ? '#16a34a' : n === 'Moyen' ? '#d97706' : '#dc2626'
+                return React.createElement('button', { key: n, onClick: function() { upd('niveauInfestation', n) }, style: { padding: '7px 18px', borderRadius: '6px', border: '1.5px solid ' + (sel ? color : '#e0ddd6'), backgroundColor: sel ? color : '#fff', color: sel ? '#fff' : '#666', fontSize: '12px', fontWeight: sel ? '700' : '400', cursor: 'pointer', fontFamily: 'inherit' } }, n)
+              })
+            )
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Zones infestées'),
+            React.createElement('textarea', { value: rapportVisiteForm.zonesInfestees || '', onChange: function(e) { upd('zonesInfestees', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Observations techniques'),
+            React.createElement('textarea', { value: rapportVisiteForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 3, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Recommandations'),
+            React.createElement('textarea', { value: rapportVisiteForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 3, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          (rapportVisiteForm.photos || []).length > 0 ? React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, '📷 Photos (' + (rapportVisiteForm.photos || []).length + ')'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+              (rapportVisiteForm.photos || []).map(function(url, i) {
+                return React.createElement('img', { key: i, src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } })
+              })
+            )
+          ) : null,
+
+          React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #f0ede8', flexWrap: 'wrap' } },
+            React.createElement('button', { onClick: function() { setRapportVisitePhase('saisie') }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, '◀ Modifier les notes'),
+            React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+              React.createElement('button', { onClick: imprimerRapportVisite, style: { background: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1', borderRadius: '6px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' } }, '🖨️ Aperçu & Imprimer'),
+              React.createElement('button', { onClick: sauvegarderRapportVisite, disabled: savingRapportVisite, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportVisite ? '⏳ Enregistrement...' : '💾 Enregistrer')
+            )
+          )
         )
       )
     )
@@ -1525,6 +1612,8 @@ function SectionClientsDevis({ db, agrement }) {
       notesTechnicien: '',
       photos: [],
     })
+    setRapportIntervPhase('saisie')
+    setRapportIntervErreurIA(null)
   }
 
   function ouvrirRapportInterv(rapport, devis, client) {
@@ -1542,6 +1631,55 @@ function SectionClientsDevis({ db, agrement }) {
       notesTechnicien: rapport.notes_technicien || '',
       photos: rapport.photos || [],
     })
+    setRapportIntervPhase('genere')
+    setRapportIntervErreurIA(null)
+  }
+
+  async function genererRapportIntervIA() {
+    if (!rapportIntervModal) return
+    setGeneratingRapportInterv(true)
+    setRapportIntervErreurIA(null)
+    var { devis, client } = rapportIntervModal
+    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+    try {
+      var res = await fetch('/api/analyze-rapport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'intervention',
+          notes: rapportIntervForm.notesTechnicien,
+          photos: rapportIntervForm.photos || [],
+          context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation },
+        })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.success) {
+        setRapportIntervErreurIA(data.error || 'Erreur inconnue')
+      } else {
+        var r = data.rapport
+        setRapportIntervForm(function(prev) {
+          return Object.assign({}, prev, {
+            zonesTraitees: r.zonesTraitees || prev.zonesTraitees || '',
+            produitsUtilises: r.produitsUtilises || prev.produitsUtilises || '',
+            methodeApplication: r.methodeApplication || prev.methodeApplication || '',
+            dureeIntervention: r.dureeIntervention || prev.dureeIntervention || '',
+            resultats: r.resultats || prev.resultats || '',
+            observations: r.observations || prev.observations || '',
+            recommandations: r.recommandations || prev.recommandations || '',
+          })
+        })
+        setRapportIntervPhase('genere')
+      }
+    } catch(e) { setRapportIntervErreurIA(e.message) }
+    setGeneratingRapportInterv(false)
+  }
+
+  function imprimerRapportInterv() {
+    if (!rapportIntervModal) return
+    var { client, devis } = rapportIntervModal
+    var html = buildRapportIntervHtml(rapportIntervForm, client, devis)
+    var w = window.open('', '_blank', 'width=920,height=1100')
+    if (w) { w.document.write(html); w.document.close() }
   }
 
   async function sauvegarderRapportInterv() {
@@ -1573,10 +1711,7 @@ function SectionClientsDevis({ db, agrement }) {
     }
     await charger()
     setSavingRapportInterv(false)
-    var html = buildRapportIntervHtml(rapportIntervForm, client, devis)
-    var w = window.open('', '_blank', 'width=920,height=1100')
-    if (w) { w.document.write(html); w.document.close() }
-    setRapportIntervModal(null)
+    setMsg("✓ Rapport d'intervention enregistré")
   }
 
   function renderRapportIntervModal() {
@@ -1588,6 +1723,7 @@ function SectionClientsDevis({ db, agrement }) {
     var section = { marginBottom: '16px' }
     return React.createElement('div', { style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' } },
       React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', width: '100%', maxWidth: '680px', padding: '28px' } },
+
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, "📊 Rapport d'intervention"),
@@ -1607,66 +1743,99 @@ function SectionClientsDevis({ db, agrement }) {
           )
         ),
 
-        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
-          React.createElement('div', null,
-            React.createElement('label', { style: lbl2 }, "Méthode d'application"),
-            React.createElement('input', { value: rapportIntervForm.methodeApplication || '', onChange: function(e) { upd('methodeApplication', e.target.value) }, placeholder: 'Ex: Pulvérisation, appâtage...', style: inp2 })
+        rapportIntervPhase === 'saisie' ? React.createElement(React.Fragment, null,
+
+          React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fff7ed', border: '2px solid #fed7aa', borderRadius: '10px', padding: '16px' }) },
+            React.createElement('label', { style: Object.assign({}, lbl2, { color: '#7c2d12', fontSize: '12px' }) }, '📝 Notes brutes du technicien'),
+            React.createElement('p', { style: { fontSize: '12px', color: '#9a3412', marginBottom: '10px', lineHeight: '1.5' } }, 'Colle ici le retour du technicien. L\'IA va rédiger le rapport professionnel d\'intervention à partir de ces notes et des photos.'),
+            React.createElement('textarea', { value: rapportIntervForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 7, placeholder: 'Ex : "Zone cuisine traitée avec FICAM W, rats dans la réserve on a posé 4 boîtes Brodifacoum, quelques cafards dans les WC. Durée 2h. Client pas là au retour mais il faut revenir vérifier dans 15j..."', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fed7aa', fontSize: '13px', lineHeight: '1.6' }) })
           ),
-          React.createElement('div', null,
-            React.createElement('label', { style: lbl2 }, "Durée de l'intervention"),
-            React.createElement('input', { value: rapportIntervForm.dureeIntervention || '', onChange: function(e) { upd('dureeIntervention', e.target.value) }, placeholder: 'Ex: 2h30', style: inp2 })
-          )
-        ),
 
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Zones traitées'),
-          React.createElement('textarea', { value: rapportIntervForm.zonesTraitees || '', onChange: function(e) { upd('zonesTraitees', e.target.value) }, rows: 2, placeholder: 'Ex: cuisine, réserve, toilettes, couloirs...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Produits utilisés'),
-          React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, placeholder: 'Nom des produits, doses, homologations...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Résultats obtenus'),
-          React.createElement('textarea', { value: rapportIntervForm.resultats || '', onChange: function(e) { upd('resultats', e.target.value) }, rows: 2, placeholder: 'Ex: Élimination totale, réduction significative...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Observations'),
-          React.createElement('textarea', { value: rapportIntervForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, placeholder: 'Difficultés rencontrées, état général des lieux...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, 'Recommandations / suivi'),
-          React.createElement('textarea', { value: rapportIntervForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 2, placeholder: 'Ex: Revisiter dans 15 jours, colmater les fissures...', style: Object.assign({}, inp2, { resize: 'vertical' }) })
-        ),
-
-        React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '14px' }) },
-          React.createElement('label', { style: Object.assign({}, lbl2, { color: '#92400e' }) }, '📝 Notes du technicien (retour terrain)'),
-          React.createElement('textarea', { value: rapportIntervForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 5, placeholder: 'Décris ce que tu as observé, les difficultés, l\'état après traitement, les zones encore à risque, ce qu\'il faut surveiller...', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fcd34d' }) })
-        ),
-
-        React.createElement('div', { style: section },
-          React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
-          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
-            (rapportIntervForm.photos || []).map(function(url, i) {
-              return React.createElement('div', { key: i, style: { position: 'relative' } },
-                React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
-                React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportIntervForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
-              )
-            })
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, '📷 Photos du terrain'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' } },
+              (rapportIntervForm.photos || []).map(function(url, i) {
+                return React.createElement('div', { key: i, style: { position: 'relative' } },
+                  React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '90px', height: '90px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                  React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportIntervForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+                )
+              })
+            ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #fed7aa', backgroundColor: '#fff7ed', cursor: uploadingPhotoInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#c2410c', fontWeight: '600' } },
+              React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
+              uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
+            )
           ),
-          React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #fed7aa', backgroundColor: '#fff7ed', cursor: uploadingPhotoInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#c2410c', fontWeight: '600' } },
-            React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
-            uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
-          )
-        ),
 
-        React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
-          React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-          React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv || uploadingPhotoInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? 'Enregistrement...' : '🖨️ Enregistrer & Imprimer')
+          rapportIntervErreurIA ? React.createElement('div', { style: { backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 14px', fontSize: '12px', color: '#991b1b', marginBottom: '14px' } }, '❌ ' + rapportIntervErreurIA) : null,
+
+          React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #f0ede8' } },
+            React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+            React.createElement('button', {
+              onClick: genererRapportIntervIA,
+              disabled: generatingRapportInterv || uploadingPhotoInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length)) ? 0.5 : 1 }
+            }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
+          )
+
+        ) : React.createElement(React.Fragment, null,
+
+          React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '12px', color: '#166534', fontWeight: '600' } },
+            '✅ Rapport généré par l\'IA — vérifiez et modifiez si nécessaire avant d\'enregistrer'
+          ),
+
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, "Méthode d'application"),
+              React.createElement('input', { value: rapportIntervForm.methodeApplication || '', onChange: function(e) { upd('methodeApplication', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, "Durée de l'intervention"),
+              React.createElement('input', { value: rapportIntervForm.dureeIntervention || '', onChange: function(e) { upd('dureeIntervention', e.target.value) }, style: inp2 })
+            )
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Zones traitées'),
+            React.createElement('textarea', { value: rapportIntervForm.zonesTraitees || '', onChange: function(e) { upd('zonesTraitees', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Produits utilisés'),
+            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Résultats obtenus'),
+            React.createElement('textarea', { value: rapportIntervForm.resultats || '', onChange: function(e) { upd('resultats', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Observations'),
+            React.createElement('textarea', { value: rapportIntervForm.observations || '', onChange: function(e) { upd('observations', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, 'Recommandations / suivi'),
+            React.createElement('textarea', { value: rapportIntervForm.recommandations || '', onChange: function(e) { upd('recommandations', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          (rapportIntervForm.photos || []).length > 0 ? React.createElement('div', { style: section },
+            React.createElement('label', { style: lbl2 }, '📷 Photos (' + (rapportIntervForm.photos || []).length + ')'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
+              (rapportIntervForm.photos || []).map(function(url, i) {
+                return React.createElement('img', { key: i, src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } })
+              })
+            )
+          ) : null,
+
+          React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #f0ede8', flexWrap: 'wrap' } },
+            React.createElement('button', { onClick: function() { setRapportIntervPhase('saisie') }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, '◀ Modifier les notes'),
+            React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+              React.createElement('button', { onClick: imprimerRapportInterv, style: { background: '#fff7ed', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '6px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' } }, '🖨️ Aperçu & Imprimer'),
+              React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? '⏳ Enregistrement...' : '💾 Enregistrer')
+            )
+          )
         )
       )
     )
