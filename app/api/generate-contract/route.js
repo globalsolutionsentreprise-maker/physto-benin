@@ -8,10 +8,7 @@ import {
   convertMillimetersToTwip, VerticalAlign, TableLayoutType
 } from "docx"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+export const dynamic = "force-dynamic"
 
 const VERT = "0a2e1a"
 const OR = "d4a920"
@@ -63,6 +60,10 @@ function spacer(before = 120) {
 }
 
 export async function GET(req) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
   try {
     const url         = new URL(req.url)
     const devisId     = url.searchParams.get("devisId")
@@ -406,9 +407,9 @@ export async function GET(req) {
                   borders: NO_BORDERS,
                   margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
                   children: [
-                    para(new TextRun({ text: "Pour GSE", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
-                    para(new TextRun({ text: "Global Solutions Entreprise", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
-                    para(new TextRun({ text: "Cachet et signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
+                    para(new TextRun({ text: "Pour le Client", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
+                    para(new TextRun({ text: entreprise, size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
+                    para(new TextRun({ text: "Bon pour accord — Signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
                     para(new TextRun({ text: "_".repeat(36), size: 18 }), { align: AlignmentType.CENTER, before: 0, after: 60 }),
                     para(new TextRun({ text: "À Cotonou, le ___ / ___ / 2026", size: 17, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 80 }),
                   ]
@@ -418,9 +419,9 @@ export async function GET(req) {
                   borders: NO_BORDERS,
                   margins: { top: mm(4), bottom: mm(4), left: mm(5), right: mm(5) },
                   children: [
-                    para(new TextRun({ text: "Pour le Client", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
-                    para(new TextRun({ text: entreprise, size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
-                    para(new TextRun({ text: "Bon pour accord — Signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
+                    para(new TextRun({ text: "Pour GSE", bold: true, size: 20, color: VERT }), { align: AlignmentType.CENTER, before: 80, after: 60 }),
+                    para(new TextRun({ text: "Global Solutions Entreprise", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 20, after: 0 }),
+                    para(new TextRun({ text: "Cachet et signature", size: 17, italics: true, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 200 }),
                     para(new TextRun({ text: "_".repeat(36), size: 18 }), { align: AlignmentType.CENTER, before: 0, after: 60 }),
                     para(new TextRun({ text: "À Cotonou, le ___ / ___ / 2026", size: 17, color: GRIS }), { align: AlignmentType.CENTER, before: 0, after: 80 }),
                   ]
