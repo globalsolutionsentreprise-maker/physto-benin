@@ -75,6 +75,7 @@ export async function GET(req) {
     const duree            = parseInt(url.searchParams.get("duree") || "12")
     const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
     const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
+    const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -89,8 +90,8 @@ export async function GET(req) {
     const client     = devis.clients || {}
     const nomClient  = [client.prenom, client.nom].filter(Boolean).join(" ")
     const entreprise = client.entreprise || nomClient
-    const prixRef    = prixTrim * 4
-    const remisePct  = prixRef > 0 ? Math.round((1 - prixAnnuel / prixRef) * 100) : 0
+    const remisePct  = remisePassed > 0 ? remisePassed : (prixTrim * 4 > 0 ? Math.round((1 - prixAnnuel / (prixTrim * 4)) * 100) : 0)
+    const prixRef    = remisePct > 0 ? Math.round(prixAnnuel / (1 - remisePct / 100)) : prixTrim * 4
     const montant    = (devis.montant_total || devis.montant || 0).toLocaleString("fr-FR")
     const typeEtabLabel = typeEtablissement || "_______________"
     const prestationLabel = Array.isArray(devis.prestations) && devis.prestations.length > 0

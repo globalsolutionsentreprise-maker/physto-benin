@@ -2916,7 +2916,8 @@ function SectionClientsDevis({ db, agrement }) {
                 controles: a.controlesMensuels || 0,
                 duree: a.dureeContrat || 12,
                 paiement: a.paiementRecommande || "trimestriel_avance",
-                typeEtablissement: contratForm.typeEtablissement
+                typeEtablissement: contratForm.typeEtablissement,
+                remise: a.remiseContrat || 0
               })
               window.open("/api/generate-contract?" + params.toString(), "_blank")
             },
