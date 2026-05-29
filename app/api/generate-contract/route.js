@@ -44,9 +44,49 @@ export async function GET(req) {
       ? devis.prestations.join(" + ")
       : devis.prestation || "Désinsectisation + Dératisation"
 
-    const today = new Date()
-    const contratRef = (devis.numero || "").replace(/^DEV-/, "CONT-")
+    const today  = new Date()
+    const annee  = today.getFullYear()
     const dateJour = today.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, " / ")
+
+    // Calcul des initiales
+    const prenom = (client.prenom || "").trim().toUpperCase()
+    const nom    = (client.nom    || "").trim().toUpperCase()
+    const ent    = (client.entreprise || "").trim().toUpperCase()
+    let initiales
+    if (prenom && nom) {
+      initiales = prenom[0] + nom[0]
+    } else if (nom.length >= 2) {
+      initiales = nom[0] + nom[nom.length - 1]
+    } else if (ent.length >= 2) {
+      initiales = ent[0] + ent[ent.length - 1]
+    } else {
+      initiales = (nom[0] || ent[0] || "X").repeat(2)
+    }
+
+    // Référence : réutiliser si contrat déjà généré pour ce devis
+    let contratRef
+    const { data: contratExistant } = await supabase
+      .from("contrats")
+      .select("reference")
+      .eq("devis_id", devisId)
+      .maybeSingle()
+
+    if (contratExistant?.reference) {
+      contratRef = contratExistant.reference
+    } else {
+      const { count } = await supabase
+        .from("contrats")
+        .select("*", { count: "exact", head: true })
+        .eq("annee", annee)
+      const seq = String((count || 0) + 1).padStart(3, "0")
+      contratRef = `CONT-${annee}-${initiales}-GSE-${seq}`
+      await supabase.from("contrats").insert({
+        devis_id:  devisId,
+        client_id: devis.client_id,
+        reference: contratRef,
+        annee
+      })
+    }
 
     const remisePct  = remisePassed > 0 ? remisePassed : (prixTrim * 4 > 0 ? Math.round((1 - prixAnnuel / (prixTrim * 4)) * 100) : 0)
     const prixRef    = remisePct > 0 ? Math.round(prixAnnuel / (1 - remisePct / 100)) : prixTrim * 4
