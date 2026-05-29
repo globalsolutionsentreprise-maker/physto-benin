@@ -59,6 +59,18 @@ export async function GET(req) {
       return `<li>${esc(text)}</li>`
     }
 
+    function frequenceLabel() {
+      if (passages === 1) return "(annuelle)"
+      if (passages === 2) return "(semestrielle)"
+      if (passages === 3) return "(quadrimestrielle)"
+      if (passages === 4) return "(trimestrielle)"
+      if (passages === 6) return "(bimestrielle)"
+      if (passages === 12) return "(mensuelle)"
+      return `(× ${passages}/an)`
+    }
+
+    const periodicite = passages <= 1 ? "an" : passages === 2 ? "semestre" : passages >= 12 ? "mois" : "trimestre"
+
     function paiementArticle() {
       if (paiement === "mensuel") return `
         <ul class="clauses">
@@ -72,7 +84,14 @@ export async function GET(req) {
           ${li("Le règlement s'effectue en une seule fois, en avance, avant le démarrage du contrat.")}
           ${li("Le paiement intégral conditionne le lancement des prestations.")}
           ${li("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire.")}
-          ${li("En cas de résiliation anticipée par le Client, les trimestres non consommés ne sont pas remboursés.")}
+          ${li("En cas de résiliation anticipée par le Client, les périodes non consommées ne sont pas remboursées.")}
+        </ul>`
+      if (paiement === "semestriel") return `
+        <ul class="clauses">
+          ${li("Le paiement s'effectue par semestre, en avance, avant tout passage semestriel.")}
+          ${li("Aucune prestation ne sera réalisée en l'absence de règlement du semestre correspondant.")}
+          ${li("Modes acceptés : espèces, Mobile Money (MTN / Moov), virement bancaire.")}
+          ${li("Tout retard de paiement supérieur à 15 jours suspend l'exécution du contrat.")}
         </ul>`
       return `
         <ul class="clauses">
@@ -87,18 +106,20 @@ export async function GET(req) {
     function paiementLabel() {
       if (paiement === "mensuel") return `Paiement mensuel en avance`
       if (paiement === "annuel") return `Paiement annuel en avance (intégral)`
+      if (paiement === "semestriel") return `Paiement semestriel en avance`
       return `Paiement trimestriel en avance`
     }
 
     function paiementMontant() {
       if (paiement === "mensuel") return `${Math.round(prixAnnuel / 12).toLocaleString("fr-FR")} FCFA / mois`
       if (paiement === "annuel") return `${prixAnnuel.toLocaleString("fr-FR")} FCFA (règlement unique)`
+      if (paiement === "semestriel") return `${Math.round(prixAnnuel / 2).toLocaleString("fr-FR")} FCFA / semestre`
       return `${prixTrim.toLocaleString("fr-FR")} FCFA / trimestre`
     }
 
     const controleRow = controles > 0 ? `
       <tr>
-        <td>× ${controles} / an<br><small>(mensuelle inter-trim.)</small></td>
+        <td>× ${controles} / an<br><small>(mensuel, inter-passage)</small></td>
         <td>Contrôle des stations à rongeurs</td>
         <td>
           — Vérification état et consommation des appâts<br>
@@ -241,7 +262,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </thead>
       <tbody>
         <tr>
-          <td>× ${passages} / an<br><small>(trimestrielle)</small></td>
+          <td>× ${passages} / an<br><small>${frequenceLabel()}</small></td>
           <td>${esc(prestationLabel)}</td>
           <td>
             — Traitement insecticide rémanent : murs, plinthes, zones d'ombre<br>
@@ -300,9 +321,9 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
     ${artTitle("Article 7 — Résiliation")}
     <ul class="clauses">
-      ${li("Chaque partie peut résilier le contrat avec un préavis écrit d'un trimestre complet.")}
-      ${li("Toute résiliation en cours de trimestre ne donne droit à aucun remboursement.")}
-      ${li("En cas de résiliation anticipée du Client, les trimestres restants sont dus à GSE.")}
+      ${li(`Chaque partie peut résilier le contrat avec un préavis écrit d'un ${periodicite} complet.`)}
+      ${li(`Toute résiliation en cours de ${periodicite} ne donne droit à aucun remboursement.`)}
+      ${li(`En cas de résiliation anticipée du Client, les ${periodicite}s restants sont dus à GSE.`)}
       ${li("GSE peut résilier sans préavis en cas de non-paiement ou d'impossibilité d'accès répétée.")}
     </ul>
 
