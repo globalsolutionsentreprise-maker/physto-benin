@@ -69,7 +69,9 @@ export async function GET(req) {
       return `(× ${passages}/an)`
     }
 
-    const periodicite = passages <= 1 ? "an" : passages === 2 ? "semestre" : passages >= 12 ? "mois" : "trimestre"
+    const periodicite        = passages <= 1 ? "an"      : passages === 2 ? "semestre" : passages >= 12 ? "mois" : "trimestre"
+    const periodiciteEnCours = passages <= 1 ? "d'année" : `de ${passages === 2 ? "semestre" : passages >= 12 ? "mois" : "trimestre"}`
+    const periodiciteRestants = passages <= 1 ? "les années restantes" : `les ${periodicite}s restants`
 
     function paiementArticle() {
       if (paiement === "mensuel") return `
@@ -322,8 +324,8 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     ${artTitle("Article 7 — Résiliation")}
     <ul class="clauses">
       ${li(`Chaque partie peut résilier le contrat avec un préavis écrit d'un ${periodicite} complet.`)}
-      ${li(`Toute résiliation en cours de ${periodicite} ne donne droit à aucun remboursement.`)}
-      ${li(`En cas de résiliation anticipée du Client, les ${periodicite}s restants sont dus à GSE.`)}
+      ${li(`Toute résiliation en cours ${periodiciteEnCours} ne donne droit à aucun remboursement.`)}
+      ${li(`En cas de résiliation anticipée du Client, ${periodiciteRestants} sont dus à GSE.`)}
       ${li("GSE peut résilier sans préavis en cas de non-paiement ou d'impossibilité d'accès répétée.")}
     </ul>
 
