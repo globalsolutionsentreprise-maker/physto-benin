@@ -2824,16 +2824,21 @@ function SectionClientsDevis({ db, agrement }) {
           contratForm.prixNegocie && parseInt(contratForm.prixNegocie) > 0 && React.createElement("button", {
             onClick: function() {
               var prixAn = parseInt(contratForm.prixNegocie)
-              var prixTrimestre = Math.round(prixAn / 4)
+              var t = (contratForm.demandeClient || '').toLowerCase()
+              var freq = { passages: 4, paiement: 'trimestriel_avance', controles: 8 }
+              if (/\b1\s*passage|\bune?\s*fois|\bannuel|\b1\s*fois/.test(t)) freq = { passages: 1, paiement: 'annuel', controles: 0 }
+              else if (/\b2\s*passages?|\bsemestriel|\bdeux\s*fois|\bdeux\s*passages?|\b2\s*fois/.test(t)) freq = { passages: 2, paiement: 'semestriel', controles: 0 }
+              else if (/\b4\s*passages?|\btrimestriel|\bquatre\s*fois|\b4\s*fois/.test(t)) freq = { passages: 4, paiement: 'trimestriel_avance', controles: 8 }
+              else if (/\b12\s*passages?|\bmensuel|\bchaque\s*mois|\btous\s*les\s*mois/.test(t)) freq = { passages: 12, paiement: 'mensuel', controles: 0 }
               var params = new URLSearchParams({
                 devisId: d.id,
                 prixAnnuel: prixAn,
-                prixTrimestre: prixTrimestre,
+                prixTrimestre: Math.round(prixAn / freq.passages),
                 formule: "Formule Intégrale",
-                passages: 4,
-                controles: 8,
+                passages: freq.passages,
+                controles: freq.controles,
                 duree: 12,
-                paiement: "trimestriel_avance",
+                paiement: freq.paiement,
                 typeEtablissement: contratForm.typeEtablissement,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
