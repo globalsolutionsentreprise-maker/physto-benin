@@ -847,6 +847,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [savingFiche, setSavingFiche] = React.useState(false)
   const [certsList, setCertsList] = React.useState([])
   const [fichesList, setFichesList] = React.useState([])
+  const [contratsList, setContratsList] = React.useState([])
   const [rapportsVisite, setRapportsVisite] = React.useState([])
   const [rapportsInterv, setRapportsInterv] = React.useState([])
   const [rapportVisiteModal, setRapportVisiteModal] = React.useState(null)
@@ -899,7 +900,7 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
@@ -907,6 +908,7 @@ function SectionClientsDevis({ db, agrement }) {
       db.from("rapports_visite").select("*").order("created_at", { ascending: false }),
       db.from("rapports_intervention").select("*").order("created_at", { ascending: false }),
       db.from("interventions").select("*, personnel(id,nom,prenom)").order("date_intervention"),
+      db.from("contrats").select("*").order("created_at", { ascending: false }),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
@@ -915,6 +917,7 @@ function SectionClientsDevis({ db, agrement }) {
     setRapportsVisite(rVisite || [])
     setRapportsInterv(rInterv || [])
     setInterventionsList(intervs || [])
+    setContratsList(contrats || [])
     setLoading(false)
   }
 
@@ -2604,8 +2607,9 @@ function SectionClientsDevis({ db, agrement }) {
     function renderDossier(d) {
       var st = STATUTS[d.statut] || { label: d.statut, c: '#444', bg: '#f0f0f0' }
       var progress = progressDossier(d)
-      var certsDevis = certsList.filter(function(c) { return c.devis_id === d.id })
-      var fichesDevis = fichesList.filter(function(f) { return f.devis_id === d.id })
+      var certsDevis    = certsList.filter(function(c) { return c.devis_id === d.id })
+      var fichesDevis   = fichesList.filter(function(f) { return f.devis_id === d.id })
+      var contratDevis  = contratsList.find(function(ct) { return ct.devis_id === d.id })
       var rapVisiteDevis = rapportsVisite.filter(function(r) { return r.devis_id === d.id })
       var rapIntervDevis = rapportsInterv.filter(function(r) { return r.devis_id === d.id })
       var p = d.parcours || {}
@@ -2699,7 +2703,15 @@ function SectionClientsDevis({ db, agrement }) {
                   ),
                   React.createElement('button', { onClick: function() { toggleFicheEnvoye(fiche) }, style: { background: fiche.envoye ? '#0a2e1a' : '#fff', color: fiche.envoye ? '#fff' : '#999', border: '1px solid ' + (fiche.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, fiche.envoye ? '✓ Remis' : 'Marquer remis')
                 )
-              })
+              }),
+              contratDevis && React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #e9d5ff', backgroundColor: '#faf5ff', borderRadius: '8px', padding: '8px 12px' } },
+                React.createElement('span', null, '📄'),
+                React.createElement('div', { style: { flex: 1 } },
+                  React.createElement('div', { style: { fontWeight: '600', color: '#6b21a8', fontSize: '11px' } }, contratDevis.reference),
+                  React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, 'Contrat d\'entretien · ' + (contratDevis.date_generation ? new Date(contratDevis.date_generation).toLocaleDateString('fr-FR') : '—'))
+                ),
+                React.createElement('button', { onClick: function() { ouvrirContratExistant(contratDevis) }, style: { background: '#fff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🖨️ Réimprimer')
+              )
             )
           ),
 
@@ -3071,6 +3083,25 @@ function SectionClientsDevis({ db, agrement }) {
     )
   }
 
+  function ouvrirContratExistant(contrat) {
+    if (!contrat.params) return
+    var p = contrat.params
+    var params = new URLSearchParams({
+      devisId:           contrat.devis_id,
+      prixAnnuel:        p.prixAnnuel || 200000,
+      prixTrimestre:     p.prixTrim   || 50000,
+      formule:           p.formule    || "Formule Intégrale",
+      passages:          p.passages   || 4,
+      controles:         p.controles  || 0,
+      duree:             p.duree      || 12,
+      paiement:          p.paiement   || "trimestriel_avance",
+      typeEtablissement: p.typeEtablissement || "",
+      remise:            p.remisePassed || 0,
+      sansNoteDevis:     p.sansNoteDevis ? "1" : "0"
+    })
+    window.open("/api/generate-contract?" + params.toString(), "_blank")
+  }
+
   function renderVueDocuments() {
     var docs = []
     certsList.forEach(function(c) {
@@ -3081,21 +3112,32 @@ function SectionClientsDevis({ db, agrement }) {
       var client = clients.find(function(cl) { return cl.id === f.client_id })
       docs.push({ _type: "fiche", _id: f.id, _raw: f, numero: f.numero_unique, client: client, date: f.created_at, envoye: f.envoye, envoye_at: f.envoye_at })
     })
+    contratsList.forEach(function(ct) {
+      var client = clients.find(function(cl) { return cl.id === ct.client_id })
+      docs.push({ _type: "contrat", _id: ct.id, _raw: ct, numero: ct.reference, client: client, date: ct.created_at, envoye: false })
+    })
     docs.sort(function(a, b) { return new Date(b.date) - new Date(a.date) })
 
-    var docsFiltres = filtreDoc === "envoyes"
-      ? docs.filter(function(d) { return d.envoye })
-      : filtreDoc === "attente"
-        ? docs.filter(function(d) { return !d.envoye })
-        : docs
+    var docsFiltres = filtreDoc === "contrats"
+      ? docs.filter(function(d) { return d._type === "contrat" })
+      : filtreDoc === "envoyes"
+        ? docs.filter(function(d) { return d.envoye })
+        : filtreDoc === "attente"
+          ? docs.filter(function(d) { return !d.envoye && d._type !== "contrat" })
+          : docs
 
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
-        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Fiches & Certificats"),
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Documents"),
         React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺")
       ),
-      React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px" } },
-        [["tous", "Tous (" + docs.length + ")"], ["envoyes", "Envoyés (" + docs.filter(function(d) { return d.envoye }).length + ")"], ["attente", "En attente (" + docs.filter(function(d) { return !d.envoye }).length + ")"]].map(function(f) {
+      React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
+        [
+          ["tous",     "Tous (" + docs.length + ")"],
+          ["contrats", "Contrats (" + contratsList.length + ")"],
+          ["envoyes",  "Envoyés (" + docs.filter(function(d) { return d.envoye }).length + ")"],
+          ["attente",  "En attente (" + docs.filter(function(d) { return !d.envoye && d._type !== "contrat" }).length + ")"]
+        ].map(function(f) {
           return React.createElement("button", { key: f[0], onClick: function() { setFiltreDoc(f[0]) }, style: { padding: "5px 14px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: filtreDoc === f[0] ? "#0a2e1a" : "#f0ede6", color: filtreDoc === f[0] ? "#fff" : "#444", fontWeight: filtreDoc === f[0] ? "700" : "400" } }, f[1])
         })
       ),
@@ -3103,12 +3145,15 @@ function SectionClientsDevis({ db, agrement }) {
         ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun document.")
         : React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "8px" } },
             docsFiltres.map(function(doc) {
-              var isCert = doc._type === "cert"
-              var icon = isCert ? (doc.sousType === "desinsect" ? "🪲" : "🐭") : "📋"
-              var typeLabel = isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : "Certificat Dératisation") : "Fiche de passage"
-              var clientNom = doc.client ? ((doc.client.prenom || "") + " " + doc.client.nom + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
+              var isContrat = doc._type === "contrat"
+              var isCert    = doc._type === "cert"
+              var icon = isContrat ? "📄" : isCert ? (doc.sousType === "desinsect" ? "🪲" : "🐭") : "📋"
+              var typeLabel = isContrat ? "Contrat d'entretien" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : "Certificat Dératisation") : "Fiche de passage"
+              var clientNom = doc.client ? ([doc.client.prenom, doc.client.nom].filter(Boolean).join(" ") + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
               var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "—"
-              return React.createElement("div", { key: doc._type + doc._id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } },
+              var borderColor = isContrat ? "#e9d5ff" : "#e8e6e0"
+              var bgColor     = isContrat ? "#faf5ff" : "#fff"
+              return React.createElement("div", { key: doc._type + doc._id, style: { backgroundColor: bgColor, border: "1px solid " + borderColor, borderRadius: "8px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } },
                 React.createElement("span", { style: { fontSize: "22px", flexShrink: 0 } }, icon),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                   React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, doc.numero || "—"),
@@ -3116,32 +3161,33 @@ function SectionClientsDevis({ db, agrement }) {
                   React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, dateStr)
                 ),
                 React.createElement("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" } },
-                  React.createElement("button", {
-                    onClick: function() { isCert ? apercuCert(doc._rawCert) : apercuFiche(doc._raw, doc.client) },
-                    title: "Prévisualiser ce document",
-                    style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
-                  }, "👁 Aperçu"),
-                  React.createElement("button", {
+                  isContrat
+                    ? React.createElement("button", {
+                        onClick: function() { ouvrirContratExistant(doc._raw) },
+                        style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
+                      }, "🖨️ Réimprimer")
+                    : React.createElement("button", {
+                        onClick: function() { isCert ? apercuCert(doc._rawCert) : apercuFiche(doc._raw, doc.client) },
+                        style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
+                      }, "👁 Aperçu"),
+                  !isContrat && React.createElement("button", {
                     onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
                     title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
                     style: { background: doc.envoye ? "#0a2e1a" : "#fff", color: doc.envoye ? "#fff" : "#999", border: "1px solid " + (doc.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "20px", padding: "4px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" }
                   }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?")),
-                  isCert
+                  !isContrat && (isCert
                     ? React.createElement("button", {
                         onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); rouvrirCertModal(doc._rawCert, d, doc.client) },
-                        title: "Modifier ce certificat",
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
                       }, "✏️ Modifier")
                     : React.createElement("button", {
                         onClick: function() { reouvrirFicheModal(doc._raw, doc.client) },
-                        title: "Modifier cette fiche",
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                      }, "✏️ Modifier"),
+                      }, "✏️ Modifier")),
                   React.createElement("button", {
-                    onClick: function() { isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
-                    title: "Supprimer",
+                    onClick: function() { isContrat ? (window.confirm("Supprimer ce contrat ?") && db.from("contrats").delete().eq("id", doc._id).then(charger)) : isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
                     style: { background: "#fff", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
-                  }, "🗑 Supprimer")
+                  }, "🗑")
                 )
               )
             })

@@ -81,10 +81,15 @@ export async function GET(req) {
       const seq = String((count || 0) + 1).padStart(3, "0")
       contratRef = `CONT-${annee}-${initiales}-GSE-${seq}`
       await supabase.from("contrats").insert({
-        devis_id:  devisId,
-        client_id: devis.client_id,
-        reference: contratRef,
-        annee
+        devis_id:        devisId,
+        client_id:       devis.client_id,
+        reference:       contratRef,
+        annee,
+        date_generation: today.toISOString().slice(0, 10),
+        params: {
+          prixAnnuel, prixTrim, formule, passages, controles,
+          duree, paiement, typeEtablissement, remisePassed, sansNoteDevis
+        }
       })
     }
 
