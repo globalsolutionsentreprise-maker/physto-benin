@@ -42,6 +42,19 @@ export async function POST(req) {
     const nbDevisAntérieurs = (historique || []).filter(d => d.id !== devisId).length
     const nbFiches = (fiches || []).length
 
+    // Extraire la fréquence depuis la demande client (déterministe, pas laissé à l'IA)
+    function parseFrequenceClient(texte) {
+      const t = (texte || "").toLowerCase()
+      if (/\b1\s*passage|\bune?\s*fois|\bannuel|\b1\s*fois/.test(t)) return { freq: 1, paiement: "annuel" }
+      if (/\b2\s*passages?|\bsemestriel|\bdeux\s*fois|\bdeux\s*passages?|\b2\s*fois/.test(t)) return { freq: 2, paiement: "semestriel" }
+      if (/\b4\s*passages?|\btrimestriel|\bquatre\s*fois|\bquatre\s*passages?|\b4\s*fois/.test(t)) return { freq: 4, paiement: "trimestriel_avance" }
+      if (/\b6\s*passages?|\bbimestriel|\bsix\s*fois/.test(t)) return { freq: 6, paiement: "trimestriel_avance" }
+      if (/\b12\s*passages?|\bmensuel|\bchaque\s*mois|\btous\s*les\s*mois/.test(t)) return { freq: 12, paiement: "mensuel" }
+      return null
+    }
+
+    const freqClient = parseFrequenceClient(demandeClient)
+
     const prompt = `Tu es un conseiller commercial senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
 Tu dois analyser les informations ci-dessous et produire une recommandation structurée pour la rédaction d'un contrat d'entretien annuel.
@@ -65,18 +78,13 @@ CONTEXTE COMPLÉMENTAIRE
 - Type d'établissement : ${typeEtablissement || "Non précisé"}
 - Demande du client : ${demandeClient || "Non précisé"}
 - Notes : ${notes || "Aucune"}
-
+${freqClient ? `
+⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an — paiementRecommande = "${freqClient.paiement}"
+Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
+` : ""}
 RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
 
-RÈGLE 0 — PRIORITAIRE — Respecter la fréquence demandée par le client :
-Le champ "Demande du client" est la volonté du client. Tu DOIS la respecter dans "frequencePassages". Ne l'augmente jamais sans son accord. Si tu estimes la fréquence insuffisante au vu du risque, indique-le UNIQUEMENT dans "pointsAttention".
-- "2 passages" / "semestriel" / "deux fois par an" / "2 fois/an" → frequencePassages = 2, paiementRecommande = "semestriel"
-- "1 passage" / "annuel" / "une fois par an" → frequencePassages = 1, paiementRecommande = "annuel"
-- "4 passages" / "trimestriel" / "quatre fois par an" → frequencePassages = 4, paiementRecommande = "trimestriel_avance"
-- "mensuel" / "12 passages" / "chaque mois" / "tous les mois" → frequencePassages = 12, paiementRecommande = "mensuel"
-- Si la demande ne précise pas de fréquence : applique les règles suivantes selon le niveau de risque.
-
-1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / (frequencePassages || 4)). Dans ce cas, justificationPrix = "Prix négocié — utilisé tel quel sans modification."
+1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié — utilisé tel quel sans modification."
 2. Si le client a ${nbFiches} fiches de passage ou ${nbDevisAntérieurs} devis antérieurs, c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché.
 3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
 4. Sois agile : si le contexte donne assez d'informations, propose une recommandation directe et concrète. Évite les réponses génériques.
@@ -94,14 +102,14 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
   "prixTrimestre": 50000,
   "justificationPrix": "Explication du prix proposé par rapport au devis",
   "remiseContrat": 20,
-  "frequencePassages": 4,
-  "controlesMensuels": 8,
+  "frequencePassages": ${freqClient ? freqClient.freq : 4},
+  "controlesMensuels": ${freqClient && freqClient.freq <= 2 ? 0 : 8},
   "auditAnnuel": true,
   "clausesSpecifiques": ["clause 1", "clause 2", "clause 3"],
   "pointsAttention": ["point 1", "point 2"],
   "argumentCommercial": "L'argument principal à utiliser avec ce client en 2-3 phrases",
   "dureeContrat": 12,
-  "paiementRecommande": "trimestriel_avance | semestriel | mensuel | annuel"
+  "paiementRecommande": "${freqClient ? freqClient.paiement : "trimestriel_avance"}"
 }`
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`, {
@@ -129,6 +137,12 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       analyse = JSON.parse(cleaned)
     } catch {
       return NextResponse.json({ error: "Réponse Gemini non parseable", raw: rawText }, { status: 500 })
+    }
+
+    // Garantie finale : si la fréquence client a été parsée, on l'impose quelle que soit la réponse de l'IA
+    if (freqClient) {
+      analyse.frequencePassages = freqClient.freq
+      analyse.paiementRecommande = freqClient.paiement
     }
 
     return NextResponse.json({
