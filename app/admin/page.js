@@ -2712,7 +2712,7 @@ function SectionClientsDevis({ db, agrement }) {
             React.createElement('button', { onClick: function() { ouvrirFicheModal(cl, d) }, style: { background: '#f5f3ff', border: '1px solid #ddd6fe', color: '#5b21b6', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📋 Fiche de passage'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
-            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '' }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
+            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
             React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
           )
         )
@@ -2811,6 +2811,12 @@ function SectionClientsDevis({ db, agrement }) {
             React.createElement("input", { value: contratForm.prixNegocie, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { prixNegocie: e.target.value })) }, placeholder: "Ex : 200000 — laisser vide pour laisser l'IA proposer", type: "number", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } }),
             React.createElement("div", { style: { fontSize: "11px", color: "#065f46", marginTop: "5px" } }, "Si renseigné, un bouton de génération directe apparaîtra — sans passer par l'IA.")
           ),
+          React.createElement("div", { style: { marginBottom: "16px" } },
+            React.createElement("label", { style: { display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#555", cursor: "pointer" } },
+              React.createElement("input", { type: "checkbox", checked: !!contratForm.inclureNoteDevis, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { inclureNoteDevis: e.target.checked })) }, style: { width: "15px", height: "15px", cursor: "pointer" } }),
+              "Inclure la note sur le devis initial (montant facturé séparément)"
+            )
+          ),
           contratErreur && React.createElement("div", { style: { backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px", padding: "12px 14px", marginBottom: "12px", fontSize: "13px", color: "#92400e", display: "flex", justifyContent: "space-between", alignItems: "center" } },
             contratErreur,
             React.createElement("span", { onClick: function() { setContratErreur(null) }, style: { cursor: "pointer", opacity: 0.5, marginLeft: "8px" } }, "×")
@@ -2828,7 +2834,8 @@ function SectionClientsDevis({ db, agrement }) {
                 controles: 8,
                 duree: 12,
                 paiement: "trimestriel_avance",
-                typeEtablissement: contratForm.typeEtablissement
+                typeEtablissement: contratForm.typeEtablissement,
+                sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
               window.open("/api/generate-contract?" + params.toString(), "_blank")
             },
@@ -2917,7 +2924,8 @@ function SectionClientsDevis({ db, agrement }) {
                 duree: a.dureeContrat || 12,
                 paiement: a.paiementRecommande || "trimestriel_avance",
                 typeEtablissement: contratForm.typeEtablissement,
-                remise: a.remiseContrat || 0
+                remise: a.remiseContrat || 0,
+                sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
               window.open("/api/generate-contract?" + params.toString(), "_blank")
             },

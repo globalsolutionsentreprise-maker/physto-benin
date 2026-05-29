@@ -20,6 +20,7 @@ export async function GET(req) {
     const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
     const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
     const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
+    const sansNoteDevis    = url.searchParams.get("sansNoteDevis") === "1"
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -249,9 +250,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
     ${artTitle("Article 2 — Objet du contrat")}
     <p class="art-text">Le présent contrat a pour objet la réalisation par GSE d'un programme annuel d'entretien sanitaire conformément aux recommandations du rapport de visite technique et dans le respect de la loi 91-004 du 11 Février 1991 portant réglementation Phytosanitaire en République du Bénin.</p>
-    <div class="note-box">
-      <strong>Note :</strong> L'intervention initiale (devis ${esc(devis.numero)}) est facturée séparément à ${esc(montant)} FCFA et doit être réglée avant démarrage du présent contrat.
-    </div>
+    ${!sansNoteDevis ? `<div class="note-box"><strong>Note :</strong> L'intervention initiale (devis ${esc(devis.numero)}) est facturée séparément à ${esc(montant)} FCFA et doit être réglée avant démarrage du présent contrat.</div>` : ""}
 
     ${artTitle(`Article 3 — Prestations incluses (${esc(formule)})`)}
     <table class="services">
@@ -309,7 +308,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         </tr>
       </tbody>
     </table>
-    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">* L'intervention initiale ${esc(devis.numero)} (${esc(montant)} FCFA) est facturée séparément.</p>
+    ${!sansNoteDevis ? `<p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">* L'intervention initiale ${esc(devis.numero)} (${esc(montant)} FCFA) est facturée séparément.</p>` : ""}
 
     ${artTitle("Article 5 — Modalités de paiement")}
     ${paiementArticle()}
