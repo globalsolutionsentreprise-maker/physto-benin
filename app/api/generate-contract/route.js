@@ -44,6 +44,10 @@ export async function GET(req) {
       ? devis.prestations.join(" + ")
       : devis.prestation || "Désinsectisation + Dératisation"
 
+    const today = new Date()
+    const contratRef = (devis.numero || "").replace(/^DEV-/, "CONT-")
+    const dateJour = today.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, " / ")
+
     const remisePct  = remisePassed > 0 ? remisePassed : (prixTrim * 4 > 0 ? Math.round((1 - prixAnnuel / (prixTrim * 4)) * 100) : 0)
     const prixRef    = remisePct > 0 ? Math.round(prixAnnuel / (1 - remisePct / 100)) : prixTrim * 4
     const remiseMontant = prixRef - prixAnnuel
@@ -212,7 +216,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     <img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
     <div class="hdr-right">
       <div class="title">Contrat d'entretien annuel</div>
-      <div class="ref">Réf. CONT-GSE-2026-____</div>
+      <div class="ref">Réf. ${esc(contratRef)}</div>
     </div>
   </div>
   <div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>
@@ -220,8 +224,8 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
   <div class="body">
 
     <div class="ref-grid">
-      <div class="ref-cell"><div class="ref-label">Réf. contrat</div><div class="ref-value">CONT-GSE-2026-____</div></div>
-      <div class="ref-cell"><div class="ref-label">Date de signature</div><div class="ref-value">___ / ___ / 2026</div></div>
+      <div class="ref-cell"><div class="ref-label">Réf. contrat</div><div class="ref-value">${esc(contratRef)}</div></div>
+      <div class="ref-cell"><div class="ref-label">Date de signature</div><div class="ref-value">${esc(dateJour)}</div></div>
       <div class="ref-cell"><div class="ref-label">Durée</div><div class="ref-value">${duree} mois</div></div>
     </div>
 
@@ -355,14 +359,14 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         <div class="sig-title">Signature du client</div>
         <div class="sig-sub">${esc(entreprise)} — Bon pour accord</div>
         <div class="sig-line"></div>
-        <div class="sig-date">À Cotonou, le ___ / ___ / 2026</div>
+        <div class="sig-date">À Cotonou, le ${esc(dateJour)}</div>
       </div>
       <div class="sig-box">
         <div class="sig-title">Pour Global Solutions Entreprise</div>
         <div class="sig-sub">Le Directeur Général</div>
         <div class="sig-line"></div>
         <div class="sig-name">Kabir Mohamed YAKOUBOU</div>
-        <div class="sig-date">À Cotonou, le ___ / ___ / 2026</div>
+        <div class="sig-date">À Cotonou, le ${esc(dateJour)}</div>
       </div>
     </div>
 
