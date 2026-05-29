@@ -2863,7 +2863,7 @@ function SectionClientsDevis({ db, agrement }) {
             ),
             React.createElement("div", { style: { backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "14px", textAlign: "center" } },
               React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#065f46" } }, Number(a.prixTrimestre).toLocaleString("fr-FR")),
-              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / trimestre")
+              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / " + (a.paiementRecommande === "semestriel" ? "semestre" : a.paiementRecommande === "mensuel" ? "mois" : a.paiementRecommande === "annuel" ? "an" : "trimestre"))
             ),
             React.createElement("div", { style: { backgroundColor: "#fef9ee", borderRadius: "8px", padding: "14px", textAlign: "center" } },
               React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#92400e" } }, a.remiseContrat + "%"),

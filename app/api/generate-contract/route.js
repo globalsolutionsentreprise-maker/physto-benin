@@ -332,7 +332,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     <ul class="clauses">
       ${li("Réaliser les interventions aux dates convenues par des techniciens certifiés.")}
       ${li("Utiliser exclusivement des produits homologués par l'État du Bénin.")}
-      ${li("Remettre une fiche de passage + attestation après chaque intervention trimestrielle.")}
+      ${li(`Remettre une fiche de passage + attestation après chaque intervention ${frequenceLabel().replace(/[()]/g, "").trim()}.`)}
       ${li("Transmettre le rapport d'audit annuel au plus tard 15 jours après la dernière intervention.")}
     </ul>
     <div class="sub-title">8.2 &nbsp; Obligations du Client</div>
