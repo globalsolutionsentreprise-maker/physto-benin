@@ -408,6 +408,7 @@ export default function Admin() {
     { id: "clients", label: "Clients & Devis" },
     { id: "crm", label: "📊 CRM Pipeline" },
     { id: "rh", label: "👥 Équipe & Planning" },
+    { id: "stock", label: "📦 Stock produits" },
   ]
 
   if (!connecte) {
@@ -818,6 +819,88 @@ export default function Admin() {
             </div>
           )}
 
+          {onglet === "stock" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>📦 Stock produits</h2>
+                  <p style={{ fontSize: "13px", color: "#888" }}>Suivi des niveaux de stock. Les achats continuent de s'enregistrer dans les dépenses comme avant.</p>
+                </div>
+                <button onClick={ouvrirAjoutStock} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>+ Nouveau produit</button>
+              </div>
+
+              {stockProduits.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px", backgroundColor: "#f8f7f4", borderRadius: "12px", color: "#888" }}>
+                  <div style={{ fontSize: "32px", marginBottom: "12px" }}>📦</div>
+                  <div style={{ fontSize: "15px", fontWeight: "600", marginBottom: "6px" }}>Aucun produit en stock</div>
+                  <div style={{ fontSize: "13px" }}>Cliquez sur "+ Nouveau produit" pour commencer</div>
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+                  {stockProduits.map(function(p) {
+                    var qte = parseFloat(p.quantite) || 0
+                    var seuil = parseFloat(p.seuil_alerte) || 0
+                    var statut = qte === 0 ? "rupture" : (seuil > 0 && qte <= seuil ? "bas" : "ok")
+                    var couleurStatut = statut === "ok" ? "#1a6b38" : statut === "bas" ? "#b45309" : "#991b1b"
+                    var bgStatut = statut === "ok" ? "#f0fdf4" : statut === "bas" ? "#fffbeb" : "#fef2f2"
+                    var borderStatut = statut === "ok" ? "#bbf7d0" : statut === "bas" ? "#fde68a" : "#fecaca"
+                    var labelStatut = statut === "ok" ? "✅ Stock OK" : statut === "bas" ? "⚠️ Stock bas" : "🚨 Rupture"
+
+                    // Placements chez clients : regrouper les sorties par client
+                    var placementsMap = {}
+                    stockMouvements.filter(function(mv) {
+                      return mv.produit_id === p.id && mv.type === 'sortie' && mv.client_id && mv.clients
+                    }).forEach(function(mv) {
+                      var cid = mv.client_id
+                      var nom = [mv.clients.prenom, mv.clients.nom].filter(Boolean).join(' ') || mv.clients.entreprise || 'Client'
+                      if (!placementsMap[cid]) placementsMap[cid] = { nom: nom, qte: 0 }
+                      placementsMap[cid].qte += parseFloat(mv.quantite) || 0
+                    })
+                    var placements = Object.values(placementsMap).filter(function(pl) { return pl.qte > 0 }).sort(function(a,b){ return b.qte - a.qte })
+
+                    return (
+                      <div key={p.id} style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                          <div style={{ fontSize: "15px", fontWeight: "700", color: "#0a2e1a" }}>{p.nom}</div>
+                          <span style={{ fontSize: "10px", fontWeight: "700", backgroundColor: bgStatut, color: couleurStatut, border: "1px solid " + borderStatut, borderRadius: "20px", padding: "3px 9px" }}>{labelStatut}</span>
+                        </div>
+
+                        <div style={{ textAlign: "center", padding: "16px 0", borderTop: "1px solid #f0ede6", borderBottom: "1px solid #f0ede6", marginBottom: "16px" }}>
+                          <div style={{ fontSize: "36px", fontWeight: "800", color: couleurStatut, lineHeight: 1 }}>{qte % 1 === 0 ? qte : qte.toFixed(2)}</div>
+                          <div style={{ fontSize: "12px", color: "#888", marginTop: "4px" }}>{p.unite}</div>
+                          {seuil > 0 && <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>seuil : {seuil} {p.unite}</div>}
+                        </div>
+
+                        {placements.length > 0 && (
+                          <div style={{ backgroundColor: "#f8f7f4", borderRadius: "8px", padding: "10px 12px", marginBottom: "12px" }}>
+                            <div style={{ fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", marginBottom: "8px" }}>📍 Chez les clients</div>
+                            {placements.map(function(pl, idx) {
+                              return (
+                                <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px", color: "#444", marginBottom: idx < placements.length - 1 ? "5px" : 0 }}>
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>{pl.nom}</span>
+                                  <span style={{ fontWeight: "700", color: "#0a2e1a", whiteSpace: "nowrap" }}>{pl.qte % 1 === 0 ? pl.qte : pl.qte.toFixed(2)} {p.unite}</span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+
+                        <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
+                          <button onClick={function() { ouvrirMouvementStock(p, "entree") }} style={{ flex: 1, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "8px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>➕ Entrée</button>
+                          <button onClick={function() { ouvrirMouvementStock(p, "sortie") }} style={{ flex: 1, backgroundColor: "#fef2f2", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "8px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>➖ Sortie</button>
+                        </div>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button onClick={function() { ouvrirEditStock(p) }} style={{ flex: 1, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>✏️ Modifier</button>
+                          <button onClick={function() { supprimerStockProduit(p.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     </main>
@@ -866,6 +949,11 @@ function SectionClientsDevis({ db, agrement }) {
   const [rapportIntervErreurIA, setRapportIntervErreurIA] = React.useState(null)
   const [interventionsList, setInterventionsList] = React.useState([])
   const [personnelAdmin, setPersonnelAdmin] = React.useState([])
+  const [stockProduits, setStockProduits] = React.useState([])
+  const [stockMouvements, setStockMouvements] = React.useState([])
+  const [stockModal, setStockModal] = React.useState(null)
+  const [stockForm, setStockForm] = React.useState({})
+  const [stockSaving, setStockSaving] = React.useState(false)
   const [meteoData, setMeteoData] = React.useState(null)
   const [loadingMeteo, setLoadingMeteo] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
@@ -901,7 +989,7 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }, { data: stock }, { data: mouvements }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
@@ -911,6 +999,8 @@ function SectionClientsDevis({ db, agrement }) {
       db.from("interventions").select("*, personnel(id,nom,prenom)").order("date_intervention"),
       db.from("contrats").select("*").order("created_at", { ascending: false }),
       db.from("personnel").select("id, nom, prenom, poste").order("nom"),
+      db.from("stock_produits").select("*").order("nom"),
+      db.from("stock_mouvements").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
@@ -921,6 +1011,8 @@ function SectionClientsDevis({ db, agrement }) {
     setInterventionsList(intervs || [])
     setContratsList(contrats || [])
     setPersonnelAdmin((perso || []).map(function(p) { return { id: p.id, nom: [p.prenom, p.nom].filter(Boolean).join(' '), poste: p.poste || '' } }))
+    setStockProduits(stock || [])
+    setStockMouvements(mouvements || [])
     setLoading(false)
   }
 
@@ -1332,6 +1424,135 @@ function SectionClientsDevis({ db, agrement }) {
     await db.from('fiches_passage').delete().eq('id', id)
     await charger()
   }
+
+  // ── STOCK ────────────────────────────────────────────────────────────────
+  function ouvrirAjoutStock() {
+    setStockForm({ nom: '', unite: 'litre', seuil_alerte: '' })
+    setStockModal({ mode: 'form', produit: null })
+  }
+  function ouvrirEditStock(p) {
+    setStockForm({ nom: p.nom, unite: p.unite, seuil_alerte: p.seuil_alerte })
+    setStockModal({ mode: 'form', produit: p })
+  }
+  function ouvrirMouvementStock(p, sens) {
+    setStockForm({ qte: '', clientId: '', note: '' })
+    setStockModal({ mode: sens, produit: p })
+  }
+  async function sauvegarderFormStock() {
+    if (!stockForm.nom || !stockForm.nom.trim()) return
+    setStockSaving(true)
+    var data = { nom: stockForm.nom.trim(), unite: stockForm.unite || 'unité', seuil_alerte: parseFloat(stockForm.seuil_alerte) || 0, updated_at: new Date().toISOString() }
+    if (stockModal.produit) {
+      await db.from('stock_produits').update(data).eq('id', stockModal.produit.id)
+    } else {
+      await db.from('stock_produits').insert(Object.assign({}, data, { quantite: 0 }))
+    }
+    setStockModal(null)
+    await charger()
+    setStockSaving(false)
+  }
+  async function appliquerMouvementStock() {
+    var delta = parseFloat(stockForm.qte) || 0
+    if (!delta) return
+    setStockSaving(true)
+    var p = stockModal.produit
+    var isSortie = stockModal.mode === 'sortie'
+    var newQte = parseFloat(p.quantite) + (isSortie ? -delta : delta)
+    if (newQte < 0) newQte = 0
+    await Promise.all([
+      db.from('stock_mouvements').insert({
+        produit_id: p.id,
+        type: stockModal.mode,
+        quantite: delta,
+        client_id: (isSortie && stockForm.clientId) ? stockForm.clientId : null,
+        note: stockForm.note || null,
+      }),
+      db.from('stock_produits').update({ quantite: newQte, updated_at: new Date().toISOString() }).eq('id', p.id),
+    ])
+    setStockModal(null)
+    await charger()
+    setStockSaving(false)
+  }
+  async function supprimerStockProduit(id) {
+    if (!window.confirm('Supprimer ce produit du stock ?')) return
+    await db.from('stock_produits').delete().eq('id', id)
+    await charger()
+  }
+
+  function renderStockModal() {
+    if (!stockModal) return null
+    var m = stockModal
+    var inp = { width: '100%', padding: '9px 12px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
+    var isForm = m.mode === 'form'
+    var isEntree = m.mode === 'entree'
+    var titre = isForm ? (m.produit ? '✏️ Modifier ' + m.produit.nom : '📦 Nouveau produit') : (isEntree ? '➕ Entrée stock — ' + m.produit.nom : '➖ Sortie stock — ' + m.produit.nom)
+    var couleur = isEntree ? '#1a6b38' : '#991b1b'
+    return React.createElement('div', {
+      style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' },
+      onClick: function(e) { if (e.target === e.currentTarget) setStockModal(null) }
+    },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '440px' } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+          React.createElement('div', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a' } }, titre),
+          React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' } }, '×')
+        ),
+        isForm
+          ? React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Nom du produit'),
+                React.createElement('input', { value: stockForm.nom || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { nom: e.target.value }) }) }, placeholder: 'Ex: IMPERA 300 CS', style: inp })
+              ),
+              React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' } },
+                React.createElement('div', null,
+                  React.createElement('label', { style: lbl }, 'Unité'),
+                  React.createElement('input', { value: stockForm.unite || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { unite: e.target.value }) }) }, placeholder: 'litre, kg, boîte…', style: inp })
+                ),
+                React.createElement('div', null,
+                  React.createElement('label', { style: lbl }, "Seuil d'alerte"),
+                  React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.seuil_alerte || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { seuil_alerte: e.target.value }) }) }, placeholder: '2', style: inp })
+                )
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' } },
+                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+                React.createElement('button', { onClick: sauvegarderFormStock, disabled: stockSaving, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : '💾 Enregistrer')
+              )
+            )
+          : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+              React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#555' } },
+                'Stock actuel : ', React.createElement('strong', null, parseFloat(m.produit.quantite) + ' ' + m.produit.unite)
+              ),
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Quantité ' + (isEntree ? 'achetée / reçue' : 'déposée / utilisée') + ' (' + m.produit.unite + ')'),
+                React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.qte || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { qte: e.target.value }) }) }, placeholder: '0', autoFocus: true, style: Object.assign({}, inp, { fontSize: '20px', textAlign: 'center', fontWeight: '700', color: couleur }) })
+              ),
+              !isEntree && React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Client concerné (optionnel)'),
+                React.createElement('select', {
+                  value: stockForm.clientId || '',
+                  onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { clientId: e.target.value }) }) },
+                  style: inp
+                },
+                  React.createElement('option', { value: '' }, '— Sortie générale (pas chez un client) —'),
+                  clients.sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'') }).map(function(c) {
+                    var nom = [c.prenom, c.nom].filter(Boolean).join(' ') || c.entreprise || 'Client'
+                    return React.createElement('option', { key: c.id, value: c.id }, nom + (c.entreprise ? ' — ' + c.entreprise : ''))
+                  })
+                )
+              ),
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Note (optionnel)'),
+                React.createElement('input', { value: stockForm.note || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { note: e.target.value }) }) }, placeholder: isEntree ? 'Ex: Livraison du 01/06' : 'Ex: Posé lors de l\'intervention', style: inp })
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end' } },
+                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+                React.createElement('button', { onClick: appliquerMouvementStock, disabled: stockSaving, style: { backgroundColor: couleur, color: '#fff', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : (isEntree ? '➕ Ajouter au stock' : '➖ Retirer du stock'))
+              )
+            )
+      )
+    )
+  }
+  // ── FIN STOCK ─────────────────────────────────────────────────────────────
 
   function ouvrirNouveauRapportVisite(devis, client) {
     setRapportVisiteModal({ devis, client, editingId: null })
@@ -3262,6 +3483,7 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   return React.createElement("div", null,
+    stockModal ? renderStockModal() : null,
     certModal ? renderCertModal() : null,
     ficheModal ? renderFicheModal() : null,
     rapportVisiteModal ? renderRapportVisiteModal() : null,
