@@ -28,6 +28,7 @@ export default function Admin() {
   const [formAcces, setFormAcces] = useState({ email: "", nom: "", role: "lecture", password: "" })
   const [accesSaving, setAccesSaving] = useState(false)
   const [accesSaveMsg, setAccesSaveMsg] = useState("")
+  const [dossierDevisId, setDossierDevisId] = useState(null)
   const [onglet, setOnglet] = useState("chiffres")
   const [chargement, setChargement] = useState(false)
   const [message, setMessage] = useState("")
@@ -229,6 +230,17 @@ export default function Admin() {
       chargerAdminData()
     }
   }, [onglet])
+
+  React.useEffect(function() {
+    function handleMessage(e) {
+      if (e.data && e.data.type === "open_dossier" && e.data.devisId) {
+        setDossierDevisId(e.data.devisId)
+        setOnglet("clients")
+      }
+    }
+    window.addEventListener("message", handleMessage)
+    return function() { window.removeEventListener("message", handleMessage) }
+  }, [])
 
   async function sauvegarderParametre(cle) {
     const valeur = parametres[cle]
@@ -511,7 +523,6 @@ export default function Admin() {
     { id: "services", label: "Nos Services" },
     { id: "realisations", label: "Realisations" },
     { id: "equipe", label: "Notre Equipe" },
-    { id: "clients", label: "Clients & Devis" },
     { id: "crm", label: "📊 CRM Pipeline" },
     { id: "rh", label: "👥 Équipe & Planning" },
     { id: "stock", label: "📦 Stock produits" },
@@ -1056,7 +1067,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Créez des devis, gérez les clients et suivez les paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} initialDevisId={dossierDevisId} />
             </div>
           )}
 
@@ -1317,7 +1328,7 @@ export default function Admin() {
 // ══════════════════════════════════════════════════
 // COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
-function SectionClientsDevis({ db, agrement }) {
+function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState("devis")
   const [devisList, setDevisList] = React.useState([])
@@ -1388,6 +1399,19 @@ function SectionClientsDevis({ db, agrement }) {
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
   React.useEffect(function() { charger() }, [])
+
+  const _lastDossier = React.useRef(null)
+  React.useEffect(function() {
+    if (!initialDevisId || initialDevisId === _lastDossier.current || devisList.length === 0) return
+    var d = devisList.find(function(x) { return x.id === initialDevisId })
+    if (!d) return
+    var cl = clients.find(function(x) { return x.id === d.client_id })
+    if (cl) {
+      _lastDossier.current = initialDevisId
+      setClientDetail(cl)
+      setVue("devis-client")
+    }
+  }, [initialDevisId, devisList])
 
   async function charger() {
     setLoading(true)

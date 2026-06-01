@@ -337,10 +337,13 @@ function renderKanban(){
         ${c.typeContrat==="contrat"?`<div style="display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary-dk);border-radius:5px;padding:2px 7px;font-size:11px;margin-top:3px;font-weight:500;"><i class="ti ti-repeat" style="font-size:11px;"></i> Contrat · ${freqLabel(c.frequenceIntervention)}</div>`:""}
         ${ni?`<div style="font-size:11px;margin-top:3px;color:${niSoon?"var(--warn)":"var(--text-2)"};"><i class="ti ti-calendar-event" style="font-size:11px;"></i> ${niSoon?"⚠ ":""}Intervention : ${fd(ni)}</div>`:""}
         ${c.commentaire?`<div class="cc-note" title="${c.commentaire}">${c.commentaire}</div>`:""}
-        <select class="cc-mv" onchange="moveCard('${c.id}',this.value);this.value=''" onclick="event.stopPropagation()">
-          <option value="">Déplacer vers...</option>
-          ${ST.filter(x=>x.key!==s.key).map(x=>`<option value="${x.key}">${x.label}</option>`).join("")}
-        </select>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+          <select class="cc-mv" onchange="moveCard('${c.id}',this.value);this.value=''" onclick="event.stopPropagation()" style="flex:1;">
+            <option value="">Déplacer vers...</option>
+            ${ST.filter(x=>x.key!==s.key).map(x=>`<option value="${x.key}">${x.label}</option>`).join("")}
+          </select>
+          <button class="btn-s" onclick="openDossier('${c.id}',event)" title="Ouvrir le dossier documents" style="padding:4px 8px;font-size:11px;flex-shrink:0;"><i class="ti ti-folder" style="font-size:11px;" aria-hidden="true"></i> Dossier</button>
+        </div>
       </div>`;
     });
     h+="</div>";
@@ -386,7 +389,7 @@ function applyF(){
       <td><span class="badge" style="${c.attestation==='envoye'?'background:#E1F5EE;color:#04342C;':'background:#F1EFE8;color:#5F5E5A;'}">${c.attestation==='envoye'?'Envoyé':'Non'}</span></td>
       <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
       <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
-      <td><button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openEdit('${c.id}')"><i class="ti ti-edit" aria-hidden="true"></i></button></td>
+      <td style="white-space:nowrap;"><button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openEdit('${c.id}')"><i class="ti ti-edit" aria-hidden="true"></i></button> <button class="btn-s" style="padding:5px 10px;font-size:12px;" onclick="openDossier('${c.id}',event)" title="Dossier documents"><i class="ti ti-folder" aria-hidden="true"></i></button></td>
     </tr>`;
   }).join("");
 }
@@ -954,6 +957,7 @@ function moveCard(id,ns){
 
 function openAdd(){editId=null;showModal(formH(null));}
 function openEdit(id){editId=id;const c=clients.find(c=>c.id===id);currentDepItems=[...(c?.depensesItems||[])];showModal(formH(c));renderDepItems();}
+function openDossier(id,e){if(e)e.stopPropagation();window.parent.postMessage({type:"open_dossier",devisId:id},"*");}
 
 function onDepCatChange(sel){
   const lib=document.getElementById("ndlib");
