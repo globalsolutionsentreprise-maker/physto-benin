@@ -195,6 +195,27 @@ export default function ContactForm() {
           </div>
         </div>
 
+        {/* MOMO PAY */}
+        <div style={{ backgroundColor: "#fff8e1", padding: "28px 36px", borderTop: "3px solid #ffcc00" }}>
+          <div style={{ fontSize: "11px", color: "#b45309", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>PAIEMENT MOBILE MONEY</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
+            <div style={{ width: "48px", height: "48px", backgroundColor: "#ffcc00", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "10px", fontSize: "22px", flexShrink: 0, boxShadow: "0 2px 8px rgba(255,204,0,0.4)" }}>📱</div>
+            <div>
+              <div style={{ fontSize: "14px", fontWeight: "700", color: "#111" }}>MTN MoMo Pay</div>
+              <div style={{ fontSize: "12px", color: "#888" }}>Paiement instantané depuis votre téléphone</div>
+            </div>
+          </div>
+          <div style={{ backgroundColor: "#ffffff", border: "1.5px solid #ffe082", borderRadius: "8px", padding: "14px 16px" }}>
+            <div style={{ fontSize: "10px", color: "#b45309", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "8px" }}>CODE USSD — COMPOSEZ :</div>
+            <div style={{ fontSize: "19px", fontWeight: "700", color: "#111", letterSpacing: "0.04em", fontFamily: "monospace" }}>
+              *880*41*893118*<span style={{ color: "#b45309" }}>montant</span>#
+            </div>
+          </div>
+          <div style={{ fontSize: "11px", color: "#888", marginTop: "10px", lineHeight: "1.6" }}>
+            Remplacez <strong style={{ color: "#b45309" }}>montant</strong> par la somme à régler en FCFA, puis appelez le code depuis votre téléphone MTN.
+          </div>
+        </div>
+
         {/* WHATSAPP */}
         <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", padding: "24px 36px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", textDecoration: "none" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="white">

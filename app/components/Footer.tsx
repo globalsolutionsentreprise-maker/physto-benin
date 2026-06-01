@@ -38,6 +38,13 @@ export default function Footer() {
           <a href={"tel:"+coord.telephone.replace(/\s/g,"")} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.telephone}</a>
           <a href={"https://wa.me/"+coord.whatsapp} target="_blank" rel="noopener noreferrer" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>WhatsApp</a>
           <a href={"mailto:"+coord.email} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.email}</a>
+          <div style={{ marginTop: "14px", paddingTop: "14px", borderTop: "1px solid #eee" }}>
+            <div style={{ fontSize: "10px", color: "#aaa", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "7px" }}>PAIEMENT ACCEPTÉ</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ backgroundColor: "#ffcc00", borderRadius: "5px", padding: "3px 7px", fontSize: "11px", fontWeight: "700", color: "#111", letterSpacing: "0.02em" }}>MTN MoMo</span>
+              <span style={{ fontSize: "11px", color: "#888", fontFamily: "monospace" }}>*880*41*893118*<span style={{ color: "#b45309", fontWeight: "700" }}>montant</span>#</span>
+            </div>
+          </div>
         </div>
       </div>
       <div style={{ borderTop: "1px solid #eee", paddingTop: "20px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
