@@ -1991,7 +1991,7 @@ function SectionClientsDevis({ db, agrement }) {
         setRapportIntervForm(function(prev) {
           return Object.assign({}, prev, {
             zonesTraitees: r.zonesTraitees || prev.zonesTraitees || '',
-            produitsUtilises: r.produitsUtilises || prev.produitsUtilises || '',
+            produitsUtilises: prev.produitsUtilises || r.produitsUtilises || '',
             methodeApplication: r.methodeApplication || prev.methodeApplication || '',
             dureeIntervention: r.dureeIntervention || prev.dureeIntervention || '',
             resultats: r.resultats || prev.resultats || '',
@@ -2120,6 +2120,12 @@ function SectionClientsDevis({ db, agrement }) {
               React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
               uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
             )
+          ),
+
+          React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '14px' }) },
+            React.createElement('label', { style: Object.assign({}, lbl2, { color: '#166534' }) }, '🧪 Produits utilisés'),
+            React.createElement('p', { style: { fontSize: '11px', color: '#166534', marginBottom: '8px' } }, 'Pré-rempli avec vos produits homologués — modifiable si besoin.'),
+            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 5, style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff' }) })
           ),
 
           rapportIntervErreurIA ? React.createElement('div', { style: { backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 14px', fontSize: '12px', color: '#991b1b', marginBottom: '14px' } }, '❌ ' + rapportIntervErreurIA) : null,
