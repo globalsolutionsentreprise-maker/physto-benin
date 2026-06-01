@@ -34,6 +34,12 @@ export default function Admin() {
   const [nouveauService, setNouveauService] = useState({ ico: "", titre: "", accroche: "", description: "", tag: "" })
   const [realisations, setRealisations] = useState([])
   const [uploadEnCours, setUploadEnCours] = useState(false)
+  const [stockProduits, setStockProduits] = React.useState([])
+  const [stockMouvements, setStockMouvements] = React.useState([])
+  const [stockModal, setStockModal] = React.useState(null)
+  const [stockForm, setStockForm] = React.useState({})
+  const [stockSaving, setStockSaving] = React.useState(false)
+  const [clientsStock, setClientsStock] = React.useState([])
 
   const [nouveauTemoignage, setNouveauTemoignage] = useState({ init: "", nom: "", role: "", texte: "" })
   const [nouvelArticle, setNouvelArticle] = useState({ categorie: "", titre: "", resume: "", contenu: "", date: "", lecture: "5 min", vedette: false })
@@ -87,6 +93,15 @@ export default function Admin() {
       if (sv.data) setServices(sv.data)
       const r = await supabase.from("realisations").select("*").order("id")
       if (r.data) setRealisations(r.data)
+
+      const [stRes, mvRes, clRes] = await Promise.all([
+        supabase.from('stock_produits').select('*').order('nom'),
+        supabase.from('stock_mouvements').select('*, clients(id, nom, prenom, entreprise)').order('created_at', { ascending: false }),
+        supabase.from('clients').select('id, nom, prenom, entreprise').order('nom'),
+      ])
+      if (stRes.data) setStockProduits(stRes.data)
+      if (mvRes.data) setStockMouvements(mvRes.data)
+      if (clRes.data) setClientsStock(clRes.data)
 
     } catch(err) {
       setErreurDB("Erreur de connexion: " + err.message)
@@ -411,6 +426,142 @@ export default function Admin() {
     { id: "stock", label: "📦 Stock produits" },
   ]
 
+  // ── STOCK (Admin scope) ───────────────────────────────────────────────────
+  async function rechargerStock() {
+    const [stRes, mvRes, clRes] = await Promise.all([
+      supabase.from('stock_produits').select('*').order('nom'),
+      supabase.from('stock_mouvements').select('*, clients(id, nom, prenom, entreprise)').order('created_at', { ascending: false }),
+      supabase.from('clients').select('id, nom, prenom, entreprise').order('nom'),
+    ])
+    if (stRes.data) setStockProduits(stRes.data)
+    if (mvRes.data) setStockMouvements(mvRes.data)
+    if (clRes.data) setClientsStock(clRes.data)
+  }
+  function ouvrirAjoutStock() {
+    setStockForm({ nom: '', unite: 'litre', seuil_alerte: '' })
+    setStockModal({ mode: 'form', produit: null })
+  }
+  function ouvrirEditStock(p) {
+    setStockForm({ nom: p.nom, unite: p.unite, seuil_alerte: p.seuil_alerte })
+    setStockModal({ mode: 'form', produit: p })
+  }
+  function ouvrirMouvementStock(p, sens) {
+    setStockForm({ qte: '', clientId: '', note: '' })
+    setStockModal({ mode: sens, produit: p })
+  }
+  async function sauvegarderFormStock() {
+    if (!stockForm.nom || !stockForm.nom.trim()) return
+    setStockSaving(true)
+    var data = { nom: stockForm.nom.trim(), unite: stockForm.unite || 'unité', seuil_alerte: parseFloat(stockForm.seuil_alerte) || 0, updated_at: new Date().toISOString() }
+    if (stockModal.produit) {
+      await supabase.from('stock_produits').update(data).eq('id', stockModal.produit.id)
+    } else {
+      await supabase.from('stock_produits').insert(Object.assign({}, data, { quantite: 0 }))
+    }
+    setStockModal(null)
+    await rechargerStock()
+    setStockSaving(false)
+  }
+  async function appliquerMouvementStock() {
+    var delta = parseFloat(stockForm.qte) || 0
+    if (!delta) return
+    setStockSaving(true)
+    var p = stockModal.produit
+    var isSortie = stockModal.mode === 'sortie'
+    var newQte = parseFloat(p.quantite) + (isSortie ? -delta : delta)
+    if (newQte < 0) newQte = 0
+    await Promise.all([
+      supabase.from('stock_mouvements').insert({
+        produit_id: p.id, type: stockModal.mode, quantite: delta,
+        client_id: (isSortie && stockForm.clientId) ? stockForm.clientId : null,
+        note: stockForm.note || null,
+      }),
+      supabase.from('stock_produits').update({ quantite: newQte, updated_at: new Date().toISOString() }).eq('id', p.id),
+    ])
+    setStockModal(null)
+    await rechargerStock()
+    setStockSaving(false)
+  }
+  async function supprimerStockProduit(id) {
+    if (!window.confirm('Supprimer ce produit du stock ?')) return
+    await supabase.from('stock_produits').delete().eq('id', id)
+    await rechargerStock()
+  }
+  function renderStockModal() {
+    if (!stockModal) return null
+    var m = stockModal
+    var inp = { width: '100%', padding: '9px 12px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
+    var lbl = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
+    var isForm = m.mode === 'form'
+    var isEntree = m.mode === 'entree'
+    var titre = isForm ? (m.produit ? '✏️ Modifier ' + m.produit.nom : '📦 Nouveau produit') : (isEntree ? '➕ Entrée stock — ' + m.produit.nom : '➖ Sortie stock — ' + m.produit.nom)
+    var couleur = isEntree ? '#1a6b38' : '#991b1b'
+    return React.createElement('div', {
+      style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' },
+      onClick: function(e) { if (e.target === e.currentTarget) setStockModal(null) }
+    },
+      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '440px' } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+          React.createElement('div', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a' } }, titre),
+          React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' } }, '×')
+        ),
+        isForm
+          ? React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Nom du produit'),
+                React.createElement('input', { value: stockForm.nom || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { nom: e.target.value }) }) }, placeholder: 'Ex: IMPERA 300 CS', style: inp })
+              ),
+              React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' } },
+                React.createElement('div', null,
+                  React.createElement('label', { style: lbl }, 'Unité'),
+                  React.createElement('input', { value: stockForm.unite || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { unite: e.target.value }) }) }, placeholder: 'litre, kg, boîte…', style: inp })
+                ),
+                React.createElement('div', null,
+                  React.createElement('label', { style: lbl }, "Seuil d'alerte"),
+                  React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.seuil_alerte || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { seuil_alerte: e.target.value }) }) }, placeholder: '2', style: inp })
+                )
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' } },
+                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+                React.createElement('button', { onClick: sauvegarderFormStock, disabled: stockSaving, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : '💾 Enregistrer')
+              )
+            )
+          : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+              React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#555' } },
+                'Stock actuel : ', React.createElement('strong', null, parseFloat(m.produit.quantite) + ' ' + m.produit.unite)
+              ),
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Quantité ' + (isEntree ? 'achetée / reçue' : 'déposée / utilisée') + ' (' + m.produit.unite + ')'),
+                React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.qte || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { qte: e.target.value }) }) }, placeholder: '0', autoFocus: true, style: Object.assign({}, inp, { fontSize: '20px', textAlign: 'center', fontWeight: '700', color: couleur }) })
+              ),
+              !isEntree && React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Client concerné (optionnel)'),
+                React.createElement('select', {
+                  value: stockForm.clientId || '',
+                  onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { clientId: e.target.value }) }) },
+                  style: inp
+                },
+                  React.createElement('option', { value: '' }, '— Sortie générale (pas chez un client) —'),
+                  clientsStock.slice().sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'') }).map(function(c) {
+                    var nom = [c.prenom, c.nom].filter(Boolean).join(' ') || c.entreprise || 'Client'
+                    return React.createElement('option', { key: c.id, value: c.id }, nom + (c.entreprise ? ' — ' + c.entreprise : ''))
+                  })
+                )
+              ),
+              React.createElement('div', null,
+                React.createElement('label', { style: lbl }, 'Note (optionnel)'),
+                React.createElement('input', { value: stockForm.note || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { note: e.target.value }) }) }, placeholder: isEntree ? 'Ex: Livraison du 01/06' : 'Ex: Posé lors de l\'intervention', style: inp })
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end' } },
+                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
+                React.createElement('button', { onClick: appliquerMouvementStock, disabled: stockSaving, style: { backgroundColor: couleur, color: '#fff', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : (isEntree ? '➕ Ajouter au stock' : '➖ Retirer du stock'))
+              )
+            )
+      )
+    )
+  }
+  // ── FIN STOCK (Admin scope) ───────────────────────────────────────────────
+
   if (!connecte) {
     return (
       <main style={{ minHeight: "100vh", backgroundColor: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -437,6 +588,7 @@ export default function Admin() {
 
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
+      {stockModal ? renderStockModal() : null}
 
       <div style={{ backgroundColor: "#0a2e1a", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -949,11 +1101,6 @@ function SectionClientsDevis({ db, agrement }) {
   const [rapportIntervErreurIA, setRapportIntervErreurIA] = React.useState(null)
   const [interventionsList, setInterventionsList] = React.useState([])
   const [personnelAdmin, setPersonnelAdmin] = React.useState([])
-  const [stockProduits, setStockProduits] = React.useState([])
-  const [stockMouvements, setStockMouvements] = React.useState([])
-  const [stockModal, setStockModal] = React.useState(null)
-  const [stockForm, setStockForm] = React.useState({})
-  const [stockSaving, setStockSaving] = React.useState(false)
   const [meteoData, setMeteoData] = React.useState(null)
   const [loadingMeteo, setLoadingMeteo] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
@@ -989,7 +1136,7 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }, { data: stock }, { data: mouvements }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
@@ -999,8 +1146,6 @@ function SectionClientsDevis({ db, agrement }) {
       db.from("interventions").select("*, personnel(id,nom,prenom)").order("date_intervention"),
       db.from("contrats").select("*").order("created_at", { ascending: false }),
       db.from("personnel").select("id, nom, prenom, poste").order("nom"),
-      db.from("stock_produits").select("*").order("nom"),
-      db.from("stock_mouvements").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
@@ -1011,8 +1156,6 @@ function SectionClientsDevis({ db, agrement }) {
     setInterventionsList(intervs || [])
     setContratsList(contrats || [])
     setPersonnelAdmin((perso || []).map(function(p) { return { id: p.id, nom: [p.prenom, p.nom].filter(Boolean).join(' '), poste: p.poste || '' } }))
-    setStockProduits(stock || [])
-    setStockMouvements(mouvements || [])
     setLoading(false)
   }
 
@@ -1424,135 +1567,6 @@ function SectionClientsDevis({ db, agrement }) {
     await db.from('fiches_passage').delete().eq('id', id)
     await charger()
   }
-
-  // ── STOCK ────────────────────────────────────────────────────────────────
-  function ouvrirAjoutStock() {
-    setStockForm({ nom: '', unite: 'litre', seuil_alerte: '' })
-    setStockModal({ mode: 'form', produit: null })
-  }
-  function ouvrirEditStock(p) {
-    setStockForm({ nom: p.nom, unite: p.unite, seuil_alerte: p.seuil_alerte })
-    setStockModal({ mode: 'form', produit: p })
-  }
-  function ouvrirMouvementStock(p, sens) {
-    setStockForm({ qte: '', clientId: '', note: '' })
-    setStockModal({ mode: sens, produit: p })
-  }
-  async function sauvegarderFormStock() {
-    if (!stockForm.nom || !stockForm.nom.trim()) return
-    setStockSaving(true)
-    var data = { nom: stockForm.nom.trim(), unite: stockForm.unite || 'unité', seuil_alerte: parseFloat(stockForm.seuil_alerte) || 0, updated_at: new Date().toISOString() }
-    if (stockModal.produit) {
-      await db.from('stock_produits').update(data).eq('id', stockModal.produit.id)
-    } else {
-      await db.from('stock_produits').insert(Object.assign({}, data, { quantite: 0 }))
-    }
-    setStockModal(null)
-    await charger()
-    setStockSaving(false)
-  }
-  async function appliquerMouvementStock() {
-    var delta = parseFloat(stockForm.qte) || 0
-    if (!delta) return
-    setStockSaving(true)
-    var p = stockModal.produit
-    var isSortie = stockModal.mode === 'sortie'
-    var newQte = parseFloat(p.quantite) + (isSortie ? -delta : delta)
-    if (newQte < 0) newQte = 0
-    await Promise.all([
-      db.from('stock_mouvements').insert({
-        produit_id: p.id,
-        type: stockModal.mode,
-        quantite: delta,
-        client_id: (isSortie && stockForm.clientId) ? stockForm.clientId : null,
-        note: stockForm.note || null,
-      }),
-      db.from('stock_produits').update({ quantite: newQte, updated_at: new Date().toISOString() }).eq('id', p.id),
-    ])
-    setStockModal(null)
-    await charger()
-    setStockSaving(false)
-  }
-  async function supprimerStockProduit(id) {
-    if (!window.confirm('Supprimer ce produit du stock ?')) return
-    await db.from('stock_produits').delete().eq('id', id)
-    await charger()
-  }
-
-  function renderStockModal() {
-    if (!stockModal) return null
-    var m = stockModal
-    var inp = { width: '100%', padding: '9px 12px', border: '1.5px solid #e0ddd6', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', boxSizing: 'border-box' }
-    var lbl = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
-    var isForm = m.mode === 'form'
-    var isEntree = m.mode === 'entree'
-    var titre = isForm ? (m.produit ? '✏️ Modifier ' + m.produit.nom : '📦 Nouveau produit') : (isEntree ? '➕ Entrée stock — ' + m.produit.nom : '➖ Sortie stock — ' + m.produit.nom)
-    var couleur = isEntree ? '#1a6b38' : '#991b1b'
-    return React.createElement('div', {
-      style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' },
-      onClick: function(e) { if (e.target === e.currentTarget) setStockModal(null) }
-    },
-      React.createElement('div', { style: { backgroundColor: '#fff', borderRadius: '12px', padding: '28px', width: '100%', maxWidth: '440px' } },
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
-          React.createElement('div', { style: { fontSize: '16px', fontWeight: '700', color: '#0a2e1a' } }, titre),
-          React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' } }, '×')
-        ),
-        isForm
-          ? React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
-              React.createElement('div', null,
-                React.createElement('label', { style: lbl }, 'Nom du produit'),
-                React.createElement('input', { value: stockForm.nom || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { nom: e.target.value }) }) }, placeholder: 'Ex: IMPERA 300 CS', style: inp })
-              ),
-              React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' } },
-                React.createElement('div', null,
-                  React.createElement('label', { style: lbl }, 'Unité'),
-                  React.createElement('input', { value: stockForm.unite || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { unite: e.target.value }) }) }, placeholder: 'litre, kg, boîte…', style: inp })
-                ),
-                React.createElement('div', null,
-                  React.createElement('label', { style: lbl }, "Seuil d'alerte"),
-                  React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.seuil_alerte || '', onChange: function(e) { setStockForm(function(p) { return Object.assign({}, p, { seuil_alerte: e.target.value }) }) }, placeholder: '2', style: inp })
-                )
-              ),
-              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' } },
-                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-                React.createElement('button', { onClick: sauvegarderFormStock, disabled: stockSaving, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : '💾 Enregistrer')
-              )
-            )
-          : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
-              React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#555' } },
-                'Stock actuel : ', React.createElement('strong', null, parseFloat(m.produit.quantite) + ' ' + m.produit.unite)
-              ),
-              React.createElement('div', null,
-                React.createElement('label', { style: lbl }, 'Quantité ' + (isEntree ? 'achetée / reçue' : 'déposée / utilisée') + ' (' + m.produit.unite + ')'),
-                React.createElement('input', { type: 'number', min: '0', step: '0.1', value: stockForm.qte || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { qte: e.target.value }) }) }, placeholder: '0', autoFocus: true, style: Object.assign({}, inp, { fontSize: '20px', textAlign: 'center', fontWeight: '700', color: couleur }) })
-              ),
-              !isEntree && React.createElement('div', null,
-                React.createElement('label', { style: lbl }, 'Client concerné (optionnel)'),
-                React.createElement('select', {
-                  value: stockForm.clientId || '',
-                  onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { clientId: e.target.value }) }) },
-                  style: inp
-                },
-                  React.createElement('option', { value: '' }, '— Sortie générale (pas chez un client) —'),
-                  clients.sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'') }).map(function(c) {
-                    var nom = [c.prenom, c.nom].filter(Boolean).join(' ') || c.entreprise || 'Client'
-                    return React.createElement('option', { key: c.id, value: c.id }, nom + (c.entreprise ? ' — ' + c.entreprise : ''))
-                  })
-                )
-              ),
-              React.createElement('div', null,
-                React.createElement('label', { style: lbl }, 'Note (optionnel)'),
-                React.createElement('input', { value: stockForm.note || '', onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { note: e.target.value }) }) }, placeholder: isEntree ? 'Ex: Livraison du 01/06' : 'Ex: Posé lors de l\'intervention', style: inp })
-              ),
-              React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'flex-end' } },
-                React.createElement('button', { onClick: function() { setStockModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '10px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
-                React.createElement('button', { onClick: appliquerMouvementStock, disabled: stockSaving, style: { backgroundColor: couleur, color: '#fff', border: 'none', borderRadius: '6px', padding: '10px 22px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, stockSaving ? '...' : (isEntree ? '➕ Ajouter au stock' : '➖ Retirer du stock'))
-              )
-            )
-      )
-    )
-  }
-  // ── FIN STOCK ─────────────────────────────────────────────────────────────
 
   function ouvrirNouveauRapportVisite(devis, client) {
     setRapportVisiteModal({ devis, client, editingId: null })
@@ -3483,7 +3497,6 @@ function SectionClientsDevis({ db, agrement }) {
   }
 
   return React.createElement("div", null,
-    stockModal ? renderStockModal() : null,
     certModal ? renderCertModal() : null,
     ficheModal ? renderFicheModal() : null,
     rapportVisiteModal ? renderRapportVisiteModal() : null,
