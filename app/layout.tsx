@@ -7,20 +7,20 @@ export const metadata: Metadata = {
   title: "Phyto Bénin - Désinsectisation Cotonou | 24h/24",
   description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens certifiés, produits homologués. Intervention rapide 24h/24 à Cotonou.",
   keywords: "désinsectisation Cotonou, dératisation Bénin, désinfection hôtel, cafards Cotonou, termites Bénin, hygiène sanitaire Bénin, punaises de lit Cotonou",
-  metadataBase: new URL("https://www.phyto-benin.bj"),
+  metadataBase: new URL("https://www.phyto-benin.com"),
   alternates: {
-    canonical: "https://www.phyto-benin.bj",
+    canonical: "https://www.phyto-benin.com",
   },
   openGraph: {
     title: "Phyto Bénin — Hygiène Sanitaire Professionnelle au Bénin",
     description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens agréés par l'État. Intervention rapide 24h/24 à Cotonou.",
-    url: "https://www.phyto-benin.bj",
+    url: "https://www.phyto-benin.com",
     siteName: "Phyto Bénin by GSE",
     locale: "fr_FR",
     type: "website",
     images: [
       {
-        url: "https://www.phyto-benin.bj/images/hero-bg.jpg",
+        url: "https://www.phyto-benin.com/images/hero-bg.jpg",
         width: 1200,
         height: 630,
         alt: "Phyto Bénin — Désinsectisation et dératisation professionnelle au Bénin",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Phyto Bénin — Hygiène Sanitaire 24h/24",
     description: "Désinsectisation, dératisation, désinfection au Bénin. Intervention rapide à Cotonou.",
-    images: ["https://www.phyto-benin.bj/images/hero-bg.jpg"],
+    images: ["https://www.phyto-benin.com/images/hero-bg.jpg"],
   },
 }
 
@@ -49,9 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "@type": "LocalBusiness",
           "name": "Phyto Bénin by GSE — Global Solutions Entreprise",
           "description": "Spécialiste en hygiène sanitaire et phytosanitaire au Bénin. Désinsectisation, dératisation, désinfection, anti-termites. Agréé par l'État béninois.",
-          "url": "https://www.phyto-benin.bj",
-          "logo": "https://www.phyto-benin.bj/logo-gse.jpeg",
-          "image": "https://www.phyto-benin.bj/images/hero-bg.jpg",
+          "url": "https://www.phyto-benin.com",
+          "logo": "https://www.phyto-benin.com/logo-gse.jpeg",
+          "image": "https://www.phyto-benin.com/images/hero-bg.jpg",
           "telephone": "+22901530 47950",
           "email": "contact@phyto-benin.com",
           "address": {
