@@ -865,6 +865,7 @@ function SectionClientsDevis({ db, agrement }) {
   const [rapportIntervPhase, setRapportIntervPhase] = React.useState('saisie')
   const [rapportIntervErreurIA, setRapportIntervErreurIA] = React.useState(null)
   const [interventionsList, setInterventionsList] = React.useState([])
+  const [personnelAdmin, setPersonnelAdmin] = React.useState([])
   const [meteoData, setMeteoData] = React.useState(null)
   const [loadingMeteo, setLoadingMeteo] = React.useState(false)
   const [filtreDoc, setFiltreDoc] = React.useState("tous")
@@ -900,7 +901,7 @@ function SectionClientsDevis({ db, agrement }) {
 
   async function charger() {
     setLoading(true)
-    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }] = await Promise.all([
+    const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
       db.from("clients").select("*").order("nom"),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
@@ -909,6 +910,7 @@ function SectionClientsDevis({ db, agrement }) {
       db.from("rapports_intervention").select("*").order("created_at", { ascending: false }),
       db.from("interventions").select("*, personnel(id,nom,prenom)").order("date_intervention"),
       db.from("contrats").select("*").order("created_at", { ascending: false }),
+      db.from("personnel").select("id, nom, prenom, poste").order("nom"),
     ])
     setDevisList(devis || [])
     setClients(cls || [])
@@ -918,6 +920,7 @@ function SectionClientsDevis({ db, agrement }) {
     setRapportsInterv(rInterv || [])
     setInterventionsList(intervs || [])
     setContratsList(contrats || [])
+    setPersonnelAdmin((perso || []).map(function(p) { return { id: p.id, nom: [p.prenom, p.nom].filter(Boolean).join(' '), poste: p.poste || '' } }))
     setLoading(false)
   }
 
@@ -1502,6 +1505,21 @@ function SectionClientsDevis({ db, agrement }) {
           ),
           React.createElement('div', null,
             React.createElement('label', { style: lbl2 }, 'Technicien'),
+            personnelAdmin.length > 0 && React.createElement('select', {
+              value: '',
+              onChange: function(e) {
+                if (!e.target.value) return
+                var current = (rapportVisiteForm.technicien || '').trim()
+                upd('technicien', current ? current + ', ' + e.target.value : e.target.value)
+                e.target.value = ''
+              },
+              style: Object.assign({}, inp2, { marginBottom: '6px', color: '#555' })
+            },
+              React.createElement('option', { value: '' }, '+ Ajouter depuis l\'équipe'),
+              personnelAdmin.map(function(m) {
+                return React.createElement('option', { key: m.id, value: m.nom }, m.nom + (m.poste ? ' · ' + m.poste : ''))
+              })
+            ),
             React.createElement('input', { value: rapportVisiteForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Nom du technicien', style: inp2 })
           )
         ),
@@ -1815,6 +1833,21 @@ function SectionClientsDevis({ db, agrement }) {
           ),
           React.createElement('div', null,
             React.createElement('label', { style: lbl2 }, 'Technicien(s)'),
+            personnelAdmin.length > 0 && React.createElement('select', {
+              value: '',
+              onChange: function(e) {
+                if (!e.target.value) return
+                var current = (rapportIntervForm.technicien || '').trim()
+                upd('technicien', current ? current + ', ' + e.target.value : e.target.value)
+                e.target.value = ''
+              },
+              style: Object.assign({}, inp2, { marginBottom: '6px', color: '#555' })
+            },
+              React.createElement('option', { value: '' }, '+ Ajouter depuis l\'équipe'),
+              personnelAdmin.map(function(m) {
+                return React.createElement('option', { key: m.id, value: m.nom }, m.nom + (m.poste ? ' · ' + m.poste : ''))
+              })
+            ),
             React.createElement('input', { value: rapportIntervForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Noms des techniciens', style: inp2 })
           )
         ),
