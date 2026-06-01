@@ -54,6 +54,9 @@ export default function Admin() {
   const [nouveauTemoignage, setNouveauTemoignage] = useState({ init: "", nom: "", role: "", texte: "" })
   const [nouvelArticle, setNouvelArticle] = useState({ categorie: "", titre: "", resume: "", contenu: "", date: "", lecture: "5 min", vedette: false })
   const [nouveauMembre, setNouveauMembre] = useState({ init: "", nom: "", role: "", description: "", ordre: 0 })
+  const [sujetArticle, setSujetArticle] = useState("")
+  const [generatingArticle, setGeneratingArticle] = useState(false)
+  const [articleGenMsg, setArticleGenMsg] = useState("")
 
   useEffect(function() {
     supabase.auth.getSession().then(async function({ data: { session } }) {
@@ -936,15 +939,53 @@ export default function Admin() {
                 )
               })}
               <div style={cardOr}>
-                <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#111", marginBottom: "14px" }}>Ajouter un article</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
-                  <div><label style={lbl}>CATEGORIE</label><input type="text" value={nouvelArticle.categorie} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { categorie: e.target.value }) }) }} placeholder="Ex: DESINSECTISATION" style={inp} /></div>
-                  <div><label style={lbl}>DATE</label><input type="text" value={nouvelArticle.date} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { date: e.target.value }) }) }} placeholder="Ex: 15 Avril 2025" style={inp} /></div>
+                <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#111", marginBottom: "6px" }}>Générer un article avec l'IA</h3>
+                <p style={{ fontSize: "12px", color: "#888", marginBottom: "14px" }}>Donnez un sujet, l'IA rédige un article SEO complet optimisé pour Cotonou / Bénin.</p>
+                <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                  <input
+                    type="text"
+                    value={sujetArticle}
+                    onChange={function(e) { setSujetArticle(e.target.value) }}
+                    onKeyDown={async function(e) { if (e.key === "Enter") e.preventDefault() }}
+                    placeholder="Ex: comment prévenir les punaises de lit dans un hôtel"
+                    style={Object.assign({}, inp, { flex: 1 })}
+                  />
+                  <button
+                    onClick={async function() {
+                      if (!sujetArticle.trim()) return
+                      setGeneratingArticle(true)
+                      setArticleGenMsg("")
+                      try {
+                        const res = await fetch("/api/generate-article", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sujet: sujetArticle }) })
+                        const d = await res.json()
+                        if (!d.ok) { setArticleGenMsg("❌ " + (d.error || "Erreur IA")); return }
+                        const a = d.article
+                        const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
+                        setNouvelArticle({ categorie: a.categorie || "", titre: a.titre || "", resume: a.resume || "", contenu: a.contenu || "", date: today, lecture: a.lecture || "5 min", vedette: false })
+                        setSujetArticle("")
+                        setArticleGenMsg("✅ Article généré — vérifiez et cliquez Publier")
+                      } catch(e) { setArticleGenMsg("❌ Erreur réseau") }
+                      setGeneratingArticle(false)
+                    }}
+                    disabled={generatingArticle || !sujetArticle.trim()}
+                    style={{ backgroundColor: "#1a6b38", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", fontWeight: "700", cursor: generatingArticle ? "wait" : "pointer", fontFamily: "inherit", whiteSpace: "nowrap", opacity: (!sujetArticle.trim() || generatingArticle) ? 0.6 : 1 }}
+                  >
+                    {generatingArticle ? "⏳ Génération..." : "✨ Générer"}
+                  </button>
                 </div>
-                <div style={{ marginBottom: "10px" }}><label style={lbl}>TITRE</label><input type="text" value={nouvelArticle.titre} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { titre: e.target.value }) }) }} placeholder="Titre de l article..." style={inp} /></div>
-                <div style={{ marginBottom: "10px" }}><label style={lbl}>RESUME</label><textarea rows={2} value={nouvelArticle.resume} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { resume: e.target.value }) }) }} style={Object.assign({}, inp, { resize: "vertical" })} /></div>
-                <div style={{ marginBottom: "14px" }}><label style={lbl}>CONTENU COMPLET</label><textarea rows={6} value={nouvelArticle.contenu} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { contenu: e.target.value }) }) }} placeholder="Redigez le contenu complet..." style={Object.assign({}, inp, { resize: "vertical" })} /></div>
-                <button onClick={ajouterArticle} style={btnAjouter}>Ajouter cet article</button>
+                {articleGenMsg && <p style={{ fontSize: "12px", color: articleGenMsg.startsWith("✅") ? "#1a6b38" : "#991b1b", marginBottom: "10px", fontWeight: "600" }}>{articleGenMsg}</p>}
+
+                <div style={{ borderTop: "1px solid #e8e6e0", paddingTop: "14px", marginTop: "4px" }}>
+                  <h3 style={{ fontSize: "13px", fontWeight: "700", color: "#555", marginBottom: "12px" }}>ou rédiger manuellement</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                    <div><label style={lbl}>CATEGORIE</label><input type="text" value={nouvelArticle.categorie} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { categorie: e.target.value }) }) }} placeholder="Ex: DESINSECTISATION" style={inp} /></div>
+                    <div><label style={lbl}>DATE</label><input type="text" value={nouvelArticle.date} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { date: e.target.value }) }) }} placeholder="Ex: 15 Avril 2025" style={inp} /></div>
+                  </div>
+                  <div style={{ marginBottom: "10px" }}><label style={lbl}>TITRE</label><input type="text" value={nouvelArticle.titre} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { titre: e.target.value }) }) }} placeholder="Titre de l article..." style={inp} /></div>
+                  <div style={{ marginBottom: "10px" }}><label style={lbl}>RESUME</label><textarea rows={2} value={nouvelArticle.resume} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { resume: e.target.value }) }) }} style={Object.assign({}, inp, { resize: "vertical" })} /></div>
+                  <div style={{ marginBottom: "14px" }}><label style={lbl}>CONTENU COMPLET</label><textarea rows={6} value={nouvelArticle.contenu} onChange={function(e) { setNouvelArticle(function(p) { return Object.assign({}, p, { contenu: e.target.value }) }) }} placeholder="Redigez le contenu complet..." style={Object.assign({}, inp, { resize: "vertical" })} /></div>
+                  <button onClick={ajouterArticle} style={btnAjouter}>Publier l'article</button>
+                </div>
               </div>
             </div>
           )}
