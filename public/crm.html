@@ -411,13 +411,15 @@ function renderFinance(){
       <thead><tr><th>Client</th><th>Statut</th><th>Devis</th><th>Facturé</th><th>Reçu</th><th>Dépenses</th><th>Résultat</th></tr></thead>
       <tbody>${clients.map(c=>{
         const s=gs(c.statut);const depTotal=(c.depenses||0)+(c.depensesPrestataires||0);const res=(c.paiementsRecus||0)-depTotal;
+        const prestItems=(c.depensesItems||[]).filter(i=>i.categorie==="prestataire").reduce((ss,i)=>ss+(i.montant||0),0);
+        const prestTotal=(c.depensesPrestataires||0)+prestItems;
         return`<tr>
           <td style="font-weight:500;">${c.client}</td>
           <td><span class="badge" style="background:${s.bg};color:${s.tc};">${s.label}</span></td>
           <td>${f(c.montantDevis)}</td>
           <td style="color:${c.montantFacture?"#1D9E75":"var(--text-3)"};">${c.montantFacture?f(c.montantFacture):"—"}</td>
           <td style="color:${c.paiementsRecus?"#1D9E75":"var(--text-3)"};">${c.paiementsRecus?f(c.paiementsRecus):"—"}</td>
-          <td style="color:${depTotal?"#E24B4A":"var(--text-3)"};">${depTotal?f(depTotal):"—"}${c.depensesPrestataires>0?`<div style="font-size:10px;color:#6366F1;">dont ${f(c.depensesPrestataires)} prestataires</div>`:""}</td>
+          <td style="color:${depTotal?"#E24B4A":"var(--text-3)"};">${depTotal?f(depTotal):"—"}${prestTotal>0?`<div style="font-size:10px;color:#6366F1;">dont ${f(prestTotal)} prestataires</div>`:""}</td>
           <td style="font-weight:500;color:${res>0?"#1D9E75":res<0?"#E24B4A":"var(--text-3)"};">${res===0?"—":(res>0?"+":"")+f(res)}</td>
         </tr>`;
       }).join("")}</tbody>
@@ -430,7 +432,7 @@ function renderFinance(){
     <div class="tbl-wrap" style="margin-bottom:1.5rem;"><table>
       <thead><tr><th>Catégorie</th><th>Libellé</th><th>Date</th><th>Montant</th><th></th></tr></thead>
       <tbody>
-        ${depGlob.map(d=>{const cat=DEP_CATS.find(c=>c.key===d.categorie)||DEP_CATS[3];return`<tr>
+        ${depGlob.map(d=>{const cat=DEP_CATS.find(c=>c.key===d.categorie)||DEP_CATS[4];return`<tr>
           <td style="white-space:nowrap;">${cat.label}</td>
           <td>${d.libelle}</td><td style="white-space:nowrap;">${fd(d.date)}</td>
           <td style="color:#E24B4A;font-weight:500;white-space:nowrap;">${f(d.montant)} FCFA</td>
@@ -952,30 +954,40 @@ function moveCard(id,ns){
 function openAdd(){editId=null;showModal(formH(null));}
 function openEdit(id){editId=id;const c=clients.find(c=>c.id===id);currentDepItems=[...(c?.depensesItems||[])];showModal(formH(c));renderDepItems();}
 
+function onDepCatChange(sel){
+  const lib=document.getElementById("ndlib");
+  if(!lib)return;
+  lib.placeholder=sel.value==="prestataire"?"Nom du technicien / prestataire":"Libellé (ex: Perméthrine 5L)";
+}
+
 function renderDepItems(){
   const wrap=document.getElementById("dep-items-wrap");
   const tot=document.getElementById("dep-total-wrap");
   if(!wrap)return;
   if(!currentDepItems.length){wrap.innerHTML="";if(tot)tot.textContent="";return;}
   const total=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);
+  const prestTotal=currentDepItems.filter(i=>i.categorie==="prestataire").reduce((s,i)=>s+(i.montant||0),0);
   wrap.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;">
     <thead><tr style="color:var(--text-3);">
       <th style="text-align:left;padding:3px 4px;">Catégorie</th>
-      <th style="text-align:left;padding:3px 4px;">Libellé</th>
-      <th style="text-align:right;padding:3px 4px;">Montant</th>
+      <th style="text-align:left;padding:3px 4px;">Libellé / Nom</th>
+      <th style="text-align:right;padding:3px 4px;">Montant prévu</th>
       <th style="width:28px;"></th>
     </tr></thead>
     <tbody>${currentDepItems.map(i=>{
-      const cat=DEP_CATS.find(c=>c.key===i.categorie)||DEP_CATS[3];
-      return`<tr style="border-top:1px solid var(--border);">
-        <td style="padding:4px;">${cat.label}</td>
-        <td style="padding:4px;">${i.libelle||"—"}</td>
-        <td style="padding:4px;text-align:right;">${(i.montant||0).toLocaleString("fr-FR")} F</td>
+      const isPrest=i.categorie==="prestataire";
+      const cat=DEP_CATS.find(c=>c.key===i.categorie)||DEP_CATS[4];
+      return`<tr style="border-top:1px solid var(--border);${isPrest?"background:rgba(99,102,241,0.07);":""}">
+        <td style="padding:4px;${isPrest?"color:#6366F1;font-weight:500;":""}">${cat.label}</td>
+        <td style="padding:4px;${isPrest?"font-weight:500;":""}">${i.libelle||"—"}</td>
+        <td style="padding:4px;text-align:right;${isPrest?"color:#6366F1;":""}">${(i.montant||0).toLocaleString("fr-FR")} F</td>
         <td style="padding:4px;text-align:center;"><button onclick="delDepClient('${i.id}')" style="background:none;border:none;cursor:pointer;color:#E24B4A;padding:0;font-size:14px;" title="Supprimer"><i class="ti ti-trash"></i></button></td>
       </tr>`;
     }).join("")}</tbody>
   </table>`;
-  if(tot)tot.textContent=`Total dépenses : ${total.toLocaleString("fr-FR")} FCFA`;
+  let totTxt=`Total dépenses : ${total.toLocaleString("fr-FR")} FCFA`;
+  if(prestTotal>0)totTxt+=` <span style="color:#6366F1;">(dont ${prestTotal.toLocaleString("fr-FR")} prestataires)</span>`;
+  if(tot)tot.innerHTML=totTxt;
 }
 
 async function addDepClient(){
@@ -1006,6 +1018,7 @@ async function delDepClient(depId){
 }
 
 const DEP_CATS=[
+  {key:"prestataire",label:"🧑‍🔧 Prestataire"},
   {key:"transport",label:"🚗 Transport"},
   {key:"produits",label:"🧪 Produits"},
   {key:"materiels",label:"🔧 Matériels"},
@@ -1113,9 +1126,9 @@ function formH(c){
       <div id="dep-items-wrap" style="margin-bottom:8px;"></div>
       <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
         <div style="flex:0 0 120px;">
-          <select id="ndcat" style="width:100%;">${DEP_CATS.map(c=>`<option value="${c.key}">${c.label}</option>`).join("")}</select>
+          <select id="ndcat" onchange="onDepCatChange(this)" style="width:100%;">${DEP_CATS.map(c=>`<option value="${c.key}">${c.label}</option>`).join("")}</select>
         </div>
-        <div style="flex:1;min-width:120px;"><input id="ndlib" placeholder="Libellé (ex: Perméthrine 5L)" style="width:100%;"></div>
+        <div style="flex:1;min-width:120px;"><input id="ndlib" placeholder="Nom du technicien / prestataire" style="width:100%;"></div>
         <div style="flex:0 0 100px;"><input type="number" id="ndmt" min="0" placeholder="Montant" style="width:100%;"></div>
         <button class="btn-s" onclick="addDepClient()" style="white-space:nowrap;"><i class="ti ti-plus"></i> Ajouter</button>
       </div>
