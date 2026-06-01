@@ -184,5 +184,60 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  if (action === "generate_planning") {
+    const { devisId, clientNom, adresse } = body
+    const { data: devis } = await supabase.from("devis")
+      .select("date_debut_contrat, frequence_intervention, duree_contrat_mois")
+      .eq("id", devisId).single()
+
+    if (!devis?.date_debut_contrat)
+      return Response.json({ error: "Renseignez une date de début de contrat avant de générer le planning." }, { status: 400 })
+
+    // Supprimer les anciennes dates planifiées pour ce contrat
+    await supabase.from("interventions").delete().eq("devis_id", devisId).eq("statut", "planifiee")
+
+    const freqMap = { mensuelle: 1, bimestrielle: 2, trimestrielle: 3, semestrielle: 6, annuelle: 12 }
+    const intervalMois = freqMap[devis.frequence_intervention] || 3
+    const duree = devis.duree_contrat_mois || 12
+    const nbInterventions = Math.floor(duree / intervalMois)
+    const toInsert = []
+
+    for (let i = 0; i < nbInterventions; i++) {
+      const iDate = new Date(devis.date_debut_contrat + "T00:00:00")
+      iDate.setMonth(iDate.getMonth() + i * intervalMois)
+      toInsert.push({
+        devis_id: devisId,
+        date_intervention: iDate.toISOString().split("T")[0],
+        statut: "planifiee",
+        client_nom: clientNom || "",
+        adresse: adresse || "",
+        notes: `Intervention ${i + 1}/${nbInterventions}`,
+        type_passage: "intervention",
+      })
+      // Contrôle au point médian (si intervalle >= 2 mois)
+      if (intervalMois >= 2) {
+        const cDate = new Date(iDate)
+        cDate.setDate(cDate.getDate() + Math.floor(intervalMois * 15))
+        const contractEnd = new Date(devis.date_debut_contrat + "T00:00:00")
+        contractEnd.setMonth(contractEnd.getMonth() + duree)
+        if (cDate < contractEnd) {
+          toInsert.push({
+            devis_id: devisId,
+            date_intervention: cDate.toISOString().split("T")[0],
+            statut: "planifiee",
+            client_nom: clientNom || "",
+            adresse: adresse || "",
+            notes: `Contrôle ${i + 1}/${nbInterventions} — vérif. état & boîtes`,
+            type_passage: "controle",
+          })
+        }
+      }
+    }
+
+    const { data: inserted, error } = await supabase.from("interventions").insert(toInsert).select()
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    return Response.json({ ok: true, count: inserted.length })
+  }
+
   return Response.json({ error: "Action inconnue" }, { status: 400 })
 }

@@ -359,7 +359,7 @@ function renderPlanning(){
   if(nonAss.length){
     h+=`<div class="non-ass" style="background:#F0F4FF;border-color:rgba(24,95,165,.3);">
       <div class="na-title" style="color:#185FA5;"><i class="ti ti-user-question"></i> Interventions sans technicien assigné</div>
-      <div class="na-chips">${nonAss.map(p=>`<div class="na-chip" style="border-color:rgba(24,95,165,.3);" onclick="openEditInterv('${p.id}')">${p.clientNom||"Client"} · ${fdShort(p.dateIntervention)}</div>`).join("")}</div>
+      <div class="na-chips">${nonAss.map(p=>{const ico=p.typePassage==="controle"?"🔍":"🔧";const bg=p.typePassage==="controle"?"rgba(99,102,241,.08)":"rgba(24,95,165,.04)";const bc=p.typePassage==="controle"?"rgba(99,102,241,.4)":"rgba(24,95,165,.3)";return`<div class="na-chip" style="border-color:${bc};background:${bg};" onclick="openEditInterv('${p.id}')">${ico} ${p.clientNom||"Client"} · ${fdShort(p.dateIntervention)}${p.typePassage==="controle"?` <span style="font-size:10px;color:#6366F1;">(contrôle)</span>`:""}</div>`;}).join("")}</div>
     </div>`;
   }
 
@@ -383,10 +383,10 @@ function renderPlanning(){
     days.forEach(d=>{
       const dayIntervs=plannings.filter(p=>p.personnelId===m.id&&p.dateIntervention===d.date);
       h+=`<div class="pg-cell${d.isToday?" today-col":""}" onclick="openNewIntervention('${d.date}','${m.id}')">
-        ${dayIntervs.map(p=>`<div class="interv-chip ${p.statut}" onclick="event.stopPropagation();openEditInterv('${p.id}')">
-          <div style="font-weight:600;">${p.clientNom||"Client"}</div>
+        ${dayIntervs.map(p=>{const isCtrl=p.typePassage==="controle";const extraStyle=isCtrl?"background:rgba(99,102,241,.15);border-left:3px solid #6366F1;":"";return`<div class="interv-chip ${p.statut}" style="${extraStyle}" onclick="event.stopPropagation();openEditInterv('${p.id}')">
+          <div style="font-weight:600;">${isCtrl?"🔍 ":"🔧 "}${p.clientNom||"Client"}</div>
           <div style="opacity:.8;">${p.heureDebut||""}${p.montantPrestataire>0?` · ${p.montantPrestataire.toLocaleString("fr-FR")} F`:""}</div>
-        </div>`).join("")}
+        </div>`;}).join("")}
         ${!dayIntervs.length?`<div class="pg-add"><i class="ti ti-plus"></i></div>`:""}
       </div>`;
     });

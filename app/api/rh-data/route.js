@@ -29,6 +29,7 @@ export async function GET() {
     dateIntervention: i.date_intervention, heureDebut: i.heure_debut?.slice(0, 5) || "08:00",
     statut: i.statut, clientNom: i.client_nom, adresse: i.adresse, notes: i.notes,
     montantPrestataire: i.montant_prestataire || 0,
+    typePassage: i.type_passage || "intervention",
     personnel: i.personnel ? { id: i.personnel.id, nom: [i.personnel.prenom, i.personnel.nom].filter(Boolean).join(" "), poste: i.personnel.poste } : null,
   }))
 

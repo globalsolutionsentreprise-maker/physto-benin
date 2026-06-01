@@ -1122,6 +1122,10 @@ function formH(c){
         <select id="ffreq">${FREQ_OPTS.map(o=>`<option value="${o.key}" ${c?.frequenceIntervention===o.key?"selected":""}>${o.label}</option>`).join("")}</select>
       </div>
       <div><label class="fl">Date de début du contrat</label><input type="date" id="fdeb" value="${c?.dateDebutContrat||""}"></div>
+      <div class="fg-full" style="padding:10px 0 0;">
+        <button type="button" onclick="genererPlanningClient()" class="btn-s" style="background:#f0fdf4;border:1px solid #86efac;color:#166534;font-weight:600;padding:8px 16px;">📅 Générer le planning automatique</button>
+        <span id="planning-status" style="font-size:12px;margin-left:10px;color:var(--text-3);"></span>
+      </div>
     </div>
     <div>
       <label class="fl">Motif d'échec</label>
@@ -1164,6 +1168,28 @@ function formH(c){
     <button class="btn-s" onclick="closeModal()">Annuler</button>
     <button class="btn-p" onclick="saveClient()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
   </div>`;
+}
+
+async function genererPlanningClient(){
+  if(!editId){toast("Sauvegardez d'abord le client");return;}
+  const c=clients.find(c=>c.id===editId);
+  const dateDebut=document.getElementById("fdeb")?.value||c?.dateDebutContrat||"";
+  if(!dateDebut){toast("Renseignez une date de début de contrat");return;}
+  const btn=document.querySelector('[onclick="genererPlanningClient()"]');
+  const status=document.getElementById("planning-status");
+  if(btn){btn.disabled=true;btn.textContent="⏳ Génération...";}
+  try{
+    const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"generate_planning",devisId:editId,clientNom:c?.client||"",adresse:c?.zone||""})});
+    const r=await res.json();
+    if(r.ok){
+      toast(`✅ ${r.count} dates créées dans le planning`);
+      if(status)status.innerHTML=`<span style="color:#166534;">✅ ${r.count} dates — visible dans Équipe &amp; Planning</span>`;
+    }else{
+      toast(r.error||"Erreur");
+      if(status)status.innerHTML=`<span style="color:#991b1b;">${r.error||"Erreur"}</span>`;
+    }
+  }catch(e){toast("Erreur réseau");}
+  if(btn){btn.disabled=false;btn.textContent="📅 Générer le planning automatique";}
 }
 
 function toggleContrat(){
