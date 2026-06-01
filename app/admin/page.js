@@ -1697,7 +1697,7 @@ function SectionClientsDevis({ db, agrement }) {
       dateIntervention: new Date().toISOString().split('T')[0],
       technicien: technicienStr,
       zonesTraitees: '',
-      produitsUtilises: '',
+      produitsUtilises: 'Insecticide : IMPERA 300 CS — traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL — application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX — mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.',
       methodeApplication: '',
       dureeIntervention: '',
       resultats: '',
@@ -1911,7 +1911,7 @@ function SectionClientsDevis({ db, agrement }) {
 
           React.createElement('div', { style: section },
             React.createElement('label', { style: lbl2 }, 'Produits utilisés'),
-            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, placeholder: 'Ex: IMPERA 300 CS, ROCOGEL, VERTOX', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 5, placeholder: 'Ex: IMPERA 300 CS, ROCOGEL, VERTOX', style: Object.assign({}, inp2, { resize: 'vertical' }) })
           ),
 
           React.createElement('div', { style: section },
