@@ -1920,6 +1920,8 @@ function SectionClientsDevis({ db, agrement }) {
     )
   }
 
+  var PRODUITS_DEFAUT_INTERV = 'Insecticide : IMPERA 300 CS — traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL — application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX — mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.'
+
   function ouvrirNouveauRapportInterv(devis, client) {
     var technicienStr = ''
     var techNoms = interventionsList
@@ -1932,7 +1934,7 @@ function SectionClientsDevis({ db, agrement }) {
       dateIntervention: new Date().toISOString().split('T')[0],
       technicien: technicienStr,
       zonesTraitees: '',
-      produitsUtilises: 'Insecticide : IMPERA 300 CS — traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL — application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX — mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.',
+      produitsUtilises: PRODUITS_DEFAUT_INTERV,
       methodeApplication: '',
       dureeIntervention: '',
       resultats: '',
@@ -1951,7 +1953,7 @@ function SectionClientsDevis({ db, agrement }) {
       dateIntervention: rapport.date_intervention || '',
       technicien: rapport.technicien || '',
       zonesTraitees: rapport.zones_traitees || '',
-      produitsUtilises: rapport.produits_utilises || '',
+      produitsUtilises: rapport.produits_utilises || PRODUITS_DEFAUT_INTERV,
       methodeApplication: rapport.methode_application || '',
       dureeIntervention: rapport.duree_intervention || '',
       resultats: rapport.resultats || '',
