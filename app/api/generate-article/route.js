@@ -30,30 +30,37 @@ export async function POST(req) {
 
   const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
 
-  const prompt = `Tu es un expert en SEO et en rédaction web pour Phyto Bénin by GSE, une entreprise d'hygiène sanitaire et phytosanitaire basée à Cotonou, Bénin. Tu rédiges des articles de blog optimisés pour Google, ciblant les recherches locales en français.
+  const prompt = `Tu es un expert SEO pour Phyto Bénin by GSE, entreprise d'hygiène sanitaire à Cotonou, Bénin.
 
-SUJET DE L'ARTICLE : "${sujet}"
+SUJET : "${sujet}"
 
-RÈGLES IMPÉRATIVES :
-- Ton : professionnel, expert, rassurant. Jamais publicitaire.
-- Longueur : 600 à 900 mots de contenu (champ contenu)
-- Mots-clés : intègre naturellement des termes comme "Cotonou", "Bénin", "hygiène sanitaire", et les termes spécifiques au sujet
-- Structure : utilise le format suivant pour le contenu :
-  * "# Titre de section" pour les H2 (titres principaux)
-  * "## Sous-titre" pour les H3
-  * "- élément" pour les listes
-  * Paragraphes normaux pour le texte courant
-- Termine toujours par une mention de Phyto Bénin et son numéro +229 01 53 04 79 50
-- Ne mets PAS de HTML, uniquement ce format texte simple
+Rédige un article de blog SEO complet. Réponds EXACTEMENT dans ce format avec ces balises (ne change rien aux balises) :
 
-RETOURNE UNIQUEMENT ce JSON valide (sans markdown, sans backticks) :
-{
-  "titre": "titre optimisé SEO incluant un mot-clé + localisation (max 80 chars)",
-  "categorie": "UNE seule catégorie en MAJUSCULES parmi : DÉSINSECTISATION, DÉRATISATION, ANTI-TERMITES, DÉSINFECTION, REPTILES, PUNAISES DE LIT, ANTI-MOUSTIQUES, HYGIÈNE PROFESSIONNELLE, PRÉVENTION",
-  "resume": "résumé accrocheur de 2-3 phrases (max 200 chars) qui donne envie de lire",
-  "lecture": "X min",
-  "contenu": "le contenu complet de l'article avec la structure # ## - décrite ci-dessus"
-}`
+[TITRE]
+titre SEO optimisé incluant un mot-clé local (Cotonou ou Bénin), max 80 caractères
+[/TITRE]
+
+[CATEGORIE]
+UNE seule valeur parmi : DÉSINSECTISATION, DÉRATISATION, ANTI-TERMITES, DÉSINFECTION, REPTILES, PUNAISES DE LIT, ANTI-MOUSTIQUES, HYGIÈNE PROFESSIONNELLE, PRÉVENTION
+[/CATEGORIE]
+
+[RESUME]
+2 phrases max, accrocheuses, qui donnent envie de lire, max 180 caractères
+[/RESUME]
+
+[LECTURE]
+X min
+[/LECTURE]
+
+[CONTENU]
+Rédige ici le contenu complet (600 à 900 mots). Utilise ce format :
+- "# Titre" pour les sections principales (H2)
+- "## Sous-titre" pour les sous-sections (H3)
+- "- élément" pour les listes
+- Paragraphes normaux pour le reste
+Intègre les mots-clés Cotonou, Bénin, hygiène sanitaire.
+Termine par une mention de Phyto Bénin (+229 01 53 04 79 50).
+[/CONTENU]`
 
   let geminiRes
   try {
@@ -68,40 +75,34 @@ RETOURNE UNIQUEMENT ce JSON valide (sans markdown, sans backticks) :
   const data = await geminiRes.json()
   const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || ""
 
-  // Extraire le JSON même s'il est entouré de texte ou de backticks
-  let cleaned = raw
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim()
-
-  // Si l'IA a quand même mis du texte avant/après, extraire le premier bloc JSON
-  const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
-  if (jsonMatch) cleaned = jsonMatch[0]
-
-  try {
-    const article = JSON.parse(cleaned)
-    if (!article.titre || !article.contenu) throw new Error("Champs manquants")
-    // Valeurs par défaut si champs optionnels absents
-    if (!article.categorie) article.categorie = "HYGIÈNE PROFESSIONNELLE"
-    if (!article.resume) article.resume = article.titre
-    if (!article.lecture) article.lecture = "5 min"
-    return NextResponse.json({ ok: true, article })
-  } catch {
-    // Dernier recours : construire un article minimal depuis le texte brut
-    if (raw.length > 100) {
-      const lines = raw.split("\n").filter(Boolean)
-      return NextResponse.json({
-        ok: true,
-        article: {
-          titre: lines[0]?.replace(/^#+\s*/, "").substring(0, 80) || "Article",
-          categorie: "HYGIÈNE PROFESSIONNELLE",
-          resume: lines[1]?.substring(0, 200) || "",
-          contenu: raw,
-          lecture: "5 min",
-        }
-      })
-    }
-    return NextResponse.json({ error: "L'IA n'a pas retourné de contenu. Réessaie.", raw }, { status: 422 })
+  if (!raw || raw.length < 50) {
+    return NextResponse.json({ error: "L'IA n'a pas retourné de contenu. Réessaie." }, { status: 422 })
   }
+
+  function extraireBalise(texte, balise) {
+    const re = new RegExp(`\\[${balise}\\]([\\s\\S]*?)\\[\\/${balise}\\]`, "i")
+    const match = texte.match(re)
+    return match ? match[1].trim() : ""
+  }
+
+  const titre = extraireBalise(raw, "TITRE")
+  const categorie = extraireBalise(raw, "CATEGORIE")
+  const resume = extraireBalise(raw, "RESUME")
+  const lecture = extraireBalise(raw, "LECTURE")
+  const contenu = extraireBalise(raw, "CONTENU")
+
+  if (!titre || !contenu) {
+    return NextResponse.json({ error: "L'IA n'a pas suivi le format attendu. Réessaie." }, { status: 422 })
+  }
+
+  return NextResponse.json({
+    ok: true,
+    article: {
+      titre: titre.substring(0, 120),
+      categorie: categorie || "HYGIÈNE PROFESSIONNELLE",
+      resume: resume.substring(0, 300),
+      lecture: lecture || "5 min",
+      contenu,
+    }
+  })
 }
