@@ -12,11 +12,12 @@ function mapStatut(statut) {
 }
 
 export async function GET() {
-  const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }] = await Promise.all([
+  const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
     supabase.from("depenses_devis").select("*").order("created_at"),
+    supabase.from("personnel").select("id, nom, prenom, poste").order("nom"),
   ])
 
   // Somme des coûts prestataires par devis
@@ -77,7 +78,13 @@ export async function GET() {
     date: d.date || (d.created_at ? d.created_at.split("T")[0] : ""),
   }))
 
-  return Response.json({ clients, depenses: dep, objectifCA: 0 })
+  const membres = (personnelList || []).map(p => ({
+    id: p.id,
+    nom: [p.prenom, p.nom].filter(Boolean).join(" "),
+    poste: p.poste || "",
+  }))
+
+  return Response.json({ clients, depenses: dep, objectifCA: 0, membres })
 }
 
 export async function POST(req) {

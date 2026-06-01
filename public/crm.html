@@ -211,6 +211,7 @@ const DEFAULT_DEP=[];
 
 let clients,depGlob,nextId,activeTab="kanban",editId=null,cfilt="",sfilt="",finChart=null,objectifCA=0,anCharts={};
 let currentDepItems=[];
+let membres=[];
 
 function load(){}
 function save(){}
@@ -956,8 +957,10 @@ function openEdit(id){editId=id;const c=clients.find(c=>c.id===id);currentDepIte
 
 function onDepCatChange(sel){
   const lib=document.getElementById("ndlib");
-  if(!lib)return;
-  lib.placeholder=sel.value==="prestataire"?"Nom du technicien / prestataire":"Libellé (ex: Perméthrine 5L)";
+  const prest=document.getElementById("ndlib-prest");
+  const isPrest=sel.value==="prestataire";
+  if(lib)lib.style.display=isPrest?"none":"";
+  if(prest)prest.style.display=isPrest?"":"none";
 }
 
 function renderDepItems(){
@@ -993,17 +996,20 @@ function renderDepItems(){
 async function addDepClient(){
   const devisId=editId;if(!devisId)return;
   const cat=document.getElementById("ndcat")?.value||"autre";
-  const lib=(document.getElementById("ndlib")?.value||"").trim();
+  const isPrest=cat==="prestataire";
+  const lib=isPrest
+    ?(document.getElementById("ndlib-prest")?.value||"").trim()
+    :(document.getElementById("ndlib")?.value||"").trim();
   const mt=parseInt(document.getElementById("ndmt")?.value||"0")||0;
   if(!lib||!mt)return;
   const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_dep_client",devisId,libelle:lib,montant:mt,categorie:cat})});
   const r=await res.json();
   if(r.ok&&r.dep){
     currentDepItems.push(r.dep);
-    // Mettre à jour le client local
     const c=clients.find(c=>c.id===devisId);
     if(c){c.depensesItems=[...currentDepItems];c.depenses=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);}
-    document.getElementById("ndlib").value="";
+    if(isPrest){document.getElementById("ndlib-prest").value="";}
+    else{document.getElementById("ndlib").value="";}
     document.getElementById("ndmt").value="";
     renderDepItems();
   }
@@ -1128,7 +1134,13 @@ function formH(c){
         <div style="flex:0 0 120px;">
           <select id="ndcat" onchange="onDepCatChange(this)" style="width:100%;">${DEP_CATS.map(c=>`<option value="${c.key}">${c.label}</option>`).join("")}</select>
         </div>
-        <div style="flex:1;min-width:120px;"><input id="ndlib" placeholder="Nom du technicien / prestataire" style="width:100%;"></div>
+        <div style="flex:1;min-width:120px;">
+          <input id="ndlib" placeholder="Libellé (ex: Perméthrine 5L)" style="width:100%;display:none;">
+          <select id="ndlib-prest" style="width:100%;">
+            <option value="">— Choisir un technicien —</option>
+            ${membres.map(m=>`<option value="${m.nom}">${m.nom}${m.poste?" · "+m.poste:""}</option>`).join("")}
+          </select>
+        </div>
         <div style="flex:0 0 100px;"><input type="number" id="ndmt" min="0" placeholder="Montant" style="width:100%;"></div>
         <button class="btn-s" onclick="addDepClient()" style="white-space:nowrap;"><i class="ti ti-plus"></i> Ajouter</button>
       </div>
@@ -1228,6 +1240,7 @@ function refresh(){render(activeTab);}
       const data=await res.json();
       clients=data.clients||[];
       depGlob=data.depenses||[];
+      membres=data.membres||[];
       objectifCA=data.objectifCA||parseInt(localStorage.getItem("gse_objectif")||"0");
     }
   }catch(e){
