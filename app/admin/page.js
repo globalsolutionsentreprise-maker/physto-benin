@@ -17,8 +17,17 @@ const CHIFFRES_DEFAUT = [
 
 export default function Admin() {
   const [connecte, setConnecte] = useState(false)
+  const [emailLogin, setEmailLogin] = useState("")
   const [mdp, setMdp] = useState("")
   const [erreurMdp, setErreurMdp] = useState(false)
+  const [setupMode, setSetupMode] = useState(false)
+  const [setupNom, setSetupNom] = useState("")
+  const [currentUser, setCurrentUser] = useState(null)
+  const [adminUsers, setAdminUsers] = useState([])
+  const [journalEntries, setJournalEntries] = useState([])
+  const [formAcces, setFormAcces] = useState({ email: "", nom: "", role: "lecture", password: "" })
+  const [accesSaving, setAccesSaving] = useState(false)
+  const [accesSaveMsg, setAccesSaveMsg] = useState("")
   const [onglet, setOnglet] = useState("chiffres")
   const [chargement, setChargement] = useState(false)
   const [message, setMessage] = useState("")
@@ -46,8 +55,26 @@ export default function Admin() {
   const [nouveauMembre, setNouveauMembre] = useState({ init: "", nom: "", role: "", description: "", ordre: 0 })
 
   useEffect(function() {
-    const auth = localStorage.getItem("phyto-benin_admin_v4")
-    if (auth === "oui") { setConnecte(true); chargerTout() }
+    supabase.auth.getSession().then(async function({ data: { session } }) {
+      if (session?.user) {
+        try {
+          const { data: acces } = await supabase.from("admin_acces").select("nom, role, actif").eq("email", session.user.email).maybeSingle()
+          if (acces?.actif) {
+            setCurrentUser({ email: session.user.email, nom: acces.nom, role: acces.role })
+            setConnecte(true)
+            chargerTout()
+            return
+          }
+        } catch(e) {}
+        await supabase.auth.signOut()
+      }
+      // Fallback legacy auth
+      if (localStorage.getItem("phyto-benin_admin_v4") === "oui") {
+        setCurrentUser({ email: "admin@gse.bj", nom: "Administrateur", role: "admin" })
+        setConnecte(true)
+        chargerTout()
+      }
+    })
   }, [])
 
   async function chargerTout() {
@@ -118,9 +145,49 @@ export default function Admin() {
     if (!error && data) setChiffres(data)
   }
 
-  function seConnecter(e) {
+  async function seConnecter(e) {
     e.preventDefault()
+    setErreurMdp(false)
+
+    // Mode première configuration
+    if (setupMode) {
+      if (!emailLogin || !mdp || !setupNom) { setErreurMdp(true); return }
+      try {
+        const res = await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "setup_first_admin", email: emailLogin, password: mdp, nom: setupNom }) })
+        const r = await res.json()
+        if (!r.ok) { setErreurMdp(true); return }
+        // Connexion automatique après setup
+      } catch(e) { setErreurMdp(true); return }
+    }
+
+    // Connexion via Supabase Auth
+    if (emailLogin) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: emailLogin, password: mdp })
+      if (!error && data?.user) {
+        const { data: acces } = await supabase.from("admin_acces").select("nom, role, actif").eq("email", data.user.email).maybeSingle()
+        if (acces?.actif) {
+          setCurrentUser({ email: data.user.email, nom: acces.nom, role: acces.role })
+          setConnecte(true)
+          chargerTout()
+          return
+        }
+        await supabase.auth.signOut()
+        setErreurMdp(true)
+        return
+      }
+      // Vérifier si première configuration nécessaire
+      try {
+        const chk = await fetch("/api/admin-auth")
+        const d = await chk.json()
+        if (d.users?.length === 0) { setSetupMode(true); return }
+      } catch(e) {}
+      setErreurMdp(true)
+      return
+    }
+
+    // Fallback : ancien mot de passe (accès d'urgence)
     if (mdp === MOT_DE_PASSE) {
+      setCurrentUser({ email: "admin@gse.bj", nom: "Administrateur", role: "admin" })
       setConnecte(true)
       localStorage.setItem("phyto-benin_admin_v4", "oui")
       chargerTout()
@@ -129,15 +196,39 @@ export default function Admin() {
     }
   }
 
-  function seDeconnecter() {
-    setConnecte(false)
+  async function seDeconnecter() {
+    await supabase.auth.signOut()
     localStorage.removeItem("phyto-benin_admin_v4")
+    setConnecte(false)
+    setCurrentUser(null)
   }
 
   function afficherMessage(msg) {
     setMessage(msg)
     setTimeout(function() { setMessage("") }, 3000)
   }
+
+  async function logAction(action, details) {
+    if (!currentUser?.email) return
+    try {
+      await supabase.from("admin_journal").insert({ user_email: currentUser.email, user_nom: currentUser.nom || currentUser.email, action, details: details || null })
+    } catch(e) {}
+  }
+
+  async function chargerAdminData() {
+    try {
+      const res = await fetch("/api/admin-auth")
+      const d = await res.json()
+      setAdminUsers(d.users || [])
+      setJournalEntries(d.journal || [])
+    } catch(e) {}
+  }
+
+  React.useEffect(function() {
+    if ((onglet === "acces" || onglet === "journal") && currentUser?.role === "admin") {
+      chargerAdminData()
+    }
+  }, [onglet])
 
   async function sauvegarderParametre(cle) {
     const valeur = parametres[cle]
@@ -424,6 +515,10 @@ export default function Admin() {
     { id: "crm", label: "📊 CRM Pipeline" },
     { id: "rh", label: "👥 Équipe & Planning" },
     { id: "stock", label: "📦 Stock produits" },
+    ...(currentUser?.role === "admin" ? [
+      { id: "acces", label: "🔐 Accès utilisateurs" },
+      { id: "journal", label: "📋 Journal activité" },
+    ] : []),
   ]
 
   // ── STOCK (Admin scope) ───────────────────────────────────────────────────
@@ -566,20 +661,33 @@ export default function Admin() {
     return (
       <main style={{ minHeight: "100vh", backgroundColor: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "48px 40px", width: "100%", maxWidth: "380px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
-          <div style={{ textAlign: "center", marginBottom: "36px" }}>
+          <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <img src="/logo-gse.jpeg" alt="Logo" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
-            <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>Back Office</h1>
-            <p style={{ fontSize: "13px", color: "#888" }}>Phyto Bénin</p>
+            <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>{setupMode ? "Première configuration" : "Back Office"}</h1>
+            <p style={{ fontSize: "13px", color: "#888" }}>{setupMode ? "Créez votre compte administrateur" : "Phyto Bénin"}</p>
           </div>
-          <form onSubmit={seConnecter} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <form onSubmit={seConnecter} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {setupMode && (
+              <div>
+                <label style={lbl}>VOTRE NOM</label>
+                <input type="text" value={setupNom} onChange={function(e) { setSetupNom(e.target.value) }} placeholder="Ex: Yakoubou Kabir" style={inp} required />
+              </div>
+            )}
             <div>
-              <label style={lbl}>MOT DE PASSE</label>
+              <label style={lbl}>ADRESSE EMAIL</label>
+              <input type="email" value={emailLogin} onChange={function(e) { setEmailLogin(e.target.value) }} placeholder="votre@email.com" style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>{setupMode ? "CRÉER UN MOT DE PASSE" : "MOT DE PASSE"}</label>
               <input type="password" value={mdp} onChange={function(e) { setMdp(e.target.value) }} placeholder="Mot de passe" style={Object.assign({}, inp, erreurMdp ? { borderColor: "#991b1b" } : {})} />
-              {erreurMdp && <p style={{ fontSize: "12px", color: "#991b1b", marginTop: "5px" }}>Mot de passe incorrect</p>}
+              {erreurMdp && <p style={{ fontSize: "12px", color: "#991b1b", marginTop: "5px" }}>{setupMode ? "Erreur lors de la configuration" : "Identifiants incorrects ou accès non autorisé"}</p>}
             </div>
             <button type="submit" style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "14px", padding: "13px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: "inherit" }}>
-              Se connecter
+              {setupMode ? "Créer mon compte" : "Se connecter"}
             </button>
+            {setupMode && (
+              <button type="button" onClick={function() { setSetupMode(false) }} style={{ background: "none", border: "none", color: "#888", fontSize: "12px", cursor: "pointer" }}>← Retour à la connexion</button>
+            )}
           </form>
         </div>
       </main>
@@ -603,9 +711,10 @@ export default function Admin() {
         <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
           {message && <span style={{ fontSize: "12px", color: "#4ade80", fontWeight: "600", backgroundColor: "rgba(74,222,128,0.1)", padding: "6px 12px", borderRadius: "5px" }}>{message}</span>}
           {erreurDB && <span style={{ fontSize: "11px", color: "#fca5a5", maxWidth: "300px" }}>{erreurDB}</span>}
+          {currentUser && <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", backgroundColor: "rgba(255,255,255,0.1)", padding: "4px 10px", borderRadius: "20px" }}>👤 {currentUser.nom} {currentUser.role === "lecture" ? "· lecture" : ""}</span>}
           <button onClick={chargerTout} style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", background: "none", border: "1px solid rgba(255,255,255,0.2)", padding: "5px 10px", borderRadius: "5px", cursor: "pointer", fontFamily: "inherit" }}>Recharger</button>
           <a href="/" style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>Voir le site</a>
-          <button onClick={seDeconnecter} style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Deconnexion</button>
+          <button onClick={seDeconnecter} style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Déconnexion</button>
         </div>
       </div>
 
@@ -968,6 +1077,152 @@ export default function Admin() {
                 title="Équipe & Planning GSE"
                 style={{ width: "100%", height: "calc(100vh - 64px)", border: "none", display: "block" }}
               />
+            </div>
+          )}
+
+          {onglet === "acces" && currentUser?.role === "admin" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>🔐 Accès utilisateurs</h2>
+                  <p style={{ fontSize: "13px", color: "#888" }}>Gérez les comptes autorisés à se connecter au back-office.</p>
+                </div>
+                <button onClick={chargerAdminData} style={{ background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" }}>↻ Actualiser</button>
+              </div>
+
+              {/* Liste des utilisateurs */}
+              <div style={{ marginBottom: "32px" }}>
+                {adminUsers.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: "32px", backgroundColor: "#f8f7f4", borderRadius: "12px", color: "#888", fontSize: "13px" }}>Aucun utilisateur trouvé.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {adminUsers.map(function(u) {
+                      return (
+                        <div key={u.id} style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: "14px", fontWeight: "700", color: "#111", marginBottom: "2px" }}>{u.nom}</div>
+                            <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: "700", backgroundColor: u.role === "admin" ? "#f0fdf4" : "#f8f7f4", color: u.role === "admin" ? "#1a6b38" : "#666", border: "1px solid " + (u.role === "admin" ? "#bbf7d0" : "#e0ddd6"), borderRadius: "20px", padding: "3px 10px" }}>
+                              {u.role === "admin" ? "Admin" : "Lecture"}
+                            </span>
+                            <span style={{ fontSize: "11px", fontWeight: "700", backgroundColor: u.actif ? "#fff" : "#fef2f2", color: u.actif ? "#1a6b38" : "#991b1b", border: "1px solid " + (u.actif ? "#bbf7d0" : "#fecaca"), borderRadius: "20px", padding: "3px 10px" }}>
+                              {u.actif ? "Actif" : "Désactivé"}
+                            </span>
+                            {u.email !== currentUser?.email && (
+                              <button onClick={async function() {
+                                if (!confirm("Désactiver / réactiver cet utilisateur ?")) return
+                                await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "update_user", email: u.email, nom: u.nom, role: u.role, actif: !u.actif }) })
+                                chargerAdminData()
+                              }} style={{ background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>
+                                {u.actif ? "Désactiver" : "Réactiver"}
+                              </button>
+                            )}
+                            {u.email !== currentUser?.email && (
+                              <button onClick={async function() {
+                                if (!confirm("Supprimer définitivement " + u.nom + " ?")) return
+                                await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete_user", email: u.email }) })
+                                chargerAdminData()
+                              }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>
+                                🗑
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Formulaire ajout utilisateur */}
+              <div style={{ backgroundColor: "#f8f7f4", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "24px" }}>
+                <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Ajouter un utilisateur</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                  <div>
+                    <label style={lbl}>NOM COMPLET</label>
+                    <input type="text" value={formAcces.nom} onChange={function(e) { setFormAcces(function(p) { return Object.assign({}, p, { nom: e.target.value }) }) }} placeholder="Ex: Marie Dupont" style={inp} />
+                  </div>
+                  <div>
+                    <label style={lbl}>ADRESSE EMAIL</label>
+                    <input type="email" value={formAcces.email} onChange={function(e) { setFormAcces(function(p) { return Object.assign({}, p, { email: e.target.value }) }) }} placeholder="marie@gse.bj" style={inp} />
+                  </div>
+                  <div>
+                    <label style={lbl}>MOT DE PASSE TEMPORAIRE</label>
+                    <input type="password" value={formAcces.password} onChange={function(e) { setFormAcces(function(p) { return Object.assign({}, p, { password: e.target.value }) }) }} placeholder="Min. 6 caractères" style={inp} />
+                  </div>
+                  <div>
+                    <label style={lbl}>RÔLE</label>
+                    <select value={formAcces.role} onChange={function(e) { setFormAcces(function(p) { return Object.assign({}, p, { role: e.target.value }) }) }} style={Object.assign({}, inp, { cursor: "pointer" })}>
+                      <option value="lecture">Lecture seule</option>
+                      <option value="admin">Administrateur</option>
+                    </select>
+                  </div>
+                </div>
+                {accesSaveMsg && <p style={{ fontSize: "12px", color: accesSaveMsg.includes("ajouté") ? "#1a6b38" : "#991b1b", marginBottom: "10px" }}>{accesSaveMsg}</p>}
+                <button onClick={async function() {
+                  if (!formAcces.email || !formAcces.nom || !formAcces.password) { setAccesSaveMsg("Tous les champs sont requis."); return }
+                  setAccesSaving(true); setAccesSaveMsg("")
+                  try {
+                    const res = await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_user", email: formAcces.email, nom: formAcces.nom, password: formAcces.password, role: formAcces.role }) })
+                    const d = await res.json()
+                    if (d.ok) {
+                      setAccesSaveMsg("Utilisateur ajouté avec succès.")
+                      setFormAcces({ email: "", nom: "", role: "lecture", password: "" })
+                      chargerAdminData()
+                    } else {
+                      setAccesSaveMsg(d.error || "Erreur lors de la création.")
+                    }
+                  } catch(e) { setAccesSaveMsg("Erreur réseau.") }
+                  setAccesSaving(false)
+                }} disabled={accesSaving} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: accesSaving ? "wait" : "pointer", fontFamily: "inherit", opacity: accesSaving ? 0.7 : 1 }}>
+                  {accesSaving ? "Création..." : "Créer l'utilisateur"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {onglet === "journal" && currentUser?.role === "admin" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+                <div>
+                  <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>📋 Journal d'activité</h2>
+                  <p style={{ fontSize: "13px", color: "#888" }}>Historique des 100 dernières actions effectuées dans le back-office.</p>
+                </div>
+                <button onClick={chargerAdminData} style={{ background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" }}>↻ Actualiser</button>
+              </div>
+
+              {journalEntries.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "48px", backgroundColor: "#f8f7f4", borderRadius: "12px", color: "#888" }}>
+                  <div style={{ fontSize: "32px", marginBottom: "12px" }}>📋</div>
+                  <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "6px" }}>Aucune activité enregistrée</div>
+                  <div style={{ fontSize: "13px" }}>Les actions des administrateurs apparaîtront ici.</div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  {journalEntries.map(function(entry) {
+                    var date = new Date(entry.created_at)
+                    var dateStr = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
+                    var heureStr = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+                    return (
+                      <div key={entry.id} style={{ backgroundColor: "#fff", border: "1px solid #f0ede6", borderRadius: "8px", padding: "12px 16px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                        <div style={{ flexShrink: 0, textAlign: "right", minWidth: "80px" }}>
+                          <div style={{ fontSize: "11px", fontWeight: "700", color: "#555" }}>{dateStr}</div>
+                          <div style={{ fontSize: "11px", color: "#aaa" }}>{heureStr}</div>
+                        </div>
+                        <div style={{ flex: 1, borderLeft: "2px solid #e8e6e0", paddingLeft: "14px" }}>
+                          <div style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "2px" }}>{entry.action}</div>
+                          {entry.details && <div style={{ fontSize: "12px", color: "#666" }}>{entry.details}</div>}
+                        </div>
+                        <div style={{ flexShrink: 0 }}>
+                          <span style={{ fontSize: "11px", backgroundColor: "#f0f8f3", color: "#1a6b38", border: "1px solid #bbf7d0", borderRadius: "20px", padding: "2px 8px" }}>{entry.user_nom || entry.user_email}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 
