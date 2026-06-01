@@ -1991,7 +1991,7 @@ function SectionClientsDevis({ db, agrement }) {
         setRapportIntervForm(function(prev) {
           return Object.assign({}, prev, {
             zonesTraitees: r.zonesTraitees || prev.zonesTraitees || '',
-            produitsUtilises: prev.produitsUtilises || r.produitsUtilises || '',
+            produitsUtilises: prev.produitsUtilises || '',
             methodeApplication: r.methodeApplication || prev.methodeApplication || '',
             dureeIntervention: r.dureeIntervention || prev.dureeIntervention || '',
             resultats: r.resultats || prev.resultats || '',

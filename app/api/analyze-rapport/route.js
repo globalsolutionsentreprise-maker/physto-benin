@@ -125,7 +125,6 @@ Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un lan
 
 {
   "zonesTraitees": "Description professionnelle des zones traitées avec précision",
-  "produitsUtilises": "Produits utilisés avec dosages et homologations si mentionnés",
   "methodeApplication": "Méthode(s) d'application employée(s)",
   "dureeIntervention": "Durée de l'intervention",
   "resultats": "Résultats obtenus et évaluation de l'efficacité du traitement",
