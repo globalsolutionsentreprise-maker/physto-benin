@@ -1135,8 +1135,8 @@ function SectionClientsDevis({ db, agrement }) {
       situation: (d.lieu_intervention) || (cl && cl.adresse) || '',
       dateDebut: '',
       dateFin: '',
-      matieres: (type === 'desinsect' || type === 'double') ? 'Deltaméthrine SC 12.5%\nCyperméthrine 10 CE' : 'Brodifacoum 0.005%\nBromadiolone 0.005%',
-      matieresDerat: type === 'double' ? 'Brodifacoum 0.005%\nBromadiolone 0.005%' : '',
+      matieres: (type === 'desinsect' || type === 'double') ? 'IMPERA 300 CS\nROCOGEL' : 'VERTOX',
+      matieresDerat: type === 'double' ? 'VERTOX' : '',
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
@@ -1244,10 +1244,10 @@ function SectionClientsDevis({ db, agrement }) {
 
         React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
           React.createElement('label', { style: lbl2 }, type === 'double' ? 'Matières actives — Désinsectisation' : 'Matières actives utilisées'),
-          React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: Deltaméthrine SC 12.5%\nCyperméthrine 10 CE', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) }),
+          React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: IMPERA 300 CS\nROCOGEL', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) }),
           type === 'double' && React.createElement('div', { style: { marginTop: '12px' } },
             React.createElement('label', { style: lbl2 }, 'Matières actives — Dératisation'),
-            React.createElement('textarea', { value: certForm.matieresDerat || '', onChange: function(e) { updateForm('matieresDerat', e.target.value) }, placeholder: 'Ex: Brodifacoum 0.005%\nBromadiolone 0.005%', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
+            React.createElement('textarea', { value: certForm.matieresDerat || '', onChange: function(e) { updateForm('matieresDerat', e.target.value) }, placeholder: 'Ex: VERTOX', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
           )
         ),
 
@@ -1824,7 +1824,7 @@ function SectionClientsDevis({ db, agrement }) {
           React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#fff7ed', border: '2px solid #fed7aa', borderRadius: '10px', padding: '16px' }) },
             React.createElement('label', { style: Object.assign({}, lbl2, { color: '#7c2d12', fontSize: '12px' }) }, '📝 Notes brutes du technicien'),
             React.createElement('p', { style: { fontSize: '12px', color: '#9a3412', marginBottom: '10px', lineHeight: '1.5' } }, 'Colle ici le retour du technicien. L\'IA va rédiger le rapport professionnel d\'intervention à partir de ces notes et des photos.'),
-            React.createElement('textarea', { value: rapportIntervForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 7, placeholder: 'Ex : "Zone cuisine traitée avec FICAM W, rats dans la réserve on a posé 4 boîtes Brodifacoum, quelques cafards dans les WC. Durée 2h. Client pas là au retour mais il faut revenir vérifier dans 15j..."', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fed7aa', fontSize: '13px', lineHeight: '1.6' }) })
+            React.createElement('textarea', { value: rapportIntervForm.notesTechnicien || '', onChange: function(e) { upd('notesTechnicien', e.target.value) }, rows: 7, placeholder: 'Ex : "Zone cuisine traitée avec IMPERA 300 CS, rats dans la réserve on a posé 4 boîtes VERTOX, quelques cafards dans les WC traités au ROCOGEL. Durée 2h. Client pas là au retour mais il faut revenir vérifier dans 15j..."', style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff', borderColor: '#fed7aa', fontSize: '13px', lineHeight: '1.6' }) })
           ),
 
           React.createElement('div', { style: section },
@@ -1878,7 +1878,7 @@ function SectionClientsDevis({ db, agrement }) {
 
           React.createElement('div', { style: section },
             React.createElement('label', { style: lbl2 }, 'Produits utilisés'),
-            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+            React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 2, placeholder: 'Ex: IMPERA 300 CS, ROCOGEL, VERTOX', style: Object.assign({}, inp2, { resize: 'vertical' }) })
           ),
 
           React.createElement('div', { style: section },
@@ -1958,7 +1958,7 @@ function SectionClientsDevis({ db, agrement }) {
       lieuPrestation: '',
       nuisibles: [],
       autresNuisible: '',
-      produits: { insecticides: '', raticides: '', desinfectants: '', fumigants: '', phytosanitaires: '', autres: '' },
+      produits: { insecticides: 'IMPERA 300 CS / ROCOGEL', raticides: 'VERTOX', desinfectants: '', fumigants: '', phytosanitaires: '', autres: '' },
       produitsCoches: [],
       dureeDebut: '',
       dureeFin: '',
