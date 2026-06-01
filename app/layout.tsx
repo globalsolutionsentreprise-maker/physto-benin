@@ -4,17 +4,34 @@ import "./globals.css"
 import Footer from "./components/Footer"
 
 export const metadata: Metadata = {
-  title: "Phyto Bénin - Desinsectisation Cotonou | 24h/24",
-  description: "Desinsectisation, deratisation, desinfection au Benin. Techniciens certifies, produits homologues. Intervention rapide 24h/24 a Cotonou.",
-  keywords: "desinsectisation Cotonou, deratisation Benin, desinfection hotel, cafards Cotonou, termites Benin",
-  metadataBase: new URL("https://phyto-benin.vercel.app"),
+  title: "Phyto Bénin - Désinsectisation Cotonou | 24h/24",
+  description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens certifiés, produits homologués. Intervention rapide 24h/24 à Cotonou.",
+  keywords: "désinsectisation Cotonou, dératisation Bénin, désinfection hôtel, cafards Cotonou, termites Bénin, hygiène sanitaire Bénin, punaises de lit Cotonou",
+  metadataBase: new URL("https://www.phyto-benin.bj"),
+  alternates: {
+    canonical: "https://www.phyto-benin.bj",
+  },
   openGraph: {
-    title: "Phyto Bénin - Hygiene Sanitaire Professionnelle",
-    description: "Desinsectisation, deratisation, desinfection au Benin. Intervention rapide 24h/24.",
-    url: "https://phyto-benin.vercel.app",
-    siteName: "Phyto Bénin",
+    title: "Phyto Bénin — Hygiène Sanitaire Professionnelle au Bénin",
+    description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens agréés par l'État. Intervention rapide 24h/24 à Cotonou.",
+    url: "https://www.phyto-benin.bj",
+    siteName: "Phyto Bénin by GSE",
     locale: "fr_FR",
     type: "website",
+    images: [
+      {
+        url: "https://www.phyto-benin.bj/images/hero-bg.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Phyto Bénin — Désinsectisation et dératisation professionnelle au Bénin",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Phyto Bénin — Hygiène Sanitaire 24h/24",
+    description: "Désinsectisation, dératisation, désinfection au Bénin. Intervention rapide à Cotonou.",
+    images: ["https://www.phyto-benin.bj/images/hero-bg.jpg"],
   },
 }
 
@@ -25,6 +42,58 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/logo-gse.jpeg" type="image/jpeg" />
         <meta name="theme-color" content="#0a2e1a" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* Schema.org LocalBusiness */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Phyto Bénin by GSE — Global Solutions Entreprise",
+          "description": "Spécialiste en hygiène sanitaire et phytosanitaire au Bénin. Désinsectisation, dératisation, désinfection, anti-termites. Agréé par l'État béninois.",
+          "url": "https://www.phyto-benin.bj",
+          "logo": "https://www.phyto-benin.bj/logo-gse.jpeg",
+          "image": "https://www.phyto-benin.bj/images/hero-bg.jpg",
+          "telephone": "+22901530 47950",
+          "email": "contact@phyto-benin.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cotonou",
+            "addressRegion": "Littoral",
+            "addressCountry": "BJ"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "6.3654",
+            "longitude": "2.4183"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          },
+          "areaServed": [
+            { "@type": "City", "name": "Cotonou" },
+            { "@type": "City", "name": "Abomey-Calavi" },
+            { "@type": "City", "name": "Porto-Novo" },
+            { "@type": "City", "name": "Ouidah" },
+            { "@type": "Country", "name": "Bénin" }
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Services d'hygiène sanitaire",
+            "itemListElement": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Désinsectisation", "description": "Élimination complète des insectes nuisibles : cafards, fourmis, moustiques, mouches." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Dératisation", "description": "Intervention sécurisée contre les rongeurs : rats, souris." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Désinfection", "description": "Assainissement complet des locaux avec produits virucides et bactéricides certifiés." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Anti-termites", "description": "Protection durable des structures contre les termites." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Reptiles et Serpents", "description": "Sécurisation contre les reptiles, geckos et serpents." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Punaises de lit", "description": "Élimination garantie des punaises de lit par traitement thermique et chimique." } }
+            ]
+          },
+          "sameAs": [
+            "https://wa.me/2290153047950"
+          ]
+        })}} />
 
         {/* Google Analytics GA4 — G-9XPCMJE1PJ */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-9XPCMJE1PJ" />
