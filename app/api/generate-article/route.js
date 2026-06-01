@@ -68,14 +68,40 @@ RETOURNE UNIQUEMENT ce JSON valide (sans markdown, sans backticks) :
   const data = await geminiRes.json()
   const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || ""
 
-  // Nettoyer les backticks markdown éventuels
-  const cleaned = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim()
+  // Extraire le JSON même s'il est entouré de texte ou de backticks
+  let cleaned = raw
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim()
+
+  // Si l'IA a quand même mis du texte avant/après, extraire le premier bloc JSON
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+  if (jsonMatch) cleaned = jsonMatch[0]
 
   try {
     const article = JSON.parse(cleaned)
     if (!article.titre || !article.contenu) throw new Error("Champs manquants")
+    // Valeurs par défaut si champs optionnels absents
+    if (!article.categorie) article.categorie = "HYGIÈNE PROFESSIONNELLE"
+    if (!article.resume) article.resume = article.titre
+    if (!article.lecture) article.lecture = "5 min"
     return NextResponse.json({ ok: true, article })
   } catch {
-    return NextResponse.json({ error: "L'IA n'a pas retourné un format valide. Réessaie.", raw }, { status: 422 })
+    // Dernier recours : construire un article minimal depuis le texte brut
+    if (raw.length > 100) {
+      const lines = raw.split("\n").filter(Boolean)
+      return NextResponse.json({
+        ok: true,
+        article: {
+          titre: lines[0]?.replace(/^#+\s*/, "").substring(0, 80) || "Article",
+          categorie: "HYGIÈNE PROFESSIONNELLE",
+          resume: lines[1]?.substring(0, 200) || "",
+          contenu: raw,
+          lecture: "5 min",
+        }
+      })
+    }
+    return NextResponse.json({ error: "L'IA n'a pas retourné de contenu. Réessaie.", raw }, { status: 422 })
   }
 }
