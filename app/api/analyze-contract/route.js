@@ -5,6 +5,26 @@ export const dynamic = "force-dynamic"
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
+async function callGeminiWithRetry(body, maxRetries = 3) {
+  let lastErr
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const res = await fetch(`${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    if (res.ok) return res
+    const errData = await res.json().catch(() => ({}))
+    lastErr = errData
+    if ((res.status === 503 || res.status === 429) && attempt < maxRetries) {
+      await new Promise(r => setTimeout(r, attempt * 2000))
+      continue
+    }
+    throw Object.assign(new Error("Gemini " + res.status), { data: errData })
+  }
+  throw Object.assign(new Error("Gemini unavailable après " + maxRetries + " tentatives"), { data: lastErr })
+}
+
 export async function POST(req) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -112,18 +132,14 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
   "paiementRecommande": "${freqClient ? freqClient.paiement : "trimestriel_avance"}"
 }`
 
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    let geminiRes
+    try {
+      geminiRes = await callGeminiWithRetry({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
       })
-    })
-
-    if (!geminiRes.ok) {
-      const err = await geminiRes.json()
-      return NextResponse.json({ error: "Gemini error: " + JSON.stringify(err) }, { status: 500 })
+    } catch (e) {
+      return NextResponse.json({ error: "❌ Gemini indisponible — réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
     }
 
     const geminiData = await geminiRes.json()
