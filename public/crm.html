@@ -1001,18 +1001,23 @@ async function addDepClient(){
     ?(document.getElementById("ndlib-prest")?.value||"").trim()
     :(document.getElementById("ndlib")?.value||"").trim();
   const mt=parseInt(document.getElementById("ndmt")?.value||"0")||0;
-  if(!lib||!mt)return;
-  const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_dep_client",devisId,libelle:lib,montant:mt,categorie:cat})});
-  const r=await res.json();
-  if(r.ok&&r.dep){
-    currentDepItems.push(r.dep);
-    const c=clients.find(c=>c.id===devisId);
-    if(c){c.depensesItems=[...currentDepItems];c.depenses=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);}
-    if(isPrest){document.getElementById("ndlib-prest").value="";}
-    else{document.getElementById("ndlib").value="";}
-    document.getElementById("ndmt").value="";
-    renderDepItems();
-  }
+  if(isPrest&&!lib){toast("Sélectionnez un technicien dans la liste");return;}
+  if(!isPrest&&!lib){toast("Saisissez un libellé");return;}
+  if(!mt){toast("Saisissez un montant");return;}
+  try{
+    const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_dep_client",devisId,libelle:lib,montant:mt,categorie:cat})});
+    const r=await res.json();
+    if(r.ok&&r.dep){
+      currentDepItems.push(r.dep);
+      const c=clients.find(c=>c.id===devisId);
+      if(c){c.depensesItems=[...currentDepItems];c.depenses=currentDepItems.reduce((s,i)=>s+(i.montant||0),0);}
+      if(isPrest){const sel=document.getElementById("ndlib-prest");if(sel)sel.selectedIndex=0;}
+      else{const inp=document.getElementById("ndlib");if(inp)inp.value="";}
+      const mtEl=document.getElementById("ndmt");if(mtEl)mtEl.value="";
+      renderDepItems();
+      toast("Dépense ajoutée");
+    }else{toast("Erreur — réessayez");}
+  }catch(e){toast("Erreur réseau — réessayez");}
 }
 
 async function delDepClient(depId){
