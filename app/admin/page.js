@@ -2013,6 +2013,15 @@ function SectionClientsDevis({ db, agrement }) {
     if (w) { w.document.write(html); w.document.close() }
   }
 
+  async function supprimerRapportInterv() {
+    var editingId = rapportIntervModal?.editingId
+    if (!editingId) return
+    if (!window.confirm('Supprimer ce rapport d\'intervention définitivement ?')) return
+    await db.from('rapports_intervention').delete().eq('id', editingId)
+    setRapportIntervModal(null)
+    await charger()
+  }
+
   async function sauvegarderRapportInterv() {
     if (!rapportIntervModal) return
     setSavingRapportInterv(true)
@@ -2176,7 +2185,10 @@ function SectionClientsDevis({ db, agrement }) {
           ) : null,
 
           React.createElement('div', { style: { display: 'flex', gap: '10px', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #f0ede8', flexWrap: 'wrap' } },
-            React.createElement('button', { onClick: function() { setRapportIntervPhase('saisie') }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, '◀ Modifier les notes'),
+            React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+              React.createElement('button', { onClick: function() { setRapportIntervPhase('saisie') }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, '◀ Modifier les notes'),
+              rapportIntervModal?.editingId && React.createElement('button', { onClick: supprimerRapportInterv, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '9px 14px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
+            ),
             React.createElement('div', { style: { display: 'flex', gap: '8px' } },
               React.createElement('button', { onClick: imprimerRapportInterv, style: { background: '#fff7ed', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '6px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' } }, '🖨️ Aperçu & Imprimer'),
               React.createElement('button', { onClick: sauvegarderRapportInterv, disabled: savingRapportInterv, style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, savingRapportInterv ? '⏳ Enregistrement...' : '💾 Enregistrer')
