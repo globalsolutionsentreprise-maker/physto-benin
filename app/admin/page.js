@@ -1125,7 +1125,7 @@ function SectionClientsDevis({ db, agrement }) {
     var jour = String(now.getDate()).padStart(2, '0')
     var mois = String(now.getMonth() + 1).padStart(2, '0')
     setCertForm({
-      ref: type === 'desinsect' ? '001/26' : '002/26',
+      ref: type === 'desinsect' ? '001/26' : type === 'double' ? '001-002/26' : '002/26',
       dateJour: jour,
       dateMois: mois,
       entreprise: (cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' '),
@@ -1135,7 +1135,8 @@ function SectionClientsDevis({ db, agrement }) {
       situation: (d.lieu_intervention) || (cl && cl.adresse) || '',
       dateDebut: '',
       dateFin: '',
-      matieres: type === 'desinsect' ? 'Deltaméthrine SC 12.5%\nCyperméthrine 10 CE' : 'Brodifacoum 0.005%\nBromadiolone 0.005%',
+      matieres: (type === 'desinsect' || type === 'double') ? 'Deltaméthrine SC 12.5%\nCyperméthrine 10 CE' : 'Brodifacoum 0.005%\nBromadiolone 0.005%',
+      matieresDerat: type === 'double' ? 'Brodifacoum 0.005%\nBromadiolone 0.005%' : '',
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
@@ -1191,6 +1192,7 @@ function SectionClientsDevis({ db, agrement }) {
       dateDebut: form.dateDebut || '',
       dateFin: form.dateFin || '',
       matieres: form.matieres || [form.matiere1, form.matiere2, form.matiere3].filter(Boolean).join('\n') || '',
+      matieresDerat: form.matieresDerat || '',
     })
     setCertModal({ type: cert.type, devis: devis || { id: cert.devis_id, client_id: cert.client_id }, cl: client, editingId: cert.id, existingNumero: cert.numero_unique })
   }
@@ -1198,7 +1200,7 @@ function SectionClientsDevis({ db, agrement }) {
   function renderCertModal() {
     if (!certModal) return null
     var type = certModal.type
-    var title = type === 'desinsect' ? 'Certificat de Désinsectisation' : 'Certificat de Dératisation'
+    var title = type === 'desinsect' ? 'Certificat de Désinsectisation' : type === 'double' ? 'Certificat de Désinsectisation & Dératisation' : 'Certificat de Dératisation'
     var updateForm = function(field, val) {
       setCertForm(function(prev) { return Object.assign({}, prev, { [field]: val }) })
     }
@@ -1241,8 +1243,12 @@ function SectionClientsDevis({ db, agrement }) {
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
-          React.createElement('label', { style: lbl2 }, 'Matières actives utilisées'),
-          React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: Deltaméthrine SC 12.5%\nCyperméthrine 10 CE', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
+          React.createElement('label', { style: lbl2 }, type === 'double' ? 'Matières actives — Désinsectisation' : 'Matières actives utilisées'),
+          React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: Deltaméthrine SC 12.5%\nCyperméthrine 10 CE', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) }),
+          type === 'double' && React.createElement('div', { style: { marginTop: '12px' } },
+            React.createElement('label', { style: lbl2 }, 'Matières actives — Dératisation'),
+            React.createElement('textarea', { value: certForm.matieresDerat || '', onChange: function(e) { updateForm('matieresDerat', e.target.value) }, placeholder: 'Ex: Brodifacoum 0.005%\nBromadiolone 0.005%', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
+          )
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', fontSize: '11px', color: '#065f46' } },
@@ -2685,10 +2691,10 @@ function SectionClientsDevis({ db, agrement }) {
               }),
               certsDevis.map(function(cert) {
                 return React.createElement('div', { key: cert.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + (cert.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: cert.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: '8px', padding: '8px 12px' } },
-                  React.createElement('span', null, cert.type === 'desinsect' ? '🪲' : '🐭'),
+                  React.createElement('span', null, cert.type === 'desinsect' ? '🪲' : cert.type === 'double' ? '🪲🐭' : '🐭'),
                   React.createElement('div', null,
                     React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, cert.numero_unique),
-                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, cert.type === 'desinsect' ? 'Certificat désinsect.' : 'Certificat dératisation')
+                    React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, cert.type === 'desinsect' ? 'Certificat désinsect.' : cert.type === 'double' ? 'Certificat combiné' : 'Certificat dératisation')
                   ),
                   React.createElement('button', { onClick: function() { toggleCertEnvoye(cert) }, style: { background: cert.envoye ? '#0a2e1a' : '#fff', color: cert.envoye ? '#fff' : '#999', border: '1px solid ' + (cert.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, cert.envoye ? '✓ Envoyé' : 'Marquer envoyé'),
                   React.createElement('button', { onClick: function() { rouvrirCertModal(cert, d, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
@@ -2724,6 +2730,7 @@ function SectionClientsDevis({ db, agrement }) {
             React.createElement('button', { onClick: function() { ouvrirFicheModal(cl, d) }, style: { background: '#f5f3ff', border: '1px solid #ddd6fe', color: '#5b21b6', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📋 Fiche de passage'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
+            d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('double', d) }, style: { background: '#f0fdf4', border: '1px solid #6ee7b7', color: '#064e3b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲🐭 Désinsect. + Dératis.'),
             React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
             React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
           )
@@ -3147,8 +3154,8 @@ function SectionClientsDevis({ db, agrement }) {
             docsFiltres.map(function(doc) {
               var isContrat = doc._type === "contrat"
               var isCert    = doc._type === "cert"
-              var icon = isContrat ? "📄" : isCert ? (doc.sousType === "desinsect" ? "🪲" : "🐭") : "📋"
-              var typeLabel = isContrat ? "Contrat d'entretien" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : "Certificat Dératisation") : "Fiche de passage"
+              var icon = isContrat ? "📄" : isCert ? (doc.sousType === "desinsect" ? "🪲" : doc.sousType === "double" ? "🪲🐭" : "🐭") : "📋"
+              var typeLabel = isContrat ? "Contrat d'entretien" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : doc.sousType === "double" ? "Certificat Combiné" : "Certificat Dératisation") : "Fiche de passage"
               var clientNom = doc.client ? ([doc.client.prenom, doc.client.nom].filter(Boolean).join(" ") + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
               var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "—"
               var borderColor = isContrat ? "#e9d5ff" : "#e8e6e0"
@@ -3310,15 +3317,35 @@ function gseFooter() {
 }
 
 function buildCertificatHtml(type, form) {
-  var titre = type === 'desinsect' ? 'CERTIFICAT DE DÉSINSECTISATION' : 'CERTIFICAT DE DÉRATISATION'
-  var operationType = type === 'desinsect' ? 'désinsectisation' : 'dératisation'
+  var isDouble = type === 'double'
+  var titre = type === 'desinsect' ? 'CERTIFICAT DE DÉSINSECTISATION'
+             : isDouble ? 'CERTIFICAT DE DÉSINSECTISATION ET DE DÉRATISATION'
+             : 'CERTIFICAT DE DÉRATISATION'
+  var operationType = type === 'desinsect' ? 'désinsectisation'
+                    : isDouble ? 'désinsectisation et de dératisation'
+                    : 'dératisation'
   var methode = type === 'desinsect'
     ? "L'opération est réalisée par pulvérisation au moyen des produits homologués ci-après."
+    : isDouble
+    ? "L'opération de désinsectisation est réalisée par pulvérisation au moyen des produits homologués ci-après. L'opération de dératisation est réalisée par disposition de produit homologué dans les PVC (boîtes d'appâts)."
     : "L'opération est réalisée par disposition de produit homologué dans les PVC (boîtes d'appâts)."
 
-  var rowsHtml = (form.matieres || '').trim()
-    ? '<tr><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line">' + (form.matieres || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600">Agrément APA/26-025/CNGP-BEN</td></tr>'
-    : ''
+  var rowsHtml
+  if (isDouble) {
+    var cellStyle = 'border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line'
+    var agrtStyle = 'border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600'
+    var rowDes = (form.matieres || '').trim()
+      ? '<tr><td style="' + cellStyle + '"><strong>Désinsectisation :</strong><br>' + (form.matieres || '') + '</td><td style="' + agrtStyle + '">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      : ''
+    var rowRat = (form.matieresDerat || '').trim()
+      ? '<tr><td style="' + cellStyle + '"><strong>Dératisation :</strong><br>' + (form.matieresDerat || '') + '</td><td style="' + agrtStyle + '">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      : ''
+    rowsHtml = rowDes + rowRat
+  } else {
+    rowsHtml = (form.matieres || '').trim()
+      ? '<tr><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line">' + (form.matieres || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      : ''
+  }
 
   var dateExec = (form.dateDebut && form.dateFin)
     ? 'du <strong>' + form.dateDebut + '</strong> au <strong>' + form.dateFin + '</strong> 2026'
