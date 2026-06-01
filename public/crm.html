@@ -995,7 +995,7 @@ async function addDepClient(){
   const cat=document.getElementById("ndcat")?.value||"autre";
   const lib=(document.getElementById("ndlib")?.value||"").trim();
   const mt=parseInt(document.getElementById("ndmt")?.value||"0")||0;
-  if(!lib&&!mt)return;
+  if(!lib||!mt)return;
   const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_dep_client",devisId,libelle:lib,montant:mt,categorie:cat})});
   const r=await res.json();
   if(r.ok&&r.dep){
