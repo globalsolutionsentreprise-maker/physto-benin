@@ -7,8 +7,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const MOT_DE_PASSE = "phyto-benin2025"
-
 const CHIFFRES_DEFAUT = [
   { id: 1, valeur: "+50", label: "Clients proteges", ordre: 1 },
   { id: 2, valeur: "2h", label: "Delai intervention", ordre: 2 },
@@ -71,12 +69,6 @@ export default function Admin() {
           }
         } catch(e) {}
         await supabase.auth.signOut()
-      }
-      // Fallback legacy auth
-      if (localStorage.getItem("phyto-benin_admin_v4") === "oui") {
-        setCurrentUser({ email: "admin@gse.bj", nom: "Administrateur", role: "admin" })
-        setConnecte(true)
-        chargerTout()
       }
     })
   }, [])
@@ -189,20 +181,11 @@ export default function Admin() {
       return
     }
 
-    // Fallback : ancien mot de passe (accès d'urgence)
-    if (mdp === MOT_DE_PASSE) {
-      setCurrentUser({ email: "admin@gse.bj", nom: "Administrateur", role: "admin" })
-      setConnecte(true)
-      localStorage.setItem("phyto-benin_admin_v4", "oui")
-      chargerTout()
-    } else {
-      setErreurMdp(true)
-    }
+    setErreurMdp(true)
   }
 
   async function seDeconnecter() {
     await supabase.auth.signOut()
-    localStorage.removeItem("phyto-benin_admin_v4")
     setConnecte(false)
     setCurrentUser(null)
   }

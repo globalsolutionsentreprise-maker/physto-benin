@@ -154,6 +154,22 @@ textarea{height:70px;resize:vertical;}
 <div class="toast" id="toast"></div>
 
 <script>
+// Injecte automatiquement le token Supabase sur les appels API internes
+(function(){
+  const _f=window.fetch;
+  window.fetch=function(url,opts){
+    opts=opts||{};
+    if(typeof url==='string'&&(url.startsWith('/api/crm-data')||url.startsWith('/api/rh-data'))){
+      try{
+        const raw=localStorage.getItem('sb-ijgjdtfaimamcrrnyrvk-auth-token');
+        const tok=raw&&JSON.parse(raw)?.access_token;
+        if(tok){opts={...opts,headers:{...opts.headers,'Authorization':'Bearer '+tok}};}
+      }catch(e){}
+    }
+    return _f.call(this,url,opts);
+  };
+})();
+
 // ── État global ───────────────────────────────────────────────────────────────
 let membres=[], plannings=[], contratsCRM=[], tousCRM=[];
 let activeTab="equipe", editMembreId=null, editIntervId=null;

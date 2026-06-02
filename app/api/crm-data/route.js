@@ -7,11 +7,20 @@ const supabase = createClient(
 
 export const dynamic = "force-dynamic"
 
+async function verifyAdmin(req) {
+  const token = req.headers.get("authorization")?.replace("Bearer ", "")
+  if (!token) return null
+  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const { data: { user } } = await anon.auth.getUser(token)
+  return user || null
+}
+
 function mapStatut(statut) {
   return { brouillon: "contact", envoye: "devis", accepte: "attente", modification_demandee: "relance", en_cours: "attente", termine: "converti", annule: "echec" }[statut] || "contact"
 }
 
-export async function GET() {
+export async function GET(req) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
@@ -88,6 +97,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const body = await req.json()
   const { action } = body
 

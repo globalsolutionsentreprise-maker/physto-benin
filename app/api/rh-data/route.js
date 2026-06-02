@@ -7,7 +7,16 @@ const supabase = createClient(
 
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+async function verifyAdmin(req) {
+  const token = req.headers.get("authorization")?.replace("Bearer ", "")
+  if (!token) return null
+  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const { data: { user } } = await anon.auth.getUser(token)
+  return user || null
+}
+
+export async function GET(req) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const [{ data: personnel }, { data: interventions }, { data: devisList }, { data: tousDevis }] = await Promise.all([
     supabase.from("personnel").select("*").order("nom"),
     supabase.from("interventions").select("*, personnel(id,nom,prenom,poste)").order("date_intervention"),
@@ -56,6 +65,7 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const body = await req.json()
   const { action } = body
 

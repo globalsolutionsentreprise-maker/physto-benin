@@ -1,9 +1,6 @@
 // app/api/create-payment/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import https from "https"
-
-const httpsAgent = new https.Agent({ rejectUnauthorized: false })
 
 const FEDAPAY_SECRET = process.env.FEDAPAY_SECRET_KEY!
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -76,8 +73,6 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers,
       signal: AbortSignal.timeout(20000),
-      // @ts-ignore
-      agent: httpsAgent,
       body: JSON.stringify({
         description,
         amount: montant,
@@ -130,8 +125,6 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers,
       signal: AbortSignal.timeout(20000),
-      // @ts-ignore
-      agent: httpsAgent,
     })
     const tokenData = await tokenRes.json()
     const token = tokenData?.v1?.token || tokenData?.token
