@@ -1927,6 +1927,46 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).filter(function(u) { return u !== url }) }) })
   }
 
+  async function extraireFramesVideo(file, formSetter, setExtracting) {
+    var objectUrl = URL.createObjectURL(file)
+    var video = document.createElement('video')
+    video.src = objectUrl
+    video.muted = true
+    video.playsInline = true
+    try {
+      await new Promise(function(resolve, reject) {
+        video.onloadedmetadata = resolve
+        video.onerror = reject
+        setTimeout(reject, 15000)
+      })
+      var duration = video.duration
+      if (!duration || !isFinite(duration) || duration === 0) return
+      var timestamps = [0.2, 0.4, 0.6, 0.8].map(function(p) { return p * duration })
+      for (var ti = 0; ti < timestamps.length; ti++) {
+        setExtracting('⏳ Frames ' + (ti + 1) + '/4 — ' + file.name)
+        video.currentTime = timestamps[ti]
+        await new Promise(function(resolve) {
+          video.onseeked = resolve
+          setTimeout(resolve, 3000)
+        })
+        var canvas = document.createElement('canvas')
+        canvas.width = Math.min(video.videoWidth, 1280)
+        canvas.height = Math.round(video.videoHeight * (canvas.width / video.videoWidth))
+        var ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        var blob = await new Promise(function(resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.8) })
+        if (!blob) continue
+        var frameFile = new File([blob], 'frame-' + Math.round(timestamps[ti]) + 's.jpg', { type: 'image/jpeg' })
+        await uploaderPhotoRapport(frameFile, function() {}, formSetter)
+      }
+    } catch (e) {
+      // skip failed video silently
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+      setExtracting(null)
+    }
+  }
+
   async function genererRapportVisiteIA() {
     if (!rapportVisiteModal) return
     setGeneratingRapportVisite(true)
