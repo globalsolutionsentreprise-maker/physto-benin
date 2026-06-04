@@ -249,7 +249,7 @@ const ST=[
   {key:"converti",label:"Converti / Facturé",bg:"#E1F5EE",tc:"#04342C",ac:"#1D9E75"},
   {key:"echec",  label:"Échec / Perdu", bg:"#F1EFE8",tc:"#2C2C2A",ac:"#5F5E5A"},
 ];
-const PRESTATIONS=["Dératisation & Pulvérisation","Dératisation seule","Pulvérisation seule","Désinsectisation & Désinfection","Phytosanitaire & Reptiles","Multi-services (combiné)","Autre"];
+const PRESTATIONS=["Dératisation","Désinsectisation","Désinfection","Traitement phytosanitaire"];
 const CATEGORIES=["Particulier","Entreprise","Institution / Administration","Association","Autre"];
 const MOTIFS=["—","Prix trop élevé","Concurrent retenu","Pas de budget","Sans réponse client","Délai de réalisation","Autre"];
 
@@ -1136,7 +1136,7 @@ function formH(c){
       </div>
       <div class="fg-full">
         <label class="fl">Type de prestation</label>
-        <select id="ftp">${PRESTATIONS.map(p=>`<option ${c?.typePrestation===p?"selected":""}>${p}</option>`).join("")}</select>
+        <select id="ftp">${["—",...PRESTATIONS,"Combiné (plusieurs prestations)"].map(p=>`<option ${(c?.typePrestation||"—")===p?"selected":""}>${p}</option>`).join("")}</select>
       </div>
       <div>
         <label class="fl">Catégorie client</label>
@@ -1333,6 +1333,12 @@ async function saveDevisFields(){
           montantBrut:body.montantBrut,remise:body.remise,remiseType:body.remiseType,
           pctAcompte:body.pctAcompte,conditionsPaiement:body.conditionsPaiement,
           montantDevis:r.montantNet,commentaire:body.description};
+      }
+      // Synchronise le select "Type de prestation" de la fiche client
+      const ftpEl=document.getElementById("ftp");
+      if(ftpEl){
+        const val=prestations.length===1?prestations[0]:prestations.length>1?"Combiné (plusieurs prestations)":"—";
+        ftpEl.value=val;
       }
       toast("Devis sauvegardé");refresh();
     }else{toast(r.error||"Erreur sauvegarde");}
