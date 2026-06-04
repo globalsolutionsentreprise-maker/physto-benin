@@ -2819,6 +2819,21 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
           (d.conditionsPaiement ? "<div style=\"margin-top:10px;font-size:12px;color:#374151;border-top:1px solid #d1fae5;padding-top:10px\">" + d.conditionsPaiement + "</div>" : "") +
           "</div>"
       })() +
+      (function() {
+        var pA2 = d.pctAcompte || 60
+        var mA2 = Math.round(Number(d.montantNet) * pA2 / 100)
+        return "<div style=\"background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:18px 20px;margin-bottom:18px;\">" +
+          "<div style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.12em;margin-bottom:12px;\">PAIEMENT PAR MOBILE MONEY</div>" +
+          "<div style=\"display:flex;align-items:center;gap:12px;margin-bottom:12px;\">" +
+          "<div style=\"width:40px;height:40px;background:#ffcc00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;\">📱</div>" +
+          "<div><div style=\"font-size:14px;font-weight:700;color:#111;\">MTN MoMo Pay</div>" +
+          "<div style=\"font-size:12px;color:#888;\">Réglez votre acompte de <strong>" + mA2.toLocaleString("fr-FR") + " FCFA</strong> instantanément depuis votre téléphone MTN</div></div></div>" +
+          "<div style=\"background:#fff;border:1.5px solid #ffe082;border-radius:6px;padding:12px 14px;margin-bottom:8px;\">" +
+          "<div style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.1em;margin-bottom:6px;\">CODE USSD — COMPOSEZ :</div>" +
+          "<div style=\"font-size:18px;font-weight:700;color:#111;letter-spacing:0.04em;font-family:monospace;\">*880*41*893118*<span style=\"color:#b45309;\">" + mA2.toLocaleString("fr-FR") + "</span>#</div></div>" +
+          "<div style=\"font-size:11px;color:#888;line-height:1.6;\">Composez ce code depuis votre téléphone MTN, validez le paiement, puis envoyez la capture à GSE pour confirmation.</div>" +
+          "</div>"
+      })() +
       "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · contact@phyto-benin.com</div>" +
       gseSigs() +
       "</div>" +
@@ -2904,9 +2919,11 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                 type: "checkbox",
                 checked: checked,
                 onChange: function() {
-                  var current = formDevis.prestations || []
-                  var newList = checked ? current.filter(function(x) { return x !== p }) : current.concat([p])
-                  setFormDevis(Object.assign({}, formDevis, { prestations: newList }))
+                  setFormDevis(function(prev) {
+                    var current = prev.prestations || []
+                    var newList = current.includes(p) ? current.filter(function(x) { return x !== p }) : current.concat([p])
+                    return Object.assign({}, prev, { prestations: newList })
+                  })
                 },
                 style: { accentColor: "#0a2e1a", width: "14px", height: "14px", flexShrink: 0 }
               }),
