@@ -46,7 +46,7 @@ export async function GET(req) {
     })
   }
 
-  const clients = (devisList || []).map(d => {
+  const clients = (devisList || []).filter(d => d.crm_statut !== null).map(d => {
     const cl = d.clients || {}
     const nom = [cl.prenom, cl.nom].filter(Boolean).join(" ") || cl.entreprise || "Client"
     const items = depItemsByDevis[d.id] || []
