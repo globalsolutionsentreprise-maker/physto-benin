@@ -1112,7 +1112,9 @@ function closeModal(){document.getElementById("modal").style.display="none";edit
 function formH(c){
   const ie=!!c;
   const prestSaved=(c?.prestation||"").split(", ").filter(Boolean);
-  const prestChecks=PRESTATIONS.map((p,i)=>`<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:5px 9px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg);white-space:nowrap;"><input type="checkbox" id="fdp_${i}" value="${p.replace(/"/g,"&quot;")}" ${prestSaved.includes(p)?"checked":""} onchange="calcDevis()" style="width:auto;margin:0;"> ${p}</label>`).join("");
+  const ppp=c?.prixParPrestation||{};
+  const prestChecks=PRESTATIONS.map((p,i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:5px 9px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg);white-space:nowrap;" onclick="document.getElementById('fdp_${i}').click()"><input type="checkbox" id="fdp_${i}" value="${p.replace(/"/g,"&quot;")}" ${prestSaved.includes(p)?"checked":""} onchange="calcDevis()" style="width:auto;margin:0;pointer-events:none;"> ${p}</div>`).join("");
+  const prixParPrestRows=PRESTATIONS.map((p,i)=>`<div id="fdppm2-row-${i}" style="display:${prestSaved.includes(p)?"flex":"none"};align-items:center;gap:10px;margin-bottom:8px;"><span style="flex:1;font-size:13px;color:#0a2e1a;font-weight:600;">${p}</span><input type="number" id="fdppm2_${i}" min="0" placeholder="Ex: 300" value="${ppp[p]||""}" oninput="calcDevis()" style="width:110px;text-align:right;"><span id="fdppm2_amt_${i}" style="font-size:12px;color:#888;min-width:130px;text-align:right;">${(ppp[p]&&c?.superficie)?'= '+Math.round(Number(c.superficie)*Number(ppp[p])).toLocaleString('fr-FR')+' FCFA':'= —'}</span></div>`).join("");
   return`<div class="modal-hdr">
     <span class="modal-title">${ie?"Modifier · "+c.client:"Nouveau client / prospect"}</span>
     <button class="btn-s" onclick="closeModal()" style="padding:5px 10px;"><i class="ti ti-x" aria-hidden="true"></i></button>
@@ -1215,8 +1217,16 @@ function formH(c){
         <label class="fl" style="margin-bottom:6px;">Prestations</label>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">${prestChecks}</div>
       </div>
-      <div><label class="fl">Superficie (m²)</label><input type="number" id="fdsup" min="0" placeholder="Ex: 500" value="${c?.superficie||""}" oninput="calcDevis()"></div>
-      <div><label class="fl">Prix au m² (FCFA)</label><input type="number" id="fdpm2" min="0" placeholder="Ex: 400" value="${c?.prixM2||""}" oninput="calcDevis()"></div>
+      <div class="fg-full"><label class="fl">Superficie (m²)</label><input type="number" id="fdsup" min="0" placeholder="Ex: 500" value="${c?.superficie||""}" oninput="calcDevis()"></div>
+      <div id="fd-pm2-single" class="fg-full" style="${prestSaved.length>=1?"display:none;":""}"><label class="fl">Prix au m² (FCFA)</label><input type="number" id="fdpm2" min="0" placeholder="Ex: 400" value="${c?.prixM2||""}" oninput="calcDevis()"></div>
+      <div id="fd-pm2-multi" class="fg-full" style="${prestSaved.length>=1?"":"display:none;"};background:#f8f7f4;border:1px solid #e0ddd6;border-radius:8px;padding:14px 16px;">
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Prix par prestation (FCFA/m²)</div>
+        ${prixParPrestRows}
+        <div style="border-top:1px solid #e0ddd6;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#0a2e1a;">
+          <span>Total prestations</span>
+          <span id="fdppm2_total">${(()=>{const s=prestSaved.reduce((sum,p)=>{const i=PRESTATIONS.indexOf(p);const v=ppp[p]?Number(ppp[p]):0;return sum+(c?.superficie&&v?Math.round(Number(c.superficie)*v):0);},0);return s>0?s.toLocaleString('fr-FR')+' FCFA':'—';})()}</span>
+        </div>
+      </div>
       <div class="fg-full">
         <label class="fl">Prix de base FCFA <span style="font-weight:400;color:var(--text-3);font-size:11px;">— calculé auto si superficie × m² renseignés</span></label>
         <input type="number" id="fdbrt" min="0" placeholder="200000" value="${c?.montantBrut||""}" oninput="calcDevis()">
@@ -1289,9 +1299,40 @@ function switchModalTab(tab){
 
 function calcDevis(){
   const gn=id=>parseFloat(document.getElementById(id)?.value||0)||0;
-  const sup=gn("fdsup"),pm2=gn("fdpm2");
-  let brut=gn("fdbrt");
-  if(sup>0&&pm2>0){brut=sup*pm2;const el=document.getElementById("fdbrt");if(el)el.value=brut;}
+  const sup=gn("fdsup");
+  const prestations=PRESTATIONS.filter((_,i)=>document.getElementById("fdp_"+i)?.checked);
+  const singleEl=document.getElementById("fd-pm2-single");
+  const multiEl=document.getElementById("fd-pm2-multi");
+  let brut;
+  if(prestations.length>=1){
+    if(singleEl)singleEl.style.display="none";
+    if(multiEl)multiEl.style.display="block";
+    PRESTATIONS.forEach((p,i)=>{
+      const row=document.getElementById("fdppm2-row-"+i);
+      const checked=!!document.getElementById("fdp_"+i)?.checked;
+      if(row)row.style.display=checked?"flex":"none";
+      if(checked){
+        const pm2=parseFloat(document.getElementById("fdppm2_"+i)?.value)||0;
+        const amt=document.getElementById("fdppm2_amt_"+i);
+        if(amt)amt.textContent=(sup&&pm2)?"= "+Math.round(sup*pm2).toLocaleString("fr-FR")+" FCFA":"= —";
+      }
+    });
+    const total=prestations.reduce((sum,p)=>{
+      const i=PRESTATIONS.indexOf(p);
+      const pm2=parseFloat(document.getElementById("fdppm2_"+i)?.value)||0;
+      return sum+(sup?Math.round(sup*pm2):0);
+    },0);
+    const totalEl=document.getElementById("fdppm2_total");
+    if(totalEl)totalEl.textContent=total>0?total.toLocaleString("fr-FR")+" FCFA":"—";
+    brut=total>0?total:gn("fdbrt");
+    if(total>0){const el=document.getElementById("fdbrt");if(el)el.value=total;}
+  }else{
+    if(singleEl)singleEl.style.display="";
+    if(multiEl)multiEl.style.display="none";
+    const pm2=gn("fdpm2");
+    brut=gn("fdbrt");
+    if(sup>0&&pm2>0){brut=sup*pm2;const el=document.getElementById("fdbrt");if(el)el.value=brut;}
+  }
   const remVal=gn("fdrem");
   const remType=document.getElementById("fdremtype")?.value||"pct";
   const remMontant=remType==="pct"?Math.round(brut*remVal/100):remVal;
@@ -1318,8 +1359,11 @@ async function saveDevisFields(){
   const g=id=>document.getElementById(id)?.value||"";
   const gn=id=>parseFloat(g(id))||0;
   const prestations=PRESTATIONS.filter((_,i)=>document.getElementById("fdp_"+i)?.checked);
+  const prixParPrestation={};
+  PRESTATIONS.forEach((p,i)=>{if(document.getElementById("fdp_"+i)?.checked){const v=parseFloat(document.getElementById("fdppm2_"+i)?.value)||0;if(v)prixParPrestation[p]=v;}});
   const body={action:"save_devis_fields",id:editId,
     prestations,superficie:gn("fdsup")||null,prixM2:gn("fdpm2")||null,
+    prixParPrestation:Object.keys(prixParPrestation).length>0?prixParPrestation:null,
     description:g("fddesc"),montantBrut:gn("fdbrt"),
     remise:gn("fdrem"),remiseType:g("fdremtype")||"pct",
     pctAcompte:gn("fdacp")||60,conditionsPaiement:g("fdcond")};
@@ -1330,6 +1374,7 @@ async function saveDevisFields(){
       const i=clients.findIndex(c=>c.id===editId);
       if(i>=0){
         clients[i]={...clients[i],prestation:prestations.join(", "),superficie:body.superficie,prixM2:body.prixM2,
+          prixParPrestation:body.prixParPrestation||{},
           montantBrut:body.montantBrut,remise:body.remise,remiseType:body.remiseType,
           pctAcompte:body.pctAcompte,conditionsPaiement:body.conditionsPaiement,
           montantDevis:r.montantNet,commentaire:body.description};
@@ -1353,6 +1398,8 @@ function imprimerDevisFromCrm(){
   const prestations=PRESTATIONS.filter((_,i)=>document.getElementById("fdp_"+i)?.checked);
   const prestStr=prestations.join(", ")||c.prestation||"—";
   const sup=gn("fdsup");const pm2=gn("fdpm2");const brut=gn("fdbrt");
+  const prixParPrestation={};
+  PRESTATIONS.forEach((p,i)=>{if(document.getElementById("fdp_"+i)?.checked){const v=parseFloat(document.getElementById("fdppm2_"+i)?.value)||0;if(v)prixParPrestation[p]=v;}});
   const remVal=gn("fdrem");const remType=g("fdremtype")||"pct";
   const remMontant=remType==="pct"?Math.round(brut*remVal/100):remVal;
   const net=brut-remMontant;
@@ -1399,10 +1446,20 @@ function imprimerDevisFromCrm(){
   <div><div class="ml">Client</div><div class="mv">${c.client}</div>${c.entreprise?`<div class="ms">${c.entreprise}</div>`:""} ${c.email?`<div class="ms">${c.email}</div>`:""} ${c.telephone?`<div class="ms">${c.telephone}</div>`:""}</div>
   <div style="text-align:right"><div class="ml">Date d'émission</div><div class="mv">${dateStr}</div><div class="ms">Valide jusqu'au ${validite}</div></div>
 </div>
-<div class="sec">Prestation</div>
-<div class="pbox"><div class="pname">${prestStr}</div>
-${sup?`<div class="pdesc" style="margin-top:6px;font-size:12px;color:#888">Superficie : ${Number(sup).toLocaleString("fr-FR")} m²  ·  Prix au m² : ${Number(pm2||0).toLocaleString("fr-FR")} FCFA/m²</div>`:""}
-${desc?`<div class="pdesc" style="margin-top:6px">${desc}</div>`:""}</div>
+<div class="sec">Prestation(s)</div>
+${(()=>{
+  const pppKeys=Object.keys(prixParPrestation);
+  const hasMulti=prestations.length>=1&&sup>0&&pppKeys.length>0;
+  if(hasMulti){
+    const lignes=prestations.map(p=>{
+      const pm2v=parseFloat(prixParPrestation[p])||0;
+      const montP=pm2v?Math.round(sup*pm2v):0;
+      return `<tr><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600">${p}</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center">${Number(sup).toLocaleString("fr-FR")} m²</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right">${pm2v.toLocaleString("fr-FR")} FCFA/m²</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right">${montP.toLocaleString("fr-FR")} FCFA</td></tr>`;
+    }).join("");
+    return `<div class="pbox" style="padding:0;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0a2e1a"><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:left">Prestation</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:center">Superficie</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:right">Prix/m²</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:right">Montant</th></tr></thead><tbody>${lignes}</tbody></table>${desc?`<div class="pdesc" style="padding:10px 14px;font-size:12px;color:#555;border-top:1px solid #e8e6e0">${desc}</div>`:""}</div>`;
+  }
+  return `<div class="pbox"><div class="pname">${prestStr}</div>${sup?`<div class="pdesc" style="margin-top:6px;font-size:12px;color:#888">Superficie : ${Number(sup).toLocaleString("fr-FR")} m²  ·  Prix au m² : ${Number(pm2||0).toLocaleString("fr-FR")} FCFA/m²</div>`:""}${desc?`<div class="pdesc" style="margin-top:6px">${desc}</div>`:""}</div>`;
+})()}
 <div class="sec">Détail financier</div>
 <div class="calc">
   <div class="cr"><span>Prix de base</span><span>${brut.toLocaleString("fr-FR")} FCFA</span></div>
