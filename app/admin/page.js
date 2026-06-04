@@ -1360,9 +1360,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [loading, setLoading] = React.useState(true)
   const [msg, setMsg] = React.useState("")
   const [filtre, setFiltre] = React.useState("tous")
-  const [showFormDevis, setShowFormDevis] = React.useState(false)
-  const [submittingDevis, setSubmittingDevis] = React.useState(false)
-  const [showNewClient, setShowNewClient] = React.useState(false)
+
   const [validating, setValidating] = React.useState(null)
   const [certModal, setCertModal] = React.useState(null)
   const [certForm, setCertForm] = React.useState({})
@@ -1542,7 +1540,6 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       pctAcompte: d.pct_acompte ? String(d.pct_acompte) : "60",
       conditionsPaiement: d.conditions_paiement || "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
     })
-    setShowFormDevis(true)
     setMsg("")
   }
 
@@ -1596,43 +1593,11 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, superficie: formDevis.superficie, prixM2: formDevis.prixM2, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
         imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
-      setShowFormDevis(false); setEditingDevis(null)
+      setEditingDevis(null)
       viderForm()
-      await charger(); setSubmittingDevis(false)
+      await charger()
       return
     }
-
-    var clientId = formDevis.clientId
-    var clientEmail = "", clientNom = "", clientPrenom = "", clientTel = "", clientEnt = ""
-    if (!clientId) {
-      var { data: nc, error: errClient } = await db.from("clients").insert({ user_id: null, nom: formDevis.nom, prenom: formDevis.prenom, email: formDevis.email, telephone: formDevis.telephone, entreprise: formDevis.entreprise }).select().single()
-      if (errClient) { setMsg("Erreur client: " + errClient.message); setSubmittingDevis(false); return }
-      clientId = nc.id; clientEmail = formDevis.email; clientNom = formDevis.nom; clientPrenom = formDevis.prenom; clientTel = formDevis.telephone; clientEnt = formDevis.entreprise
-    } else {
-      var cl2 = clients.find(function(c) { return c.id === clientId })
-      if (cl2) { clientEmail = cl2.email; clientNom = cl2.nom; clientPrenom = cl2.prenom || ""; clientTel = cl2.telephone || ""; clientEnt = cl2.entreprise || "" }
-    }
-    var { data: num } = await db.rpc("generate_devis_numero")
-    var numero = num || ("DEV-" + Date.now())
-    var { error: errDevis } = await db.from("devis").insert({ client_id: clientId, numero: numero, prestation: prestationStr, description: formDevis.description, montant_total: montantClient, montant_net: montantNet, statut: "envoye", date_envoi: new Date().toISOString(), pct_acompte: parseInt(formDevis.pctAcompte) || 60, conditions_paiement: formDevis.conditionsPaiement || null, superficie: superficieVal, prix_m2: prixM2Val })
-    if (errDevis) { setMsg("Erreur devis: " + errDevis.message); setSubmittingDevis(false); return }
-
-    if (enLigne && clientEmail) {
-      try {
-        await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail, clientNom, clientPrenom, devisNumero: numero, prestation: prestationStr, montant: montantClient, description: formDevis.description }) })
-        setMsg("✓ Devis créé et email envoyé à " + clientEmail)
-      } catch(e) { setMsg("✓ Devis créé (email non envoyé)") }
-    } else if (enLigne) {
-      setMsg("✓ Devis créé (pas d'email pour ce client)")
-    } else {
-      setMsg("✓ Devis créé — impression en cours...")
-      var imprimData2 = { numero: numero, clientNom: clientNom, clientPrenom: clientPrenom, clientEmail: clientEmail, clientTelephone: clientTel, clientEntreprise: clientEnt, prestation: prestationStr, superficie: formDevis.superficie, prixM2: formDevis.prixM2, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
-      imprimerDevis(imprimData2)
-    }
-
-    setShowFormDevis(false); setShowNewClient(false)
-    viderForm()
-    await charger(); setSubmittingDevis(false)
   }
 
   async function validerLivraison(id) {
@@ -2926,28 +2891,9 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   }
 
   function renderFormDevis() {
-    if (!showFormDevis) return null
+    if (!editingDevis) return null
     return React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
-      React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingDevis ? "Modifier " + editingDevis.numero : "Créer un devis"),
-      React.createElement("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" } },
-        React.createElement("button", { onClick: function() { setShowNewClient(false) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: !showNewClient ? "#0a2e1a" : "#f0ede6", color: !showNewClient ? "#fff" : "#444" } }, "Client existant"),
-        React.createElement("button", { onClick: function() { setShowNewClient(true); setFormDevis(Object.assign({}, formDevis, { clientId: "" })) }, style: { padding: "7px 14px", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", border: "none", backgroundColor: showNewClient ? "#0a2e1a" : "#f0ede6", color: showNewClient ? "#fff" : "#444" } }, "+ Nouveau client")
-      ),
-      !showNewClient
-        ? React.createElement("div", { style: { marginBottom: "14px" } },
-            React.createElement("label", { style: lbl }, "Client *"),
-            React.createElement("select", { value: formDevis.clientId, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { clientId: e.target.value })) }, style: inp },
-              React.createElement("option", { value: "" }, "Choisir un client..."),
-              clients.map(function(c) { return React.createElement("option", { key: c.id, value: c.id }, (c.prenom || "") + " " + c.nom + (c.entreprise ? " — " + c.entreprise : "")) })
-            )
-          )
-        : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" } },
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: formDevis.prenom, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formDevis.nom, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Email"), React.createElement("input", { type: "email", value: formDevis.email, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { email: e.target.value })) }, placeholder: "jean@email.com (optionnel)", style: inp })),
-            React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: formDevis.telephone, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
-            React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formDevis.entreprise, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp }))
-          ),
+      React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, "Modifier " + editingDevis.numero),
       React.createElement("div", { style: { marginBottom: "14px" } },
         React.createElement("label", { style: lbl }, "Prestation(s) * — sélectionnez une ou plusieurs"),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "4px", padding: "12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", backgroundColor: "#fff" } },
@@ -3100,14 +3046,10 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })
       ),
       React.createElement("div", { style: { display: "flex", gap: "10px" } },
-        React.createElement("button", { onClick: creerDevis, disabled: submittingDevis, style: { backgroundColor: editingDevis ? "#7c3aed" : "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", opacity: submittingDevis ? 0.7 : 1 } },
-          submittingDevis ? "..." : (
-            editingDevis
-              ? (formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer")
-              : (formDevis.modeTransmission === "email" ? "✉ Créer et envoyer" : "🖨️ Créer et imprimer")
-          )
+        React.createElement("button", { onClick: creerDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } },
+          formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer"
         ),
-        React.createElement("button", { onClick: function() { setShowFormDevis(false); setShowNewClient(false); setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
       )
     )
   }
@@ -3798,8 +3740,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
         React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, "Tous les devis"),
         React.createElement("div", { style: { display: "flex", gap: "8px" } },
-          React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
-          React.createElement("button", { onClick: function() { setShowFormDevis(true); setMsg("") }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau devis")
+          React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺")
         )
       ),
       renderFormDevis(),
