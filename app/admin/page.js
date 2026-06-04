@@ -1491,7 +1491,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
       setMsg("✓ Client mis à jour")
       setShowFormClient(false); setEditingClient(null)
-      await charger(); setSubmittingClient(false)
+      var editedId = editingClient.id
+      await charger()
+      if (clientDetail && clientDetail.id === editedId) {
+        setClientDetail(function(prev) { return Object.assign({}, prev, formClient) })
+      }
+      setSubmittingClient(false)
     } else {
       try {
         const res = await fetch("/api/create-client", {
