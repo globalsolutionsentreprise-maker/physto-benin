@@ -22,7 +22,7 @@ function mapStatut(statut) {
 export async function GET(req) {
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
-    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, ifu, rccm)").order("created_at", { ascending: false }),
+    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
     supabase.from("depenses_devis").select("*").order("created_at"),
@@ -78,6 +78,17 @@ export async function GET(req) {
       depensesPrestataires: prestByDevis[d.id] || 0,
       ifu: cl.ifu || "",
       rccm: cl.rccm || "",
+      numero: d.numero || "",
+      email: cl.email || "",
+      telephone: cl.telephone || "",
+      entreprise: cl.entreprise || "",
+      superficie: d.superficie || "",
+      prixM2: d.prix_m2 || "",
+      montantBrut: d.montant_brut || 0,
+      remise: d.remise || 0,
+      remiseType: d.remise_type || "pct",
+      pctAcompte: d.pct_acompte || 60,
+      conditionsPaiement: d.conditions_paiement || "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention.",
     }
   })
 
@@ -171,6 +182,28 @@ export async function POST(req) {
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
     return Response.json({ ok: true, id: newDevis?.id })
+  }
+
+  if (action === "save_devis_fields") {
+    const { id, prestations, superficie, prixM2, description, montantBrut, remise, remiseType, pctAcompte, conditionsPaiement } = body
+    const prestationStr = Array.isArray(prestations) ? prestations.join(", ") : (prestations || "")
+    const remiseVal = remise || 0
+    const remiseMontant = remiseType === "pct" ? Math.round((montantBrut || 0) * remiseVal / 100) : remiseVal
+    const montantNet = (montantBrut || 0) - remiseMontant
+    await supabase.from("devis").update({
+      prestation: prestationStr || "—",
+      superficie: superficie || null,
+      prix_m2: prixM2 || null,
+      description: description || "",
+      montant_brut: montantBrut || 0,
+      remise: remiseVal,
+      remise_type: remiseType || "pct",
+      montant_net: montantNet,
+      montant_total: montantNet,
+      pct_acompte: pctAcompte || 60,
+      conditions_paiement: conditionsPaiement || "",
+    }).eq("id", id)
+    return Response.json({ ok: true, montantNet })
   }
 
   if (action === "del_client") {
