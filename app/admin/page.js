@@ -2828,7 +2828,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         var prestList = d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }) : []
         var ppp = d.prixParPrestation || {}
         var sup = d.superficie ? Number(d.superficie) : 0
-        var hasMulti = prestList.length > 1 && sup > 0 && Object.keys(ppp).length > 0
+        var hasMulti = prestList.length >= 1 && sup > 0 && Object.keys(ppp).length > 0
         if (hasMulti) {
           var lignes = prestList.map(function(p) {
             var pm2 = parseFloat(ppp[p]) || 0
@@ -2997,7 +2997,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             var sup = e.target.value
             setFormDevis(function(prev) {
               var prixPP = prev.prixParPrestation || {}
-              var multi = prev.prestations && prev.prestations.length > 1
+              var multi = prev.prestations && prev.prestations.length >= 1
               if (multi && sup) {
                 var total = prev.prestations.reduce(function(sum, p) {
                   var pm2 = parseFloat(prixPP[p]) || 0
@@ -3016,7 +3016,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       (function() {
         var prestations = formDevis.prestations || []
         var sup = parseFloat(formDevis.superficie) || 0
-        var multiPresta = prestations.length > 1
+        var multiPresta = prestations.length >= 1
         if (multiPresta) {
           return React.createElement("div", { style: { marginBottom: "12px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px", padding: "14px 16px" } },
             React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" } }, "Prix par prestation (FCFA/m²)"),
