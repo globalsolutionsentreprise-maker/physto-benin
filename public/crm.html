@@ -1128,7 +1128,7 @@ function formH(c){
       <select id="fcat" onchange="toggleIfuRccm()">${CATEGORIES.map(p=>`<option ${c?.categorie===p?"selected":""}>${p}</option>`).join("")}</select>
     </div>
     <div><label class="fl">Zone géographique</label><input type="text" id="fzone" placeholder="Ex: Cotonou, Akpakpa…" value="${c?.zone||""}"></div>
-    <div id="fg-ifu-rccm" style="${["Entreprise","Institution / Administration"].includes(c?.categorie)?"":"display:none;"}display:contents;">
+    <div id="fg-ifu-rccm" style="${["Entreprise","Institution / Administration"].includes(c?.categorie)?"display:contents;":"display:none;"}">
       <div><label class="fl">IFU</label><input type="text" id="fifu" placeholder="Ex: 3202420126111" value="${c?.ifu||""}"></div>
       <div><label class="fl">RCCM</label><input type="text" id="frccm" placeholder="Ex: RB/COT/24 B 38910" value="${c?.rccm||""}"></div>
     </div>
@@ -1140,7 +1140,7 @@ function formH(c){
         <option value="contrat" ${c?.typeContrat==="contrat"?"selected":""}>Contrat récurrent</option>
       </select>
     </div>
-    <div id="fg-contrat" style="${c?.typeContrat==="contrat"?"":"display:none;"}display:contents;">
+    <div id="fg-contrat" style="${c?.typeContrat==="contrat"?"display:contents;":"display:none;"}">
       <div><label class="fl">Durée du contrat (mois)</label><input type="number" id="fdur" min="1" max="60" value="${c?.dureeContratMois||12}"></div>
       <div><label class="fl">Fréquence d'intervention</label>
         <select id="ffreq">${FREQ_OPTS.map(o=>`<option value="${o.key}" ${c?.frequenceIntervention===o.key?"selected":""}>${o.label}</option>`).join("")}</select>
