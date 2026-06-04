@@ -1381,6 +1381,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [rapportIntervForm, setRapportIntervForm] = React.useState({})
   const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
   const [uploadingPhotoInterv, setUploadingPhotoInterv] = React.useState(false)
+  const [extractingFramesVisite, setExtractingFramesVisite] = React.useState(null)
+  const [extractingFramesInterv, setExtractingFramesInterv] = React.useState(null)
   const [generatingRapportVisite, setGeneratingRapportVisite] = React.useState(false)
   const [rapportVisitePhase, setRapportVisitePhase] = React.useState('saisie')
   const [rapportVisiteErreurIA, setRapportVisiteErreurIA] = React.useState(null)
