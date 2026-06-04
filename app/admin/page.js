@@ -2943,9 +2943,11 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             value: formDevis.superficie,
             onChange: function(e) {
               var sup = e.target.value
-              var pm2 = parseFloat(formDevis.prixM2) || 0
-              var auto = (sup && pm2) ? String(Math.round(parseFloat(sup) * pm2)) : formDevis.montantBrut
-              setFormDevis(Object.assign({}, formDevis, { superficie: sup, montantBrut: (sup && pm2) ? auto : formDevis.montantBrut }))
+              setFormDevis(function(prev) {
+                var pm2 = parseFloat(prev.prixM2) || 0
+                var auto = (sup && pm2) ? String(Math.round(parseFloat(sup) * pm2)) : prev.montantBrut
+                return Object.assign({}, prev, { superficie: sup, montantBrut: (sup && pm2) ? auto : prev.montantBrut })
+              })
             },
             placeholder: "Ex : 500",
             style: inp
@@ -2958,8 +2960,10 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             value: formDevis.prixM2,
             onChange: function(e) {
               var pm2 = e.target.value
-              var sup = parseFloat(formDevis.superficie) || 0
-              setFormDevis(Object.assign({}, formDevis, { prixM2: pm2, montantBrut: (sup && pm2) ? String(Math.round(sup * parseFloat(pm2))) : formDevis.montantBrut }))
+              setFormDevis(function(prev) {
+                var sup = parseFloat(prev.superficie) || 0
+                return Object.assign({}, prev, { prixM2: pm2, montantBrut: (sup && pm2) ? String(Math.round(sup * parseFloat(pm2))) : prev.montantBrut })
+              })
             },
             placeholder: "Ex : 300",
             style: inp
@@ -2968,16 +2972,16 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       ),
       React.createElement("div", { style: { marginBottom: "12px" } },
         React.createElement("label", { style: lbl }, "Prix de base FCFA *" + (formDevis.superficie && formDevis.prixM2 ? " — calculé automatiquement" : "")),
-        React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { montantBrut: e.target.value })) }, placeholder: "200000", style: inp })
+        React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { montantBrut: v }) }) }, placeholder: "200000", style: inp })
       ),
       React.createElement("div", { style: { marginBottom: "12px" } },
         React.createElement("label", { style: lbl }, "Remise accordée (optionnel)"),
         React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "stretch" } },
           React.createElement("div", { style: { display: "flex", borderRadius: "6px", overflow: "hidden", border: "1.5px solid #e0ddd6", flexShrink: 0 } },
-            React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { remiseType: "pct" })) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "pct" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "pct" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "%"),
-            React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { remiseType: "fixe" })) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "fixe" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "fixe" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "FCFA")
+            React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { remiseType: "pct" }) }) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "pct" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "pct" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "%"),
+            React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { remiseType: "fixe" }) }) }, style: { padding: "8px 14px", border: "none", backgroundColor: formDevis.remiseType === "fixe" ? "#0a2e1a" : "#fff", color: formDevis.remiseType === "fixe" ? "#fff" : "#666", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" } }, "FCFA")
           ),
-          React.createElement("input", { type: "number", value: formDevis.remise, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { remise: e.target.value })) }, placeholder: formDevis.remiseType === "pct" ? "Ex: 10  (= 10%)" : "Ex: 5000", style: Object.assign({}, inp, { flex: 1 }) })
+          React.createElement("input", { type: "number", value: formDevis.remise, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { remise: v }) }) }, placeholder: formDevis.remiseType === "pct" ? "Ex: 10  (= 10%)" : "Ex: 5000", style: Object.assign({}, inp, { flex: 1 }) })
         )
       ),
       (function() {
@@ -3011,11 +3015,11 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       React.createElement("div", { style: { marginBottom: "16px" } },
         React.createElement("label", { style: lbl }, "Mode de remise au client"),
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
-          React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { modeTransmission: "email" })) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "email" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "email" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
+          React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { modeTransmission: "email" }) }) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "email" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "email" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
             React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "email" ? "#0a2e1a" : "#555" } }, "✉ Envoyer par email"),
             React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Paiement en ligne via FedaPay")
           ),
-          React.createElement("button", { type: "button", onClick: function() { setFormDevis(Object.assign({}, formDevis, { modeTransmission: "impression" })) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "impression" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "impression" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
+          React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { modeTransmission: "impression" }) }) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "impression" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "impression" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
             React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "impression" ? "#0a2e1a" : "#555" } }, "🖨️ Imprimer le devis"),
             React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Remise en main — paiement libre")
           )
@@ -3034,7 +3038,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                   value: formDevis.pctAcompte || "60",
                   onChange: function(e) {
                     var v = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
-                    setFormDevis(Object.assign({}, formDevis, { pctAcompte: String(v) }))
+                    setFormDevis(function(prev) { return Object.assign({}, prev, { pctAcompte: String(v) }) })
                   },
                   style: Object.assign({}, inp, { width: "70px", textAlign: "center", fontSize: "20px", fontWeight: "700", color: "#0a2e1a", padding: "8px" })
                 }),
@@ -3055,12 +3059,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         ),
         React.createElement("div", null,
           React.createElement("label", { style: lbl }, "Conditions de paiement (affiché sur le devis)"),
-          React.createElement("textarea", { value: formDevis.conditionsPaiement, rows: 2, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { conditionsPaiement: e.target.value })) }, placeholder: "Ex: Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention.", style: Object.assign({}, inp, { resize: "vertical", fontSize: "13px" }) })
+          React.createElement("textarea", { value: formDevis.conditionsPaiement, rows: 2, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { conditionsPaiement: v }) }) }, placeholder: "Ex: Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention.", style: Object.assign({}, inp, { resize: "vertical", fontSize: "13px" }) })
         )
       ),
       React.createElement("div", { style: { marginBottom: "18px" } },
         React.createElement("label", { style: lbl }, "Description"),
-        React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { setFormDevis(Object.assign({}, formDevis, { description: e.target.value })) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })
+        React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { description: v }) }) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })
       ),
       React.createElement("div", { style: { display: "flex", gap: "10px" } },
         React.createElement("button", { onClick: creerDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } },
