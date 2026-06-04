@@ -1323,18 +1323,20 @@ async function saveDevisFields(){
     description:g("fddesc"),montantBrut:gn("fdbrt"),
     remise:gn("fdrem"),remiseType:g("fdremtype")||"pct",
     pctAcompte:gn("fdacp")||60,conditionsPaiement:g("fdcond")};
-  const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  const r=await res.json();
-  if(r.ok){
-    const i=clients.findIndex(c=>c.id===editId);
-    if(i>=0){
-      clients[i]={...clients[i],prestation:prestations.join(", "),superficie:body.superficie,prixM2:body.prixM2,
-        montantBrut:body.montantBrut,remise:body.remise,remiseType:body.remiseType,
-        pctAcompte:body.pctAcompte,conditionsPaiement:body.conditionsPaiement,
-        montantDevis:r.montantNet,commentaire:body.description};
-    }
-    toast("Devis sauvegardé");refresh();
-  }else{toast(r.error||"Erreur sauvegarde");}
+  try{
+    const res=await fetch("/api/crm-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const r=await res.json();
+    if(r.ok){
+      const i=clients.findIndex(c=>c.id===editId);
+      if(i>=0){
+        clients[i]={...clients[i],prestation:prestations.join(", "),superficie:body.superficie,prixM2:body.prixM2,
+          montantBrut:body.montantBrut,remise:body.remise,remiseType:body.remiseType,
+          pctAcompte:body.pctAcompte,conditionsPaiement:body.conditionsPaiement,
+          montantDevis:r.montantNet,commentaire:body.description};
+      }
+      toast("Devis sauvegardé");refresh();
+    }else{toast(r.error||"Erreur sauvegarde");}
+  }catch(e){toast("Erreur réseau — vérifiez votre connexion");}
 }
 
 function imprimerDevisFromCrm(){
