@@ -1448,13 +1448,13 @@ function imprimerDevisFromCrm(){
 </div>
 <div class="sec">Prestation(s)</div>
 ${(()=>{
-  const pppKeys=Object.keys(prixParPrestation);
-  const hasMulti=prestations.length>=1&&sup>0&&pppKeys.length>0;
+  const hasPPP=Object.keys(prixParPrestation).length>0;
+  const hasMulti=prestations.length>=1&&sup>0;
   if(hasMulti){
     const lignes=prestations.map(p=>{
-      const pm2v=parseFloat(prixParPrestation[p])||0;
+      const pm2v=hasPPP?(parseFloat(prixParPrestation[p])||0):(prestations.length===1?parseFloat(pm2)||0:0);
       const montP=pm2v?Math.round(sup*pm2v):0;
-      return `<tr><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600">${p}</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center">${Number(sup).toLocaleString("fr-FR")} m²</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right">${pm2v.toLocaleString("fr-FR")} FCFA/m²</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right">${montP.toLocaleString("fr-FR")} FCFA</td></tr>`;
+      return `<tr><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600">${p}</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center">${Number(sup).toLocaleString("fr-FR")} m²</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right">${pm2v?pm2v.toLocaleString("fr-FR")+" FCFA/m²":"—"}</td><td style="padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right">${montP?montP.toLocaleString("fr-FR")+" FCFA":"—"}</td></tr>`;
     }).join("");
     return `<div class="pbox" style="padding:0;overflow:hidden"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#0a2e1a"><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:left">Prestation</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:center">Superficie</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:right">Prix/m²</th><th style="padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:.08em;text-align:right">Montant</th></tr></thead><tbody>${lignes}</tbody></table>${desc?`<div class="pdesc" style="padding:10px 14px;font-size:12px;color:#555;border-top:1px solid #e8e6e0">${desc}</div>`:""}</div>`;
   }
