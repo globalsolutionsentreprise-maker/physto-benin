@@ -1125,9 +1125,13 @@ function formH(c){
     </div>
     <div>
       <label class="fl">Catégorie client</label>
-      <select id="fcat">${CATEGORIES.map(p=>`<option ${c?.categorie===p?"selected":""}>${p}</option>`).join("")}</select>
+      <select id="fcat" onchange="toggleIfuRccm()">${CATEGORIES.map(p=>`<option ${c?.categorie===p?"selected":""}>${p}</option>`).join("")}</select>
     </div>
     <div><label class="fl">Zone géographique</label><input type="text" id="fzone" placeholder="Ex: Cotonou, Akpakpa…" value="${c?.zone||""}"></div>
+    <div id="fg-ifu-rccm" style="${["Entreprise","Institution / Administration"].includes(c?.categorie)?"":"display:none;"}display:contents;">
+      <div><label class="fl">IFU</label><input type="text" id="fifu" placeholder="Ex: 3202420126111" value="${c?.ifu||""}"></div>
+      <div><label class="fl">RCCM</label><input type="text" id="frccm" placeholder="Ex: RB/COT/24 B 38910" value="${c?.rccm||""}"></div>
+    </div>
     <div><label class="fl">Montant total (FCFA)</label><input type="number" id="fmd" min="0" value="${c?.montantDevis||""}"></div>
     <div class="fg-full">
       <label class="fl">Nature de l'engagement</label>
@@ -1218,6 +1222,13 @@ function toggleContrat(){
   if(el)el.style.display=isContrat?"contents":"none";
 }
 
+function toggleIfuRccm(){
+  const cat=document.getElementById("fcat")?.value||"";
+  const show=["Entreprise","Institution / Administration"].includes(cat);
+  const el=document.getElementById("fg-ifu-rccm");
+  if(el)el.style.display=show?"contents":"none";
+}
+
 async function saveClient(){
   const g=id=>document.getElementById(id)?.value||"";
   const gn=id=>parseFloat(g(id))||0;
@@ -1226,7 +1237,8 @@ async function saveClient(){
     motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs"),commentaire:g("fco"),
     montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),attestation:g("fat")||"non",
     typeContrat:g("ftc")||"ponctuel",dureeContratMois:gn("fdur")||12,
-    frequenceIntervention:g("ffreq")||"trimestrielle",dateDebutContrat:g("fdeb")||""};
+    frequenceIntervention:g("ffreq")||"trimestrielle",dateDebutContrat:g("fdeb")||"",
+    ifu:g("fifu").trim()||null,rccm:g("frccm").trim()||null};
   if(!d.client){alert("Veuillez saisir le nom du client.");return;}
   if(editId){
     const i=clients.findIndex(c=>c.id===editId);

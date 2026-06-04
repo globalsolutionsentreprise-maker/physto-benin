@@ -1,0 +1,3 @@
+ALTER TABLE clients
+  ADD COLUMN IF NOT EXISTS ifu text,
+  ADD COLUMN IF NOT EXISTS rccm text;

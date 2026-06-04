@@ -22,7 +22,7 @@ function mapStatut(statut) {
 export async function GET(req) {
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
-    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise)").order("created_at", { ascending: false }),
+    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
     supabase.from("depenses_devis").select("*").order("created_at"),
@@ -76,6 +76,8 @@ export async function GET(req) {
       frequenceIntervention: d.frequence_intervention || "trimestrielle",
       dateDebutContrat: d.date_debut_contrat || "",
       depensesPrestataires: prestByDevis[d.id] || 0,
+      ifu: cl.ifu || "",
+      rccm: cl.rccm || "",
     }
   })
 
@@ -131,12 +133,18 @@ export async function POST(req) {
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
     }).eq("id", id)
+    if (body.ifu !== undefined || body.rccm !== undefined) {
+      const { data: devisRow } = await supabase.from("devis").select("client_id").eq("id", id).single()
+      if (devisRow?.client_id) {
+        await supabase.from("clients").update({ ifu: body.ifu || null, rccm: body.rccm || null }).eq("id", devisRow.client_id)
+      }
+    }
     return Response.json({ ok: true })
   }
 
   if (action === "add_client") {
     const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
-    const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null }).select().single()
+    const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null, ifu: body.ifu || null, rccm: body.rccm || null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
     const { data: num } = await supabase.rpc("generate_devis_numero")
     const { data: newDevis } = await supabase.from("devis").insert({
