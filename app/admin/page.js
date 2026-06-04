@@ -1880,7 +1880,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       niveauInfestation: 'Moyen',
       recommandations: '',
       observations: '',
-      technicien: '',
+      technicien: personnelAdmin.length === 1 ? personnelAdmin[0].nom : '',
       notesTechnicien: '',
       photos: [],
       datesProposees: [],
@@ -2041,10 +2041,36 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       var num = 'RV-' + now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
       data.numero_unique = num
       await db.from('rapports_visite').insert(data)
+      // Créer automatiquement la mission dans le planning si technicien + date renseignés
+      if (rapportVisiteForm.technicien && rapportVisiteForm.dateVisite) {
+        var dejaPlanning = interventionsList.some(function(i) { return i.devisId === devis.id })
+        if (!dejaPlanning) {
+          var techNom = rapportVisiteForm.technicien.split(',')[0].trim()
+          var techPers = personnelAdmin.find(function(p) { return p.nom === techNom })
+          var clientNomStr = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+          var { data: { session: sess } } = await db.auth.getSession()
+          await fetch('/api/rh-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (sess?.access_token || '') },
+            body: JSON.stringify({
+              action: 'add_intervention',
+              devisId: devis.id,
+              personnelId: techPers ? techPers.id : null,
+              dateIntervention: rapportVisiteForm.dateVisite,
+              heureDebut: '08:00',
+              statut: 'planifiee',
+              clientNom: clientNomStr,
+              adresse: rapportVisiteForm.adresseSite || '',
+              notes: 'Rapport de visite — ' + (devis.prestation || ''),
+              montantPrestataire: 0
+            })
+          })
+        }
+      }
     }
     await charger()
     setSavingRapportVisite(false)
-    setMsg('✓ Rapport de visite enregistré')
+    setMsg('✓ Rapport de visite enregistré — mission ajoutée au planning')
   }
 
   function renderRapportVisiteModal() {
