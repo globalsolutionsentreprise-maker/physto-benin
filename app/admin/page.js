@@ -1398,6 +1398,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [analysingContrat, setAnalysingContrat] = React.useState(false)
   const [contratErreur, setContratErreur] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
+  const [showNouveauDevis, setShowNouveauDevis] = React.useState(false)
+  const [nouveauDevisPresta, setNouveauDevisPresta] = React.useState([])
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
   const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", prixParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
   const [showFormClient, setShowFormClient] = React.useState(false)
@@ -1542,6 +1544,27 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       conditionsPaiement: d.conditions_paiement || "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
     })
     setMsg("")
+  }
+
+  async function creerNouveauDevisClient(cl) {
+    if (nouveauDevisPresta.length === 0) { setMsg("Sélectionnez au moins une prestation."); return }
+    var prestationStr = nouveauDevisPresta.join(" + ")
+    var { data: num } = await db.rpc("generate_devis_numero")
+    var numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-4))
+    var { data: newDevis, error } = await db.from("devis").insert({
+      client_id: cl.id,
+      numero: numero,
+      prestation: prestationStr,
+      montant_net: 0,
+      montant_total: 0,
+      statut: "brouillon"
+    }).select("*, clients(id, nom, prenom, entreprise, email, telephone)").single()
+    if (error) { setMsg("Erreur : " + error.message); return }
+    setShowNouveauDevis(false)
+    setNouveauDevisPresta([])
+    await charger()
+    ouvrirEditionDevis(newDevis)
+    setVue("devis")
   }
 
   async function creerDevis() {
@@ -3389,8 +3412,38 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
           )
         )
       ),
-      React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a', marginBottom: '14px' } }, devisClient.length + ' dossier(s)'),
-      devisClient.length === 0
+      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' } },
+        React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a' } }, devisClient.length + ' dossier(s)'),
+        React.createElement('button', {
+          onClick: function() { setShowNouveauDevis(function(v) { return !v }); setNouveauDevisPresta([]) },
+          style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+        }, showNouveauDevis ? '× Annuler' : '+ Nouveau devis')
+      ),
+      showNouveauDevis && React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '2px solid #0a2e1a', borderRadius: '10px', padding: '20px', marginBottom: '20px' } },
+        React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a', marginBottom: '12px' } }, 'Sélectionnez les prestations pour ce devis'),
+        React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' } },
+          PRESTATIONS.map(function(p) {
+            var checked = nouveauDevisPresta.includes(p)
+            return React.createElement('div', {
+              key: p,
+              onClick: function() { setNouveauDevisPresta(function(prev) { return prev.includes(p) ? prev.filter(function(x) { return x !== p }) : prev.concat([p]) }) },
+              style: { display: 'flex', alignItems: 'center', gap: '7px', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', userSelect: 'none', backgroundColor: checked ? '#0a2e1a' : '#fff', border: '1.5px solid ' + (checked ? '#0a2e1a' : '#d1d5db'), color: checked ? '#d4a920' : '#374151', fontSize: '13px', fontWeight: checked ? '700' : '400', transition: 'all 0.12s' }
+            },
+              React.createElement('span', { style: { fontSize: '15px' } }, checked ? '☑' : '☐'),
+              p
+            )
+          })
+        ),
+        nouveauDevisPresta.length > 0 && React.createElement('div', { style: { fontSize: '12px', color: '#065f46', marginBottom: '12px', fontWeight: '600' } },
+          'Sélectionnées : ' + nouveauDevisPresta.join(' + ')
+        ),
+        React.createElement('button', {
+          onClick: function() { creerNouveauDevisClient(cl) },
+          disabled: nouveauDevisPresta.length === 0,
+          style: { backgroundColor: nouveauDevisPresta.length === 0 ? '#ccc' : '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '10px 24px', fontSize: '13px', fontWeight: '700', cursor: nouveauDevisPresta.length === 0 ? 'default' : 'pointer', fontFamily: 'inherit' }
+        }, 'Créer le devis →')
+      ),
+      devisClient.length === 0 && !showNouveauDevis
         ? React.createElement('div', { style: { textAlign: 'center', padding: '40px', backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', color: '#888' } }, 'Aucun devis pour ce client.')
         : devisClient.map(function(d) { return renderDossier(d) })
     )
