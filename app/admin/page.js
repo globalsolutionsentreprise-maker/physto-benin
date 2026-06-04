@@ -2654,8 +2654,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             React.createElement('label', { style: lbl2 }, 'Type de prestation'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
               TYPES_PRESTA.map(function(t) {
-                return React.createElement('label', { key: t, style: chkLbl },
-                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.prestations || []).includes(t), onChange: function() { toggleArr('prestations', t) }, style: chkStyle }),
+                return React.createElement('div', { key: t, style: Object.assign({}, chkLbl, { userSelect: 'none' }), onClick: function() { toggleArr('prestations', t) } },
+                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.prestations || []).includes(t), onChange: function() {}, style: chkStyle }),
                   t
                 )
               })
@@ -2677,8 +2677,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             React.createElement('label', { style: lbl2 }, 'Nuisibles présents'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
               NUISIBLES.map(function(n) {
-                return React.createElement('label', { key: n, style: chkLbl },
-                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.nuisibles || []).includes(n), onChange: function() { toggleArr('nuisibles', n) }, style: chkStyle }),
+                return React.createElement('div', { key: n, style: Object.assign({}, chkLbl, { userSelect: 'none' }), onClick: function() { toggleArr('nuisibles', n) } },
+                  React.createElement('input', { type: 'checkbox', checked: (ficheForm.nuisibles || []).includes(n), onChange: function() {}, style: chkStyle }),
                   n
                 )
               })
