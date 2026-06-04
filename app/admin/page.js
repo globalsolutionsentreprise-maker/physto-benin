@@ -1550,7 +1550,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     if ((!formDevis.clientId && !formDevis.nom) || !prestationStr || !formDevis.montantBrut) {
       setMsg("Remplissez tous les champs obligatoires."); return
     }
-    setSubmittingDevis(true); setMsg("")
+    setMsg("")
 
     var brut = parseFloat(formDevis.montantBrut) || 0
     var remiseVal = formDevis.remise ? parseFloat(formDevis.remise) : 0
@@ -1582,7 +1582,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         superficie: superficieVal,
         prix_m2: prixM2Val
       }).eq("id", editingDevis.id)
-      if (error) { setMsg("Erreur: " + error.message); setSubmittingDevis(false); return }
+      if (error) { setMsg("Erreur: " + error.message); return }
       if (enLigne && cl && cl.email) {
         try {
           await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: editingDevis.numero, prestation: prestationStr, montant: montantClient, description: formDevis.description }) })
