@@ -35,7 +35,7 @@ export async function POST(req) {
     parts.push({ text: promptText })
 
     // Fetch photos and pass as inline data (max 6)
-    for (const url of (photos || []).slice(0, 6)) {
+    for (const url of (photos || []).slice(0, 12)) {
       try {
         const imgRes = await fetch(url, { signal: AbortSignal.timeout(8000) })
         if (!imgRes.ok) continue
@@ -90,7 +90,7 @@ CONTEXTE
 NOTES BRUTES DU TECHNICIEN :
 ${notes || "(aucune note fournie)"}
 
-${(ctx?.photos?.length > 0) ? "Des photos du terrain sont jointes — analyse-les pour enrichir le rapport." : ""}
+${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
 
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
@@ -119,7 +119,7 @@ CONTEXTE
 NOTES BRUTES DU TECHNICIEN :
 ${notes || "(aucune note fournie)"}
 
-${(ctx?.photos?.length > 0) ? "Des photos du terrain sont jointes — analyse-les pour enrichir le rapport." : ""}
+${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
 
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
