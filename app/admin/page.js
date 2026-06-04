@@ -2467,6 +2467,14 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #fed7aa', backgroundColor: '#fff7ed', cursor: uploadingPhotoInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#c2410c', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
               uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
+            ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
+              React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
+                var files = Array.from(e.target.files).slice(0, 3)
+                files.reduce(function(p, f) { return p.then(function() { return extraireFramesVideo(f, setRapportIntervForm, setExtractingFramesInterv) }) }, Promise.resolve())
+                e.target.value = ''
+              }, disabled: !!extractingFramesInterv }),
+              extractingFramesInterv || '🎥 Ajouter des vidéos'
             )
           ),
 
@@ -2482,8 +2490,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportIntervIA,
-              disabled: generatingRapportInterv || uploadingPhotoInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length)) ? 0.5 : 1 }
+              disabled: generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length)) ? 0.5 : 1 }
             }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
