@@ -2967,18 +2967,21 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "4px", padding: "12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", backgroundColor: "#fff" } },
           PRESTATIONS.map(function(p) {
             var checked = (formDevis.prestations || []).includes(p)
-            return React.createElement("label", { key: p, style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "13px", cursor: "pointer", padding: "6px 8px", borderRadius: "4px", backgroundColor: checked ? "#f0fdf4" : "transparent", border: checked ? "1px solid #bbf7d0" : "1px solid transparent", userSelect: "none" } },
+            return React.createElement("div", { key: p,
+              style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "13px", cursor: "pointer", padding: "6px 8px", borderRadius: "4px", backgroundColor: checked ? "#f0fdf4" : "transparent", border: checked ? "1px solid #bbf7d0" : "1px solid transparent", userSelect: "none" },
+              onClick: function() {
+                setFormDevis(function(prev) {
+                  var current = prev.prestations || []
+                  var newList = current.includes(p) ? current.filter(function(x) { return x !== p }) : current.concat([p])
+                  return Object.assign({}, prev, { prestations: newList })
+                })
+              }
+            },
               React.createElement("input", {
                 type: "checkbox",
                 checked: checked,
-                onChange: function() {
-                  setFormDevis(function(prev) {
-                    var current = prev.prestations || []
-                    var newList = current.includes(p) ? current.filter(function(x) { return x !== p }) : current.concat([p])
-                    return Object.assign({}, prev, { prestations: newList })
-                  })
-                },
-                style: { accentColor: "#0a2e1a", width: "14px", height: "14px", flexShrink: 0 }
+                onChange: function() {},
+                style: { accentColor: "#0a2e1a", width: "14px", height: "14px", flexShrink: 0, pointerEvents: "none" }
               }),
               p
             )
