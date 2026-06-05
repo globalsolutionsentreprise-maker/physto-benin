@@ -179,7 +179,12 @@ export default function AdminProno() {
                     ),
                     React.createElement("div", { style: { textAlign: "right" } },
                       React.createElement("div", { style: { color: "#fbbf24", fontWeight: 700, fontSize: 13 } }, p.predictions?.champion || "—"),
-                      React.createElement("div", { style: { color: "rgba(255,255,255,0.35)", fontSize: 11 } }, "Buteur : " + (p.predictions?.topScorer || "—"))
+                      React.createElement("div", { style: { color: "rgba(255,255,255,0.35)", fontSize: 11 } }, "Buteur : " + (p.predictions?.topScorer || "—")),
+                      React.createElement("div", { style: { marginTop: 4, fontSize: 11, color: p.predictions?.partage?.confirme ? "#4ade80" : "#f59e0b", fontWeight: 600 } },
+                        p.predictions?.partage?.confirme
+                          ? "✅ " + (p.predictions?.partage?.plateforme || "partagé")
+                          : p.predictions?.partage ? "⏳ partage non confirmé" : "❌ pas de partage"
+                      )
                     )
                   ),
                   detail?.id === p.id && React.createElement(DetailPanel, { p: p })
@@ -228,6 +233,11 @@ function DetailPanel({ p }) {
       React.createElement("div", { style: { background: "rgba(255,255,255,0.05)", borderRadius: 8, padding: "6px 10px", fontSize: 11 } },
         React.createElement("span", { style: { color: "rgba(255,255,255,0.4)" } }, "📱 WhatsApp : "),
         React.createElement("a", { href: "https://wa.me/" + p.whatsapp?.replace(/[^0-9]/g, ""), target: "_blank", rel: "noreferrer", style: { color: "#4ade80", fontWeight: 700, textDecoration: "none" } }, p.whatsapp)
+      ),
+      pred.partage && React.createElement("div", { style: { background: pred.partage.confirme ? "rgba(74,222,128,0.08)" : "rgba(239,68,68,0.08)", border: "1px solid " + (pred.partage.confirme ? "rgba(74,222,128,0.25)" : "rgba(239,68,68,0.25)"), borderRadius: 8, padding: "6px 10px", fontSize: 11 } },
+        React.createElement("span", { style: { color: "rgba(255,255,255,0.4)" } }, pred.partage.confirme ? "✅ Partage " : "⏳ Partage : "),
+        React.createElement("span", { style: { color: pred.partage.confirme ? "#4ade80" : "#fbbf24", fontWeight: 700 } }, pred.partage.plateforme || "—"),
+        pred.partage.url && React.createElement("a", { href: pred.partage.url, target: "_blank", rel: "noreferrer", style: { marginLeft: 8, color: "#60a5fa", fontSize: 10, textDecoration: "underline" } }, "Voir le post")
       )
     )
   )
