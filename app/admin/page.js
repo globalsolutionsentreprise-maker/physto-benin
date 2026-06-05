@@ -2112,22 +2112,18 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
           ),
           React.createElement('div', null,
             React.createElement('label', { style: lbl2 }, 'Technicien'),
-            personnelAdmin.length > 0 && React.createElement('select', {
-              value: '',
-              onChange: function(e) {
-                if (!e.target.value) return
-                var current = (rapportVisiteForm.technicien || '').trim()
-                upd('technicien', current ? current + ', ' + e.target.value : e.target.value)
-                e.target.value = ''
-              },
-              style: Object.assign({}, inp2, { marginBottom: '6px', color: '#555' })
-            },
-              React.createElement('option', { value: '' }, '+ Ajouter depuis l\'équipe'),
-              personnelAdmin.map(function(m) {
-                return React.createElement('option', { key: m.id, value: m.nom }, m.nom + (m.poste ? ' · ' + m.poste : ''))
-              })
-            ),
-            React.createElement('input', { value: rapportVisiteForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Nom du technicien', style: inp2 })
+            personnelAdmin.length > 0
+              ? React.createElement('select', {
+                  value: rapportVisiteForm.technicien || '',
+                  onChange: function(e) { upd('technicien', e.target.value) },
+                  style: inp2
+                },
+                React.createElement('option', { value: '' }, '— Choisir un technicien —'),
+                personnelAdmin.map(function(m) {
+                  return React.createElement('option', { key: m.id, value: m.nom }, m.nom + (m.poste ? ' · ' + m.poste : ''))
+                })
+              )
+              : React.createElement('input', { value: rapportVisiteForm.technicien || '', onChange: function(e) { upd('technicien', e.target.value) }, placeholder: 'Nom du technicien', style: inp2 })
           )
         ),
 
