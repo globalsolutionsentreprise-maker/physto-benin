@@ -2043,7 +2043,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       await db.from('rapports_visite').insert(data)
       // Créer automatiquement la mission dans le planning si technicien + date renseignés
       if (rapportVisiteForm.technicien && rapportVisiteForm.dateVisite) {
-        var dejaPlanning = interventionsList.some(function(i) { return i.devisId === devis.id })
+        var dejaPlanning = interventionsList.some(function(i) { return i.devis_id === devis.id })
         if (!dejaPlanning) {
           var techNom = rapportVisiteForm.technicien.split(',')[0].trim()
           var techPers = personnelAdmin.find(function(p) { return p.nom === techNom })
