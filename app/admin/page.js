@@ -1992,7 +1992,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         setRapportVisiteForm(function(prev) {
           return Object.assign({}, prev, {
             descriptionSite: r.descriptionSite || prev.descriptionSite || '',
-            nuisibles: Array.isArray(r.nuisibles) ? r.nuisibles : prev.nuisibles || [],
+            nuisibles: Array.isArray(r.nuisibles) ? r.nuisibles.filter(function(n) { return ['Cafards','Rats','Souris','Moustiques','Mouches','Fourmis','Termites','Punaises de lit','Serpents'].includes(n) }) : prev.nuisibles || [],
             zonesInfestees: r.zonesInfestees || prev.zonesInfestees || '',
             niveauInfestation: r.niveauInfestation || prev.niveauInfestation || 'Moyen',
             observations: r.observations || prev.observations || '',

@@ -96,7 +96,7 @@ Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un lan
 
 {
   "descriptionSite": "Description professionnelle du site (type de bâtiment, configuration, état général, superficie approximative si connue)",
-  "nuisibles": ["liste des nuisibles identifiés"],
+  "nuisibles": ["uniquement des valeurs parmi : Cafards, Rats, Souris, Moustiques, Mouches, Fourmis, Termites, Punaises de lit, Serpents"],
   "zonesInfestees": "Description précise des zones infestées ou à risque",
   "niveauInfestation": "Faible | Moyen | Élevé",
   "observations": "Observations techniques détaillées (points critiques, facteurs favorisants, accessibilité, conditions sanitaires)",
