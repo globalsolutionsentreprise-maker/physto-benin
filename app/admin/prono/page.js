@@ -34,7 +34,12 @@ export default function AdminProno() {
 
   async function charger() {
     setLoading(true)
-    const res = await fetch("/api/prono")
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    if (!token) { setLoading(false); return }
+    const res = await fetch("/api/prono", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     const json = await res.json()
     setLoading(false)
     if (json.participants) setParticipants(json.participants)
