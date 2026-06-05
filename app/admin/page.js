@@ -2398,6 +2398,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     await charger()
   }
 
+  async function supprimerRapportIntervById(id) {
+    if (!window.confirm('Supprimer ce rapport d\'intervention ?')) return
+    await db.from('rapports_intervention').delete().eq('id', id)
+    await charger()
+  }
+
   async function sauvegarderRapportInterv() {
     if (!rapportIntervModal) return
     setSavingRapportInterv(true)
@@ -3443,7 +3449,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                     React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, r.numero_unique || "Rapport intervention"),
                     React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, r.date_intervention ? new Date(r.date_intervention).toLocaleDateString('fr-FR') : "Rapport d'intervention")
                   ),
-                  React.createElement('button', { onClick: function() { ouvrirRapportInterv(r, d, cl) }, style: { background: 'none', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
+                  React.createElement('button', { onClick: function() { ouvrirRapportInterv(r, d, cl) }, style: { background: 'none', border: '1px solid #fed7aa', color: '#c2410c', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir'),
+                  React.createElement('button', { onClick: function() { supprimerRapportIntervById(r.id) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑')
                 )
               }),
               certsDevis.map(function(cert) {
@@ -3454,7 +3461,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                     React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, cert.type === 'desinsect' ? 'Certificat désinsect.' : cert.type === 'double' ? 'Certificat combiné' : 'Certificat dératisation')
                   ),
                   React.createElement('button', { onClick: function() { toggleCertEnvoye(cert) }, style: { background: cert.envoye ? '#0a2e1a' : '#fff', color: cert.envoye ? '#fff' : '#999', border: '1px solid ' + (cert.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, cert.envoye ? '✓ Envoyé' : 'Marquer envoyé'),
-                  React.createElement('button', { onClick: function() { rouvrirCertModal(cert, d, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir')
+                  React.createElement('button', { onClick: function() { rouvrirCertModal(cert, d, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir'),
+                  React.createElement('button', { onClick: function() { supprimerCertificat(cert.id) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑')
                 )
               }),
               fichesDevis.map(function(fiche) {
@@ -3464,7 +3472,9 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                     React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, fiche.numero_unique),
                     React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, 'Fiche de passage')
                   ),
-                  React.createElement('button', { onClick: function() { toggleFicheEnvoye(fiche) }, style: { background: fiche.envoye ? '#0a2e1a' : '#fff', color: fiche.envoye ? '#fff' : '#999', border: '1px solid ' + (fiche.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, fiche.envoye ? '✓ Remis' : 'Marquer remis')
+                  React.createElement('button', { onClick: function() { toggleFicheEnvoye(fiche) }, style: { background: fiche.envoye ? '#0a2e1a' : '#fff', color: fiche.envoye ? '#fff' : '#999', border: '1px solid ' + (fiche.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, fiche.envoye ? '✓ Remis' : 'Marquer remis'),
+                  React.createElement('button', { onClick: function() { reouvrirFicheModal(fiche, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir'),
+                  React.createElement('button', { onClick: function() { supprimerFiche(fiche.id) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑')
                 )
               }),
               contratDevis && React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #e9d5ff', backgroundColor: '#faf5ff', borderRadius: '8px', padding: '8px 12px' } },
@@ -3914,6 +3924,10 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       var client = clients.find(function(cl) { return cl.id === r.client_id })
       docs.push({ _type: "rapport_visite", _id: r.id, _devisId: r.devis_id, _rawRV: r, numero: r.numero_unique, client: client, date: r.created_at })
     })
+    rapportsInterv.forEach(function(r) {
+      var client = clients.find(function(cl) { return cl.id === r.client_id })
+      docs.push({ _type: "rapport_interv", _id: r.id, _devisId: r.devis_id, _rawRI: r, numero: r.numero_unique, client: client, date: r.created_at })
+    })
     docs.sort(function(a, b) { return new Date(b.date) - new Date(a.date) })
 
     var docsFiltres = filtreDoc === "contrats"
@@ -3946,12 +3960,13 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
               var isContrat = doc._type === "contrat"
               var isCert    = doc._type === "cert"
               var isRV      = doc._type === "rapport_visite"
-              var icon = isContrat ? "📄" : isRV ? "🔍" : isCert ? (doc.sousType === "desinsect" ? "🪲" : doc.sousType === "double" ? "🪲🐭" : "🐭") : "📋"
-              var typeLabel = isContrat ? "Contrat d'entretien" : isRV ? "Rapport de visite" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : doc.sousType === "double" ? "Certificat Combiné" : "Certificat Dératisation") : "Fiche de passage"
+              var isRI      = doc._type === "rapport_interv"
+              var icon = isContrat ? "📄" : isRV ? "🔍" : isRI ? "📊" : isCert ? (doc.sousType === "desinsect" ? "🪲" : doc.sousType === "double" ? "🪲🐭" : "🐭") : "📋"
+              var typeLabel = isContrat ? "Contrat d'entretien" : isRV ? "Rapport de visite" : isRI ? "Rapport d'intervention" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : doc.sousType === "double" ? "Certificat Combiné" : "Certificat Dératisation") : "Fiche de passage"
               var clientNom = doc.client ? ([doc.client.prenom, doc.client.nom].filter(Boolean).join(" ") + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
               var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "—"
-              var borderColor = isContrat ? "#e9d5ff" : isRV ? "#bae6fd" : "#e8e6e0"
-              var bgColor     = isContrat ? "#faf5ff" : isRV ? "#f0f9ff" : "#fff"
+              var borderColor = isContrat ? "#e9d5ff" : isRV ? "#bae6fd" : isRI ? "#fed7aa" : "#e8e6e0"
+              var bgColor     = isContrat ? "#faf5ff" : isRV ? "#f0f9ff" : isRI ? "#fff7ed" : "#fff"
               return React.createElement("div", { key: doc._type + doc._id, style: { backgroundColor: bgColor, border: "1px solid " + borderColor, borderRadius: "8px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } },
                 React.createElement("span", { style: { fontSize: "22px", flexShrink: 0 } }, icon),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
@@ -3970,16 +3985,21 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                           onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); ouvrirRapportVisite(doc._rawRV, d || { id: doc._devisId }, doc.client || {}) },
                           style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
                         }, "👁 Voir / Modifier")
-                      : React.createElement("button", {
-                          onClick: function() { isCert ? apercuCert(doc._rawCert) : apercuFiche(doc._raw, doc.client) },
-                          style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
-                        }, "👁 Aperçu"),
-                  !isContrat && !isRV && React.createElement("button", {
+                      : isRI
+                        ? React.createElement("button", {
+                            onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); ouvrirRapportInterv(doc._rawRI, d || { id: doc._devisId }, doc.client || {}) },
+                            style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
+                          }, "👁 Voir / Modifier")
+                        : React.createElement("button", {
+                            onClick: function() { isCert ? apercuCert(doc._rawCert) : apercuFiche(doc._raw, doc.client) },
+                            style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" }
+                          }, "👁 Aperçu"),
+                  !isContrat && !isRV && !isRI && React.createElement("button", {
                     onClick: function() { isCert ? toggleCertEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) : toggleFicheEnvoye({ id: doc._id, envoye: doc.envoye, envoye_at: doc.envoye_at }) },
                     title: doc.envoye ? ("Envoyé le " + new Date(doc.envoye_at).toLocaleDateString("fr-FR")) : "Marquer comme envoyé",
                     style: { background: doc.envoye ? "#0a2e1a" : "#fff", color: doc.envoye ? "#fff" : "#999", border: "1px solid " + (doc.envoye ? "#0a2e1a" : "#ccc"), borderRadius: "20px", padding: "4px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" }
                   }, doc.envoye ? "✓ " + (isCert ? "Envoyé" : "Remis") : (isCert ? "Envoyé ?" : "Remis ?")),
-                  !isContrat && !isRV && (isCert
+                  !isContrat && !isRV && !isRI && (isCert
                     ? React.createElement("button", {
                         onClick: function() { var d = devisList.find(function(x) { return x.id === doc._devisId }); rouvrirCertModal(doc._rawCert, d, doc.client) },
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
@@ -3989,7 +4009,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                         style: { background: "#fff", color: "#0a2e1a", border: "1px solid #0a2e1a", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
                       }, "✏️ Modifier")),
                   React.createElement("button", {
-                    onClick: function() { isContrat ? (window.confirm("Supprimer ce contrat ?") && db.from("contrats").delete().eq("id", doc._id).then(charger)) : isRV ? supprimerRapportVisite(doc._id) : isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
+                    onClick: function() { isContrat ? (window.confirm("Supprimer ce contrat ?") && db.from("contrats").delete().eq("id", doc._id).then(charger)) : isRV ? supprimerRapportVisite(doc._id) : isRI ? supprimerRapportIntervById(doc._id) : isCert ? supprimerCertificat(doc._id) : supprimerFiche(doc._id) },
                     style: { background: "#fff", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
                   }, "🗑")
                 )
