@@ -169,8 +169,7 @@ export async function POST(req) {
     const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat, offreBienvenue, leadId } = body
     const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null, ifu: body.ifu || null, rccm: body.rccm || null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
-    const { data: num } = await supabase.rpc("generate_devis_numero")
-    const numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase())
+    const numero = "DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase()
     const { data: newDevis, error: devisErr } = await supabase.from("devis").insert({
       client_id: newClient.id,
       numero,
