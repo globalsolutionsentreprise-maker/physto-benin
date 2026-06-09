@@ -1444,7 +1444,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     setLoading(true)
     const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
       db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
-      db.from("clients").select("*").order("nom"),
+      Promise.resolve({ data: [] }),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
       db.from("fiches_passage").select("*").order("created_at", { ascending: false }),
       db.from("rapports_visite").select("*").order("created_at", { ascending: false }),
@@ -1465,8 +1465,14 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     setLoading(false)
     db.auth.getSession().then(function(res) {
       var token = (res.data.session && res.data.session.access_token) || ''
-      return fetch("/api/crm-data?action=get_leads", { headers: { "Authorization": "Bearer " + token } })
-    }).then(function(r) { return r.json() }).then(function(j) { setLeads(j.leads || []) }).catch(function() {})
+      return Promise.all([
+        fetch("/api/crm-data?action=get_leads", { headers: { "Authorization": "Bearer " + token } }).then(function(r) { return r.json() }),
+        fetch("/api/crm-data?action=get_clients", { headers: { "Authorization": "Bearer " + token } }).then(function(r) { return r.json() }),
+      ])
+    }).then(function(results) {
+      setLeads(results[0].leads || [])
+      setClients(results[1].clients || [])
+    }).catch(function() {})
   }
 
   async function saveParcours(devisId, newParcours) {

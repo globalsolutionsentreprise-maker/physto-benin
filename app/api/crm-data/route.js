@@ -30,6 +30,11 @@ export async function GET(req) {
     return Response.json({ leads: leads || [] })
   }
 
+  if (action === "get_clients") {
+    const { data: clients } = await supabase.from("clients").select("*").order("nom")
+    return Response.json({ clients: clients || [] })
+  }
+
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
