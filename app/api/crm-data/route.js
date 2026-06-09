@@ -170,9 +170,10 @@ export async function POST(req) {
     const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null, ifu: body.ifu || null, rccm: body.rccm || null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
     const { data: num } = await supabase.rpc("generate_devis_numero")
-    const { data: newDevis } = await supabase.from("devis").insert({
+    const numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-6))
+    const { data: newDevis, error: devisErr } = await supabase.from("devis").insert({
       client_id: newClient.id,
-      numero: num,
+      numero,
       prestation: typePrestation || "—",
       description: commentaire || "",
       montant_net: montantDevis || 0,
@@ -193,6 +194,7 @@ export async function POST(req) {
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
+    if (devisErr) console.error("add_client devis insert error:", devisErr.message, "numero:", numero)
     if (offreBienvenue && newDevis?.id) {
       const { error: discountErr } = await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
       if (discountErr) return Response.json({ error: "Erreur application remise bienvenue", detail: discountErr.message }, { status: 500 })
