@@ -24,15 +24,17 @@ export async function POST(req) {
       if (existing) return NextResponse.json({ ok: true, duplicate: true })
     }
 
-    await supabase.from("leads").insert({
+    const { error: insertError } = await supabase.from("leads").insert({
       nom, telephone: telephone || null, email: email || null,
       nuisible: nuisible || null, ville: ville || null,
       message: message || null, urgence: urgence || false,
       offre_bienvenue: true, traite: false,
     })
+    if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 })
 
     return NextResponse.json({ ok: true })
   } catch (err) {
+    console.error("register-lead error:", err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
