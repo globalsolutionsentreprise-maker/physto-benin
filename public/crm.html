@@ -1499,7 +1499,7 @@ async function saveClient(){
   const gn=id=>parseFloat(g(id))||0;
   const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
     typePrestation:g("ftp"),categorie:g("fcat"),zone:g("fzone")||"—",
-    motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs"),commentaire:g("fco"),
+    motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs")||"contact",commentaire:g("fco"),
     montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),attestation:g("fat")||"non",
     typeContrat:g("ftc")||"ponctuel",dureeContratMois:gn("fdur")||12,
     frequenceIntervention:g("ffreq")||"trimestrielle",dateDebutContrat:g("fdeb")||"",
