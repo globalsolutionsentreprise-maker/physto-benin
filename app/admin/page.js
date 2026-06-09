@@ -1410,6 +1410,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [clientDetail, setClientDetail] = React.useState(null)
   const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
   const [pipelineExpanded, setPipelineExpanded] = React.useState(null)
+  const [leads, setLeads] = React.useState([])
 
   const STATUTS = {
     brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
@@ -1462,6 +1463,10 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     setContratsList(contrats || [])
     setPersonnelAdmin((perso || []).map(function(p) { return { id: p.id, nom: [p.prenom, p.nom].filter(Boolean).join(' '), poste: p.poste || '' } }))
     setLoading(false)
+    db.auth.getSession().then(function(res) {
+      var token = (res.data.session && res.data.session.access_token) || ''
+      return fetch("/api/crm-data?action=get_leads", { headers: { "Authorization": "Bearer " + token } })
+    }).then(function(r) { return r.json() }).then(function(j) { setLeads(j.leads || []) }).catch(function() {})
   }
 
   async function saveParcours(devisId, newParcours) {
@@ -1544,7 +1549,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       prixParPrestation: d.prix_par_prestation || {},
       description: d.description || "",
       montantBrut: d.montant_net || d.montant_total || "",
-      remise: "",
+      remise: d.remise_bienvenue ? String(d.remise_bienvenue) : "",
       remiseType: "pct",
       modeTransmission: "email",
       pctAcompte: d.pct_acompte ? String(d.pct_acompte) : "60",
@@ -3001,7 +3006,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       React.createElement("div", { style: { flex: 1 } },
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" } },
           React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
-          React.createElement("span", { style: { padding: "2px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label)
+          React.createElement("span", { style: { padding: "2px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label),
+          d.remise_bienvenue > 0 && React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 7px", borderRadius: "20px" } }, "−10%")
         ),
         React.createElement("div", { style: { fontSize: "14px", fontWeight: "600", color: "#0a2e1a", marginBottom: "2px" } }, d.prestation),
         cl && React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, [(cl.prenom || ""), cl.nom].filter(Boolean).join(" ") + (cl.entreprise ? " — " + cl.entreprise : "")),
@@ -3656,6 +3662,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                 duree: 12,
                 paiement: freq.paiement,
                 typeEtablissement: contratForm.typeEtablissement,
+                remise: d.remise_bienvenue || 0,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
               window.open("/api/generate-contract?" + params.toString(), "_blank")
@@ -3745,7 +3752,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
                 duree: a.dureeContrat || 12,
                 paiement: a.paiementRecommande || "trimestriel_avance",
                 typeEtablissement: contratForm.typeEtablissement,
-                remise: a.remiseContrat || 0,
+                remise: a.remiseContrat || d.remise_bienvenue || 0,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
               window.open("/api/generate-contract?" + params.toString(), "_blank")
@@ -4028,6 +4035,27 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         )
       ),
       renderFormDevis(),
+      leads.length > 0 && React.createElement("div", { style: { backgroundColor: "#fff8e1", border: "1px solid #d4a920", borderRadius: "8px", padding: "14px 16px", marginBottom: "20px" } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" } },
+          React.createElement("strong", { style: { fontSize: "13px", color: "#0a2e1a" } }, "Leads site — offre de bienvenue"),
+          React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 8px", borderRadius: "20px" } }, leads.length + " en attente")
+        ),
+        leads.map(function(lead) {
+          return React.createElement("div", { key: lead.id, style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid #f0e8c8" } },
+            React.createElement("div", null,
+              React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, lead.nom),
+              React.createElement("div", { style: { fontSize: "11px", color: "#666", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
+            ),
+            React.createElement("button", {
+              onClick: async function() {
+                await db.from("leads").update({ traite: true }).eq("id", lead.id)
+                setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
+              },
+              style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, marginLeft: "10px" }
+            }, "Traiter →")
+          )
+        })
+      ),
       React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
         ["tous", "envoye", "accepte", "modification_demandee", "en_cours", "termine", "annule"].map(function(st) {
           var count = st === "tous" ? devisList.length : devisList.filter(function(d) { return d.statut === st }).length
