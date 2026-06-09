@@ -32,6 +32,12 @@ export default function ContactForm() {
       })
       if (res.ok) {
         setStatut("succes")
+        // Fire-and-forget : enregistre le lead dans Supabase pour l'offre bienvenue
+        fetch("/api/register-lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formulaire),
+        }).catch(function() {})
         setFormulaire({ nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false })
       } else { setStatut("erreur") }
     } catch(err) { setStatut("erreur") }
@@ -150,6 +156,13 @@ export default function ContactForm() {
               Urgence — je souhaite être contacté(e) dans les 2h
             </span>
           </label>
+
+          <div style={{ backgroundColor: "rgba(26,107,56,0.15)", border: "1px solid rgba(26,107,56,0.4)", borderRadius: "6px", padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "12px", fontWeight: "800", padding: "3px 10px", borderRadius: "20px", flexShrink: 0 }}>−10%</span>
+            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", lineHeight: "1.4" }}>
+              Votre remise de 10% est automatiquement incluse — valable pour toute première demande.
+            </span>
+          </div>
 
           <button type="submit" disabled={statut === "envoi"} style={{ backgroundColor: statut === "envoi" ? "#8a6e12" : "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px", border: "none", cursor: statut === "envoi" ? "not-allowed" : "pointer", fontFamily: "inherit", letterSpacing: "0.02em" }}>
             {statut === "envoi" ? "Envoi en cours..." : "Envoyer ma demande"}
