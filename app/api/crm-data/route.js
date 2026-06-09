@@ -1,10 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
-
 export const dynamic = "force-dynamic"
 
 async function verifyAdmin(req) {
@@ -20,6 +15,7 @@ function mapStatut(statut) {
 }
 
 export async function GET(req) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const url = new URL(req.url)
   const action = url.searchParams.get("action")
@@ -125,6 +121,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const body = await req.json()
   const { action } = body
