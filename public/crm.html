@@ -1511,12 +1511,14 @@ async function saveClient(){
     fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save_client',id:editId,...d})}).catch(()=>{});
     toast("Client mis à jour");
   }else{
+    let addOk=false;
     try{
       const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_client',...d})});
       const result=await res.json();
-      if(result.id)clients.push({id:result.id,...d});
-    }catch(e){}
-    toast("Client ajouté au pipeline");
+      if(result.id){clients.push({id:result.id,...d});addOk=true;}
+      else{toast("Erreur ajout: "+(result.error||JSON.stringify(result)));closeModal();refresh();return;}
+    }catch(e){toast("Erreur réseau: "+e.message);closeModal();refresh();return;}
+    if(addOk)toast("Client ajouté au pipeline");
   }
   closeModal();refresh();
 }
