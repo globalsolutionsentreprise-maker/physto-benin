@@ -1138,7 +1138,7 @@ function formH(c){
       </div>
       <div class="fg-full">
         <label class="fl">Type de prestation</label>
-        <select id="ftp">${["—",...PRESTATIONS,"Combiné (plusieurs prestations)"].map(p=>`<option ${(c?.typePrestation||"—")===p?"selected":""}>${p}</option>`).join("")}</select>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">${(()=>{const saved=(c?.typePrestation||"").split(", ").filter(p=>PRESTATIONS.includes(p));return PRESTATIONS.map((p,i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:5px 9px;border:1px solid var(--border-2);border-radius:6px;background:var(--bg);white-space:nowrap;" onclick="document.getElementById('ftp_${i}').click()"><input type="checkbox" id="ftp_${i}" value="${p}" ${saved.includes(p)?"checked":""} style="width:auto;margin:0;pointer-events:none;"> ${p}</div>`).join("");})()}</div>
       </div>
       <div>
         <label class="fl">Catégorie client</label>
@@ -1498,7 +1498,7 @@ async function saveClient(){
   const g=id=>document.getElementById(id)?.value||"";
   const gn=id=>parseFloat(g(id))||0;
   const d={client:g("fc").trim(),provenance:g("fp"),dateContact:g("fdc"),dateDevis:g("fd"),
-    typePrestation:g("ftp"),categorie:g("fcat"),zone:g("fzone")||"—",
+    typePrestation:PRESTATIONS.filter((_,i)=>document.getElementById("ftp_"+i)?.checked).join(", ")||"—",categorie:g("fcat"),zone:g("fzone")||"—",
     motifEchec:g("fmot")||"—",montantDevis:gn("fmd"),statut:g("fs")||"contact",commentaire:g("fco"),
     montantFacture:gn("fmf"),dateFacture:g("fdf"),paiementsRecus:gn("fp2"),attestation:g("fat")||"non",
     typeContrat:g("ftc")||"ponctuel",dureeContratMois:gn("fdur")||12,
