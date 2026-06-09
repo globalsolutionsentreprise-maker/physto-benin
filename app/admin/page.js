@@ -1513,11 +1513,6 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         })
         const data = await res.json()
         if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setSubmittingClient(false); return }
-        if (data.clientId) {
-          var { data: num } = await db.rpc("generate_devis_numero")
-          var numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-4))
-          await db.from("devis").insert({ client_id: data.clientId, numero: numero, prestation: "À définir", montant_net: 0, montant_total: 0, statut: "brouillon" })
-        }
         setMsg("✓ " + data.message)
         setShowFormClient(false)
         await charger(); setSubmittingClient(false)
