@@ -7,7 +7,7 @@ When the user's request matches an available agent or skill, invoke it proactive
 Key routing rules:
 - Bug reported / something broken / page not loading → invoke bug-investigator agent
 - Before or after a commit/deploy → invoke code-reviewer agent
-- "commite et déploie" / "déploie" / "mets en prod" → invoke deploy-helper agent
+- "commite et déploie" / "déploie" / "mets en prod" → invoke /deploy-gse command
 - New table / migration / Supabase query → invoke supabase-expert agent
 - "vérifie que ça marche" / after UI changes → invoke ui-qa agent
 - Investigating a bug or error → invoke /investigate skill
