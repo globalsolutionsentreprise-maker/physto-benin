@@ -88,6 +88,7 @@ export async function GET(req) {
       montantBrut: d.montant_brut || 0,
       remise: d.remise || 0,
       remiseType: d.remise_type || "pct",
+      remiseBienvenue: d.remise_bienvenue || 0,
       pctAcompte: d.pct_acompte || 60,
       conditionsPaiement: d.conditions_paiement || "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention.",
     }
@@ -106,6 +107,19 @@ export async function GET(req) {
     nom: [p.prenom, p.nom].filter(Boolean).join(" "),
     poste: p.poste || "",
   }))
+
+  const url = new URL(req.url)
+  const action = url.searchParams.get("action")
+
+  if (action === "get_leads") {
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("traite", false)
+      .order("created_at", { ascending: false })
+      .limit(20)
+    return Response.json({ leads: leads || [] })
+  }
 
   return Response.json({ clients, depenses: dep, objectifCA: 0, membres })
 }
@@ -155,7 +169,7 @@ export async function POST(req) {
   }
 
   if (action === "add_client") {
-    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
+    const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat, offreBienvenue, leadId } = body
     const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null, ifu: body.ifu || null, rccm: body.rccm || null }).select().single()
     if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
     const { data: num } = await supabase.rpc("generate_devis_numero")
@@ -182,6 +196,12 @@ export async function POST(req) {
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
+    if (offreBienvenue && newDevis?.id) {
+      await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
+      if (leadId) {
+        await supabase.from("leads").update({ traite: true }).eq("id", leadId)
+      }
+    }
     return Response.json({ ok: true, id: newDevis?.id })
   }
 
