@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 async function creerBrouillonDevis(supabase, clientId) {
   try {
     const { data: num } = await supabase.rpc("generate_devis_numero")
-    const numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-4))
+    const numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase())
     const { error } = await supabase.from("devis").insert({
       client_id: clientId,
       numero,
