@@ -3771,6 +3771,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
 
   function renderVuePipeline() {
     var COLONNES = [
+      { id: 'contact',      label: '📞 Contact',        color: '#0ea5e9' },
       { id: 'visite',       label: '🔍 Visite',        color: '#7c3aed' },
       { id: 'facture',      label: '💰 Facture',        color: '#0f766e' },
       { id: 'intervention', label: '🔧 Intervention',   color: '#1e40af' },
@@ -3812,6 +3813,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       if ((p.intervention && p.intervention.done) || hasFiche) return 'certificat'
       if (p.facture && p.facture.done) return 'intervention'
       if (p.visite && p.visite.done) return 'facture'
+      if (d.statut === 'brouillon') return 'contact'
       return 'visite'
     }
 
@@ -3880,7 +3882,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
 
     return React.createElement('div', null,
       React.createElement('div', { style: { fontSize: '13px', color: '#888', marginBottom: '20px' } }, 'Suivi du parcours client — de la visite jusqu\'à l\'encaissement.'),
-      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(6, minmax(190px, 1fr))', gap: '10px', overflowX: 'auto', paddingBottom: '12px' } },
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(190px, 1fr))', gap: '10px', overflowX: 'auto', paddingBottom: '12px' } },
         COLONNES.map(function(col) {
           var devisColonne = devisList.filter(function(d) { return getColonne(d) === col.id })
           return React.createElement('div', { key: col.id },
