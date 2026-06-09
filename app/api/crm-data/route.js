@@ -21,6 +21,19 @@ function mapStatut(statut) {
 
 export async function GET(req) {
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
+  const url = new URL(req.url)
+  const action = url.searchParams.get("action")
+
+  if (action === "get_leads") {
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("id, nom, telephone, email, nuisible, ville, message, urgence, created_at")
+      .eq("traite", false)
+      .order("created_at", { ascending: false })
+      .limit(20)
+    return Response.json({ leads: leads || [] })
+  }
+
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
@@ -108,19 +121,6 @@ export async function GET(req) {
     poste: p.poste || "",
   }))
 
-  const url = new URL(req.url)
-  const action = url.searchParams.get("action")
-
-  if (action === "get_leads") {
-    const { data: leads } = await supabase
-      .from("leads")
-      .select("*")
-      .eq("traite", false)
-      .order("created_at", { ascending: false })
-      .limit(20)
-    return Response.json({ leads: leads || [] })
-  }
-
   return Response.json({ clients, depenses: dep, objectifCA: 0, membres })
 }
 
@@ -197,7 +197,8 @@ export async function POST(req) {
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
     if (offreBienvenue && newDevis?.id) {
-      await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
+      const { error: discountErr } = await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
+      if (discountErr) return Response.json({ error: "Erreur application remise bienvenue", detail: discountErr.message }, { status: 500 })
       if (leadId) {
         await supabase.from("leads").update({ traite: true }).eq("id", leadId)
       }
