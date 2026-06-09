@@ -194,7 +194,7 @@ export async function POST(req) {
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
     }).select().single()
-    if (devisErr) console.error("add_client devis insert error:", devisErr.message, "numero:", numero)
+    if (devisErr) return Response.json({ error: "Erreur insertion devis: " + devisErr.message + " | code: " + devisErr.code }, { status: 500 })
     if (offreBienvenue && newDevis?.id) {
       const { error: discountErr } = await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
       if (discountErr) return Response.json({ error: "Erreur application remise bienvenue", detail: discountErr.message }, { status: 500 })
