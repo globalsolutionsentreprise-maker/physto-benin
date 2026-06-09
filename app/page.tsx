@@ -21,7 +21,7 @@ export default function Accueil() {
 
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
-    { id: 2, valeur: "2h", label: "Délai d'intervention" },
+    { id: 2, valeur: "7j/7", label: "Disponibilité urgence" },
     { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
   ])
 
@@ -70,27 +70,27 @@ export default function Accueil() {
   }, [])
 
   const services = [
-    { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Élimination complète et durable par gel appât, pulvérisation résiduelle et fumigation professionnelle. Traitement certifié." },
-    { numero: "02", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Intervention sécurisée avec pièges homologués et raticides certifiés. Sécurisation de vos accès et suivi mensuel inclus." },
-    { numero: "03", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Traitement virucide, bactéricide et fongicide. Certifié pour les restaurants, hôtels et établissements de santé. Certificat officiel remis." },
-    { numero: "04", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Barrière chimique en profondeur, traitement par injection et garantie longue durée. Diagnostic gratuit inclus." },
-    { numero: "05", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Sécurisation périmétrique complète, répulsifs professionnels longue durée. Intervention d'urgence en moins de 2h à Cotonou." },
-    { numero: "06", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. Traitement adapté à chaque situation, devis gratuit sous 2h." },
+    { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation — on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
+    { numero: "02", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
+    { numero: "03", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis — valable pour les inspections sanitaires." },
+    { numero: "04", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, garantie longue durée. Diagnostic gratuit." },
+    { numero: "05", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants — on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
+    { numero: "06", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. On adapte le traitement à votre situation. Devis gratuit." },
   ]
 
   const etapes = [
-    { num: "01", titre: "Vous nous contactez", desc: "Par WhatsApp, téléphone ou formulaire. Disponibles 24h/24 et 7j/7, y compris les jours fériés." },
-    { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien certifié se déplace chez vous pour évaluer la situation et proposer la solution la plus adaptée." },
-    { num: "03", titre: "Intervention professionnelle", desc: "Traitement réalisé avec des produits homologués et des équipements de niveau professionnel. Discret et efficace." },
-    { num: "04", titre: "Certificat et suivi", desc: "Un certificat officiel vous est remis à l'issue de chaque intervention." },
+    { num: "01", titre: "Vous nous contactez", desc: "WhatsApp, téléphone ou formulaire — comme vous préférez. On répond rapidement, 24h/24 et 7j/7." },
+    { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien passe chez vous — sans frais — pour voir exactement ce qu'il y a à faire. Pas d'estimation à l'aveugle." },
+    { num: "03", titre: "Intervention", desc: "On traite avec les bons produits, proprement et discrètement. Pas besoin de tout préparer — on s'adapte à votre planning." },
+    { num: "04", titre: "Certificat et suivi", desc: "À la fin de chaque intervention, vous recevez un certificat officiel. Pour vous, vos partenaires ou l'inspection sanitaire." },
   ]
 
   const garanties = [
-    { titre: "Agréé par l'État du Bénin", desc: "Entreprise officiellement référencée et agréée par les autorités sanitaires du Bénin.", detail: agrement, accent: true },
-    { titre: "Produits homologués OMS", desc: "Tous nos produits respectent les normes de l'Organisation Mondiale de la Santé.", accent: false },
-    { titre: "Intervention en 2h", desc: "Disponibles 24h/24 et 7j/7. Délai garanti en moins de 2h sur Cotonou.", accent: false },
-    { titre: "Certificat officiel remis", desc: "Un document officiel vous est remis après chaque intervention.", accent: false },
-    { titre: "Techniciens certifiés", desc: "Notre équipe est formée et certifiée en hygiène phytosanitaire.", accent: false },
+    { titre: "Agréé par l'État du Bénin", desc: "On est officiellement agréés par les autorités sanitaires du Bénin. Pas une promesse — un document.", detail: agrement, accent: true },
+    { titre: "Produits homologués OMS", desc: "Tous nos produits passent les normes OMS — efficaces contre les nuisibles, sans danger pour votre entourage.", accent: false },
+    { titre: "Disponibles 24h/24", desc: "Disponibles 24h/24 et 7j/7, y compris jours fériés. Urgences assurées sur Cotonou.", accent: false },
+    { titre: "Certificat officiel remis", desc: "Chaque intervention se termine par un certificat signé. Valable pour les inspections sanitaires.", accent: false },
+    { titre: "Techniciens certifiés", desc: "Nos techniciens sont formés, certifiés et connaissent le terrain béninois.", accent: false },
   ]
 
   return (
@@ -127,7 +127,7 @@ export default function Accueil() {
             en toute sérénité.
           </h1>
           <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "520px", marginBottom: "40px", fontWeight: "300" }}>
-            Désinsectisation, dératisation, désinfection — des interventions professionnelles certifiées pour hôtels, restaurants, entreprises et particuliers exigeants dans tout le Bénin.
+            Cafards, rats, termites, serpents — on s'en occupe. Techniciens certifiés, produits homologués OMS, résultats garantis. Pour les professionnels comme pour les particuliers, partout au Bénin.
           </p>
           <div className="hero-btns" style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
@@ -163,10 +163,10 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700" }}>suffit à tout changer.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "16px" }}>
-            Phyto Bénin est la référence béninoise en matière d'hygiène sanitaire et phytosanitaire professionnelle. Nous intervenons avec des produits homologués, des techniciens certifiés et un protocole rigoureux éprouvé depuis plus de dix ans.
+            Phyto Bénin, c'est l'entreprise que les hôtels, restaurants et familles appellent quand ils ont un vrai problème de nuisibles. Depuis plus de dix ans, on intervient avec les bons produits, les bons techniciens — et on ne repart pas tant que c'est réglé.
           </p>
           <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
-            Notre équipe met tout en œuvre pour vous offrir un environnement sain, sécurisé et durablement traité.
+            Ce n'est pas qu'un traitement. C'est la tranquillité d'esprit qui vient avec.
           </p>
           <a href="/qui-sommes-nous" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
             Découvrir notre histoire →
@@ -226,9 +226,9 @@ export default function Accueil() {
           </div>
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
             {[
-              { img: "/images/client-hotel.jpg", label: "Hôtels et Resorts", desc: "Interventions discrètes, respect des horaires, protocole hôtelier" },
-              { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Traitement des grandes surfaces, mise aux normes, suivi régulier" },
-              { img: "/images/client-bureau.jpg", label: "Bureaux et Entreprises", desc: "Interventions hors heures ouvrées, confidentialité garantie" },
+              { img: "/images/client-hotel.jpg", label: "Hôtels et Resorts", desc: "On connaît les contraintes hôtelières : discrétion, horaires stricts, zéro interruption de service." },
+              { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Grandes surfaces, normes HACCP, suivi régulier — on s'adapte à vos exigences." },
+              { img: "/images/client-bureau.jpg", label: "Bureaux et Entreprises", desc: "Interventions en dehors des heures ouvrées. Vos équipes ne voient rien, ne sentent rien." },
             ].map(function(c, i) {
               return (
                 <div key={i} style={{ position: "relative", borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#0d3d1e" }}>
@@ -252,7 +252,7 @@ export default function Accueil() {
             <h2 style={{ fontSize: "clamp(26px, 3vw, 40px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em" }}>
               Simple. Rapide.
               <br />
-              <strong style={{ fontWeight: "700" }}>Définitivement efficace.</strong>
+              <strong style={{ fontWeight: "700" }}>Et ça marche.</strong>
             </h2>
           </div>
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>

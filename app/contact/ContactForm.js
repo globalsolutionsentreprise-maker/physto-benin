@@ -85,17 +85,17 @@ export default function ContactForm() {
         <h2 style={{ fontSize: "26px", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.01em", marginBottom: "8px" }}>
           Décrivez votre situation.
           <br />
-          <strong style={{ fontWeight: "700" }}>Nous prenons en charge le reste.</strong>
+          <strong style={{ fontWeight: "700" }}>On s'occupe du reste.</strong>
         </h2>
         <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)", marginBottom: "40px" }}>
-          Réponse sous 2h. Diagnostic et estimation offerts.
+          Diagnostic et estimation offerts.
         </p>
 
         {statut === "succes" && (
           <div style={{ backgroundColor: "rgba(26,107,56,0.25)", border: "1px solid rgba(26,107,56,0.5)", padding: "24px", marginBottom: "24px", textAlign: "center" }}>
             <div style={{ fontSize: "18px", marginBottom: "8px", color: "#d4a920", fontWeight: "300" }}>— Envoyé</div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "#4ade80", marginBottom: "4px" }}>Message envoyé avec succès</div>
-            <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Notre équipe vous contacte sous 2h.</div>
+            <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Notre équipe vous contacte rapidement.</div>
           </div>
         )}
 
@@ -153,7 +153,7 @@ export default function ContactForm() {
           <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
             <input type="checkbox" name="urgence" checked={formulaire.urgence} onChange={handleChange} style={{ width: "16px", height: "16px", accentColor: "#d4a920", flexShrink: 0 }} />
             <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: "1.5" }}>
-              Urgence — je souhaite être contacté(e) dans les 2h
+              Urgence — je souhaite être contacté(e) rapidement
             </span>
           </label>
 

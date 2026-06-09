@@ -21,7 +21,7 @@ export default function QuiSommesNous() {
   const [engagement, setEngagement] = useState("Notre engagement est de délivrer des interventions professionnelles, rigoureuses et durables, avec des produits homologués et des techniciens certifiés.")
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
-    { id: 2, valeur: "2h", label: "Délai d'urgence garanti" },
+    { id: 2, valeur: "7j/7", label: "Disponibilité" },
     { id: 3, valeur: "100%", label: "Résultats probants" },
     { id: 4, valeur: "24h/24", label: "Disponibilité" },
   ])
@@ -47,10 +47,10 @@ export default function QuiSommesNous() {
   }, [])
 
   const valeurs = [
-    { num: "01", titre: "Efficacité", desc: "Chaque intervention est préparée, planifiée et exécutée avec précision. Nous ne partons pas avant que le résultat soit là." },
-    { num: "02", titre: "Fiabilité", desc: "Produits homologués, protocoles certifiés, techniciens formés en continu. Pas de compromis sur la qualité." },
-    { num: "03", titre: "Réactivité", desc: "Disponibles 24h/24 et 7j/7. Délai d'intervention garanti en moins de 2h à Cotonou et ses environs." },
-    { num: "04", titre: "Transparence", desc: "Devis clair, intervention expliquée, certificat remis. Vous savez exactement ce que vous payez et pourquoi." },
+    { num: "01", titre: "Efficacité", desc: "On prépare, on planifie, on intervient. Et on ne repart pas tant que c'est fait." },
+    { num: "02", titre: "Fiabilité", desc: "Produits homologués, protocoles certifiés, techniciens formés régulièrement. Sur la qualité, on ne négocie pas." },
+    { num: "03", titre: "Réactivité", desc: "Disponibles 24h/24 et 7j/7. Urgences assurées à Cotonou et ses environs." },
+    { num: "04", titre: "Transparence", desc: "Prix annoncé à l'avance, traitement expliqué étape par étape, certificat remis à la fin. Aucune mauvaise surprise." },
   ]
 
   const engagements = [
@@ -97,7 +97,7 @@ export default function QuiSommesNous() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>au service du Bénin.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
-            Phyto Bénin est la division hygiène sanitaire et phytosanitaire de Global Solutions Entreprise. Basés à Cotonou, nous intervenons dans tout le Bénin.
+            Phyto Bénin est la branche hygiène sanitaire de Global Solutions Entreprise. Basés à Cotonou, on intervient partout au Bénin depuis plus de dix ans.
           </p>
         </div>
       </section>

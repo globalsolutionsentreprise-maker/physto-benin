@@ -19,17 +19,17 @@ const SERVICES: Record<string, {
     titre: "Désinsectisation",
     ico: "🪳",
     accroche: "Cafards · Fourmis · Moustiques · Mouches",
-    description: "Élimination complète et durable de tous les insectes nuisibles à Cotonou et au Bénin. Traitements par gel appât, pulvérisation résiduelle et fumigation professionnelle réalisés par des techniciens certifiés.",
-    tag: "Devis gratuit sous 2h",
+    description: "Cafards, fourmis, moustiques, mouches — on choisit la bonne méthode selon votre situation : gel appât, pulvérisation résiduelle ou fumigation. Techniciens certifiés, résultat garanti.",
+    tag: "Devis gratuit",
     details: ["Diagnostic complet et gratuit avant intervention", "Gel appât professionnel longue durée", "Pulvérisation résiduelle certifiée OMS", "Fumigation pour les infestations sévères", "Contrat de suivi mensuel disponible"],
     metaTitle: "Désinsectisation Cotonou — Cafards, Fourmis, Moustiques | Phyto Bénin",
-    metaDesc: "Désinsectisation professionnelle à Cotonou et au Bénin. Élimination cafards, fourmis, moustiques, mouches. Techniciens agréés, produits homologués. Devis gratuit sous 2h.",
+    metaDesc: "Désinsectisation professionnelle à Cotonou et au Bénin. Élimination cafards, fourmis, moustiques, mouches. Techniciens agréés, produits homologués. Devis gratuit.",
     mots: "désinsectisation Cotonou, désinsectisation Bénin, élimination cafards Cotonou, traitement insectes Bénin, cafards appartement Cotonou",
     faqs: [
       { q: "Combien de temps dure une intervention de désinsectisation ?", r: "Une intervention standard dure entre 1 et 3 heures selon la superficie. Nous recommandons de quitter les locaux pendant 2 à 4 heures après le traitement." },
-      { q: "Les produits utilisés sont-ils dangereux pour les enfants et animaux ?", r: "Tous nos produits sont homologués par l'OMS et conformes aux normes sanitaires béninoises. Nous vous indiquons précisément le délai de réoccupation après chaque traitement." },
-      { q: "Faut-il une deuxième intervention ?", r: "Pour les infestations de cafards, une seconde intervention de contrôle est recommandée 3 à 4 semaines après pour garantir l'élimination complète des œufs éclos." },
-      { q: "Intervenez-vous en urgence la nuit ou le week-end ?", r: "Oui, nous sommes disponibles 24h/24 et 7j/7 à Cotonou et dans les zones prioritaires (Abomey-Calavi, Sèmè-Kpodji)." },
+      { q: "Les produits utilisés sont-ils dangereux pour les enfants et animaux ?", r: "Non — tous nos produits passent les normes OMS et les standards béninois. On vous donne le délai exact à respecter avant de réoccuper les lieux, selon le traitement." },
+      { q: "Faut-il une deuxième intervention ?", r: "Pour les cafards, on recommande un passage de contrôle 3 à 4 semaines après — c'est le temps que mettent les œufs à éclore. Ça évite les rechutes et garantit le résultat dans la durée." },
+      { q: "Intervenez-vous en urgence la nuit ou le week-end ?", r: "Oui, on est disponibles 24h/24 et 7j/7 à Cotonou et dans les zones prioritaires (Abomey-Calavi, Sèmè-Kpodji)." },
     ],
     secteursCibles: ["Restaurants et cuisines", "Hôtels et hébergements", "Entrepôts alimentaires", "Bureaux et entreprises", "Appartements et villas", "Établissements de santé"],
     urgence: true,
@@ -38,17 +38,17 @@ const SERVICES: Record<string, {
     titre: "Dératisation",
     ico: "🐀",
     accroche: "Rats · Souris · Rongeurs",
-    description: "Intervention sécurisée et efficace contre les rongeurs au Bénin. Pièges homologués, raticides certifiés, sécurisation des accès et suivi mensuel pour une protection durable.",
+    description: "Rats, souris, rongeurs — on les élimine et on sécurise vos points d'entrée pour qu'ils ne reviennent pas. Pièges homologués, raticides certifiés, suivi mensuel disponible.",
     tag: "Contrat mensuel disponible",
     details: ["Inspection complète des zones à risque", "Pièges professionnels certifiés", "Raticides homologués et sécurisés", "Sécurisation des points d'entrée", "Rapport d'intervention détaillé et suivi mensuel"],
     metaTitle: "Dératisation Bénin — Rats et Souris | Intervention Rapide | Phyto Bénin",
     metaDesc: "Dératisation professionnelle au Bénin et à Cotonou. Élimination rats, souris, rongeurs. Pièges homologués, raticides certifiés. Intervention rapide 24h/24.",
     mots: "dératisation Cotonou, dératisation Bénin, élimination rats Cotonou, traitement rongeurs Bénin, souris maison Cotonou",
     faqs: [
-      { q: "Comment savoir si j'ai une infestation de rats ?", r: "Les principaux signes sont des crottes noires, des bruits la nuit, des câbles ou emballages rongés, des traces de morsures sur les murs et des odeurs particulières." },
-      { q: "Vos raticides sont-ils dangereux pour les animaux domestiques ?", r: "Nous utilisons des stations d'appât sécurisées inaccessibles aux animaux de compagnie et aux enfants. Les produits sont dosés pour cibler uniquement les rongeurs." },
-      { q: "Combien de temps faut-il pour éliminer une infestation ?", r: "En général 2 à 3 semaines selon le niveau d'infestation. Nous proposons un contrat mensuel avec visites de contrôle pour maintenir le résultat." },
-      { q: "Intervenez-vous dans les entrepôts et industries ?", r: "Oui, la dératisation des entrepôts, industries agroalimentaires et entrepôts de stockage est l'une de nos spécialités avec des protocoles adaptés aux normes HACCP." },
+      { q: "Comment savoir si j'ai une infestation de rats ?", r: "Crottes noires, bruits la nuit, câbles ou emballages rongés, traces de morsures, odeurs — si vous avez un ou deux de ces signes, appelez-nous. Mieux vaut agir tôt." },
+      { q: "Vos raticides sont-ils dangereux pour les animaux domestiques ?", r: "Non — on utilise des stations d'appât fermées, inaccessibles aux enfants et aux animaux. Les produits sont dosés pour cibler les rongeurs, pas votre entourage." },
+      { q: "Combien de temps faut-il pour éliminer une infestation ?", r: "En général, entre 2 et 3 semaines selon l'ampleur. On propose aussi un contrat mensuel si vous voulez maintenir le résultat dans le temps." },
+      { q: "Intervenez-vous dans les entrepôts et industries ?", r: "Oui — la dératisation des entrepôts et industries agroalimentaires, c'est l'une de nos spécialités. Protocoles adaptés aux normes HACCP, suivi rigoureux." },
     ],
     secteursCibles: ["Entrepôts et industrie", "Restaurants et cuisine", "Marchés et commerces", "Résidences et villas", "Établissements de santé", "Hôtels et hébergements"],
     urgence: true,
@@ -64,10 +64,10 @@ const SERVICES: Record<string, {
     metaDesc: "Désinfection professionnelle à Cotonou et au Bénin. Assainissement complet, produits virucides et bactéricides certifiés OMS. Certificat d'hygiène officiel. Restaurants, hôtels, santé.",
     mots: "désinfection Cotonou, assainissement locaux Bénin, certificat hygiène Bénin, désinfection restaurant Cotonou, désinfection hôtel Bénin",
     faqs: [
-      { q: "À quelle fréquence faut-il désinfecter ses locaux ?", r: "Pour les restaurants et hôtels, une désinfection mensuelle est recommandée. Pour les établissements de santé, la fréquence peut être hebdomadaire selon l'activité." },
-      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui, notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA/26-025/CNGP-BEN) et est accepté par les autorités sanitaires du Bénin." },
-      { q: "Faut-il vider les locaux avant la désinfection ?", r: "Pour une désinfection complète, nous recommandons de retirer les denrées alimentaires exposées. Nos techniciens vous fournissent un protocole précis avant l'intervention." },
-      { q: "Vos produits protègent-ils contre les virus et bactéries ?", r: "Oui, nous utilisons des produits virucides à large spectre homologués OMS, efficaces contre les bactéries, virus, champignons et moisissures." },
+      { q: "À quelle fréquence faut-il désinfecter ses locaux ?", r: "Pour un restaurant ou un hôtel, une fois par mois c'est la base. Pour une clinique ou une pharmacie, ça peut être hebdomadaire selon votre activité." },
+      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui — notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA/26-025/CNGP-BEN). Il est accepté par les autorités sanitaires et les inspecteurs." },
+      { q: "Faut-il vider les locaux avant la désinfection ?", r: "Pas grand chose à faire de votre côté — juste retirer les denrées alimentaires exposées. On vous envoie un protocole précis avant de passer." },
+      { q: "Vos produits protègent-ils contre les virus et bactéries ?", r: "Oui — on travaille avec des produits virucides à large spectre homologués OMS : bactéries, virus, champignons, moisissures. Tout est couvert." },
     ],
     secteursCibles: ["Restaurants et traiteurs", "Hôtels et hébergements", "Cliniques et pharmacies", "Crèches et écoles", "Marchés et surfaces commerciales", "Bureaux et open spaces"],
     urgence: false,
@@ -83,10 +83,10 @@ const SERVICES: Record<string, {
     metaDesc: "Traitement anti-termites professionnel au Bénin. Protection bois, béton et fondations. Barrière chimique certifiée, garantie longue durée, contrôle annuel. Devis gratuit.",
     mots: "anti-termites Bénin, traitement termites Cotonou, protection bois termites Bénin, termites maison Cotonou, barrière chimique termites",
     faqs: [
-      { q: "Comment savoir si ma maison est infestée de termites ?", r: "Les signes incluent des galeries de terre sur les murs et fondations, du bois creux qui sonne vide, des ailes abandonnées près des fenêtres et des dégâts sur les menuiseries." },
-      { q: "Le traitement anti-termites est-il dangereux pour les occupants ?", r: "Non, nos produits sont appliqués dans les fondations et les structures. Les locaux restent habitables. Nous recommandons une aération après le traitement des espaces fermés." },
-      { q: "Quelle est la durée de garantie du traitement ?", r: "Nos traitements sont garantis avec un contrôle annuel inclus. La durée exacte de garantie est précisée dans le contrat selon le type de traitement réalisé." },
-      { q: "Peut-on traiter une maison déjà construite contre les termites ?", r: "Oui, nous intervenons sur les constructions existantes par injection dans les fondations, traitement des menuiseries et barrières chimiques périmétriques." },
+      { q: "Comment savoir si ma maison est infestée de termites ?", r: "Regardez les murs et fondations : galeries de terre, bois qui sonne creux, ailes abandonnées près des fenêtres, menuiseries abîmées — si vous voyez un ou deux de ces signes, appelez-nous avant que ça s'aggrave." },
+      { q: "Le traitement anti-termites est-il dangereux pour les occupants ?", r: "Non — les produits vont dans les fondations et les structures, pas dans les espaces de vie. Les locaux restent habitables. On recommande juste d'aérer après le traitement des espaces fermés." },
+      { q: "Quelle est la durée de garantie du traitement ?", r: "Un contrôle annuel est inclus dans le contrat. La durée exacte de garantie dépend du type de traitement réalisé — on vous l'indique clairement avant de commencer." },
+      { q: "Peut-on traiter une maison déjà construite contre les termites ?", r: "Oui, sans problème. On intervient sur les constructions existantes par injection dans les fondations, traitement des menuiseries et barrières périmétriques." },
     ],
     secteursCibles: ["Maisons individuelles", "Immeubles résidentiels", "Entrepôts et hangars", "Bureaux et commerces", "Villas et résidences", "Bâtiments industriels"],
     urgence: false,
@@ -95,17 +95,17 @@ const SERVICES: Record<string, {
     titre: "Reptiles et Serpents",
     ico: "🐍",
     accroche: "Geckos · Serpents · Lézards",
-    description: "Sécurisation complète contre les reptiles au Bénin. Répulsifs professionnels longue durée, barrières physiques et intervention d'urgence en moins de 2h à Cotonou.",
-    tag: "Urgence — 2h à Cotonou",
-    details: ["Intervention d'urgence en moins de 2h à Cotonou", "Répulsifs professionnels longue durée", "Sécurisation périmétrique complète du site", "Pose de barrières physiques anti-reptiles", "Suivi post-intervention et contrôle inclus"],
-    metaTitle: "Serpents et Reptiles Bénin — Urgence 2h Cotonou | Phyto Bénin",
-    metaDesc: "Intervention d'urgence contre serpents, geckos et reptiles à Cotonou et au Bénin. Sécurisation complète, répulsifs professionnels. Intervention en moins de 2h.",
+    description: "Sécurisation complète contre les reptiles au Bénin. Répulsifs professionnels longue durée, barrières physiques et intervention d'urgence disponible 24h/24 à Cotonou.",
+    tag: "Urgence — disponible 24h/24",
+    details: ["Intervention d'urgence disponible 24h/24 à Cotonou", "Répulsifs professionnels longue durée", "Sécurisation périmétrique complète du site", "Pose de barrières physiques anti-reptiles", "Suivi post-intervention et contrôle inclus"],
+    metaTitle: "Serpents et Reptiles Bénin — Urgence 24h/24 Cotonou | Phyto Bénin",
+    metaDesc: "Intervention d'urgence contre serpents, geckos et reptiles à Cotonou et au Bénin. Sécurisation complète, répulsifs professionnels. Disponible 24h/24.",
     mots: "serpents Cotonou, reptiles maison Bénin, élimination serpents Cotonou, geckos appartement Bénin, urgence serpent Cotonou",
     faqs: [
-      { q: "Que faire si je trouve un serpent dans ma maison ?", r: "N'approchez pas l'animal. Fermez la pièce, éloignez les personnes et appelez-nous immédiatement. Notre équipe intervient en moins de 2h à Cotonou." },
-      { q: "Tous les serpents au Bénin sont-ils dangereux ?", r: "Non, mais certaines espèces présentes au Bénin sont venimeuses. Sans identification formelle, tout serpent doit être traité comme potentiellement dangereux." },
-      { q: "Comment empêcher les serpents d'entrer chez soi ?", r: "Nous installons des barrières physiques (grillages, joints de portes) et appliquons des répulsifs périmètriques professionnels. Un contrôle annuel maintient la protection." },
-      { q: "Intervenez-vous aussi pour les geckos en grande quantité ?", r: "Oui, les proliférations de geckos dans les locaux commerciaux et industriels font partie de nos interventions régulières." },
+      { q: "Que faire si je trouve un serpent dans ma maison ?", r: "N'approchez pas l'animal. Fermez la pièce, éloignez les personnes et appelez-nous immédiatement. Notre équipe est disponible 24h/24 à Cotonou." },
+      { q: "Tous les serpents au Bénin sont-ils dangereux ?", r: "Non — mais certaines espèces présentes au Bénin sont venimeuses. Sans identification certaine, mieux vaut traiter chaque serpent comme potentiellement dangereux." },
+      { q: "Comment empêcher les serpents d'entrer chez soi ?", r: "On installe des grillages, des joints de portes et on applique des répulsifs périmètriques durables. Un contrôle annuel suffit à maintenir la protection." },
+      { q: "Intervenez-vous aussi pour les geckos en grande quantité ?", r: "Oui — les proliférations de geckos dans les locaux commerciaux et entrepôts, c'est quelque chose qu'on traite régulièrement." },
     ],
     secteursCibles: ["Maisons et villas", "Jardins et terrasses", "Entrepôts et hangars", "Résidences avec espaces verts", "Hôtels et resorts", "Sites industriels"],
     urgence: true,
@@ -267,7 +267,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
           </p>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>
-              Devis gratuit sous 2h
+              Devis gratuit
             </a>
             <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#fff", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>
               WhatsApp direct
@@ -324,7 +324,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
             <div style={{ backgroundColor: "#0a2e1a", padding: "32px", marginBottom: "16px" }}>
               <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "16px" }}>INTERVENTION RAPIDE</div>
               <div style={{ fontSize: "22px", fontWeight: "700", color: "#fff", marginBottom: "8px" }}>Devis gratuit</div>
-              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", marginBottom: "24px", lineHeight: "1.6" }}>Réponse garantie sous 2h. Diagnostic offert sans engagement.</div>
+              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", marginBottom: "24px", lineHeight: "1.6" }}>Diagnostic offert sans engagement.</div>
               <a href="/contact" style={{ display: "block", textAlign: "center", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "14px", borderRadius: "4px", textDecoration: "none", marginBottom: "10px" }}>
                 Demander un devis
               </a>
@@ -340,7 +340,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
                 "Produits homologués OMS",
                 "Techniciens certifiés",
                 "Disponible 24h/24",
-                "Devis gratuit sous 2h",
+                "Devis gratuit",
               ].map((r, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#444", padding: "8px 0", borderBottom: i < 4 ? "1px solid #f7f7f5" : "none" }}>
                   <span style={{ color: "#1a6b38", fontWeight: "700" }}>✓</span>
