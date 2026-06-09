@@ -1883,7 +1883,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     setRapportVisiteModal({ devis, client, editingId: null })
     setRapportVisiteForm({
       dateVisite: new Date().toISOString().split('T')[0],
-      adresseSite: client.adresse || '',
+      adresseSite: client.adresse || devis.zone || '',
       descriptionSite: devis.prestation || '',
       nuisibles: [],
       autresNuisible: '',

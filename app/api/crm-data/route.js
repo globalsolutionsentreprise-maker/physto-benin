@@ -142,8 +142,8 @@ export async function POST(req) {
   }
 
   if (action === "save_client") {
-    const { id, client, statut, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
-    await supabase.from("devis").update({
+    const { id, client, statut, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
+    const devisUpdate = {
       crm_statut: statut,
       provenance,
       zone,
@@ -160,7 +160,9 @@ export async function POST(req) {
       duree_contrat_mois: dureeContratMois || 12,
       frequence_intervention: frequenceIntervention || "trimestrielle",
       date_debut_contrat: dateDebutContrat || null,
-    }).eq("id", id)
+    }
+    if (typePrestation && typePrestation !== "—") devisUpdate.prestation = typePrestation
+    await supabase.from("devis").update(devisUpdate).eq("id", id)
     const { data: devisRow } = await supabase.from("devis").select("client_id").eq("id", id).single()
     if (devisRow?.client_id) {
       const clientUpdate = { ifu: body.ifu ?? null, rccm: body.rccm ?? null }
