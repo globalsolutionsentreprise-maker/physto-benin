@@ -306,6 +306,43 @@ export default function Accueil() {
         </div>
       </section>
       )}
+
+      {/* OFFRE DE BIENVENUE */}
+      <section style={{ backgroundColor: "#0a2e1a", padding: "64px 40px" }}>
+        <div style={{ maxWidth: "900px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "48px", alignItems: "center" }} className="grid-2">
+          <div>
+            <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px", textTransform: "uppercase" }}>Offre de bienvenue</div>
+            <h2 style={{ fontSize: "32px", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.01em", marginBottom: "16px" }}>
+              Votre premier traitement à{" "}
+              <strong style={{ fontWeight: "700", color: "#d4a920" }}>-10%</strong>
+            </h2>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.55)", lineHeight: "1.7", marginBottom: "32px" }}>
+              Chaque nouveau client bénéficie automatiquement d&apos;une remise de 10% sur son premier devis. Valable pour toute première demande, sans condition ni code promo.
+            </p>
+            <a href="/contact" style={{ display: "inline-block", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "13px", fontWeight: "700", padding: "14px 28px", textDecoration: "none", letterSpacing: "0.04em" }}>
+              Demander un devis gratuit →
+            </a>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {[
+              { titre: "Remise automatique", desc: "Aucun code promo à saisir. La remise s'applique d'elle-même sur votre premier devis." },
+              { titre: "Valable sur tous nos services", desc: "Désinsectisation, dératisation, désinfection, anti-termites — tous nos traitements sont concernés." },
+              { titre: "Remise portée sur le contrat", desc: "Si votre devis débouche sur un contrat annuel, la remise de 10% est conservée." },
+            ].map(function(item) {
+              return (
+                <div key={item.titre} style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", padding: "20px 24px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#d4a920", flexShrink: 0, marginTop: "6px" }} />
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff", marginBottom: "4px" }}>{item.titre}</div>
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", lineHeight: "1.5" }}>{item.desc}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* TÉMOIGNAGES */}
       <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
