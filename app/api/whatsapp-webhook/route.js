@@ -4,6 +4,7 @@ import { createHmac } from "crypto"
 export const dynamic = "force-dynamic"
 
 const WHATSAPP_TOKEN    = process.env.WHATSAPP_TOKEN
+const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID
 const VERIFY_TOKEN      = process.env.WHATSAPP_VERIFY_TOKEN
 const GEMINI_API_KEY    = process.env.GEMINI_API_KEY
@@ -49,7 +50,7 @@ export async function POST(req) {
 
   // Vérification signature HMAC-SHA256
   const signature = req.headers.get("x-hub-signature-256") || ""
-  const expected  = "sha256=" + createHmac("sha256", WHATSAPP_TOKEN).update(rawBody).digest("hex")
+  const expected  = "sha256=" + createHmac("sha256", WHATSAPP_APP_SECRET).update(rawBody).digest("hex")
   if (signature !== expected) {
     return new Response("Unauthorized", { status: 401 })
   }
