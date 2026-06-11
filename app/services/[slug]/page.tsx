@@ -173,18 +173,19 @@ export async function generateStaticParams() {
   return Object.keys(SERVICES).map((slug) => ({ slug }))
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const s = SERVICES[params.slug]
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const s = SERVICES[slug]
   if (!s) return {}
   return {
     title: s.metaTitle,
     description: s.metaDesc,
     keywords: s.mots,
-    alternates: { canonical: `https://www.phyto-benin.com/services/${params.slug}` },
+    alternates: { canonical: `https://www.phyto-benin.com/services/${slug}` },
     openGraph: {
       title: s.metaTitle,
       description: s.metaDesc,
-      url: `https://www.phyto-benin.com/services/${params.slug}`,
+      url: `https://www.phyto-benin.com/services/${slug}`,
       siteName: "Phyto Bénin by GSE",
       locale: "fr_FR",
       type: "website",
@@ -193,8 +194,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default function ServicePage({ params }: { params: { slug: string } }) {
-  const s = SERVICES[params.slug]
+export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const s = SERVICES[slug]
   if (!s) notFound()
 
   const schemaService = {
@@ -210,7 +212,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
       "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" }
     },
     "areaServed": { "@type": "Country", "name": "Bénin" },
-    "url": `https://www.phyto-benin.com/services/${params.slug}`,
+    "url": `https://www.phyto-benin.com/services/${slug}`,
   }
 
   const schemaFAQ = {
@@ -229,7 +231,7 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.phyto-benin.com" },
       { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://www.phyto-benin.com/services" },
-      { "@type": "ListItem", "position": 3, "name": s.titre, "item": `https://www.phyto-benin.com/services/${params.slug}` },
+      { "@type": "ListItem", "position": 3, "name": s.titre, "item": `https://www.phyto-benin.com/services/${slug}` },
     ]
   }
 
@@ -366,10 +368,8 @@ export default function ServicePage({ params }: { params: { slug: string } }) {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#0a0a0a", marginBottom: "24px" }}>Nos autres services</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
-            {Object.entries(SERVICES).filter(([slug]) => slug !== params.slug).slice(0, 4).map(([slug, srv]) => (
-              <a key={slug} href={`/services/${slug}`} style={{ display: "block", padding: "20px", backgroundColor: "#f7f7f5", textDecoration: "none", borderLeft: "3px solid transparent", transition: "border-color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderLeftColor = "#d4a920")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderLeftColor = "transparent")}>
+            {Object.entries(SERVICES).filter(([s]) => s !== slug).slice(0, 4).map(([s, srv]) => (
+              <a key={s} href={`/services/${s}`} style={{ display: "block", padding: "20px", backgroundColor: "#f7f7f5", textDecoration: "none", borderLeft: "3px solid #d4a920" }}>
                 <div style={{ fontSize: "20px", marginBottom: "8px" }}>{srv.ico}</div>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>{srv.titre}</div>
                 <div style={{ fontSize: "11px", color: "#888", marginTop: "4px" }}>{srv.accroche}</div>
