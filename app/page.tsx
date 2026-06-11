@@ -70,12 +70,12 @@ export default function Accueil() {
   }, [])
 
   const services = [
-    { numero: "01", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation — on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
-    { numero: "02", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
-    { numero: "03", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis — valable pour les inspections sanitaires." },
-    { numero: "04", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, garantie longue durée. Diagnostic gratuit." },
-    { numero: "05", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants — on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
-    { numero: "06", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. On adapte le traitement à votre situation. Devis gratuit." },
+    { numero: "01", slug: "desinsectisation-cotonou", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation — on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
+    { numero: "02", slug: "deratisation-benin", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
+    { numero: "03", slug: "desinfection-locaux", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis — valable pour les inspections sanitaires." },
+    { numero: "04", slug: "anti-termites-benin", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, garantie longue durée. Diagnostic gratuit." },
+    { numero: "05", slug: "reptiles-serpents-benin", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants — on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
+    { numero: "06", slug: "punaises-de-lit-cotonou", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. On adapte le traitement à votre situation. Devis gratuit." },
   ]
 
   const etapes = [
@@ -198,7 +198,7 @@ export default function Accueil() {
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
             {services.map(function(s, i) {
               return (
-                <a key={i} href="/services" style={{ textDecoration: "none" }}>
+                <a key={i} href={`/services/${s.slug}`} style={{ textDecoration: "none" }}>
                   <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "40px 32px", minHeight: "280px", display: "flex", flexDirection: "column" }}>
                     <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>{s.numero}</div>
                     <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "10px" }}>{s.accroche.toUpperCase()}</div>
