@@ -150,27 +150,34 @@ async function saveConversation(phone, conv) {
 }
 
 // ─── Gemini Flash ─────────────────────────────────────────────────────────────
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+
 async function callGemini(messages) {
   const contents = messages.map(m => ({
     role: m.role === "assistant" ? "model" : "user",
     parts: [{ text: m.content }],
   }))
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
-      }),
-    }
-  )
-
-  const data = await res.json()
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "Je suis désolé, une erreur est survenue. Pouvez-vous réessayer ?"
+  for (const model of GEMINI_MODELS) {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents,
+          generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+        }),
+      }
+    )
+    const data = await res.json()
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+    if (text) return text
+    // 503 = overloaded, 429 = quota, both → try next model
+    if (data?.error?.code !== 503 && data?.error?.code !== 429) break
+  }
+  return "Je suis désolé, une erreur est survenue. Pouvez-vous réessayer ?"
 }
 
 // ─── Meta Cloud API ───────────────────────────────────────────────────────────
