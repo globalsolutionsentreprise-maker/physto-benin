@@ -14,6 +14,9 @@ function slugifier(titre: string): string {
 export default function Blog() {
   const [articles, setArticles] = useState<any[]>([])
   const [categorieActive, setCategorieActive] = useState("Tous les articles")
+  const [newsletterEmail, setNewsletterEmail] = useState("")
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [newsletterMessage, setNewsletterMessage] = useState("")
 
   const articlesParDefaut = [
     { id: 1, categorie: "DÉSINSECTISATION", titre: "Comment éliminer durablement les cafards dans un restaurant ?", resume: "Les blattes sont l'ennemi numéro un de tout restaurateur. Voici les étapes professionnelles pour en venir à bout définitivement.", date: "15 Mars 2025", lecture: "6 min", vedette: true },
@@ -37,6 +40,30 @@ export default function Blog() {
   const articlesFiltres = categorieActive === "Tous les articles" ? articles : articles.filter(function(a) { return a.categorie === categorieActive })
   const vedette = articlesFiltres.find(function(a) { return a.vedette })
   const autres = articlesFiltres.filter(function(a) { return !a.vedette })
+
+  async function handleNewsletterSubmit() {
+    if (!newsletterEmail) return
+    setNewsletterStatus("loading")
+    try {
+      const res = await fetch("/api/newsletter-subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      })
+      const data = await res.json()
+      if (res.ok && data.ok) {
+        setNewsletterStatus("success")
+        setNewsletterMessage(data.duplicate ? "Vous êtes déjà abonné(e) !" : "Merci, vous êtes abonné(e) !")
+        setNewsletterEmail("")
+      } else {
+        setNewsletterStatus("error")
+        setNewsletterMessage(data.error || "Une erreur est survenue.")
+      }
+    } catch {
+      setNewsletterStatus("error")
+      setNewsletterMessage("Une erreur est survenue.")
+    }
+  }
 
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
@@ -163,11 +190,28 @@ export default function Blog() {
             Un article de conseil par semaine. Désabonnement en un clic.
           </p>
           <div style={{ display: "flex", gap: "3px" }}>
-            <input type="email" placeholder="votre@email.com" style={{ flex: 1, padding: "14px 18px", border: "1px solid #e0e0e0", fontSize: "14px", fontFamily: "inherit", outline: "none" }} />
-            <button style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "13px", padding: "14px 24px", border: "none", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-              Je m'abonne
+            <input
+              type="email"
+              placeholder="votre@email.com"
+              value={newsletterEmail}
+              onChange={function(e) { setNewsletterEmail(e.target.value) }}
+              onKeyDown={function(e) { if (e.key === "Enter") handleNewsletterSubmit() }}
+              disabled={newsletterStatus === "loading"}
+              style={{ flex: 1, padding: "14px 18px", border: "1px solid #e0e0e0", fontSize: "14px", fontFamily: "inherit", outline: "none" }}
+            />
+            <button
+              onClick={handleNewsletterSubmit}
+              disabled={newsletterStatus === "loading"}
+              style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "13px", padding: "14px 24px", border: "none", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}
+            >
+              {newsletterStatus === "loading" ? "..." : "Je m'abonne"}
             </button>
           </div>
+          {newsletterMessage && (
+            <p style={{ marginTop: "16px", fontSize: "13px", color: newsletterStatus === "success" ? "#1a6b38" : "#b91c1c" }}>
+              {newsletterMessage}
+            </p>
+          )}
         </div>
       </section>
 
