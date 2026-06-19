@@ -1549,7 +1549,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       telephone: cl ? (cl.telephone || "") : "",
       entreprise: cl ? (cl.entreprise || "") : "",
       prestation: d.prestation || "",
-      prestations: d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }) : [],
+      prestations: d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }).filter(function(p) { return PRESTATIONS.includes(p) }) : [],
       superficie: d.superficie ? String(d.superficie) : "",
       prixM2: d.prix_m2 ? String(d.prix_m2) : "",
       prixParPrestation: d.prix_par_prestation || {},
