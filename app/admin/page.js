@@ -4129,23 +4129,25 @@ var GSE_DOC_STYLES = '<style>' +
   '@media print {' +
   '  @page { size: A4 portrait; margin: 7mm 10mm; }' +
   '  .noprint { display: none; }' +
-  '  body { background: #fff; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+  '  body { background: #fff; font-size: 9.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
   '  .page { max-width: 100%; }' +
-  '  .hdr { padding: 8px 16px; }' +
-  '  .hdr-left .name { font-size: 15px; }' +
-  '  .hdr img { width: 44px !important; height: 44px !important; }' +
-  '  .agr { padding: 3px 10px; font-size: 8px; }' +
-  '  .body { padding: 8px 16px; }' +
-  '  .section { margin-bottom: 6px; }' +
-  '  .section-title { font-size: 8px; padding-bottom: 2px; margin-bottom: 5px; }' +
-  '  .value-box { padding: 4px 7px; font-size: 9.5px; min-height: 18px; line-height: 1.4; }' +
-  '  .grid2 { gap: 8px; }' +
-  '  .sig-zone { min-height: 38px; padding: 5px; }' +
-  '  .sig-title { font-size: 8px; }' +
-  '  .gse-footer { padding: 4px 16px; font-size: 8px; }' +
-  '  .photos-grid { grid-template-columns: repeat(5,1fr); gap: 4px; }' +
-  '  .photos-grid > div { aspect-ratio: unset; height: 62px; }' +
-  '  .photos-grid img { height: 62px; }' +
+  '  .hdr { padding: 7px 14px; }' +
+  '  .hdr-left .name { font-size: 14px; }' +
+  '  .hdr img { width: 40px !important; height: 40px !important; }' +
+  '  .agr { padding: 3px 10px; font-size: 7.5px; }' +
+  '  .body { padding: 6px 14px; }' +
+  '  .section { margin-bottom: 4px; }' +
+  '  .section-title { font-size: 7.5px; padding-bottom: 2px; margin-bottom: 3px; }' +
+  '  .value-box { padding: 3px 6px; font-size: 9px; min-height: 16px; line-height: 1.35; }' +
+  '  .grid2 { gap: 6px; }' +
+  '  .sig-zone { min-height: 32px; padding: 4px; }' +
+  '  .sig-title { font-size: 7.5px; }' +
+  '  .sigs-grid { gap: 10px !important; margin-top: 8px !important; }' +
+  '  .sig-spacer { height: 22px !important; }' +
+  '  .gse-footer { padding: 3px 14px; font-size: 7.5px; }' +
+  '  .photos-grid { grid-template-columns: repeat(6,1fr); gap: 3px; }' +
+  '  .photos-grid > div { aspect-ratio: unset; height: 48px; }' +
+  '  .photos-grid img { height: 48px; }' +
   '}'
 
 function gseHeader(title, ref) {
@@ -4158,9 +4160,9 @@ function gseHeader(title, ref) {
 }
 
 function gseSigs() {
-  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px">' +
-    '<div><div class="sig-title">Signature du client</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888">Bon pour accord</p><div style="height:60px"></div></div></div>' +
-    '<div><div class="sig-title">Pour Global Solutions Entreprise</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888;margin-bottom:4px">Le Directeur Général</p><div style="height:40px"></div><p style="font-weight:700;font-size:12px">Kabir Mohamed YAKOUBOU</p></div></div>' +
+  return '<div class="sigs-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px">' +
+    '<div><div class="sig-title">Signature du client</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888">Bon pour accord</p><div class="sig-spacer" style="height:60px"></div></div></div>' +
+    '<div><div class="sig-title">Pour Global Solutions Entreprise</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888;margin-bottom:4px">Le Directeur Général</p><div class="sig-spacer" style="height:40px"></div><p style="font-weight:700;font-size:12px">Kabir Mohamed YAKOUBOU</p></div></div>' +
     '</div>'
 }
 
