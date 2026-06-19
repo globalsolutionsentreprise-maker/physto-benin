@@ -52,7 +52,7 @@ export async function POST(req) {
     try {
       geminiRes = await callGeminiWithRetry({
         contents: [{ parts }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 4096 },
+        generationConfig: { temperature: 0.2, maxOutputTokens: 4096, responseMimeType: "application/json" },
       })
     } catch (e) {
       return NextResponse.json({ error: "❌ Gemini indisponible — réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
@@ -66,7 +66,14 @@ export async function POST(req) {
     try {
       rapport = JSON.parse(cleaned)
     } catch {
-      return NextResponse.json({ error: "Réponse non parseable", raw: rawText }, { status: 500 })
+      // Fallback : extraire le bloc JSON si Gemini a ajouté du texte autour
+      const match = cleaned.match(/\{[\s\S]*\}/)
+      try {
+        if (!match) throw new Error("no match")
+        rapport = JSON.parse(match[0])
+      } catch {
+        return NextResponse.json({ error: "Réponse non parseable — réessaie ou reformule tes notes", raw: rawText }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ success: true, rapport })
