@@ -2917,7 +2917,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       ".noprint { text-align: center; padding: 16px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }" +
       ".noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin: 4px; }" +
       ".noprint button.sec-btn { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }" +
-      "@media print { .noprint { display: none; } body { background: #fff; } @page { size: A4 portrait; margin: 7mm 10mm; } }" +
+      "@media print { .noprint { display: none; } .momo-block { display: none !important; } body { background: #fff; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 7mm 10mm; } .page { max-width: 100%; } .hdr { padding: 8px 16px; } .hdr-left .name { font-size: 14px; } .agr { padding: 3px 8px; font-size: 8px; } .body { padding: 12px 18px; } .meta { margin-bottom: 12px; } .sec { margin-bottom: 8px; padding-bottom: 4px; } .pbox { padding: 10px 14px; margin-bottom: 12px; } .pname { font-size: 14px; } .pdesc { font-size: 11px; } .calc { margin-bottom: 12px; } .cr { padding: 5px 0; font-size: 11px; } .cr.total { font-size: 14px; } .valid { padding: 6px 10px; margin-bottom: 12px; font-size: 10px; } .sig-zone { min-height: 44px; padding: 6px; } .sig-title { font-size: 8px; } .gse-footer { padding: 4px 16px; font-size: 8px; } }" +
       "</style></head><body>" +
       "<div class=\"noprint\"><button onclick=\"window.print()\">🖨️ Imprimer</button><button class=\"sec-btn\" onclick=\"window.close()\">Fermer</button></div>" +
       "<div class=\"page\">" +
@@ -2933,12 +2933,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       "</div>" +
       "<div class=\"sec\">Prestation(s)</div>" +
       (function() {
-        var prestList = d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }) : []
+        var prestList = d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }).filter(Boolean) : []
         var ppp = d.prixParPrestation || {}
         var sup = d.superficie ? Number(d.superficie) : 0
         var hasMulti = prestList.length >= 1 && sup > 0 && Object.keys(ppp).length > 0
         if (hasMulti) {
-          var lignes = prestList.map(function(p) {
+          var lignes = prestList.filter(function(p) { return parseFloat(ppp[p]) > 0 }).map(function(p) {
             var pm2 = parseFloat(ppp[p]) || 0
             var montP = pm2 ? Math.round(sup * pm2) : 0
             return "<tr>" +
@@ -2983,7 +2983,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       (function() {
         var pA2 = d.pctAcompte || 60
         var mA2 = Math.round(Number(d.montantNet) * pA2 / 100)
-        return "<div style=\"background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:18px 20px;margin-bottom:18px;\">" +
+        return "<div class=\"momo-block\" style=\"background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:18px 20px;margin-bottom:18px;\">" +
           "<div style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.12em;margin-bottom:12px;\">PAIEMENT PAR MOBILE MONEY</div>" +
           "<div style=\"display:flex;align-items:center;gap:12px;margin-bottom:12px;\">" +
           "<div style=\"width:40px;height:40px;background:#ffcc00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;\">📱</div>" +
