@@ -4127,9 +4127,9 @@ var GSE_DOC_STYLES = '<style>' +
   '.photos-grid > div { aspect-ratio: 1; overflow: hidden; border-radius: 6px; border: 1px solid #e0ddd6; }' +
   '.photos-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }' +
   '@media print {' +
-  '  @page { size: A4 portrait; margin: 7mm 10mm; }' +
+  '  @page { size: A4 portrait; margin: 7mm 10mm 18mm 10mm; }' +
   '  .noprint { display: none; }' +
-  '  body { background: #fff; font-size: 9.5px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+  '  body { background: #fff; font-size: 9px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
   '  .page { max-width: 100%; }' +
   '  .hdr { padding: 7px 14px; }' +
   '  .hdr-left .name { font-size: 14px; }' +
@@ -4138,16 +4138,16 @@ var GSE_DOC_STYLES = '<style>' +
   '  .body { padding: 6px 14px; }' +
   '  .section { margin-bottom: 4px; }' +
   '  .section-title { font-size: 7.5px; padding-bottom: 2px; margin-bottom: 3px; }' +
-  '  .value-box { padding: 3px 6px; font-size: 9px; min-height: 16px; line-height: 1.35; }' +
+  '  .value-box { padding: 3px 6px; font-size: 9px; min-height: 15px; line-height: 1.3; }' +
   '  .grid2 { gap: 6px; }' +
-  '  .sig-zone { min-height: 32px; padding: 4px; }' +
+  '  .sig-zone { min-height: 28px; padding: 4px; }' +
   '  .sig-title { font-size: 7.5px; }' +
-  '  .sigs-grid { gap: 10px !important; margin-top: 8px !important; }' +
-  '  .sig-spacer { height: 22px !important; }' +
-  '  .gse-footer { padding: 3px 14px; font-size: 7.5px; }' +
+  '  .sigs-grid { gap: 10px !important; margin-top: 6px !important; }' +
+  '  .sig-spacer { height: 18px !important; }' +
+  '  .gse-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 3px 14px; font-size: 7.5px; border-top: 1px solid #e0ddd6; background: #f0ede6; }' +
   '  .photos-grid { grid-template-columns: repeat(6,1fr); gap: 3px; }' +
-  '  .photos-grid > div { aspect-ratio: unset; height: 48px; }' +
-  '  .photos-grid img { height: 48px; }' +
+  '  .photos-grid > div { aspect-ratio: unset; height: 42px; }' +
+  '  .photos-grid img { height: 42px; }' +
   '}'
 
 function gseHeader(title, ref) {
