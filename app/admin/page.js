@@ -4142,7 +4142,7 @@ function gseHeader(title, ref) {
 function gseSigs() {
   return '<div class="sigs-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px">' +
     '<div><div class="sig-title">Signature du client</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888">Bon pour accord</p><div class="sig-spacer" style="height:60px"></div></div></div>' +
-    '<div><div class="sig-title">Pour Global Solutions Entreprise</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888;margin-bottom:4px">Le Directeur Technique</p><div class="sig-spacer" style="height:40px"></div><p style="font-weight:700;font-size:12px">Fabrice ADOSSOU</p></div></div>' +
+    '<div><div class="sig-title">Pour Global Solutions Entreprise</div><div class="sig-zone"><p style="font-size:10px;font-style:italic;color:#888;margin-bottom:4px">Le Directeur Général</p><div class="sig-spacer" style="height:40px"></div><p style="font-weight:700;font-size:12px">Kabir YAKOUBOU</p></div></div>' +
     '</div>'
 }
 

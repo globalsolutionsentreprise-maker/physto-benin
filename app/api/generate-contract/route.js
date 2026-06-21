@@ -408,9 +408,9 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </div>
       <div class="sig-box">
         <div class="sig-title">Pour Global Solutions Entreprise</div>
-        <div class="sig-sub">Le Directeur Technique</div>
+        <div class="sig-sub">Le Directeur Général</div>
         <div class="sig-line"></div>
-        <div class="sig-name">Fabrice ADOSSOU</div>
+        <div class="sig-name">Kabir YAKOUBOU</div>
         <div class="sig-date">À Cotonou, le ${esc(dateJour)}</div>
       </div>
     </div>
