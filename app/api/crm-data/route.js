@@ -99,6 +99,7 @@ export async function GET(req) {
       superficie: d.superficie || "",
       prixM2: d.prix_m2 || "",
       prixParPrestation: d.prix_par_prestation || {},
+      superficieParPrestation: d.superficie_par_prestation || {},
       montantBrut: d.montant_brut || 0,
       remise: d.remise || 0,
       remiseType: d.remise_type || "pct",
@@ -212,15 +213,14 @@ export async function POST(req) {
   }
 
   if (action === "save_devis_fields") {
-    const { id, prestations, superficie, prixM2, prixParPrestation, description, montantBrut, remise, remiseType, pctAcompte, conditionsPaiement } = body
+    const { id, prestations, superficieParPrestation, prixParPrestation, description, montantBrut, remise, remiseType, pctAcompte, conditionsPaiement } = body
     const prestationStr = Array.isArray(prestations) ? prestations.join(", ") : (prestations || "")
     const remiseVal = remise || 0
     const remiseMontant = remiseType === "pct" ? Math.round((montantBrut || 0) * remiseVal / 100) : remiseVal
     const montantNet = (montantBrut || 0) - remiseMontant
     await supabase.from("devis").update({
       prestation: prestationStr || "—",
-      superficie: superficie || null,
-      prix_m2: prixM2 || null,
+      superficie_par_prestation: (superficieParPrestation && Object.keys(superficieParPrestation).length > 0) ? superficieParPrestation : null,
       prix_par_prestation: (prixParPrestation && Object.keys(prixParPrestation).length > 0) ? prixParPrestation : null,
       description: description || "",
       montant_brut: montantBrut || 0,
