@@ -21,6 +21,7 @@
 - Client signature: ALWAYS on the LEFT
 - GSE signature: ALWAYS on the RIGHT
 - This applies to all documents: devis, certificats, fiches de passage
+- GSE signatory: ALWAYS "Le Directeur Général / Kabir YAKOUBOU" — never Fabrice ADOSSOU (files: admin/page.js gseSigs(), crm.html imprimerDevisFromCrm(), generate-contract/route.js)
 
 ## Git commits
 
