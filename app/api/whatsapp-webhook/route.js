@@ -113,12 +113,12 @@ export async function POST(req) {
     replyText = `Parfait ${leadData.nom || ""}, un technicien vous rappelle sur ce numéro sous peu pour organiser votre diagnostic gratuit. Bonne journée ! 🌿`
   }
 
-  // Sauvegarder historique
+  // Sauvegarder historique + envoyer réponse en parallèle
   conv.messages.push({ role: "assistant", content: replyText, ts: new Date().toISOString() })
-  await saveConversation(phone, conv)
-
-  // Envoyer réponse au client
-  await sendWhatsApp(phone, replyText)
+  await Promise.all([
+    saveConversation(phone, conv),
+    sendWhatsApp(phone, replyText),
+  ])
 
   return new Response("OK", { status: 200 })
 }
@@ -150,7 +150,7 @@ async function saveConversation(phone, conv) {
 }
 
 // ─── Gemini Flash ─────────────────────────────────────────────────────────────
-const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-flash"]
 
 async function callGemini(messages) {
   const contents = messages.map(m => ({
@@ -201,30 +201,29 @@ async function sendWhatsApp(to, text) {
 async function createLead(data, phone) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://physto-benin.vercel.app"
 
-  // Appel route register-lead existante
-  await fetch(`${baseUrl}/api/register-lead`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      nom:       data.nom,
-      telephone: data.telephone || phone,
-      ville:     data.ville,
-      nuisible:  data.nuisible,
-      message:   `Local: ${data.type_local || "?"} | Surface: ${data.superficie || "?"} | WhatsApp`,
-      urgence:   data.urgence === true || data.urgence === "oui",
-    }),
-  })
+  const urgenceLabel = (data.urgence === true || data.urgence === "oui") ? "🔴 OUI" : "non"
+  const notif = NOTIFY_NUMBER ? [
+    "🔔 *Nouveau lead WhatsApp*",
+    `Nom : ${data.nom || "?"}  |  Tél : ${data.telephone || phone}`,
+    `Ville : ${data.ville || "?"}  |  Nuisible : ${data.nuisible || "?"}`,
+    `Local : ${data.type_local || "?"}  |  Surface : ${data.superficie || "?"}`,
+    `Urgence : ${urgenceLabel}`,
+  ].join("\n") : null
 
-  // Notification WhatsApp sur le numéro pro
-  if (NOTIFY_NUMBER) {
-    const urgenceLabel = (data.urgence === true || data.urgence === "oui") ? "🔴 OUI" : "non"
-    const notif = [
-      "🔔 *Nouveau lead WhatsApp*",
-      `Nom : ${data.nom || "?"}  |  Tél : ${data.telephone || phone}`,
-      `Ville : ${data.ville || "?"}  |  Nuisible : ${data.nuisible || "?"}`,
-      `Local : ${data.type_local || "?"}  |  Surface : ${data.superficie || "?"}`,
-      `Urgence : ${urgenceLabel}`,
-    ].join("\n")
-    await sendWhatsApp(NOTIFY_NUMBER, notif)
-  }
+  // Enregistrement lead + notification pro en parallèle
+  await Promise.all([
+    fetch(`${baseUrl}/api/register-lead`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nom:       data.nom,
+        telephone: data.telephone || phone,
+        ville:     data.ville,
+        nuisible:  data.nuisible,
+        message:   `Local: ${data.type_local || "?"} | Surface: ${data.superficie || "?"} | WhatsApp`,
+        urgence:   data.urgence === true || data.urgence === "oui",
+      }),
+    }),
+    notif ? sendWhatsApp(NOTIFY_NUMBER, notif) : Promise.resolve(),
+  ])
 }
