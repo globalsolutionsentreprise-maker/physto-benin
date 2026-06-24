@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/whatsapp-healthcheck",
-      "schedule": "0 7,18 * * *"
+      "schedule": "0 7 * * *"
     }
   ]
 }
