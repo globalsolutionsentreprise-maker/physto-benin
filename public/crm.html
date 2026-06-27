@@ -1207,6 +1207,7 @@ function formH(c){
     </div>
     <div class="form-footer">
       ${ie?`<button class="btn-s btn-danger" onclick="delClient('${c.id}')" style="margin-right:auto;"><i class="ti ti-trash" aria-hidden="true"></i> Supprimer</button>`:""}
+      ${ie?`<button class="btn-s" onclick="duplicateDevis()" style="background:#eff6ff;border:1px solid #93c5fd;color:#1d4ed8;" title="Créer un nouveau devis avec les mêmes données"><i class="ti ti-copy" aria-hidden="true"></i> Dupliquer</button>`:""}
       <button class="btn-s" onclick="closeModal()">Annuler</button>
       <button class="btn-p" onclick="saveClient()"><i class="ti ti-check" aria-hidden="true"></i> Enregistrer</button>
     </div>
@@ -1380,6 +1381,50 @@ async function saveDevisFields(){
       toast("Devis sauvegardé");refresh();
     }else{toast(r.error||"Erreur sauvegarde");}
   }catch(e){toast("Erreur réseau — vérifiez votre connexion");}
+}
+
+async function duplicateDevis(){
+  const c=clients.find(x=>x.id===editId);
+  if(!c){toast("Client introuvable");return;}
+  const today=new Date().toISOString().slice(0,10);
+  const d={
+    client:c.client,provenance:c.provenance||"—",
+    dateContact:today,dateDevis:"",
+    typePrestation:c.typePrestation||"—",categorie:c.categorie||"—",
+    zone:c.zone||"—",motifEchec:"—",
+    montantDevis:c.montantDevis||0,statut:"contact",
+    commentaire:"",montantFacture:0,dateFacture:"",
+    paiementsRecus:0,attestation:"non",
+    typeContrat:c.typeContrat||"ponctuel",
+    dureeContratMois:c.dureeContratMois||12,
+    frequenceIntervention:c.frequenceIntervention||"trimestrielle",
+    dateDebutContrat:"",
+    ifu:c.ifu||null,rccm:c.rccm||null
+  };
+  try{
+    const res=await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add_client',...d})});
+    const result=await res.json();
+    if(!result.id){toast("Erreur: "+(result.error||"ajout échoué"));return;}
+    const newId=result.id;
+    clients.push({id:newId,...d});
+    if(c.montantBrut||c.prixParPrestation){
+      const prestations=c.prestation?c.prestation.split(", ").filter(Boolean):[];
+      await fetch('/api/crm-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        action:"save_devis_fields",id:newId,
+        prestations,
+        superficieParPrestation:c.superficieParPrestation||null,
+        prixParPrestation:c.prixParPrestation||null,
+        description:"",
+        montantBrut:c.montantBrut||c.montantDevis||0,
+        remise:c.remise||0,remiseType:c.remiseType||"pct",
+        pctAcompte:c.pctAcompte||60,
+        conditionsPaiement:c.conditionsPaiement||""
+      })});
+    }
+    closeModal();refresh();
+    toast("Devis dupliqué — fiche ouverte");
+    setTimeout(()=>openEdit(newId),300);
+  }catch(e){toast("Erreur réseau: "+e.message);}
 }
 
 function imprimerDevisFromCrm(){
