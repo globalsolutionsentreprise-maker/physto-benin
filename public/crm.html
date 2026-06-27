@@ -1389,16 +1389,17 @@ async function duplicateDevis(){
   const today=new Date().toISOString().slice(0,10);
   const d={
     client:c.client,provenance:c.provenance||"—",
-    dateContact:today,dateDevis:"",
+    dateContact:today,dateDevis:today,
     typePrestation:c.typePrestation||"—",categorie:c.categorie||"—",
-    zone:c.zone||"—",motifEchec:"—",
-    montantDevis:c.montantDevis||0,statut:"contact",
-    commentaire:"",montantFacture:0,dateFacture:"",
-    paiementsRecus:0,attestation:"non",
+    zone:c.zone||"—",motifEchec:c.motifEchec||"—",
+    montantDevis:c.montantDevis||0,statut:c.statut||"contact",
+    commentaire:c.commentaire||"",montantFacture:c.montantFacture||0,
+    dateFacture:c.dateFacture||"",paiementsRecus:c.paiementsRecus||0,
+    attestation:c.attestation||"non",
     typeContrat:c.typeContrat||"ponctuel",
     dureeContratMois:c.dureeContratMois||12,
     frequenceIntervention:c.frequenceIntervention||"trimestrielle",
-    dateDebutContrat:"",
+    dateDebutContrat:c.dateDebutContrat||"",
     ifu:c.ifu||null,rccm:c.rccm||null
   };
   try{

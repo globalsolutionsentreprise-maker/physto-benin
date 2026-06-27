@@ -3345,6 +3345,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
 
     function etapeDone(d, etapeId) {
       var p = d.parcours || {}
+      if (p[etapeId] && p[etapeId].override !== undefined) return p[etapeId].override
       if (etapeId === 'contact' || etapeId === 'devis') return true
       if (etapeId === 'fiche') return fichesList.some(function(f) { return f.devis_id === d.id })
       if (etapeId === 'certificat') return certsList.some(function(c) { return c.devis_id === d.id })
@@ -3360,7 +3361,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     function toggleDB(d, etapeId) {
       var currentDone = etapeDone(d, etapeId)
       var p = Object.assign({}, d.parcours || {})
-      p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      var isAuto = ETAPES_DB.find(function(e) { return e.id === etapeId && e.auto })
+      if (isAuto) {
+        p[etapeId] = { override: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      } else {
+        p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      }
       saveParcours(d.id, p)
     }
 
@@ -3405,16 +3411,18 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
             React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' } },
               ETAPES_DB.map(function(etape) {
                 var done = etapeDone(d, etape.id)
+                var isManualOverride = etape.auto && p[etape.id] && p[etape.id].override !== undefined
                 var date = p[etape.id] && p[etape.id].date ? p[etape.id].date : null
                 return React.createElement('div', { key: etape.id,
-                  onClick: function() { if (!etape.auto) toggleDB(d, etape.id) },
-                  title: etape.auto ? 'Détecté automatiquement' : (done ? 'Cliquer pour annuler' : 'Cliquer pour valider'),
-                  style: { backgroundColor: done ? '#f0fdf4' : '#f8f7f4', border: '1px solid ' + (done ? '#bbf7d0' : '#e8e6e0'), borderRadius: '8px', padding: '8px 4px', textAlign: 'center', cursor: etape.auto ? 'default' : 'pointer' }
+                  onClick: function() { toggleDB(d, etape.id) },
+                  title: done ? 'Cliquer pour annuler' : 'Cliquer pour valider',
+                  style: { backgroundColor: done ? '#f0fdf4' : '#f8f7f4', border: '1px solid ' + (done ? '#bbf7d0' : '#e8e6e0'), borderRadius: '8px', padding: '8px 4px', textAlign: 'center', cursor: 'pointer' }
                 },
                   React.createElement('div', { style: { fontSize: '15px', marginBottom: '3px' } }, done ? '✅' : '⬜'),
                   React.createElement('div', { style: { fontSize: '9px', color: done ? '#065f46' : '#888', fontWeight: done ? '700' : '400', lineHeight: 1.3 } }, etape.label),
-                  !etape.auto && date ? React.createElement('div', { style: { fontSize: '8px', color: '#aaa', marginTop: '2px' } }, date) : null,
-                  etape.auto ? React.createElement('div', { style: { fontSize: '8px', color: '#bbb', marginTop: '2px' } }, 'auto') : null
+                  date ? React.createElement('div', { style: { fontSize: '8px', color: '#aaa', marginTop: '2px' } }, date) : null,
+                  etape.auto && !isManualOverride ? React.createElement('div', { style: { fontSize: '8px', color: '#bbb', marginTop: '2px' } }, 'auto') : null,
+                  isManualOverride ? React.createElement('div', { style: { fontSize: '8px', color: '#d4a920', marginTop: '2px', fontWeight: '700' } }, 'manuel') : null
                 )
               })
             )
@@ -3776,6 +3784,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
 
     function isEtapeDone(d, etapeId) {
       var p = d.parcours || {}
+      if (p[etapeId] && p[etapeId].override !== undefined) return p[etapeId].override
       var hasFiche = fichesList.some(function(f) { return f.devis_id === d.id })
       var hasCert = certsList.some(function(c) { return c.devis_id === d.id })
       if (etapeId === 'contact') return true
@@ -3805,7 +3814,12 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
 
     function toggleEtape(d, etapeId, currentDone) {
       var p = Object.assign({}, d.parcours || {})
-      p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      var isAuto = ETAPES.find(function(e) { return e.id === etapeId && e.auto })
+      if (isAuto) {
+        p[etapeId] = { override: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      } else {
+        p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
+      }
       saveParcours(d.id, p)
     }
 
@@ -3821,19 +3835,20 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         ETAPES.map(function(etape) {
           var done = isEtapeDone(d, etape.id)
           var p = d.parcours || {}
+          var isManualOverride = etape.auto && p[etape.id] && p[etape.id].override !== undefined
           var date = p[etape.id] && p[etape.id].date ? p[etape.id].date : null
           return React.createElement('div', { key: etape.id, style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', borderBottom: '1px solid #eee' } },
-            etape.auto
-              ? React.createElement('span', { style: { fontSize: '13px', opacity: done ? 1 : 0.3, flexShrink: 0 } }, done ? '✅' : '⬜')
-              : React.createElement('button', {
-                  onClick: function() { toggleEtape(d, etape.id, done) },
-                  title: done ? 'Marquer non fait' : 'Marquer fait',
-                  style: { background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', padding: 0, flexShrink: 0 }
-                }, done ? '✅' : '⬜'),
+            React.createElement('button', {
+              onClick: function() { toggleEtape(d, etape.id, done) },
+              title: done ? 'Marquer non fait' : 'Marquer fait',
+              style: { background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', padding: 0, flexShrink: 0 }
+            }, done ? '✅' : '⬜'),
             React.createElement('span', { style: { fontSize: '11px', color: done ? '#0a2e1a' : '#888', flex: 1, fontWeight: done ? '600' : '400' } }, etape.label),
-            etape.auto
-              ? React.createElement('span', { style: { fontSize: '9px', color: '#bbb', backgroundColor: '#e8e6e0', borderRadius: '3px', padding: '1px 4px' } }, 'auto')
-              : date ? React.createElement('span', { style: { fontSize: '9px', color: '#aaa' } }, date) : null
+            isManualOverride
+              ? React.createElement('span', { style: { fontSize: '9px', color: '#d4a920', fontWeight: '700', backgroundColor: '#fffbeb', borderRadius: '3px', padding: '1px 4px' } }, 'manuel')
+              : etape.auto
+                ? React.createElement('span', { style: { fontSize: '9px', color: '#bbb', backgroundColor: '#e8e6e0', borderRadius: '3px', padding: '1px 4px' } }, 'auto')
+                : date ? React.createElement('span', { style: { fontSize: '9px', color: '#aaa' } }, date) : null
           )
         })
       )
