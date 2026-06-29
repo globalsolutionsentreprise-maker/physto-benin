@@ -81,10 +81,14 @@ export async function POST(req) {
   // Charger historique
   const conv = await loadConversation(phone)
 
-  // Si lead déjà créé : confirmer poliment
+  // Si un lead a déjà été créé lors d'une conversation précédente, on repart sur
+  // une conversation neuve : un client qui réécrit = nouveau besoin potentiel.
+  // On ne stonewalle plus avec un message de fin (sinon client perdu).
+  // register-lead dédoublonne par téléphone sur 24h → pas de lead en double.
   if (conv.lead_created) {
-    await sendWhatsApp(phone, "Votre demande est bien enregistrée ! Un technicien vous contactera très prochainement. Merci de votre confiance. 🌿")
-    return new Response("OK", { status: 200 })
+    conv.messages     = []
+    conv.lead_created = false
+    conv.lead_partial = null
   }
 
   // Ajouter message utilisateur
