@@ -154,7 +154,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             .nav-desktop { display: none !important; }
             .nav-mobile-btn { display: flex !important; }
             .nav-agrement-mobile { display: block !important; }
-            .urgband-tags { display: none !important; }
             .hero-padding { padding: 40px 20px 60px !important; }
             .hero-h1 { font-size: 32px !important; }
             .hero-p { font-size: 14px !important; }
@@ -171,7 +170,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             .cta-btns { justify-content: center !important; }
             .badge-float { display: none !important; }
             .nav-padding { padding: 10px 20px !important; }
-            .urgband-padding { padding: 8px 16px !important; }
           }
 
           @media (max-width: 480px) {
@@ -248,22 +246,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <a href="/contact" style={{ color: "#d4a920", fontSize: "11px", fontWeight: "700", textDecoration: "none", whiteSpace: "nowrap", letterSpacing: "0.04em", flexShrink: 0 }}>
             En profiter →
-          </a>
-        </div>
-
-        {/* BANDEAU URGENCE */}
-        <div className="urgband-padding" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: "#991b1b", padding: "8px 40px", flexWrap: "wrap", gap: "8px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#fca5a5", flexShrink: 0 }} />
-            <span style={{ color: "#fff", fontSize: "11px", fontWeight: "600" }}>Urgence 24h/24 — 7j/7</span>
-            <div className="urgband-tags" style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-              {["Cafards", "Rats", "Geckos", "Termites", "Moustiques", "Serpents", "+ Tous"].map((t) => (
-                <span key={t} style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff", fontSize: "9px", padding: "2px 7px", borderRadius: "10px" }}>{t}</span>
-              ))}
-            </div>
-          </div>
-          <a href="tel:+2290153047950" style={{ backgroundColor: "#fff", color: "#991b1b", fontSize: "10px", fontWeight: "700", padding: "5px 12px", borderRadius: "5px", textDecoration: "none", whiteSpace: "nowrap" }}>
-            Appeler maintenant
           </a>
         </div>
 
