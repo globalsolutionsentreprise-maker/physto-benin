@@ -11,6 +11,23 @@ function slugifier(titre: string): string {
     .replace(/^-|-$/g, "")
 }
 
+// Maillage interne : relie chaque cat\u00e9gorie d'article au service correspondant
+const SERVICE_PAR_CATEGORIE: Record<string, { slug: string; label: string }> = {
+  "DESINSECTISATION": { slug: "desinsectisation-cotonou", label: "d\u00e9sinsectisation" },
+  "DERATISATION": { slug: "deratisation-benin", label: "d\u00e9ratisation" },
+  "ANTI-TERMITES": { slug: "anti-termites-benin", label: "traitement anti-termites" },
+  "DESINFECTION": { slug: "desinfection-locaux", label: "d\u00e9sinfection" },
+  "REPTILES": { slug: "reptiles-serpents-benin", label: "traitement reptiles et serpents" },
+  "PUNAISES DE LIT": { slug: "punaises-de-lit-cotonou", label: "traitement punaises de lit" },
+  "ANTI-MOUSTIQUES": { slug: "anti-moustiques-cotonou", label: "traitement anti-moustiques" },
+}
+
+function serviceAssocie(categorie: string): { slug: string; label: string } | null {
+  if (!categorie) return null
+  const key = categorie.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  return SERVICE_PAR_CATEGORIE[key] || null
+}
+
 export default function Article({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const [article, setArticle] = useState<any>(null)
@@ -145,6 +162,21 @@ export default function Article({ params }: { params: Promise<{ slug: string }> 
                 </a>
               </div>
             </div>
+          )}
+
+          {/* SERVICE ASSOCIÉ — maillage interne SEO */}
+          {serviceAssocie(article.categorie) && (
+            <a href={"/services/" + serviceAssocie(article.categorie)!.slug} style={{ textDecoration: "none", display: "block", marginTop: "48px" }}>
+              <div style={{ backgroundColor: "#f7f7f5", border: "1px solid #e8e8e8", borderLeft: "3px solid #d4a920", borderRadius: "8px", padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "6px" }}>SERVICE ASSOCIÉ</div>
+                  <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a2e1a" }}>
+                    Découvrir notre service de {serviceAssocie(article.categorie)!.label} au Bénin
+                  </div>
+                </div>
+                <span style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a", borderBottom: "2px solid #d4a920", paddingBottom: "2px", whiteSpace: "nowrap" }}>En savoir plus →</span>
+              </div>
+            </a>
           )}
 
           {/* CTA */}

@@ -1,28 +1,13 @@
 "use client"
 import { useState, useEffect } from "react"
-import { createClient } from "@supabase/supabase-js"
-
-// Options critiques : désactiver auth pour éviter le bug de verrou
-function creerSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      }
-    }
-  )
-}
+import { supabase } from "./lib/supabase"
 
 export default function Accueil() {
 
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
-    { id: 2, valeur: "7j/7", label: "Disponibilité urgence" },
-    { id: 4, valeur: "24h/24", label: "Disponibilité urgence" },
+    { id: 2, valeur: "7j/7", label: "Service continu" },
+    { id: 4, valeur: "24h/24", label: "Urgences assurées" },
   ])
 
   const [temoignages, setTemoignages] = useState([
@@ -36,8 +21,8 @@ export default function Accueil() {
   const [realisations, setRealisations] = useState<any[]>([])
 
   useEffect(function() {
-    // Créer le client DANS le useEffect pour éviter les conflits React
-    const db = creerSupabase()
+    // Client Supabase partagé (singleton) — évite les instances GoTrueClient multiples
+    const db = supabase
 
     async function charger() {
       try {
@@ -54,11 +39,11 @@ export default function Accueil() {
           setTemoignages(resTemoignages.data)
         }
         if (resParametres.data) {
-          const agr = resParametres.data.find(function(x) { return x.cle === "agrement" })
+          const agr = resParametres.data.find(function(x: any) { return x.cle === "agrement" })
           if (agr) setAgrement(agr.valeur)
         }
         const rr = await db.from("realisations").select("*").eq("actif", true).order("id")
-        if (rr.data && rr.data.length > 0) setRealisations(rr.data.filter(function(r) { return r.actif === true }))
+        if (rr.data && rr.data.length > 0) setRealisations(rr.data.filter(function(r: any) { return r.actif === true }))
         setCharge(true)
       } catch(err) {
         console.error("Erreur Supabase:", err)

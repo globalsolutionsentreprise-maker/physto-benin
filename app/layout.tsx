@@ -2,6 +2,7 @@ import '../styles/premium-gse.css'
 import type { Metadata } from "next"
 import "./globals.css"
 import Footer from "./components/Footer"
+import ScrollReveal from "./components/ScrollReveal"
 
 export const metadata: Metadata = {
   title: "Phyto Bénin - Désinsectisation Cotonou | 24h/24",
@@ -265,6 +266,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Appeler maintenant
           </a>
         </div>
+
+        <ScrollReveal />
 
         {children}
 
