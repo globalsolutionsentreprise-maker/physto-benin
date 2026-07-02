@@ -1412,9 +1412,18 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [depModal, setDepModal] = React.useState(false)
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
   const [depSaving, setDepSaving] = React.useState(false)
+  const [objectifCA, setObjectifCA] = React.useState(0)
+  const [objModal, setObjModal] = React.useState(false)
+  const [objInput, setObjInput] = React.useState("")
+  const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
     if (vue === "finances" && !finData && !finLoading) chargerFinances()
   }, [vue])
+  React.useEffect(function() {
+    db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
+      if (res && res.data && res.data.valeur) setObjectifCA(parseFloat(res.data.valeur) || 0)
+    }).catch(function() {})
+  }, [])
   const [analysingContrat, setAnalysingContrat] = React.useState(false)
   const [contratErreur, setContratErreur] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
@@ -3187,6 +3196,42 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     } catch (e) { setMsg("Erreur suppression") }
   }
 
+  function openObjModal() {
+    setObjInput(objectifCA ? String(objectifCA) : "")
+    setObjModal(true)
+  }
+  async function enregistrerObjectif() {
+    var val = parseFloat(objInput) || 0
+    setObjSaving(true)
+    try {
+      await db.from("parametres").upsert({ cle: "objectif_ca", valeur: String(val) }, { onConflict: "cle" })
+      setObjectifCA(val)
+      setObjModal(false)
+      setMsg("Objectif CA enregistré")
+    } catch (e) { setMsg("Erreur enregistrement objectif") }
+    setObjSaving(false)
+  }
+  function renderObjModal() {
+    if (!objModal) return null
+    var e = React.createElement
+    var inpS = { width: "100%", padding: "9px 11px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+    return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setObjModal(false) } },
+      e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "420px", maxWidth: "92vw" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Objectif CA annuel"),
+          e("button", { onClick: function() { setObjModal(false) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
+        ),
+        e("label", { style: { display: "block", fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "5px" } }, "Objectif de chiffre d'affaires annuel (FCFA)"),
+        e("input", { type: "number", min: "0", value: objInput, placeholder: "Ex: 2000000", onChange: function(ev) { setObjInput(ev.target.value) }, style: inpS }),
+        e("p", { style: { fontSize: "11px", color: "#999", margin: "6px 0 20px" } }, "Utilisé pour afficher votre taux de progression."),
+        e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
+          e("button", { onClick: function() { setObjModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
+          e("button", { onClick: enregistrerObjectif, disabled: objSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: objSaving ? "wait" : "pointer", fontFamily: "inherit" } }, objSaving ? "Enregistrement…" : "Enregistrer")
+        )
+      )
+    )
+  }
+
   function renderDepModal() {
     if (!depModal) return null
     var e = React.createElement
@@ -3299,13 +3344,35 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       )
     }
 
+    var objPct = objectifCA > 0 ? Math.round(tfa / objectifCA * 100) : 0
+    var objCard = objectifCA > 0
+      ? e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px 18px", marginBottom: "24px" } },
+          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+            e("div", null,
+              e("span", { style: { fontSize: "12px", color: "#888" } }, "Objectif CA annuel : "),
+              e("span", { style: { fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, finFmt(objectifCA) + " FCFA")
+            ),
+            e("button", { onClick: openObjModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "Modifier")
+          ),
+          e("div", { style: { background: "#f0efe9", borderRadius: "5px", height: "18px", overflow: "hidden", marginBottom: "6px" } },
+            e("div", { style: { width: Math.min(objPct, 100) + "%", background: objPct >= 100 ? "#1D9E75" : "#185FA5", height: "100%" } })
+          ),
+          e("div", { style: { fontSize: "12px", color: "#555" } }, "Facturé " + finFmt(tfa) + " FCFA — atteint à ", e("b", { style: { color: objPct >= 100 ? "#1D9E75" : "#185FA5" } }, objPct + "%"))
+        )
+      : e("div", { style: { background: "#fafaf8", border: "1px dashed #d8d5cc", borderRadius: "10px", padding: "14px 18px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+          e("span", { style: { fontSize: "12px", color: "#888" } }, "Aucun objectif de chiffre d'affaires défini."),
+          e("button", { onClick: openObjModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "6px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🎯 Définir un objectif CA")
+        )
+
     return e("div", null,
       renderDepModal(),
+      renderObjModal(),
       e("div", { style: { display: "flex", gap: "12px", marginBottom: "24px" } },
         kpiCard("Encaissements clients", finFmt(tp) + " FCFA", "#1D9E75"),
         kpiCard("Total dépenses", finFmt(td) + " FCFA", "#E24B4A"),
         kpiCard("Résultat net", (r >= 0 ? "+" : "") + finFmt(r) + " FCFA", r >= 0 ? "#1D9E75" : "#E24B4A")
       ),
+      objCard,
       e("div", { style: secS }, "Suivi financier par client"),
       e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
         e("table", { style: { width: "100%", borderCollapse: "collapse" } },
