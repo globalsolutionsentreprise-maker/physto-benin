@@ -48,13 +48,36 @@ Ce qui n'existe **que** dans `crm.html` et doit être porté :
 | G2 | **Vue Finances** + CRUD dépenses | `renderFinance` L421-549, `openAddDep/saveDep/delDep/addDepClient/delDepClient` | `add_depense, del_depense, add_dep_client, del_dep_client` |
 | G3 | **Objectif CA** (modal) | `openObjectif/saveObjectif` L555-576 | stocké côté param (à confirmer) |
 | G4 | **Export CSV** | `exportCSV` L1572 | lecture seule (génère le CSV client-side) |
-| G5 | **Pipeline : déplacer une carte entre étapes** | `moveCard` L974 → action `move` | `move` |
+| G5 | **Kanban COMMERCIAL** (statut) : colonnes + move + type mission | `renderKanban` L332-378, `moveCard` L974 → action `move` | `move` |
 
-⚠️ **G5 à vérifier en priorité** : aucun appel à l'action `move` n'existe dans la partie
-React (`grep move app/admin/page.js` = vide). Donc soit `renderVuePipeline` est en
-lecture seule, soit il change d'étape autrement. À confirmer avant d'estimer G5.
+✅ **G5 clarifié en Phase 0** : le pipeline React existant est le workflow d'exécution
+(`parcours`), un concept **différent** du kanban commercial de `crm.html` (`statut`). Décision
+actée : garder les deux. G5 = **porter le kanban commercial entier** dans React (nouvelle vue
+« Commercial » : 6 colonnes statut, dropdown « Déplacer vers » → action `move`, barre type
+mission). C'est donc plus gros que prévu, à replacer en dernier de la Phase 1.
 
 ---
+
+## 3bis. Résultats Phase 0 (2026-07-02) — à intégrer
+
+Investigation faite avant de coder. Trois découvertes qui corrigent le plan initial :
+
+- **🔴 Les deux pipelines sont deux concepts différents, pas des doublons.**
+  - `crm.html` (`renderKanban`) = **entonnoir commercial** par `statut` (premier contact →
+    devis envoyé → attente → relance → converti → perdu). Move via dropdown → action `move`
+    qui écrit `clients.statut`. Barre « Type de mission » (contrats vs ponctuels).
+  - React (`renderVuePipeline`) = **workflow d'exécution** par `parcours` (contact → visite
+    → facture → intervention → certificat → encaissement → clôturé), colonne calculée par
+    `getColonne(d)` depuis `parcours` + fiches/certs. Pas de `statut`, pas de `move`.
+  - **Décision actée : garder les DEUX** dans React (voir §9.4). Donc G5 n'est plus « ajouter
+    le move » mais **« porter le kanban commercial complet »** (statut + move + type mission).
+- **🟠 Objectif CA stocké en `localStorage` (`gse_objectif`), pas en base.** Propre au
+  navigateur. Migration : le mettre dans la table `parametres` (partagé, propre). Petit +.
+- **🟡 Modèles de données différents.** `crm.html` = modèle « client » aplati
+  (`c.client, c.montantDevis, c.statut, c.montantFacture, c.depenses`…). React = tables
+  normalisées (`devis` joint `clients`, `depenses_devis`, `depenses_globales`,
+  `interventions`). → Tout port (dont l'export CSV G4) doit **remapper** les champs, jamais
+  copier-coller.
 
 ## 4. Dépendances techniques
 
@@ -155,6 +178,18 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
 
 ---
 
+## 10. Journal d'avancement
+
+- **2026-07-02 — Phase 0 ✅** : investigation faite (voir §3bis). 3 découvertes actées.
+- **2026-07-02 — G4 Export CSV ✅ déployé + QA prod OK** (commit `893ad05`). Bouton
+  « ⬇ Export CSV » dans la barre d'onglets du CRM React (`renderOnglets`). Récupère le
+  tableau aplati via le GET par défaut de `/api/crm-data` (zéro duplication de calcul).
+  Testé sur prod : message « Export CSV téléchargé », fichier généré, console propre.
+  Accessible via CRM Pipeline → Dossier (la bascule menu = Phase 2).
+- **Suivant : G2** (Finances + CRUD dépenses).
+
+---
+
 ## 9. Décisions actées (2026-07-02)
 
 1. **Graphiques → `recharts`** (réécriture des graphes, pas de réutilisation Chart.js).
@@ -162,3 +197,8 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
    avant la suivante.
 3. **crm.html → suppression franche** en Phase 3 une fois la parité prouvée (le code reste
    récupérable dans l'historique git).
+4. **Pipelines → garder les DEUX** (Phase 0). React aura une vue **Commercial** (statut,
+   portée de crm.html) ET la vue **Exécution/parcours** (déjà en place). G5 = porter le
+   kanban commercial.
+5. **Objectif CA → migrer vers la table `parametres`** (au lieu de localStorage) pour qu'il
+   soit partagé entre appareils. À confirmer.
