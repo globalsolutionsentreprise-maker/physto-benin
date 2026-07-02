@@ -28,6 +28,7 @@ export default function Admin() {
   const [accesSaveMsg, setAccesSaveMsg] = useState("")
   const [dossierDevisId, setDossierDevisId] = useState(null)
   const [onglet, setOnglet] = useState("chiffres")
+  const [sousTexte, setSousTexte] = useState("accueil")
   const [chargement, setChargement] = useState(false)
   const [message, setMessage] = useState("")
   const [erreurDB, setErreurDB] = useState("")
@@ -498,23 +499,27 @@ export default function Admin() {
   const btnAjouter = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "13px", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: "inherit" }
   const btnSauvegarder = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "12px", padding: "10px 16px", borderRadius: "6px", border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }
 
-  const menu = [
-    { id: "chiffres", label: "Chiffres cles" },
-    { id: "parametres", label: "Coordonnees" },
-    { id: "textes_accueil", label: "Textes Accueil" },
-    { id: "textes_mission", label: "Textes Mission" },
-    { id: "textes_garanties", label: "Garanties" },
-    { id: "temoignages", label: "Temoignages" },
-    { id: "articles", label: "Articles Blog" },
-    { id: "services", label: "Nos Services" },
-    { id: "realisations", label: "Realisations" },
-    { id: "equipe", label: "Notre Equipe" },
-    { id: "crm", label: "📊 CRM Pipeline" },
-    { id: "rh", label: "👥 Équipe & Planning" },
-    { id: "stock", label: "📦 Stock produits" },
+  const menuGroupes = [
+    { titre: "Site web", items: [
+      { id: "chiffres", label: "Chiffres cles" },
+      { id: "parametres", label: "Coordonnees" },
+      { id: "textes", label: "Textes du site" },
+      { id: "temoignages", label: "Temoignages" },
+      { id: "articles", label: "Articles Blog" },
+      { id: "services", label: "Nos Services" },
+      { id: "realisations", label: "Realisations" },
+      { id: "equipe", label: "Équipe (site web)" },
+    ] },
+    { titre: "Gestion", items: [
+      { id: "crm", label: "📊 CRM Pipeline" },
+      { id: "rh", label: "👥 Planning & RH" },
+      { id: "stock", label: "📦 Stock produits" },
+    ] },
     ...(currentUser?.role === "admin" ? [
-      { id: "acces", label: "🔐 Accès utilisateurs" },
-      { id: "journal", label: "📋 Journal activité" },
+      { titre: "Admin", items: [
+        { id: "acces", label: "🔐 Accès utilisateurs" },
+        { id: "journal", label: "📋 Journal activité" },
+      ] },
     ] : []),
   ]
 
@@ -718,11 +723,18 @@ export default function Admin() {
       <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", minHeight: "calc(100vh - 64px)" }}>
 
         <div style={{ backgroundColor: "#fff", borderRight: "1px solid #f0f0f0", padding: "20px 0" }}>
-          {menu.map(function(item) {
+          {menuGroupes.map(function(groupe) {
             return (
-              <button key={item.id} onClick={function() { setOnglet(item.id) }} style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 20px", fontSize: "12px", fontWeight: onglet === item.id ? "700" : "400", color: onglet === item.id ? "#0a2e1a" : "#666", backgroundColor: onglet === item.id ? "#f0f8f3" : "transparent", borderLeft: onglet === item.id ? "3px solid #1a6b38" : "3px solid transparent", borderTop: "none", borderRight: "none", borderBottom: "none", cursor: "pointer", fontFamily: "inherit" }}>
-                {item.label}
-              </button>
+              <div key={groupe.titre} style={{ marginBottom: "18px" }}>
+                <div style={{ padding: "0 20px 6px", fontSize: "10px", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0aca3" }}>{groupe.titre}</div>
+                {groupe.items.map(function(item) {
+                  return (
+                    <button key={item.id} onClick={function() { setOnglet(item.id) }} style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 20px", fontSize: "12px", fontWeight: onglet === item.id ? "700" : "400", color: onglet === item.id ? "#0a2e1a" : "#666", backgroundColor: onglet === item.id ? "#f0f8f3" : "transparent", borderLeft: onglet === item.id ? "3px solid #1a6b38" : "3px solid transparent", borderTop: "none", borderRight: "none", borderBottom: "none", cursor: "pointer", fontFamily: "inherit" }}>
+                      {item.label}
+                    </button>
+                  )
+                })}
+              </div>
             )
           })}
         </div>
@@ -793,81 +805,79 @@ export default function Admin() {
             </div>
           )}
 
-          {onglet === "textes_accueil" && (
-            <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Textes de la page d accueil</h2>
-              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Modifiez chaque texte puis cliquez Sauvegarder.</p>
-              {[
-                { cle: "hero_badge", label: "BADGE HERO", type: "input" },
-                { cle: "hero_titre_1", label: "HERO TITRE LIGNE 1", type: "input" },
-                { cle: "hero_titre_2", label: "HERO TITRE LIGNE 2 (en or)", type: "input" },
-                { cle: "hero_titre_3", label: "HERO TITRE LIGNE 3", type: "input" },
-                { cle: "hero_description", label: "HERO DESCRIPTION", type: "textarea" },
-                { cle: "intro_titre", label: "SECTION ENGAGEMENT TITRE", type: "input" },
-                { cle: "intro_texte_1", label: "SECTION ENGAGEMENT PARAGRAPHE 1", type: "textarea" },
-                { cle: "intro_texte_2", label: "SECTION ENGAGEMENT PARAGRAPHE 2", type: "textarea" },
-                { cle: "cta_titre", label: "BANDEAU FINAL TITRE", type: "input" },
-                { cle: "cta_description", label: "BANDEAU FINAL DESCRIPTION", type: "textarea" },
-              ].map(function(t) {
-                return (
-                  <div key={t.cle} style={card}>
-                    <label style={lbl}>{t.label}</label>
-                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                      {t.type === "input" ? (
-                        <input type="text" value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={inp} />
-                      ) : (
-                        <textarea rows={3} value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
-                      )}
-                      <button onClick={function() { sauvegarderContenu(t.cle) }} style={btnSauvegarder}>Sauvegarder</button>
+          {onglet === "textes" && (() => {
+            const groupesTextes = {
+              accueil: {
+                titre: "Textes de la page d accueil",
+                sousTitre: "Modifiez chaque texte puis cliquez Sauvegarder.",
+                champs: [
+                  { cle: "hero_badge", label: "BADGE HERO", type: "input" },
+                  { cle: "hero_titre_1", label: "HERO TITRE LIGNE 1", type: "input" },
+                  { cle: "hero_titre_2", label: "HERO TITRE LIGNE 2 (en or)", type: "input" },
+                  { cle: "hero_titre_3", label: "HERO TITRE LIGNE 3", type: "input" },
+                  { cle: "hero_description", label: "HERO DESCRIPTION", type: "textarea" },
+                  { cle: "intro_titre", label: "SECTION ENGAGEMENT TITRE", type: "input" },
+                  { cle: "intro_texte_1", label: "SECTION ENGAGEMENT PARAGRAPHE 1", type: "textarea" },
+                  { cle: "intro_texte_2", label: "SECTION ENGAGEMENT PARAGRAPHE 2", type: "textarea" },
+                  { cle: "cta_titre", label: "BANDEAU FINAL TITRE", type: "input" },
+                  { cle: "cta_description", label: "BANDEAU FINAL DESCRIPTION", type: "textarea" },
+                ],
+              },
+              mission: {
+                titre: "Textes Qui sommes-nous",
+                sousTitre: "Modifiez les textes de la page Qui sommes-nous.",
+                champs: [
+                  { cle: "mission_texte_1", label: "NOTRE MISSION PARAGRAPHE 1", type: "textarea" },
+                  { cle: "mission_texte_2", label: "NOTRE MISSION PARAGRAPHE 2", type: "textarea" },
+                ],
+              },
+              garanties: {
+                titre: "Textes des garanties",
+                sousTitre: "Ces textes apparaissent dans la section Nos engagements.",
+                champs: [
+                  { cle: "garantie_agrement_desc", label: "AGREMENT DESCRIPTION", type: "textarea" },
+                  { cle: "garantie_produits_desc", label: "PRODUITS HOMOLOGUES DESCRIPTION", type: "textarea" },
+                  { cle: "garantie_resultats_desc", label: "RESULTATS GARANTIS DESCRIPTION", type: "textarea" },
+                ],
+              },
+            }
+            const sousOnglets = [
+              { id: "accueil", label: "Accueil" },
+              { id: "mission", label: "Qui sommes-nous" },
+              { id: "garanties", label: "Garanties" },
+            ]
+            const actif = groupesTextes[sousTexte] || groupesTextes.accueil
+            return (
+              <div>
+                <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Textes du site</h2>
+                <p style={{ fontSize: "13px", color: "#888", marginBottom: "20px" }}>{actif.sousTitre}</p>
+                <div style={{ display: "flex", gap: "6px", marginBottom: "24px", borderBottom: "1px solid #eceae4" }}>
+                  {sousOnglets.map(function(s) {
+                    return (
+                      <button key={s.id} onClick={function() { setSousTexte(s.id) }} style={{ padding: "8px 16px", fontSize: "13px", fontWeight: sousTexte === s.id ? "700" : "500", color: sousTexte === s.id ? "#0a2e1a" : "#888", backgroundColor: "transparent", border: "none", borderBottom: sousTexte === s.id ? "2px solid #1a6b38" : "2px solid transparent", cursor: "pointer", fontFamily: "inherit", marginBottom: "-1px" }}>
+                        {s.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                {actif.champs.map(function(t) {
+                  return (
+                    <div key={t.cle} style={card}>
+                      <label style={lbl}>{t.label}</label>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                        {t.type === "input" ? (
+                          <input type="text" value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={inp} />
+                        ) : (
+                          <textarea rows={3} value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
+                        )}
+                        <button onClick={function() { sauvegarderContenu(t.cle) }} style={btnSauvegarder}>Sauvegarder</button>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {onglet === "textes_mission" && (
-            <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Textes Qui sommes-nous</h2>
-              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Modifiez les textes de la page Qui sommes-nous.</p>
-              {[
-                { cle: "mission_texte_1", label: "NOTRE MISSION PARAGRAPHE 1" },
-                { cle: "mission_texte_2", label: "NOTRE MISSION PARAGRAPHE 2" },
-              ].map(function(t) {
-                return (
-                  <div key={t.cle} style={card}>
-                    <label style={lbl}>{t.label}</label>
-                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                      <textarea rows={4} value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
-                      <button onClick={function() { sauvegarderContenu(t.cle) }} style={btnSauvegarder}>Sauvegarder</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {onglet === "textes_garanties" && (
-            <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Textes des garanties</h2>
-              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Ces textes apparaissent dans la section Nos engagements.</p>
-              {[
-                { cle: "garantie_agrement_desc", label: "AGREMENT DESCRIPTION" },
-                { cle: "garantie_produits_desc", label: "PRODUITS HOMOLOGUES DESCRIPTION" },
-                { cle: "garantie_resultats_desc", label: "RESULTATS GARANTIS DESCRIPTION" },
-              ].map(function(t) {
-                return (
-                  <div key={t.cle} style={card}>
-                    <label style={lbl}>{t.label}</label>
-                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                      <textarea rows={3} value={contenus[t.cle] || ""} onChange={function(e) { modifierContenu(t.cle, e.target.value) }} style={Object.assign({}, inp, { resize: "vertical" })} />
-                      <button onClick={function() { sauvegarderContenu(t.cle) }} style={btnSauvegarder}>Sauvegarder</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+                  )
+                })}
+              </div>
+            )
+          })()}
 
           {onglet === "temoignages" && (
             <div>
