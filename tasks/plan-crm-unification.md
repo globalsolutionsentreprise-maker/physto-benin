@@ -198,7 +198,15 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   (2) le sous-détail « dont X prestataires » de la colonne Dépenses n'est pas repris
   (cosmétique). Note : le bouton suppression utilise `confirm()` (comme crm.html) — non
   cliquable en automation MCP (dialogue bloquant), testé en neutralisant confirm().
-- **Suivant : G3** (Objectif CA → à migrer vers la table `parametres`).
+- **2026-07-02 — G3 Objectif CA ✅ déployé + QA prod OK** (commit `e1a8239`). Objectif CA
+  annuel dans la vue Finances : carte de progression (facturé vs objectif) + modal
+  d'édition. **Migré de localStorage vers la table `parametres`** (clé `objectif_ca`),
+  chargé au montage, sauvegardé via `upsert onConflict cle` — partagé entre appareils.
+  QA prod : défini 1 000 000 → progression 75% (facturé 748 476), puis remis à 0 pour
+  laisser l'utilisateur fixer sa vraie cible ; console propre. Note : l'API renvoie
+  toujours `objectifCA: 0` en dur (non utilisé par React qui lit `parametres` directement) ;
+  à nettoyer côté API lors de la Phase 3 si besoin.
+- **Suivant : G1** (Analyse — recharts, le gros morceau).
 
 ---
 
