@@ -186,7 +186,19 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   tableau aplati via le GET par défaut de `/api/crm-data` (zéro duplication de calcul).
   Testé sur prod : message « Export CSV téléchargé », fichier généré, console propre.
   Accessible via CRM Pipeline → Dossier (la bascule menu = Phase 2).
-- **Suivant : G2** (Finances + CRUD dépenses).
+- **2026-07-02 — G2 Finances + dépenses ✅ déployé + QA prod OK** (commit `a6d92ea`).
+  Nouvel onglet « Finances » dans le CRM React (`renderVueFinances` + `renderDepModal`) :
+  3 KPIs, tableau financier par client, dépenses générales (ajout modal + suppression),
+  vue d'ensemble (barres) et projection contrats récurrents 12 mois. Données via le GET
+  par défaut de `/api/crm-data` ; POST dépenses avec Bearer token (verifyAdmin l'exige).
+  QA prod : KPIs identiques à crm.html (dépenses 533 500, résultat net +214 976), CRUD
+  dépense testé (ajout → 533 501 puis suppression → 533 500), console propre.
+  Écarts mineurs assumés : (1) la « vue d'ensemble » est rendue en barres CSS simples,
+  pas en recharts — recharts est réservé à G1 (Analyse) où il y a de vrais graphes ;
+  (2) le sous-détail « dont X prestataires » de la colonne Dépenses n'est pas repris
+  (cosmétique). Note : le bouton suppression utilise `confirm()` (comme crm.html) — non
+  cliquable en automation MCP (dialogue bloquant), testé en neutralisant confirm().
+- **Suivant : G3** (Objectif CA → à migrer vers la table `parametres`).
 
 ---
 
