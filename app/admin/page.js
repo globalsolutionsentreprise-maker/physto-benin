@@ -1407,6 +1407,14 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
   const [contratAnalyse, setContratAnalyse] = React.useState(null)
+  const [finData, setFinData] = React.useState(null)
+  const [finLoading, setFinLoading] = React.useState(false)
+  const [depModal, setDepModal] = React.useState(false)
+  const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
+  const [depSaving, setDepSaving] = React.useState(false)
+  React.useEffect(function() {
+    if (vue === "finances" && !finData && !finLoading) chargerFinances()
+  }, [vue])
   const [analysingContrat, setAnalysingContrat] = React.useState(false)
   const [contratErreur, setContratErreur] = React.useState(null)
   const [editingDevis, setEditingDevis] = React.useState(null)
@@ -3094,10 +3102,272 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     } catch (e) { setMsg("Erreur export CSV") }
   }
 
+  // ── G2 : Vue Finances + dépenses (port fidèle de crm.html renderFinance) ────
+  var DEP_CATS = [
+    { key: "prestataire", label: "🧑‍🔧 Prestataire" },
+    { key: "transport", label: "🚗 Transport" },
+    { key: "produits", label: "🧪 Produits" },
+    { key: "materiels", label: "🔧 Matériels" },
+    { key: "autre", label: "📌 Autre" },
+  ]
+  var ST_META = {
+    contact: { label: "Premier contact", bg: "#FAEEDA", tc: "#633806" },
+    devis: { label: "Devis envoyé", bg: "#E6F1FB", tc: "#0C447C" },
+    attente: { label: "En attente", bg: "#FFF0C4", tc: "#412402" },
+    relance: { label: "Relance", bg: "#FBEAF0", tc: "#72243E" },
+    converti: { label: "Converti / Facturé", bg: "#E1F5EE", tc: "#04342C" },
+    echec: { label: "Échec / Perdu", bg: "#F1EFE8", tc: "#2C2C2A" },
+  }
+  var FREQ_MOIS = { mensuelle: 1, bimestrielle: 2, trimestrielle: 3, semestrielle: 6, annuelle: 12 }
+  var FREQ_LABEL = { mensuelle: "Mensuelle", bimestrielle: "Bimestrielle", trimestrielle: "Trimestrielle", semestrielle: "Semestrielle", annuelle: "Annuelle" }
+  function finFmt(n) { return Math.round(n || 0).toLocaleString("fr-FR") }
+  function finFmtD(d) { return d ? new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+  function finFreqMois(k) { return FREQ_MOIS[k] || 3 }
+  function finInterventionDates(c) {
+    if (c.typeContrat !== "contrat" || !c.dateDebutContrat) return []
+    var start = new Date(c.dateDebutContrat + "T00:00:00")
+    var duree = c.dureeContratMois || 12
+    var freq = finFreqMois(c.frequenceIntervention)
+    var dates = []
+    for (var i = 0; i < duree; i += freq) {
+      var d = new Date(start)
+      d.setMonth(d.getMonth() + i)
+      dates.push(d.toISOString().slice(0, 10))
+    }
+    return dates
+  }
+  function finNextIntervention(c) {
+    var today = new Date(); today.setHours(0, 0, 0, 0)
+    return finInterventionDates(c).find(function(d) { return new Date(d + "T00:00:00") >= today }) || null
+  }
+  function finMontantParInter(c) {
+    var freq = finFreqMois(c.frequenceIntervention)
+    var nb = (c.dureeContratMois || 12) / freq
+    return Math.round((c.montantDevis || 0) / nb)
+  }
+
+  async function chargerFinances() {
+    setFinLoading(true)
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var r = await fetch("/api/crm-data", { headers: { "Authorization": "Bearer " + token } })
+      var data = await r.json()
+      setFinData({ clients: data.clients || [], depenses: data.depenses || [] })
+    } catch (e) { setFinData({ clients: [], depenses: [] }) }
+    setFinLoading(false)
+  }
+  function openDepModal() {
+    setDepForm({ categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10) })
+    setDepModal(true)
+  }
+  async function ajouterDepense() {
+    var libelle = (depForm.libelle || "").trim()
+    var montant = parseFloat(depForm.montant) || 0
+    if (!libelle || !montant) { setMsg("Erreur : libellé et montant requis."); return }
+    setDepSaving(true)
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }) })
+      setDepModal(false)
+      await chargerFinances()
+      setMsg("Dépense enregistrée")
+    } catch (e) { setMsg("Erreur enregistrement dépense") }
+    setDepSaving(false)
+  }
+  async function supprimerDepense(id) {
+    if (!confirm("Supprimer cette dépense ?")) return
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_depense", id: id }) })
+      await chargerFinances()
+      setMsg("Dépense supprimée")
+    } catch (e) { setMsg("Erreur suppression") }
+  }
+
+  function renderDepModal() {
+    if (!depModal) return null
+    var e = React.createElement
+    var inpS = { width: "100%", padding: "9px 11px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+    var lblS = { display: "block", fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "5px" }
+    return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setDepModal(false) } },
+      e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "440px", maxWidth: "92vw" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Nouvelle dépense générale"),
+          e("button", { onClick: function() { setDepModal(false) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
+        ),
+        e("div", { style: { marginBottom: "12px" } },
+          e("label", { style: lblS }, "Catégorie"),
+          e("select", { value: depForm.categorie, onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { categorie: v }) }) }, style: Object.assign({}, inpS, { cursor: "pointer" }) },
+            DEP_CATS.map(function(c) { return e("option", { key: c.key, value: c.key }, c.label) })
+          )
+        ),
+        e("div", { style: { marginBottom: "12px" } },
+          e("label", { style: lblS }, "Libellé"),
+          e("input", { type: "text", value: depForm.libelle, placeholder: "Ex: Carburant Cotonou, Perméthrine 5L…", onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { libelle: v }) }) }, style: inpS })
+        ),
+        e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" } },
+          e("div", null,
+            e("label", { style: lblS }, "Montant (FCFA)"),
+            e("input", { type: "number", min: "0", value: depForm.montant, onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { montant: v }) }) }, style: inpS })
+          ),
+          e("div", null,
+            e("label", { style: lblS }, "Date"),
+            e("input", { type: "date", value: depForm.date, onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { date: v }) }) }, style: inpS })
+          )
+        ),
+        e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
+          e("button", { onClick: function() { setDepModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
+          e("button", { onClick: ajouterDepense, disabled: depSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: depSaving ? "wait" : "pointer", fontFamily: "inherit" } }, depSaving ? "Enregistrement…" : "Enregistrer")
+        )
+      )
+    )
+  }
+
+  function renderVueFinances() {
+    var e = React.createElement
+    if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement des finances…")
+    var cls = finData.clients || []
+    var depGlob = finData.depenses || []
+    var tp = cls.reduce(function(s, c) { return s + (c.paiementsRecus || 0) }, 0)
+    var tdc = cls.reduce(function(s, c) { return s + (c.depenses || 0) }, 0)
+    var tdp = cls.reduce(function(s, c) { return s + (c.depensesPrestataires || 0) }, 0)
+    var tdg = depGlob.reduce(function(s, d) { return s + (d.montant || 0) }, 0)
+    var td = tdc + tdp + tdg
+    var tf = cls.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+    var tfa = cls.reduce(function(s, c) { return s + (c.montantFacture || 0) }, 0)
+    var r = tfa - td
+
+    var thS = { textAlign: "left", padding: "8px 10px", fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
+    var tdS = { padding: "8px 10px", fontSize: "12px", borderBottom: "1px solid #f0efe9", whiteSpace: "nowrap" }
+    var secS = { fontSize: "13px", fontWeight: "700", color: "#0a2e1a", margin: "0 0 12px" }
+    function kpiCard(lbl, val, color) {
+      return e("div", { style: { flex: 1, background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px" } },
+        e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "6px" } }, lbl),
+        e("div", { style: { fontSize: "22px", fontWeight: "700", color: color } }, val)
+      )
+    }
+
+    var maxV = Math.max(tf, tfa, tp, td, 1)
+    var barsData = [["Devis total", tf, "#85B7EB"], ["Facturé", tfa, "#5DCAA5"], ["Encaissé", tp, "#1D9E75"], ["Dépenses", td, "#E24B4A"]]
+
+    var contrats = cls.filter(function(c) { return c.typeContrat === "contrat" && c.statut !== "echec" })
+    var recurringBlock
+    if (!contrats.length) {
+      recurringBlock = e("div", { style: { padding: "18px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", color: "#888", textAlign: "center", fontSize: "13px" } }, "Aucun contrat récurrent — ouvrez une fiche client et choisissez « Contrat récurrent ».")
+    } else {
+      var today = new Date()
+      var months = []
+      for (var mi = 0; mi < 12; mi++) { var dm = new Date(today.getFullYear(), today.getMonth() + mi, 1); months.push({ ym: dm.toISOString().slice(0, 7), label: dm.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }) }) }
+      var mCA = months.map(function(m) { return contrats.reduce(function(s, c) { var mpi = finMontantParInter(c); var hit = finInterventionDates(c).some(function(d) { return d.slice(0, 7) === m.ym }); return s + (hit ? mpi : 0) }, 0) })
+      var totalCA = mCA.reduce(function(a, b) { return a + b }, 0)
+      var caAn = contrats.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+      recurringBlock = e("div", null,
+        e("div", { style: { display: "flex", gap: "24px", flexWrap: "wrap", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px", marginBottom: "14px" } },
+          e("div", null, e("div", { style: { fontSize: "11px", color: "#888" } }, "CA récurrent total"), e("div", { style: { fontSize: "18px", fontWeight: "700", color: "#1a6b38" } }, finFmt(caAn) + " FCFA")),
+          e("div", null, e("div", { style: { fontSize: "11px", color: "#888" } }, "Projection 12 mois"), e("div", { style: { fontSize: "18px", fontWeight: "700", color: "#185FA5" } }, finFmt(totalCA) + " FCFA")),
+          e("div", null, e("div", { style: { fontSize: "11px", color: "#888" } }, "Contrats actifs"), e("div", { style: { fontSize: "18px", fontWeight: "700" } }, contrats.length))
+        ),
+        e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px" } },
+          e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+            e("thead", null, e("tr", null,
+              e("th", { style: thS }, "Client"), e("th", { style: thS }, "Fréquence"), e("th", { style: thS }, "Montant/inter."),
+              months.map(function(m) { return e("th", { key: m.ym, style: Object.assign({}, thS, { textAlign: "center", minWidth: "52px" }) }, m.label) })
+            )),
+            e("tbody", null,
+              contrats.map(function(c) {
+                var mpi = finMontantParInter(c); var ni = finNextIntervention(c)
+                return e("tr", { key: c.id || c.client },
+                  e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }) }, c.client, ni ? e("div", { style: { fontSize: "10px", color: "#999", fontWeight: "400" } }, "Prochain : " + finFmtD(ni)) : null),
+                  e("td", { style: Object.assign({}, tdS, { fontSize: "12px" }) }, FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle"),
+                  e("td", { style: Object.assign({}, tdS, { color: "#1a6b38", fontWeight: "500" }) }, finFmt(mpi)),
+                  months.map(function(m) {
+                    var hit = finInterventionDates(c).some(function(d) { return d.slice(0, 7) === m.ym })
+                    return e("td", { key: m.ym, style: Object.assign({}, tdS, { textAlign: "center", background: hit ? "rgba(29,158,117,0.09)" : "transparent", color: hit ? "#1a6b38" : "#ccc", fontWeight: hit ? "600" : "400" }) }, hit ? finFmt(mpi) : "·")
+                  })
+                )
+              }),
+              e("tr", { style: { fontWeight: "600", borderTop: "2px solid #e0ddd6" } },
+                e("td", { style: Object.assign({}, tdS, { color: "#555" }), colSpan: 3 }, "CA récurrent mensuel"),
+                mCA.map(function(v, idx) { return e("td", { key: idx, style: Object.assign({}, tdS, { textAlign: "center", color: v > 0 ? "#1a6b38" : "#ccc" }) }, v > 0 ? finFmt(v) : "—") })
+              )
+            )
+          )
+        )
+      )
+    }
+
+    return e("div", null,
+      renderDepModal(),
+      e("div", { style: { display: "flex", gap: "12px", marginBottom: "24px" } },
+        kpiCard("Encaissements clients", finFmt(tp) + " FCFA", "#1D9E75"),
+        kpiCard("Total dépenses", finFmt(td) + " FCFA", "#E24B4A"),
+        kpiCard("Résultat net", (r >= 0 ? "+" : "") + finFmt(r) + " FCFA", r >= 0 ? "#1D9E75" : "#E24B4A")
+      ),
+      e("div", { style: secS }, "Suivi financier par client"),
+      e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
+        e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+          e("thead", null, e("tr", null, ["Client", "Statut", "Devis", "Facturé", "Reçu", "Dépenses", "Résultat"].map(function(hh) { return e("th", { key: hh, style: thS }, hh) }))),
+          e("tbody", null, cls.map(function(c) {
+            var meta = ST_META[c.statut] || ST_META.contact
+            var depTotal = (c.depenses || 0) + (c.depensesPrestataires || 0)
+            var res = (c.paiementsRecus || 0) - depTotal
+            return e("tr", { key: c.id || c.client },
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, c.client),
+              e("td", { style: tdS }, e("span", { style: { background: meta.bg, color: meta.tc, borderRadius: "20px", padding: "2px 8px", fontSize: "11px", fontWeight: "600" } }, meta.label)),
+              e("td", { style: tdS }, finFmt(c.montantDevis)),
+              e("td", { style: Object.assign({}, tdS, { color: c.montantFacture ? "#1D9E75" : "#bbb" }) }, c.montantFacture ? finFmt(c.montantFacture) : "—"),
+              e("td", { style: Object.assign({}, tdS, { color: c.paiementsRecus ? "#1D9E75" : "#bbb" }) }, c.paiementsRecus ? finFmt(c.paiementsRecus) : "—"),
+              e("td", { style: Object.assign({}, tdS, { color: depTotal ? "#E24B4A" : "#bbb" }) }, depTotal ? finFmt(depTotal) : "—"),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#bbb" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
+            )
+          }))
+        )
+      ),
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+        e("div", { style: Object.assign({}, secS, { margin: 0 }) }, "Dépenses générales"),
+        e("button", { onClick: openDepModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter")
+      ),
+      e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
+        e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+          e("thead", null, e("tr", null, ["Catégorie", "Libellé", "Date", "Montant", ""].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
+          e("tbody", null,
+            depGlob.map(function(d) {
+              var cat = DEP_CATS.find(function(x) { return x.key === d.categorie }) || DEP_CATS[4]
+              return e("tr", { key: d.id },
+                e("td", { style: tdS }, cat.label),
+                e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal" }) }, d.libelle),
+                e("td", { style: tdS }, finFmtD(d.date)),
+                e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "500" }) }, finFmt(d.montant) + " FCFA"),
+                e("td", { style: tdS }, e("button", { onClick: function() { supprimerDepense(d.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑"))
+              )
+            }),
+            depGlob.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 5 }, "Aucune dépense générale.")) : null,
+            e("tr", { style: { fontWeight: "600" } }, e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }), colSpan: 3 }, "Total"), e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "600" }) }, finFmt(tdg) + " FCFA"), e("td", { style: tdS }, ""))
+          )
+        )
+      ),
+      e("div", { style: secS }, "Vue d'ensemble"),
+      e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "18px", marginBottom: "24px" } },
+        barsData.map(function(b) {
+          return e("div", { key: b[0], style: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" } },
+            e("div", { style: { width: "110px", fontSize: "12px", color: "#555" } }, b[0]),
+            e("div", { style: { flex: 1, background: "#f0efe9", borderRadius: "5px", height: "22px", overflow: "hidden" } }, e("div", { style: { width: Math.round(b[1] / maxV * 100) + "%", background: b[2], height: "100%" } })),
+            e("div", { style: { width: "140px", textAlign: "right", fontSize: "12px", fontWeight: "600", color: "#333" } }, finFmt(b[1]) + " FCFA")
+          )
+        })
+      ),
+      e("div", { style: secS }, "Contrats récurrents"),
+      recurringBlock
+    )
+  }
+
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -4132,6 +4402,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null,
     vue === "pipeline" ? renderVuePipeline() : null,
+    vue === "finances" ? renderVueFinances() : null,
     vue === "documents" ? renderVueDocuments() : null
   )
 }
