@@ -3064,6 +3064,36 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     )
   }
 
+  // Export CSV du pipeline — récupère le tableau aplati depuis le GET par défaut de
+  // /api/crm-data (mêmes calculs que crm.html, aucune duplication de logique).
+  async function exporterCSV() {
+    try {
+      setMsg("")
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var r = await fetch("/api/crm-data", { headers: { "Authorization": "Bearer " + token } })
+      if (!r.ok) { setMsg("Erreur export CSV"); return }
+      var data = await r.json()
+      var rows = data.clients || []
+      var stLabels = { contact: "Premier contact", devis: "Devis envoyé", attente: "En attente", relance: "Relance", converti: "Converti / Facturé", echec: "Échec / Perdu" }
+      var hdrs = ["N°", "Client", "Provenance", "Type prestation", "Catégorie", "Zone", "Date contact", "Date devis", "Montant devis", "Statut", "Motif échec", "Attestation", "Date facture", "Montant facturé", "Paiements reçus", "Dépenses liées", "Commentaire"]
+      var lignes = rows.map(function(c, i) {
+        return [i + 1, c.client, c.provenance, c.typePrestation || "", c.categorie || "", c.zone || "", c.dateContact || "", c.dateDevis, c.montantDevis, (stLabels[c.statut] || c.statut || ""), c.motifEchec || "", c.attestation === "envoye" ? "Envoyé" : "Non", c.dateFacture, c.montantFacture, c.paiementsRecus, c.depenses, c.commentaire]
+      })
+      var csv = [hdrs].concat(lignes).map(function(row) {
+        return row.map(function(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"' }).join(",")
+      }).join("\n")
+      var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" })
+      var url = URL.createObjectURL(blob)
+      var a = document.createElement("a")
+      a.href = url
+      a.download = "GSE_Pipeline_" + new Date().toISOString().slice(0, 10) + ".csv"
+      a.click()
+      URL.revokeObjectURL(url)
+      setMsg("Export CSV téléchargé")
+    } catch (e) { setMsg("Erreur export CSV") }
+  }
+
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
@@ -3075,7 +3105,8 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
         return React.createElement("button", { key: t[0], onClick: function() { setVue(t[0]); setClientDetail(null); setMsg("") }, style: { padding: "10px 20px", border: "none", borderBottom: active ? "2px solid #0a2e1a" : "2px solid transparent", marginBottom: "-2px", background: "none", fontSize: "13px", fontWeight: active ? "700" : "400", color: active ? "#0a2e1a" : "#888", cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center" } },
           t[1], badge
         )
-      })
+      }),
+      React.createElement("button", { key: "export-csv", onClick: exporterCSV, title: "Exporter le pipeline en CSV", style: { marginLeft: "auto", marginBottom: "6px", background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center" } }, "⬇ Export CSV")
     )
   }
 
