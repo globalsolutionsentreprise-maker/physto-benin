@@ -1417,6 +1417,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
   const [pipelineExpanded, setPipelineExpanded] = React.useState(null)
   const [leads, setLeads] = React.useState([])
+  const [leadsTraites, setLeadsTraites] = React.useState([])
+  const [showTraites, setShowTraites] = React.useState(false)
 
   const STATUTS = {
     brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
@@ -4695,6 +4697,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
+  async function chargerLeadsTraites() {
+    var res = await db.from("leads").select("id, nom, telephone, email, nuisible, ville, created_at").eq("traite", true).order("created_at", { ascending: false }).limit(50)
+    setLeadsTraites(res.data || [])
+  }
+  async function restaurerLead(lead) {
+    await db.from("leads").update({ traite: false }).eq("id", lead.id)
+    setLeadsTraites(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
+    setLeads(function(prev) { return [lead].concat(prev) })
+  }
+
   function renderVueDevis() {
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
@@ -4717,6 +4729,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             ),
             React.createElement("button", {
               onClick: async function() {
+                if (!confirm("Marquer « " + lead.nom + " » comme traité ?\n\nIl quittera la liste d'attente (récupérable via « Voir les leads traités »).")) return
                 await db.from("leads").update({ traite: true }).eq("id", lead.id)
                 setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
               },
@@ -4724,6 +4737,28 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             }, "Traiter →")
           )
         })
+      ),
+      React.createElement("div", { style: { marginBottom: "16px" } },
+        React.createElement("button", {
+          onClick: function() { var next = !showTraites; setShowTraites(next); if (next) chargerLeadsTraites() },
+          style: { background: "none", border: "1px solid #e0ddd6", color: "#888", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }
+        }, showTraites ? "▲ Masquer les leads traités" : "▼ Voir les leads traités"),
+        showTraites && React.createElement("div", { style: { marginTop: "10px", backgroundColor: "#f8f7f4", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "12px 16px" } },
+          leadsTraites.length === 0
+            ? React.createElement("div", { style: { fontSize: "12px", color: "#999", textAlign: "center", padding: "8px" } }, "Aucun lead traité.")
+            : leadsTraites.map(function(lead) {
+                return React.createElement("div", { key: lead.id, style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid #eceae4" } },
+                  React.createElement("div", null,
+                    React.createElement("div", { style: { fontSize: "13px", fontWeight: "600", color: "#555" } }, lead.nom),
+                    React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
+                  ),
+                  React.createElement("button", {
+                    onClick: function() { restaurerLead(lead) },
+                    style: { background: "none", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, marginLeft: "10px" }
+                  }, "↩ Remettre")
+                )
+              })
+        )
       ),
       React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
         ["tous", "envoye", "accepte", "modification_demandee", "en_cours", "termine", "annule"].map(function(st) {
