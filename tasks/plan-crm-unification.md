@@ -238,9 +238,28 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   `dossierDevisId`. QA prod : clic « CRM Pipeline » → CRM React direct sur la vue Commercial,
   navigation interne OK (Devis), données correctes, console propre. `crm.html` et
   `/api/crm-frame` ne sont plus chargés.
-- **Suivant : Phase 3** — suppression physique de `public/crm.html` + `app/api/crm-frame/route.js`,
-  et nettoyage du chemin mort `initialDevisId` dans `SectionClientsDevis`. Vérifier qu'aucune
-  autre référence ne subsiste, puis `graphify update`.
+- **2026-07-03 — Phase 3 (suppression) ✅ déployé + QA prod OK** (commit `715cffb`).
+  Suppression de `public/crm.html` (1624 l.) et `app/api/crm-frame/route.js` ; `next.config.js`
+  nettoyé (retrait de l'exclusion `api/crm-frame`, `api/rh-frame` conservé) ; chemin mort
+  `initialDevisId`/`_lastDossier` retiré de `SectionClientsDevis`. QA prod : `/api/crm-frame`
+  → 404 (route supprimée), CRM React toujours fonctionnel (menu → kanban Commercial), iframe
+  Planning & RH intacte, build vert, console propre.
+
+---
+
+## ✅ MIGRATION TERMINÉE (2026-07-03)
+
+Le double système CRM parallèle est **éliminé**. Un seul CRM, en React
+(`SectionClientsDevis`), avec les vues : **Devis · Clients · Commercial · Pipeline · Finances
+· Analyse · Documents**. `crm.html` n'existe plus (récupérable dans l'historique git).
+
+Briques livrées, chacune déployée + QA prod : Phase 0 (invest.) · G4 (export CSV) · G2
+(Finances + dépenses) · G3 (Objectif CA → `parametres`) · G1a (Analyse KPIs) · G1b (graphes
+recharts) · G5 (kanban commercial) · Phase 2 (bascule menu) · Phase 3 (suppression).
+
+Restes optionnels (non bloquants) : l'API `/api/crm-data` renvoie encore `objectifCA: 0` en
+dur (inutilisé, React lit `parametres`) — à nettoyer un jour. Les commentaires de provenance
+`// … crm.html` dans `page.js` sont conservés volontairement (doc du port).
 
 ---
 
