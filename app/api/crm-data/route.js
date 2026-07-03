@@ -30,6 +30,16 @@ export async function GET(req) {
     return Response.json({ leads: leads || [] })
   }
 
+  if (action === "get_leads_traites") {
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("id, nom, telephone, email, nuisible, ville, created_at")
+      .eq("traite", true)
+      .order("created_at", { ascending: false })
+      .limit(50)
+    return Response.json({ leads: leads || [] })
+  }
+
   if (action === "get_clients") {
     const { data: clients } = await supabase.from("clients").select("*").order("nom")
     return Response.json({ clients: clients || [] })
@@ -139,6 +149,11 @@ export async function POST(req) {
       if (row && !row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0
     }
     await supabase.from("devis").update(updateData).eq("id", body.id)
+    return Response.json({ ok: true })
+  }
+
+  if (action === "set_lead_traite") {
+    await supabase.from("leads").update({ traite: !!body.traite }).eq("id", body.id)
     return Response.json({ ok: true })
   }
 

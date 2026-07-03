@@ -4698,11 +4698,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   async function chargerLeadsTraites() {
-    var res = await db.from("leads").select("id, nom, telephone, email, nuisible, ville, created_at").eq("traite", true).order("created_at", { ascending: false }).limit(50)
-    setLeadsTraites(res.data || [])
+    var sess = await db.auth.getSession()
+    var token = (sess.data.session && sess.data.session.access_token) || ""
+    var res = await fetch("/api/crm-data?action=get_leads_traites", { headers: { "Authorization": "Bearer " + token } })
+    var data = await res.json()
+    setLeadsTraites(data.leads || [])
   }
   async function restaurerLead(lead) {
-    await db.from("leads").update({ traite: false }).eq("id", lead.id)
+    var sess = await db.auth.getSession()
+    var token = (sess.data.session && sess.data.session.access_token) || ""
+    await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "set_lead_traite", id: lead.id, traite: false }) })
     setLeadsTraites(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
     setLeads(function(prev) { return [lead].concat(prev) })
   }
@@ -4730,7 +4735,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("button", {
               onClick: async function() {
                 if (!confirm("Marquer « " + lead.nom + " » comme traité ?\n\nIl quittera la liste d'attente (récupérable via « Voir les leads traités »).")) return
-                await db.from("leads").update({ traite: true }).eq("id", lead.id)
+                var sess = await db.auth.getSession()
+                var token = (sess.data.session && sess.data.session.access_token) || ""
+                await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "set_lead_traite", id: lead.id, traite: true }) })
                 setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
               },
               style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, marginLeft: "10px" }
