@@ -27,7 +27,6 @@ export default function Admin() {
   const [formAcces, setFormAcces] = useState({ email: "", nom: "", role: "lecture", password: "" })
   const [accesSaving, setAccesSaving] = useState(false)
   const [accesSaveMsg, setAccesSaveMsg] = useState("")
-  const [dossierDevisId, setDossierDevisId] = useState(null)
   const [onglet, setOnglet] = useState("chiffres")
   const [sousTexte, setSousTexte] = useState("accueil")
   const [chargement, setChargement] = useState(false)
@@ -218,17 +217,6 @@ export default function Admin() {
       chargerAdminData()
     }
   }, [onglet])
-
-  React.useEffect(function() {
-    function handleMessage(e) {
-      if (e.data && e.data.type === "open_dossier" && e.data.devisId) {
-        setDossierDevisId(e.data.devisId)
-        setOnglet("clients")
-      }
-    }
-    window.addEventListener("message", handleMessage)
-    return function() { window.removeEventListener("message", handleMessage) }
-  }, [])
 
   async function sauvegarderParametre(cle) {
     const valeur = parametres[cle]
@@ -1098,21 +1086,11 @@ export default function Admin() {
             </div>
           )}
 
-          {onglet === "clients" && (
-            <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>Clients & Devis</h2>
-              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Créez des devis, gérez les clients et suivez les paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} initialDevisId={dossierDevisId} />
-            </div>
-          )}
-
           {onglet === "crm" && (
-            <div style={{ margin: "-32px" }}>
-              <iframe
-                src="/api/crm-frame"
-                title="CRM Pipeline GSE"
-                style={{ width: "100%", height: "calc(100vh - 64px)", border: "none", display: "block" }}
-              />
+            <div>
+              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
+              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="commercial" />
             </div>
           )}
 
@@ -1363,9 +1341,9 @@ export default function Admin() {
 // ══════════════════════════════════════════════════
 // COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
-function SectionClientsDevis({ db, agrement, initialDevisId }) {
+function SectionClientsDevis({ db, agrement, initialDevisId, vueInitiale }) {
   const COMMISSION_FEDAPAY = 0.0185
-  const [vue, setVue] = React.useState("devis")
+  const [vue, setVue] = React.useState(vueInitiale || "devis")
   const [devisList, setDevisList] = React.useState([])
   const [clients, setClients] = React.useState([])
   const [loading, setLoading] = React.useState(true)
