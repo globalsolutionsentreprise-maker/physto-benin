@@ -45,6 +45,21 @@ export async function GET(req) {
     return Response.json({ clients: clients || [] })
   }
 
+  if (action === "get_encaissement_desync") {
+    // Devis marqués « encaissement fait » (parcours) mais dont paiements_recus < montant facturé
+    const { data: devis } = await supabase.from("devis").select("id, numero, montant_net, montant_facture_crm, paiements_recus, parcours, clients(nom, prenom, entreprise)")
+    const affected = (devis || []).filter(d => {
+      const enc = d.parcours && d.parcours.encaissement && d.parcours.encaissement.done
+      const facture = d.montant_facture_crm || d.montant_net || 0
+      return enc && facture > 0 && (d.paiements_recus || 0) < facture
+    }).map(d => ({
+      id: d.id, numero: d.numero,
+      client: (d.clients && (d.clients.entreprise || [d.clients.prenom, d.clients.nom].filter(Boolean).join(" "))) || "Client",
+      facture: d.montant_facture_crm || d.montant_net || 0, recu: d.paiements_recus || 0,
+    }))
+    return Response.json({ affected })
+  }
+
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
@@ -160,6 +175,21 @@ export async function POST(req) {
   if (action === "delete_lead") {
     await supabase.from("leads").delete().eq("id", body.id)
     return Response.json({ ok: true })
+  }
+
+  if (action === "sync_encaissements") {
+    // Backfill : pour les devis encaissés (parcours) mais paiements_recus < facturé, aligner paiements_recus sur le facturé
+    const { data: devis } = await supabase.from("devis").select("id, montant_net, montant_facture_crm, paiements_recus, parcours")
+    let count = 0
+    for (const d of (devis || [])) {
+      const enc = d.parcours && d.parcours.encaissement && d.parcours.encaissement.done
+      const facture = d.montant_facture_crm || d.montant_net || 0
+      if (enc && facture > 0 && (d.paiements_recus || 0) < facture) {
+        await supabase.from("devis").update({ paiements_recus: facture }).eq("id", d.id)
+        count++
+      }
+    }
+    return Response.json({ ok: true, count })
   }
 
   if (action === "save_client") {
