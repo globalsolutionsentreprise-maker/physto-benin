@@ -1418,7 +1418,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [objInput, setObjInput] = React.useState("")
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
-    if ((vue === "finances" || vue === "analyse") && !finData && !finLoading) chargerFinances()
+    if ((vue === "finances" || vue === "analyse" || vue === "commercial") && !finData && !finLoading) chargerFinances()
   }, [vue])
   React.useEffect(function() {
     db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
@@ -3197,6 +3197,27 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     } catch (e) { setMsg("Erreur suppression") }
   }
 
+  // ── G5 : kanban commercial (statut) ──────────────────────────────────────
+  async function deplacerCarte(devisId, newStatut) {
+    if (!newStatut) return
+    setFinData(function(prev) {
+      if (!prev) return prev
+      return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) { return c.id === devisId ? Object.assign({}, c, { statut: newStatut }) : c }) })
+    })
+    setMsg("Déplacé : " + (ST_META[newStatut] ? ST_META[newStatut].label : newStatut))
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, statut: newStatut }) })
+    } catch (e) { setMsg("Erreur déplacement") }
+  }
+  function ouvrirDossierCommercial(devisId) {
+    var d = devisList.find(function(x) { return x.id === devisId })
+    if (!d) { setVue("devis"); return }
+    var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+    if (cl) { setClientDetail(cl); setVue("devis-client") } else { setVue("devis") }
+  }
+
   function openObjModal() {
     setObjInput(objectifCA ? String(objectifCA) : "")
     setObjModal(true)
@@ -3679,10 +3700,64 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     )
   }
 
+  // ── G5 : Vue Commercial — kanban par statut (port de crm.html renderKanban) ──
+  function renderVueCommercial() {
+    var e = React.createElement
+    if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline commercial…")
+    var cls = finData.clients || []
+    var cols = ["contact", "devis", "attente", "relance", "converti", "echec"]
+    var nbContrats = cls.filter(function(c) { return c.typeContrat === "contrat" && c.statut !== "echec" }).length
+    var nbPonctuels = cls.filter(function(c) { return c.typeContrat !== "contrat" && c.statut !== "echec" }).length
+    var totMission = (nbContrats + nbPonctuels) || 1
+    var pctC = Math.round(nbContrats / totMission * 100)
+    var pctP = 100 - pctC
+
+    function renderCard(c) {
+      var meta = ST_META[c.statut] || ST_META.contact
+      var ni = finNextIntervention(c)
+      var niSoon = ni && (new Date(ni + "T00:00:00") - new Date()) < 30 * 864e5
+      return e("div", { key: c.id, style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+        e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
+        e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
+        e("div", { style: { fontSize: "13px", fontWeight: "700", color: meta.tc } }, finFmt(c.montantDevis) + " FCFA" + (c.typeContrat === "contrat" ? " / " + (c.dureeContratMois || 12) + "m" : "")),
+        c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
+        ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
+        c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
+        e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
+          e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
+            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(cols.filter(function(k) { return k !== c.statut }).map(function(k) { return e("option", { key: k, value: k }, (ST_META[k] || {}).label) }))
+          ),
+          e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
+        )
+      )
+    }
+
+    return e("div", null,
+      e("div", { style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
+        e("span", { style: { fontSize: "11px", color: "#888" } }, "Type de mission :"),
+        e("span", { style: { background: "#EEF2FF", color: "#4338CA", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: "600" } }, "🔁 " + nbContrats + " contrat" + (nbContrats > 1 ? "s" : "") + " (" + pctC + "%)"),
+        e("span", { style: { color: "#ccc" } }, "·"),
+        e("span", { style: { background: "#F0FDF4", color: "#166534", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: "600" } }, "⚡ " + nbPonctuels + " ponctuel" + (nbPonctuels > 1 ? "s" : "") + " (" + pctP + "%)")
+      ),
+      e("div", { style: { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" } },
+        cols.map(function(key) {
+          var meta = ST_META[key] || {}
+          var cards = cls.filter(function(c) { return c.statut === key })
+          var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+          return e("div", { key: key, style: { minWidth: "230px", width: "230px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
+            e("div", { style: { background: meta.bg, color: meta.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, meta.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length)),
+            tot > 0 ? e("div", { style: { fontSize: "11px", color: meta.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
+            cards.length === 0 ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "Aucun") : cards.map(renderCard)
+          )
+        })
+      )
+    )
+  }
+
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["commercial", "Commercial"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -4716,6 +4791,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null,
+    vue === "commercial" ? renderVueCommercial() : null,
     vue === "pipeline" ? renderVuePipeline() : null,
     vue === "finances" ? renderVueFinances() : null,
     vue === "analyse" ? renderVueAnalyse() : null,
