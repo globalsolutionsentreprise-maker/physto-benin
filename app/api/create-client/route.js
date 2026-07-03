@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 
 export const dynamic = "force-dynamic"
 
-async function creerBrouillonDevis(supabase, clientId) {
+async function creerBrouillonDevis(supabase, clientId, description) {
   try {
     const { data: num } = await supabase.rpc("generate_devis_numero")
     const numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase())
@@ -11,6 +11,7 @@ async function creerBrouillonDevis(supabase, clientId) {
       client_id: clientId,
       numero,
       prestation: "À définir",
+      description: description || null,
       montant_net: 0,
       montant_total: 0,
       statut: "brouillon",
@@ -27,7 +28,7 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    const { nom, prenom, email, telephone, entreprise, adresse } = await req.json()
+    const { nom, prenom, email, telephone, entreprise, adresse, leadDescription } = await req.json()
 
     if (!nom) {
       return NextResponse.json({ error: "Le nom est obligatoire" }, { status: 400 })
@@ -86,7 +87,7 @@ export async function POST(req) {
       if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
       clientId = newClient.id
 
-      await creerBrouillonDevis(supabase, clientId)
+      await creerBrouillonDevis(supabase, clientId, leadDescription)
       return NextResponse.json({
         success: true,
         clientId,

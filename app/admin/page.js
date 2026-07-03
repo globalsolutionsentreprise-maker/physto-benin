@@ -1509,10 +1509,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       setSubmittingClient(false)
     } else {
       try {
+        var leadDescription = null
+        if (leadEnConversion) {
+          var parts = []
+          if (leadEnConversion.nuisible) parts.push("Nuisible : " + leadEnConversion.nuisible)
+          if (leadEnConversion.message) parts.push(leadEnConversion.message)
+          leadDescription = parts.join("\n") || null
+        }
         const res = await fetch("/api/create-client", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formClient)
+          body: JSON.stringify(Object.assign({}, formClient, { leadDescription: leadDescription }))
         })
         const data = await res.json()
         if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setSubmittingClient(false); return }
