@@ -1090,7 +1090,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="commercial" />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="pipeline" />
             </div>
           )}
 
@@ -1396,7 +1396,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [objInput, setObjInput] = React.useState("")
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
-    if ((vue === "finances" || vue === "analyse" || vue === "commercial") && !finData && !finLoading) chargerFinances()
+    if ((vue === "finances" || vue === "analyse" || vue === "pipeline") && !finData && !finLoading) chargerFinances()
   }, [vue])
   React.useEffect(function() {
     db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
@@ -1472,10 +1472,28 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   async function saveParcours(devisId, newParcours) {
-    await db.from('devis').update({ parcours: newParcours }).eq('id', devisId)
+    // Si l'étape « Encaissement » vient de basculer, refléter le paiement dans les Finances :
+    // encaissement fait → paiements_recus = montant facturé ; annulé → 0.
+    var d = devisList.find(function(x) { return x.id === devisId }) || {}
+    var wasEncaisse = !!(d.parcours && d.parcours.encaissement && d.parcours.encaissement.done)
+    var nowEncaisse = !!(newParcours.encaissement && newParcours.encaissement.done)
+    var update = { parcours: newParcours }
+    var paiementChange
+    if (nowEncaisse !== wasEncaisse) {
+      paiementChange = nowEncaisse ? (d.montant_facture_crm || d.montant_net || 0) : 0
+      update.paiements_recus = paiementChange
+    }
+    await db.from('devis').update(update).eq('id', devisId)
     setDevisList(function(prev) {
-      return prev.map(function(d) { return d.id === devisId ? Object.assign({}, d, { parcours: newParcours }) : d })
+      return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { parcours: newParcours }, paiementChange !== undefined ? { paiements_recus: paiementChange } : {}) : x })
     })
+    // Reflet immédiat de l'encaissement dans les données Finances/Analyse (aplati), sans rechargement
+    if (paiementChange !== undefined) {
+      setFinData(function(prev) {
+        if (!prev) return prev
+        return Object.assign({}, prev, { clients: (prev.clients || []).map(function(x) { return x.id === devisId ? Object.assign({}, x, { paiementsRecus: paiementChange }) : x }) })
+      })
+    }
   }
 
   function ouvrirAjoutClient() {
@@ -3686,7 +3704,117 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  // ── G5 : Vue Commercial — kanban par statut ─────────────────────────────────
+  // ── Pipeline UNIFIÉ (vente + exécution en un seul kanban) ───────────────────
+  function renderVuePipelineUnifie() {
+    var e = React.createElement
+    if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline…")
+    var cls = finData.clients || []
+    var devisMap = {}
+    devisList.forEach(function(d) { devisMap[d.id] = d })
+
+    var COLS = [
+      { id: "prospect",     label: "📞 Prospect",     bg: "#FAEEDA", tc: "#633806" },
+      { id: "devis",        label: "📄 Devis envoyé", bg: "#E6F1FB", tc: "#0C447C" },
+      { id: "relance",      label: "🔔 Relance",      bg: "#FBEAF0", tc: "#72243E" },
+      { id: "converti",     label: "✅ Converti",      bg: "#E1F5EE", tc: "#04342C" },
+      { id: "visite",       label: "🔍 Visite",       bg: "#F3E8FF", tc: "#6b21a8" },
+      { id: "intervention", label: "🔧 Intervention", bg: "#E0E7FF", tc: "#3730a3" },
+      { id: "certificat",   label: "📋 Certificat",   bg: "#FEF3C7", tc: "#92400e" },
+      { id: "encaissement", label: "💳 Encaissement", bg: "#DCFCE7", tc: "#166534" },
+      { id: "cloture",      label: "🏁 Clôturé",      bg: "#D1FAE5", tc: "#065f46" },
+      { id: "perdu",        label: "❌ Perdu",        bg: "#F1EFE8", tc: "#2C2C2A" },
+    ]
+    var SALES_MOVES = [
+      { id: "contact", label: "📞 Prospect" },
+      { id: "devis", label: "📄 Devis envoyé" },
+      { id: "relance", label: "🔔 Relance" },
+      { id: "converti", label: "✅ Converti" },
+      { id: "echec", label: "❌ Perdu" },
+    ]
+
+    function colUnifiee(c) {
+      if (c.statut === "echec") return "perdu"
+      var rd = devisMap[c.id] || {}
+      var p = rd.parcours || {}
+      var hasFiche = fichesList.some(function(f) { return f.devis_id === c.id })
+      var hasCert = certsList.some(function(x) { return x.devis_id === c.id })
+      var execStarted = c.statut === "converti" || (p.visite && p.visite.done) || (p.facture && p.facture.done) || (p.intervention && p.intervention.done) || hasFiche || hasCert
+      if (execStarted) {
+        if (hasCert && p.encaissement && p.encaissement.done) return "cloture"
+        if (hasCert) return "encaissement"
+        if ((p.intervention && p.intervention.done) || hasFiche) return "certificat"
+        if (p.facture && p.facture.done) return "intervention"
+        if (p.visite && p.visite.done) return "visite"
+        return "converti"
+      }
+      if (c.statut === "devis") return "devis"
+      if (c.statut === "attente" || c.statut === "relance") return "relance"
+      return "prospect"
+    }
+
+    function marquerEncaisse(c) {
+      var rd = devisMap[c.id]
+      if (!rd) return
+      var p = Object.assign({}, rd.parcours || {})
+      p.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
+      saveParcours(c.id, p)
+      setMsg("✓ Encaissement enregistré — reflété dans les Finances")
+    }
+
+    var byCol = {}
+    COLS.forEach(function(col) { byCol[col.id] = [] })
+    cls.forEach(function(c) { var k = colUnifiee(c); if (byCol[k]) byCol[k].push(c) })
+
+    function renderCard(c, colId) {
+      var ni = finNextIntervention(c)
+      var niSoon = ni && (new Date(ni + "T00:00:00") - new Date()) < 30 * 864e5
+      return e("div", { key: c.id, style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+        e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
+        e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
+        e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, finFmt(c.montantDevis) + " FCFA" + (c.typeContrat === "contrat" ? " / " + (c.dureeContratMois || 12) + "m" : "")),
+        c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
+        ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
+        c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
+        colId === "encaissement" ? e("button", { onClick: function() { marquerEncaisse(c) }, style: { width: "100%", marginTop: "8px", background: "#166534", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✓ Marquer encaissé") : null,
+        e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
+          e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
+            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(SALES_MOVES.map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
+          ),
+          e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (avancer l'exécution)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
+        )
+      )
+    }
+
+    return e("div", null,
+      e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "14px" } }, "Cycle complet : vente (Prospect → Converti) puis exécution (Visite → Clôturé). « Déplacer vers » gère la vente ; l'exécution avance via le Dossier."),
+      e("div", { style: { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" } },
+        COLS.map(function(col) {
+          var cards = byCol[col.id] || []
+          var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+          var colLeads = col.id === "prospect" ? leads : []
+          var leadEls = colLeads.map(function(lead) {
+            return e("div", { key: "lead-" + lead.id, style: { background: "#fffdf7", border: "1px dashed #d4a920", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+              e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", gap: "6px" } },
+                e("div", { style: { fontWeight: "600", fontSize: "13px" } }, lead.nom),
+                e("span", { style: { fontSize: "9px", fontWeight: "700", background: "#fdf6e3", color: "#8a6d1a", border: "1px solid #ecd9a0", borderRadius: "10px", padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" } }, "🌱 LEAD")
+              ),
+              e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
+              lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
+              e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
+            )
+          })
+          return e("div", { key: col.id, style: { minWidth: "225px", width: "225px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
+            e("div", { style: { background: col.bg, color: col.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, col.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
+            tot > 0 ? e("div", { style: { fontSize: "11px", color: col.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
+            leadEls,
+            (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
+          )
+        })
+      )
+    )
+  }
+
+  // ── G5 : Vue Commercial — kanban par statut (remplacé par le pipeline unifié) ─
   function renderVueCommercial() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline commercial…")
@@ -3756,7 +3884,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["commercial", "Commercial"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -4857,8 +4985,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null,
-    vue === "commercial" ? renderVueCommercial() : null,
-    vue === "pipeline" ? renderVuePipeline() : null,
+    vue === "pipeline" ? renderVuePipelineUnifie() : null,
     vue === "finances" ? renderVueFinances() : null,
     vue === "analyse" ? renderVueAnalyse() : null,
     vue === "documents" ? renderVueDocuments() : null
