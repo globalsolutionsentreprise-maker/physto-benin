@@ -3048,7 +3048,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   // Export CSV du pipeline — récupère le tableau aplati depuis le GET par défaut de
-  // /api/crm-data (mêmes calculs que crm.html, aucune duplication de logique).
+  // /api/crm-data (calculs centralisés côté serveur, aucune duplication de logique).
   async function exporterCSV() {
     try {
       setMsg("")
@@ -3077,7 +3077,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     } catch (e) { setMsg("Erreur export CSV") }
   }
 
-  // ── G2 : Vue Finances + dépenses (port fidèle de crm.html renderFinance) ────
+  // ── G2 : Vue Finances + dépenses ───────────────────────────────────────────
   var DEP_CATS = [
     { key: "prestataire", label: "🧑‍🔧 Prestataire" },
     { key: "transport", label: "🚗 Transport" },
@@ -3418,7 +3418,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  // ── G1a : Vue Analyse — KPIs analytiques + insights (port de crm.html renderAnalyse, hors graphes) ──
+  // ── G1a : Vue Analyse — KPIs analytiques + insights (hors graphes) ──────────
   function renderVueAnalyse() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement de l'analyse…")
@@ -3665,7 +3665,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  // ── G5 : Vue Commercial — kanban par statut (port de crm.html renderKanban) ──
+  // ── G5 : Vue Commercial — kanban par statut ─────────────────────────────────
   function renderVueCommercial() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline commercial…")

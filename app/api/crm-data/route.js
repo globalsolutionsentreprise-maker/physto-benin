@@ -123,7 +123,7 @@ export async function GET(req) {
     poste: p.poste || "",
   }))
 
-  return Response.json({ clients, depenses: dep, objectifCA: 0, membres })
+  return Response.json({ clients, depenses: dep, membres })
 }
 
 export async function POST(req) {
