@@ -1419,6 +1419,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [leads, setLeads] = React.useState([])
   const [leadsTraites, setLeadsTraites] = React.useState([])
   const [showTraites, setShowTraites] = React.useState(false)
+  const [leadEnConversion, setLeadEnConversion] = React.useState(null)
 
   const STATUTS = {
     brouillon: { label: "Brouillon", c: "#92400e", bg: "#fef3c7" },
@@ -1479,6 +1480,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function ouvrirAjoutClient() {
     setEditingClient(null)
+    setLeadEnConversion(null)
     setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
     setShowFormClient(true)
     setMsg("")
@@ -1516,6 +1518,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setSubmittingClient(false); return }
         setMsg("✓ " + data.message)
         setShowFormClient(false)
+        if (leadEnConversion) {
+          var convLead = leadEnConversion
+          try {
+            var s2 = await db.auth.getSession()
+            var tok2 = (s2.data.session && s2.data.session.access_token) || ""
+            await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + tok2 }, body: JSON.stringify({ action: "set_lead_traite", id: convLead.id, traite: true }) })
+          } catch(e2) {}
+          setLeads(function(prev) { return prev.filter(function(l) { return l.id !== convLead.id }) })
+          setLeadEnConversion(null)
+        }
         await charger(); setSubmittingClient(false)
       } catch(e) { setMsg("Erreur réseau: " + e.message); setSubmittingClient(false) }
     }
@@ -3711,10 +3723,23 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           var meta = ST_META[key] || {}
           var cards = cls.filter(function(c) { return c.statut === key })
           var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+          var colLeads = key === "contact" ? leads : []
+          var leadEls = colLeads.map(function(lead) {
+            return e("div", { key: "lead-" + lead.id, style: { background: "#fffdf7", border: "1px dashed #d4a920", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+              e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", gap: "6px" } },
+                e("div", { style: { fontWeight: "600", fontSize: "13px" } }, lead.nom),
+                e("span", { style: { fontSize: "9px", fontWeight: "700", background: "#fdf6e3", color: "#8a6d1a", border: "1px solid #ecd9a0", borderRadius: "10px", padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" } }, "🌱 LEAD")
+              ),
+              e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
+              lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
+              e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
+            )
+          })
           return e("div", { key: key, style: { minWidth: "230px", width: "230px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
-            e("div", { style: { background: meta.bg, color: meta.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, meta.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length)),
+            e("div", { style: { background: meta.bg, color: meta.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, meta.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
             tot > 0 ? e("div", { style: { fontSize: "11px", color: meta.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
-            cards.length === 0 ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "Aucun") : cards.map(renderCard)
+            leadEls,
+            (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "Aucun") : cards.map(renderCard)
           )
         })
       )
@@ -3953,7 +3978,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       ),
       showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
-        React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : "Ajouter un client"),
+        React.createElement("h4", { style: { margin: "0 0 4px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : (leadEnConversion ? "Convertir le lead en client" : "Ajouter un client")),
+        leadEnConversion ? React.createElement("p", { style: { margin: "0 0 16px", fontSize: "12px", color: "#b0885a" } }, "🌱 Lead « " + leadEnConversion.nom + " » — il sera archivé automatiquement après enregistrement.") : React.createElement("div", { style: { height: "12px" } }),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: formClient.prenom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formClient.nom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
@@ -3964,7 +3990,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ),
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
           React.createElement("button", { onClick: sauvegarderClient, disabled: submittingClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, submittingClient ? "..." : (editingClient ? "Mettre à jour" : "Ajouter")),
-          React.createElement("button", { onClick: function() { setShowFormClient(false); setEditingClient(null) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+          React.createElement("button", { onClick: function() { setShowFormClient(false); setEditingClient(null); setLeadEnConversion(null) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
         )
       ),
       loading
@@ -4719,6 +4745,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
     setLeadsTraites(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
   }
+  // Convertit un lead : pré-remplit la fiche Nouveau client et bascule sur l'onglet Clients.
+  // Le lead sera archivé (traité) automatiquement après création du client (voir sauvegarderClient).
+  function convertirLead(lead) {
+    setEditingClient(null)
+    setFormClient({ prenom: "", nom: lead.nom || "", email: lead.email || "", telephone: lead.telephone || "", entreprise: "", adresse: lead.ville || "" })
+    setLeadEnConversion(lead)
+    setShowFormClient(true)
+    setVue("clients")
+    setMsg("Complétez la fiche client puis enregistrez — le lead sera archivé automatiquement.")
+  }
 
   function renderVueDevis() {
     return React.createElement("div", null,
@@ -4738,7 +4774,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           return React.createElement("div", { key: lead.id, style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid #f0e8c8" } },
             React.createElement("div", null,
               React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, lead.nom),
-              React.createElement("div", { style: { fontSize: "11px", color: "#666", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
+              React.createElement("div", { style: { fontSize: "11px", color: "#666", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
+              lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0885a", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
               React.createElement("button", {
@@ -4768,7 +4805,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 return React.createElement("div", { key: lead.id, style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid #eceae4" } },
                   React.createElement("div", null,
                     React.createElement("div", { style: { fontSize: "13px", fontWeight: "600", color: "#555" } }, lead.nom),
-                    React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
+                    React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
+                    lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0aca3", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null
                   ),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
                     React.createElement("button", {
