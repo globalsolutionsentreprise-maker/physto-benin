@@ -222,9 +222,18 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   graphes s'affichent, données cohérentes avec les légendes (donut pipeline : Devis envoyé
   83%, En attente 8%, Converti 7%, Échec 1%), console propre (aucune erreur recharts, pas
   de souci SSR car les charts ne rendent qu'après le fetch client). **G1 terminé (a+b).**
-- **Suivant : G5** (kanban commercial par `statut` — nouvelle vue à porter, cf. §3bis /
-  décision « garder les deux pipelines »), puis Phase 2 (bascule menu) et Phase 3
-  (suppression crm.html).
+- **2026-07-03 — G5 Kanban commercial ✅ déployé + QA prod OK** (commit `69f8284`). Nouvel
+  onglet « Commercial » dans le CRM React : port du kanban commercial de crm.html (statut),
+  distinct du pipeline d'exécution (parcours). 6 colonnes, barre type de mission, cartes,
+  déplacement « Déplacer vers… » → action `move` avec Bearer token (optimiste), bouton
+  Dossier → détail devis-client. QA prod : rendu identique à crm.html (1 contrat 7% /
+  14 ponctuels 93% ; Devis envoyé 8·8 875 344, En attente 2·888 918, Converti 5, Échec 3) ;
+  déplacement testé Glory Hôtel devis↔attente avec **persistance confirmée après reload**,
+  puis remis à l'état initial ; console propre. **Toutes les vues de crm.html sont désormais
+  portées en React.**
+- **Suivant : Phase 2** — basculer le menu « CRM Pipeline » sur le CRM React (remplacer
+  l'iframe par `SectionClientsDevis`), fusionner avec l'entrée `clients` et retirer le pont
+  `postMessage`/`open_dossier`. Puis **Phase 3** — suppression de `crm.html` + `/api/crm-frame`.
 
 ---
 
