@@ -206,7 +206,17 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   laisser l'utilisateur fixer sa vraie cible ; console propre. Note : l'API renvoie
   toujours `objectifCA: 0` en dur (non utilisé par React qui lit `parametres` directement) ;
   à nettoyer côté API lors de la Phase 3 si besoin.
-- **Suivant : G1** (Analyse — recharts, le gros morceau).
+- **2026-07-03 — G1a Analyse (KPIs + insights, hors graphes) ✅ déployé + QA prod OK**
+  (commit `ce56d77`). Onglet « Analyse » du CRM React : 5 KPIs (conversion 28%, pipeline
+  pondéré 3 766 646, recouvrement 78%, délai 6j, échec 17%), insights automatiques, funnel,
+  jauge objectif (SVG), performance par canal, segmentation, catégories, motifs d'échec,
+  dépenses par catégorie, classement clients. Port fidèle de renderAnalyse SANS les graphes.
+  QA prod : chiffres cohérents avec crm.html (funnel : devis envoyé 8 / converti 5 / échec 3),
+  console propre. Note de parité assumée : le total dépenses de l'onglet Analyse (493 500)
+  diffère de celui de Finances (533 500) — comportement d'origine de crm.html (la ventilation
+  par catégorie exclut les items de catégorie « prestataire », comptés séparément).
+- **Suivant : G1b** (les 3 graphiques Chart.js → recharts : donut pipeline, barres
+  segmentation, donut prestations) — nécessite d'ajouter `recharts` au package.json.
 
 ---
 
