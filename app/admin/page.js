@@ -4711,6 +4711,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setLeadsTraites(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
     setLeads(function(prev) { return [lead].concat(prev) })
   }
+  async function supprimerLead(lead) {
+    if (!confirm("Supprimer définitivement le lead « " + lead.nom + " » ?\n\nCette action est irréversible.")) return
+    var sess = await db.auth.getSession()
+    var token = (sess.data.session && sess.data.session.access_token) || ""
+    await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "delete_lead", id: lead.id }) })
+    setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
+    setLeadsTraites(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
+  }
 
   function renderVueDevis() {
     return React.createElement("div", null,
@@ -4732,16 +4740,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, lead.nom),
               React.createElement("div", { style: { fontSize: "11px", color: "#666", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
             ),
-            React.createElement("button", {
-              onClick: async function() {
-                if (!confirm("Marquer « " + lead.nom + " » comme traité ?\n\nIl quittera la liste d'attente (récupérable via « Voir les leads traités »).")) return
-                var sess = await db.auth.getSession()
-                var token = (sess.data.session && sess.data.session.access_token) || ""
-                await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "set_lead_traite", id: lead.id, traite: true }) })
-                setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
-              },
-              style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, marginLeft: "10px" }
-            }, "Traiter →")
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
+              React.createElement("button", {
+                onClick: async function() {
+                  if (!confirm("Marquer « " + lead.nom + " » comme traité ?\n\nIl quittera la liste d'attente (récupérable via « Voir les leads traités »).")) return
+                  var sess = await db.auth.getSession()
+                  var token = (sess.data.session && sess.data.session.access_token) || ""
+                  await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "set_lead_traite", id: lead.id, traite: true }) })
+                  setLeads(function(prev) { return prev.filter(function(l) { return l.id !== lead.id }) })
+                },
+                style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+              }, "Traiter →"),
+              React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+            )
           )
         })
       ),
@@ -4759,10 +4770,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                     React.createElement("div", { style: { fontSize: "13px", fontWeight: "600", color: "#555" } }, lead.nom),
                     React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · "))
                   ),
-                  React.createElement("button", {
-                    onClick: function() { restaurerLead(lead) },
-                    style: { background: "none", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", flexShrink: 0, marginLeft: "10px" }
-                  }, "↩ Remettre")
+                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
+                    React.createElement("button", {
+                      onClick: function() { restaurerLead(lead) },
+                      style: { background: "none", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+                    }, "↩ Remettre"),
+                    React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+                  )
                 )
               })
         )

@@ -157,6 +157,11 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  if (action === "delete_lead") {
+    await supabase.from("leads").delete().eq("id", body.id)
+    return Response.json({ ok: true })
+  }
+
   if (action === "save_client") {
     const { id, client, statut, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat } = body
     const devisUpdate = {
