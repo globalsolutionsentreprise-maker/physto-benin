@@ -215,8 +215,16 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   console propre. Note de parité assumée : le total dépenses de l'onglet Analyse (493 500)
   diffère de celui de Finances (533 500) — comportement d'origine de crm.html (la ventilation
   par catégorie exclut les items de catégorie « prestataire », comptés séparément).
-- **Suivant : G1b** (les 3 graphiques Chart.js → recharts : donut pipeline, barres
-  segmentation, donut prestations) — nécessite d'ajouter `recharts` au package.json.
+- **2026-07-03 — G1b Analyse (graphes recharts) ✅ déployé + QA prod OK** (commit `66066bc`).
+  Ajout de `recharts` 3.9.1 + les 3 graphiques de la vue Analyse (réécriture des Chart.js) :
+  donut Répartition pipeline par montant, barres Segmentation par taille, donut Répartition
+  par type de prestation. Rendus au-dessus des légendes CSS existantes. QA prod : les 3
+  graphes s'affichent, données cohérentes avec les légendes (donut pipeline : Devis envoyé
+  83%, En attente 8%, Converti 7%, Échec 1%), console propre (aucune erreur recharts, pas
+  de souci SSR car les charts ne rendent qu'après le fetch client). **G1 terminé (a+b).**
+- **Suivant : G5** (kanban commercial par `statut` — nouvelle vue à porter, cf. §3bis /
+  décision « garder les deux pipelines »), puis Phase 2 (bascule menu) et Phase 3
+  (suppression crm.html).
 
 ---
 
