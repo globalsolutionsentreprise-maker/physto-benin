@@ -1417,7 +1417,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
   const [objInput, setObjInput] = React.useState("")
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
-    if (vue === "finances" && !finData && !finLoading) chargerFinances()
+    if ((vue === "finances" || vue === "analyse") && !finData && !finLoading) chargerFinances()
   }, [vue])
   React.useEffect(function() {
     db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
@@ -3431,10 +3431,224 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     )
   }
 
+  // ── G1a : Vue Analyse — KPIs analytiques + insights (port de crm.html renderAnalyse, hors graphes) ──
+  function renderVueAnalyse() {
+    var e = React.createElement
+    if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement de l'analyse…")
+    var cls = finData.clients || []
+    var depGlob = finData.depenses || []
+    var total = cls.length
+    var conv = cls.filter(function(c) { return c.statut === "converti" })
+    var echecs = cls.filter(function(c) { return c.statut === "echec" })
+    var actifs = cls.filter(function(c) { return c.statut !== "converti" && c.statut !== "echec" })
+    var txConv = total ? Math.round(conv.length / total * 100) : 0
+    var txEchec = total ? Math.round(echecs.length / total * 100) : 0
+    var totalDevis = cls.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+    var totalFacture = cls.reduce(function(s, c) { return s + (c.montantFacture || 0) }, 0)
+    var totalEncaisse = cls.reduce(function(s, c) { return s + (c.paiementsRecus || 0) }, 0)
+    var txRecouvr = totalFacture ? Math.round(totalEncaisse / totalFacture * 100) : 100
+    var wt = { contact: 0.10, devis: 0.30, attente: 0.40, relance: 0.20, converti: 1, echec: 0 }
+    var pipeW = cls.reduce(function(s, c) { return s + (c.montantDevis || 0) * (wt[c.statut] || 0) }, 0)
+    var convF = conv.filter(function(c) { return c.dateDevis && c.dateFacture })
+    var delaiDF = convF.length ? Math.round(convF.reduce(function(s, c) { return s + (new Date(c.dateFacture) - new Date(c.dateDevis)) / 864e5 }, 0) / convF.length) : null
+    var delaiAll = cls.filter(function(c) { return c.dateContact && c.dateDevis })
+    var delaiMoyenContact = delaiAll.length ? Math.round(delaiAll.reduce(function(s, c) { return s + (new Date(c.dateDevis) - new Date(c.dateContact)) / 864e5 }, 0) / delaiAll.length) : null
+    var bySrc = {}
+    cls.forEach(function(c) { var k = c.provenance || "—"; if (!bySrc[k]) bySrc[k] = { count: 0, montant: 0, conv: 0 }; bySrc[k].count++; bySrc[k].montant += (c.montantDevis || 0); if (c.statut === "converti") bySrc[k].conv++ })
+    var srcList = Object.entries(bySrc).sort(function(a, b) { return b[1].montant - a[1].montant })
+    var maxSrcMontant = Math.max.apply(null, srcList.map(function(s) { return s[1].montant }).concat([1]))
+    var byPrest = {}
+    cls.forEach(function(c) { var k = c.typePrestation || "Non renseigné"; if (!byPrest[k]) byPrest[k] = { count: 0, montant: 0 }; byPrest[k].count++; byPrest[k].montant += (c.montantDevis || 0) })
+    var byCat = {}
+    cls.forEach(function(c) { var k = c.categorie || "Non renseigné"; if (!byCat[k]) byCat[k] = { count: 0, montant: 0 }; byCat[k].count++; byCat[k].montant += (c.montantDevis || 0) })
+    var seg = { petit: 0, moyen: 0, grand: 0 }, segM = { petit: 0, moyen: 0, grand: 0 }
+    cls.forEach(function(c) { var m = c.montantDevis || 0; if (m < 50000) { seg.petit++; segM.petit += m } else if (m < 200000) { seg.moyen++; segM.moyen += m } else { seg.grand++; segM.grand += m } })
+    var sorted = cls.slice().sort(function(a, b) { return (b.montantDevis || 0) - (a.montantDevis || 0) })
+    var top2 = sorted.slice(0, 2).reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+    var concPct = totalDevis ? Math.round(top2 / totalDevis * 100) : 0
+    var progPct = objectifCA ? Math.min(Math.round(totalEncaisse / objectifCA * 100), 100) : 0
+    var stOrder = ["contact", "devis", "attente", "relance", "converti", "echec"]
+    var stCounts = stOrder.map(function(k) { var meta = ST_META[k] || {}; var arr = cls.filter(function(c) { return c.statut === k }); return { key: k, label: meta.label, bg: meta.bg, tc: meta.tc, count: arr.length, montant: arr.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0) } })
+    var maxCount = Math.max.apply(null, stCounts.map(function(s) { return s.count }).concat([1]))
+    var byMotif = {}
+    echecs.forEach(function(c) { var k = c.motifEchec || "—"; if (!byMotif[k]) byMotif[k] = 0; byMotif[k]++ })
+    var depCatTotals = { transport: 0, produits: 0, materiels: 0, autre: 0 }
+    cls.forEach(function(c) { (c.depensesItems || []).forEach(function(i) { var k = i.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += i.montant || 0 }) })
+    depGlob.forEach(function(d) { var k = d.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += d.montant || 0 })
+    var totalDepCat = Object.values(depCatTotals).reduce(function(s, v) { return s + v }, 0)
+    var depPrestaTotal = cls.reduce(function(s, c) { return s + (c.depensesPrestataires || 0) }, 0)
+    var PALETTE = ["#1D9E75", "#185FA5", "#BA7517", "#993556", "#5F5E5A", "#854F0B"]
+
+    var insights = []
+    if (txConv < 20) insights.push({ type: "warn", ico: "⚠️", title: "Taux de conversion : " + txConv + "%", txt: "Seulement " + conv.length + " client" + (conv.length > 1 ? "s" : "") + " converti" + (conv.length > 1 ? "s" : "") + " sur " + total + ". Un taux < 20 % indique des leviers à activer : relances, révision tarifaire ou ciblage." })
+    else insights.push({ type: "good", ico: "✅", title: "Bon taux de conversion : " + txConv + "%", txt: conv.length + " client" + (conv.length > 1 ? "s" : "") + " converti" + (conv.length > 1 ? "s" : "") + " sur " + total + ". Capitalisez sur les canaux et profils qui fonctionnent." })
+    if (concPct >= 60) insights.push({ type: "warn", ico: "⚡", title: "Concentration élevée : " + concPct + "% sur 2 clients", txt: "Les 2 plus gros dossiers représentent " + concPct + "% de votre pipeline. Un risque de dépendance — diversifier le portefeuille." })
+    var bestSrc = srcList[0]
+    if (bestSrc) insights.push({ type: "info", ico: "📡", title: "Meilleur canal : " + bestSrc[0], txt: "Source la plus productive avec " + finFmt(bestSrc[1].montant) + " FCFA en devis et " + bestSrc[1].count + " prospect" + (bestSrc[1].count > 1 ? "s" : "") + ". Renforcer les actions sur ce canal." })
+    if (actifs.length >= 4) insights.push({ type: "info", ico: "🔄", title: actifs.length + " dossiers actifs en cours", txt: "Pipeline en cours estimé à " + finFmt(pipeW) + " FCFA (valeur pondérée). Prioriser les relances sur les dossiers \"En attente\"." })
+    if (delaiDF !== null) insights.push({ type: "good", ico: "⏱️", title: "Délai devis → facture : " + delaiDF + " jour" + (delaiDF > 1 ? "s" : ""), txt: "Cycle court sur les clients convertis. Objectif : maintenir sous 7 jours pour optimiser la trésorerie." })
+    if (objectifCA && progPct < 50) insights.push({ type: "warn", ico: "🎯", title: "Progression objectif : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA encaissés sur un objectif de " + finFmt(objectifCA) + " FCFA. Il reste " + finFmt(objectifCA - totalEncaisse) + " FCFA à atteindre." })
+    else if (objectifCA && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Mi-objectif atteint : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA sur " + finFmt(objectifCA) + " FCFA — bonne trajectoire." })
+
+    var thS = { textAlign: "left", padding: "8px 10px", fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
+    var tdS = { padding: "8px 10px", fontSize: "12px", borderBottom: "1px solid #f0efe9", whiteSpace: "nowrap" }
+    var secLblS = { fontSize: "12px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }
+    function anCard(title, children) { return e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px" } }, e("div", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", marginBottom: "14px" } }, title), children) }
+    function grid2(a, b) { return e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" } }, a, b) }
+    function anKpi(val, lbl, sub, color) { return e("div", { style: { flex: "1", minWidth: "150px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "14px 16px" } }, e("div", { style: { fontSize: "22px", fontWeight: "700", color: color } }, val), e("div", { style: { fontSize: "11px", color: "#555", marginTop: "4px", fontWeight: "600" } }, lbl), e("div", { style: { fontSize: "10px", color: "#999", marginTop: "2px" } }, sub)) }
+    function barRow(label, right, pct, color, sub) {
+      return e("div", { style: { marginBottom: "14px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "4px" } }, e("span", { style: { fontSize: "12px", fontWeight: "500" } }, label), e("span", { style: { fontSize: "11px", color: "#777" } }, right)),
+        e("div", { style: { height: "8px", background: "#f0efe9", borderRadius: "99px", overflow: "hidden" } }, e("div", { style: { width: Math.max(pct, 2) + "%", height: "100%", background: color, borderRadius: "99px" } })),
+        sub ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "3px" } }, sub) : null
+      )
+    }
+
+    var dash = Math.PI * 80
+    var gauge = objectifCA
+      ? e("div", { style: { display: "flex", flexDirection: "column", alignItems: "center" } },
+          e("svg", { viewBox: "0 0 200 110", style: { width: "100%", maxWidth: "220px" } },
+            e("path", { d: "M20,100 A80,80 0 0,1 180,100", fill: "none", stroke: "#f0efe9", strokeWidth: "18", strokeLinecap: "round" }),
+            e("path", { d: "M20,100 A80,80 0 0,1 180,100", fill: "none", stroke: "#1D9E75", strokeWidth: "18", strokeLinecap: "round", strokeDasharray: dash, strokeDashoffset: dash * (1 - progPct / 100) }),
+            e("text", { x: "100", y: "88", textAnchor: "middle", fontSize: "22", fontWeight: "700", fill: "#111" }, progPct + "%"),
+            e("text", { x: "100", y: "104", textAnchor: "middle", fontSize: "10", fill: "#777" }, "de l'objectif atteint")
+          ),
+          e("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", fontSize: "11px", color: "#777", marginTop: "6px" } }, e("span", null, "Encaissé : ", e("b", { style: { color: "#1D9E75" } }, finFmt(totalEncaisse) + " F")), e("span", null, "Objectif : ", e("b", null, finFmt(objectifCA) + " F"))),
+          e("div", { style: { marginTop: "8px", fontSize: "11px", color: "#999" } }, "Reste à atteindre : ", e("b", { style: { color: "#111" } }, finFmt(Math.max(objectifCA - totalEncaisse, 0)) + " FCFA"))
+        )
+      : e("div", { style: { padding: "24px 0", textAlign: "center", color: "#999", fontSize: "12px" } }, "🎯 Aucun objectif défini. Définissez-le dans l'onglet Finances.")
+
+    return e("div", null,
+      // KPIs
+      e("div", { style: { display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" } },
+        anKpi(txConv + "%", "Taux de conversion", conv.length + "/" + total + " clients", "#1D9E75"),
+        anKpi(finFmt(pipeW), "Pipeline pondéré (FCFA)", "Probabilité réelle", "#185FA5"),
+        anKpi(txRecouvr + "%", "Taux de recouvrement", finFmt(totalEncaisse) + " / " + finFmt(totalFacture) + " FCFA", txRecouvr >= 100 ? "#1D9E75" : "#BA7517"),
+        anKpi(delaiDF !== null ? delaiDF + "j" : "—", "Délai devis → facture", delaiMoyenContact !== null ? "Contact→devis : " + delaiMoyenContact + "j" : "Sur clients convertis", delaiDF === null ? "#999" : "#1D9E75"),
+        anKpi(txEchec + "%", "Taux d'échec", echecs.length + " dossier" + (echecs.length > 1 ? "s" : "") + " perdu" + (echecs.length > 1 ? "s" : ""), "#E24B4A")
+      ),
+      // Insights
+      e("div", { style: secLblS }, "Insights automatiques"),
+      e("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "24px" } },
+        insights.map(function(it, i) {
+          var bg = it.type === "good" ? "#E1F5EE" : it.type === "warn" ? "#FFF0C4" : "#E6F1FB"
+          return e("div", { key: i, style: { background: bg, borderRadius: "10px", padding: "14px", display: "flex", gap: "10px" } },
+            e("div", { style: { fontSize: "18px", flexShrink: 0 } }, it.ico),
+            e("div", { style: { fontSize: "12px", color: "#333", lineHeight: "1.4" } }, e("strong", { style: { display: "block", marginBottom: "2px" } }, it.title), it.txt)
+          )
+        })
+      ),
+      // Funnel + Objectif
+      grid2(
+        anCard("Funnel pipeline", e("div", null, stCounts.map(function(s) {
+          return e("div", { key: s.key, style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" } },
+            e("div", { style: { width: "110px", fontSize: "11px", color: "#555", flexShrink: 0 } }, s.label),
+            e("div", { style: { flex: 1 } }, e("div", { style: { background: s.bg, color: s.tc, width: Math.max(s.count / maxCount * 100, 8) + "%", borderRadius: "5px", padding: "3px 8px", fontSize: "11px", fontWeight: "600", whiteSpace: "nowrap" } }, s.count + " · " + finFmt(s.montant) + " F"))
+          )
+        }))),
+        anCard("Objectif CA annuel", gauge)
+      ),
+      // Canal + Répartition pipeline (légende)
+      grid2(
+        anCard("Performance par canal d'acquisition", e("div", null, srcList.map(function(entry) {
+          var src = entry[0], d = entry[1]
+          var tx = d.count ? Math.round(d.conv / d.count * 100) : 0
+          var pct = maxSrcMontant ? Math.round(d.montant / maxSrcMontant * 100) : 0
+          return e("div", { key: src }, barRow(src, d.count + " prospect" + (d.count > 1 ? "s" : "") + " · tx conv. " + tx + "%", pct, "#1a6b38", finFmt(d.montant) + " FCFA · " + finFmt(d.montant / d.count) + " FCFA moy."))
+        }))),
+        anCard("Répartition pipeline par montant", e("div", null, stCounts.filter(function(s) { return s.montant > 0 }).map(function(s, i) {
+          var pct = totalDevis ? Math.round(s.montant / totalDevis * 100) : 0
+          return e("div", { key: s.key, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" } },
+            e("div", { style: { width: "10px", height: "10px", borderRadius: "3px", background: PALETTE[i % PALETTE.length], flexShrink: 0 } }),
+            e("div", { style: { flex: 1, fontSize: "12px" } }, s.label),
+            e("div", { style: { fontSize: "12px", fontWeight: "600" } }, finFmt(s.montant) + " F · " + pct + "%")
+          )
+        })))
+      ),
+      // Segmentation + Prestation
+      grid2(
+        anCard("Segmentation par taille de devis", e("div", null,
+          [{ lbl: "Petits (< 50 000 F)", n: seg.petit, m: segM.petit, c: "#5DCAA5" }, { lbl: "Moyens (50k–200k F)", n: seg.moyen, m: segM.moyen, c: "#185FA5" }, { lbl: "Grands (> 200 000 F)", n: seg.grand, m: segM.grand, c: "#BA7517" }].map(function(s, i) {
+            return e("div", { key: i, style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" } },
+              e("div", { style: { fontSize: "11px", width: "130px", flexShrink: 0 } }, s.lbl),
+              e("div", { style: { fontSize: "13px", fontWeight: "700", width: "24px" } }, s.n),
+              e("div", { style: { flex: 1, height: "8px", background: "#f0efe9", borderRadius: "99px", overflow: "hidden" } }, e("div", { style: { width: (total ? Math.round(s.n / total * 100) : 0) + "%", height: "100%", background: s.c, borderRadius: "99px" } })),
+              e("div", { style: { fontSize: "11px", fontWeight: "600", width: "90px", textAlign: "right" } }, finFmt(s.m) + " F")
+            )
+          })
+        )),
+        anCard("Répartition par type de prestation", e("div", null,
+          Object.entries(byPrest).sort(function(a, b) { return b[1].montant - a[1].montant }).map(function(entry, i) {
+            return e("div", { key: entry[0], style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" } },
+              e("div", { style: { width: "10px", height: "10px", borderRadius: "3px", background: PALETTE[i % PALETTE.length], flexShrink: 0 } }),
+              e("div", { style: { flex: 1, fontSize: "11px" } }, entry[0]),
+              e("div", { style: { fontSize: "11px", fontWeight: "500" } }, entry[1].count + " · " + finFmt(entry[1].montant) + " F")
+            )
+          })
+        ))
+      ),
+      // Catégories + Motifs
+      grid2(
+        anCard("Catégories clients", e("div", null, Object.entries(byCat).sort(function(a, b) { return b[1].montant - a[1].montant }).map(function(entry, i) {
+          var v = entry[1]; var pct = total ? Math.round(v.count / total * 100) : 0
+          return e("div", { key: entry[0] }, barRow(entry[0], v.count + " client" + (v.count > 1 ? "s" : "") + " · " + pct + "%", pct, PALETTE[i % PALETTE.length], finFmt(v.montant) + " FCFA de devis"))
+        }))),
+        anCard("Analyse des échecs & motifs", echecs.length === 0
+          ? e("div", { style: { color: "#999", fontSize: "12px", textAlign: "center", padding: "24px 0" } }, "🙂 Aucun dossier perdu à ce jour.")
+          : e("div", null,
+              e("div", { style: { marginBottom: "12px" } }, Object.entries(byMotif).map(function(entry) { return e("div", { key: entry[0], style: { display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #f0efe9" } }, e("span", { style: { fontSize: "12px" } }, entry[0]), e("span", { style: { fontSize: "12px", fontWeight: "600", color: "#E24B4A" } }, entry[1] + " cas")) })),
+              e("div", { style: { borderTop: "1px solid #e8e6e0", paddingTop: "10px" } }, echecs.map(function(c) { return e("div", { key: c.id || c.client, style: { display: "flex", justifyContent: "space-between", padding: "4px 0" } }, e("span", { style: { fontSize: "12px", fontWeight: "500" } }, c.client), e("span", { style: { fontSize: "11px", color: "#777" } }, finFmt(c.montantDevis) + " FCFA · " + finFmtD(c.dateDevis))) }))
+            )
+        )
+      ),
+      // Dépenses par catégorie
+      e("div", { style: secLblS }, "Répartition des dépenses par catégorie"),
+      e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px", marginBottom: "24px" } },
+        (totalDepCat === 0 && depPrestaTotal === 0)
+          ? e("div", { style: { color: "#999", fontSize: "12px", textAlign: "center", padding: "24px 0" } }, "Aucune dépense détaillée renseignée.")
+          : e("div", null,
+              [{ key: "transport", label: "🚗 Transport", color: "#185FA5" }, { key: "produits", label: "🧪 Produits", color: "#1D9E75" }, { key: "materiels", label: "🔧 Matériels", color: "#BA7517" }, { key: "autre", label: "📌 Autre", color: "#6366F1" }].map(function(cat) {
+                var v = depCatTotals[cat.key] || 0; var denom = totalDepCat + depPrestaTotal; var pct = denom ? Math.round(v / denom * 100) : 0
+                return e("div", { key: cat.key, style: { marginBottom: "10px" } },
+                  e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" } }, e("span", null, cat.label), e("span", { style: { fontWeight: "600" } }, finFmt(v) + " FCFA (" + pct + "%)")),
+                  e("div", { style: { height: "6px", borderRadius: "3px", background: "#f0efe9", overflow: "hidden" } }, e("div", { style: { height: "100%", width: pct + "%", background: cat.color, borderRadius: "3px" } }))
+                )
+              }),
+              depPrestaTotal > 0 ? (function() { var denom = totalDepCat + depPrestaTotal; var pct = denom ? Math.round(depPrestaTotal / denom * 100) : 0; return e("div", { style: { marginBottom: "10px" } }, e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" } }, e("span", null, "👷 Prestataires"), e("span", { style: { fontWeight: "600" } }, finFmt(depPrestaTotal) + " FCFA (" + pct + "%)")), e("div", { style: { height: "6px", borderRadius: "3px", background: "#f0efe9", overflow: "hidden" } }, e("div", { style: { height: "100%", width: pct + "%", background: "#8B5CF6", borderRadius: "3px" } }))) })() : null,
+              e("div", { style: { borderTop: "1px solid #e8e6e0", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontSize: "12px", fontWeight: "600" } }, e("span", null, "Total dépenses"), e("span", { style: { color: "#E24B4A" } }, finFmt(totalDepCat + depPrestaTotal) + " FCFA"))
+            )
+      ),
+      // Classement clients
+      e("div", { style: secLblS }, "Classement clients par valeur de devis"),
+      e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
+        e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+          e("thead", null, e("tr", null, ["#", "Client", "Zone", "Catégorie", "Canal", "Prestation", "Devis", "Statut", "Cycle (j)", "Résultat"].map(function(h, i) { return e("th", { key: i, style: thS }, h) }))),
+          e("tbody", null, sorted.map(function(c, i) {
+            var meta = ST_META[c.statut] || ST_META.contact
+            var cycleJ = c.dateContact && c.dateDevis ? Math.round((new Date(c.dateDevis) - new Date(c.dateContact)) / 864e5) : null
+            var res = (c.paiementsRecus || 0) - (c.depenses || 0)
+            return e("tr", { key: c.id || i },
+              e("td", { style: Object.assign({}, tdS, { color: "#999", fontWeight: "600" }) }, i + 1),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, c.client),
+              e("td", { style: Object.assign({}, tdS, { color: "#777" }) }, c.zone || "—"),
+              e("td", { style: tdS }, c.categorie || "—"),
+              e("td", { style: tdS }, c.provenance),
+              e("td", { style: Object.assign({}, tdS, { color: "#777", fontSize: "11px" }) }, c.typePrestation || "—"),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }) }, finFmt(c.montantDevis)),
+              e("td", { style: tdS }, e("span", { style: { background: meta.bg, color: meta.tc, borderRadius: "20px", padding: "2px 8px", fontSize: "11px", fontWeight: "600" } }, meta.label)),
+              e("td", { style: Object.assign({}, tdS, { textAlign: "center", color: "#999" }) }, cycleJ !== null ? cycleJ + "j" : "—"),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#999" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
+            )
+          }))
+        )
+      )
+    )
+  }
+
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -4470,6 +4684,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
     vue === "devis" ? renderVueDevis() : null,
     vue === "pipeline" ? renderVuePipeline() : null,
     vue === "finances" ? renderVueFinances() : null,
+    vue === "analyse" ? renderVueAnalyse() : null,
     vue === "documents" ? renderVueDocuments() : null
   )
 }
