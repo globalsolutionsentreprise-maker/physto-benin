@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -3504,6 +3505,37 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       )
     }
 
+    // G1b : graphes recharts
+    var donutStData = stCounts.filter(function(s) { return s.montant > 0 }).map(function(s) { return { name: s.label, value: s.montant } })
+    var prestDonutData = Object.entries(byPrest).sort(function(a, b) { return b[1].montant - a[1].montant }).map(function(entry) { return { name: entry[0], value: entry[1].montant } })
+    var segBarData = [{ name: "< 50 000", value: seg.petit }, { name: "50k–200k", value: seg.moyen }, { name: "> 200 000", value: seg.grand }]
+    var segColors = ["#5DCAA5", "#185FA5", "#BA7517"]
+    function chartDonut(data) {
+      if (!data.length) return null
+      return e("div", { style: { height: "200px", marginBottom: "12px" } },
+        e(ResponsiveContainer, { width: "100%", height: "100%" },
+          e(PieChart, null,
+            e(Pie, { data: data, dataKey: "value", nameKey: "name", cx: "50%", cy: "50%", innerRadius: 45, outerRadius: 78, paddingAngle: 2, stroke: "#fff", strokeWidth: 2 },
+              data.map(function(d, i) { return e(Cell, { key: i, fill: PALETTE[i % PALETTE.length] }) })
+            ),
+            e(Tooltip, { formatter: function(v) { return finFmt(v) + " FCFA" } })
+          )
+        )
+      )
+    }
+    function chartSegBar() {
+      return e("div", { style: { height: "180px", marginBottom: "12px" } },
+        e(ResponsiveContainer, { width: "100%", height: "100%" },
+          e(BarChart, { data: segBarData, margin: { top: 8, right: 8, left: -18, bottom: 0 } },
+            e(XAxis, { dataKey: "name", tick: { fontSize: 11 }, axisLine: false, tickLine: false }),
+            e(YAxis, { allowDecimals: false, tick: { fontSize: 11 }, axisLine: false, tickLine: false }),
+            e(Tooltip, { cursor: { fill: "rgba(0,0,0,0.04)" } }),
+            e(Bar, { dataKey: "value", radius: [6, 6, 0, 0] }, segBarData.map(function(d, i) { return e(Cell, { key: i, fill: segColors[i % segColors.length] }) }))
+          )
+        )
+      )
+    }
+
     var dash = Math.PI * 80
     var gauge = objectifCA
       ? e("div", { style: { display: "flex", flexDirection: "column", alignItems: "center" } },
@@ -3556,7 +3588,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
           var pct = maxSrcMontant ? Math.round(d.montant / maxSrcMontant * 100) : 0
           return e("div", { key: src }, barRow(src, d.count + " prospect" + (d.count > 1 ? "s" : "") + " · tx conv. " + tx + "%", pct, "#1a6b38", finFmt(d.montant) + " FCFA · " + finFmt(d.montant / d.count) + " FCFA moy."))
         }))),
-        anCard("Répartition pipeline par montant", e("div", null, stCounts.filter(function(s) { return s.montant > 0 }).map(function(s, i) {
+        anCard("Répartition pipeline par montant", e("div", null, chartDonut(donutStData), stCounts.filter(function(s) { return s.montant > 0 }).map(function(s, i) {
           var pct = totalDevis ? Math.round(s.montant / totalDevis * 100) : 0
           return e("div", { key: s.key, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" } },
             e("div", { style: { width: "10px", height: "10px", borderRadius: "3px", background: PALETTE[i % PALETTE.length], flexShrink: 0 } }),
@@ -3568,6 +3600,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
       // Segmentation + Prestation
       grid2(
         anCard("Segmentation par taille de devis", e("div", null,
+          chartSegBar(),
           [{ lbl: "Petits (< 50 000 F)", n: seg.petit, m: segM.petit, c: "#5DCAA5" }, { lbl: "Moyens (50k–200k F)", n: seg.moyen, m: segM.moyen, c: "#185FA5" }, { lbl: "Grands (> 200 000 F)", n: seg.grand, m: segM.grand, c: "#BA7517" }].map(function(s, i) {
             return e("div", { key: i, style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" } },
               e("div", { style: { fontSize: "11px", width: "130px", flexShrink: 0 } }, s.lbl),
@@ -3578,6 +3611,7 @@ function SectionClientsDevis({ db, agrement, initialDevisId }) {
           })
         )),
         anCard("Répartition par type de prestation", e("div", null,
+          chartDonut(prestDonutData),
           Object.entries(byPrest).sort(function(a, b) { return b[1].montant - a[1].montant }).map(function(entry, i) {
             return e("div", { key: entry[0], style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" } },
               e("div", { style: { width: "10px", height: "10px", borderRadius: "3px", background: PALETTE[i % PALETTE.length], flexShrink: 0 } }),
