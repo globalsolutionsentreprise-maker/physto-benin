@@ -3291,7 +3291,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var td = tdc + tdp + tdg
     var tf = cls.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
     var tfa = cls.reduce(function(s, c) { return s + (c.montantFacture || 0) }, 0)
-    var r = tfa - td
+    var r = tp - td // Résultat net = encaissé (réellement reçu) − dépenses, pour que les 3 KPIs se réconcilient (facturé ≠ encaissé)
 
     var thS = { textAlign: "left", padding: "8px 10px", fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
     var tdS = { padding: "8px 10px", fontSize: "12px", borderBottom: "1px solid #f0efe9", whiteSpace: "nowrap" }
