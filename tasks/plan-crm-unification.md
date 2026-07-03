@@ -231,9 +231,16 @@ Ordre conseillé de livraison : G4 → G2 → G3 → G1 → G5 → bascule menu 
   déplacement testé Glory Hôtel devis↔attente avec **persistance confirmée après reload**,
   puis remis à l'état initial ; console propre. **Toutes les vues de crm.html sont désormais
   portées en React.**
-- **Suivant : Phase 2** — basculer le menu « CRM Pipeline » sur le CRM React (remplacer
-  l'iframe par `SectionClientsDevis`), fusionner avec l'entrée `clients` et retirer le pont
-  `postMessage`/`open_dossier`. Puis **Phase 3** — suppression de `crm.html` + `/api/crm-frame`.
+- **2026-07-03 — Phase 2 (bascule menu) ✅ déployé + QA prod OK** (commit `bd8b826`). Le menu
+  « CRM Pipeline » rend maintenant directement `SectionClientsDevis` (React) avec la vue
+  `commercial` par défaut, au lieu de l'iframe `crm.html`. Fusion de l'ancien onglet `clients`
+  (mort) dans le bloc `crm` ; retrait du pont `postMessage`/`open_dossier` et de l'état
+  `dossierDevisId`. QA prod : clic « CRM Pipeline » → CRM React direct sur la vue Commercial,
+  navigation interne OK (Devis), données correctes, console propre. `crm.html` et
+  `/api/crm-frame` ne sont plus chargés.
+- **Suivant : Phase 3** — suppression physique de `public/crm.html` + `app/api/crm-frame/route.js`,
+  et nettoyage du chemin mort `initialDevisId` dans `SectionClientsDevis`. Vérifier qu'aucune
+  autre référence ne subsiste, puis `graphify update`.
 
 ---
 
