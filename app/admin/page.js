@@ -1341,7 +1341,7 @@ export default function Admin() {
 // ══════════════════════════════════════════════════
 // COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
-function SectionClientsDevis({ db, agrement, initialDevisId, vueInitiale }) {
+function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState(vueInitiale || "devis")
   const [devisList, setDevisList] = React.useState([])
@@ -1432,19 +1432,6 @@ function SectionClientsDevis({ db, agrement, initialDevisId, vueInitiale }) {
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
   React.useEffect(function() { charger() }, [])
-
-  const _lastDossier = React.useRef(null)
-  React.useEffect(function() {
-    if (!initialDevisId || initialDevisId === _lastDossier.current || devisList.length === 0) return
-    var d = devisList.find(function(x) { return x.id === initialDevisId })
-    if (!d) return
-    var cl = clients.find(function(x) { return x.id === d.client_id })
-    if (cl) {
-      _lastDossier.current = initialDevisId
-      setClientDetail(cl)
-      setVue("devis-client")
-    }
-  }, [initialDevisId, devisList])
 
   async function charger() {
     setLoading(true)
