@@ -257,9 +257,11 @@ Briques livrées, chacune déployée + QA prod : Phase 0 (invest.) · G4 (export
 (Finances + dépenses) · G3 (Objectif CA → `parametres`) · G1a (Analyse KPIs) · G1b (graphes
 recharts) · G5 (kanban commercial) · Phase 2 (bascule menu) · Phase 3 (suppression).
 
-Restes optionnels (non bloquants) : l'API `/api/crm-data` renvoie encore `objectifCA: 0` en
-dur (inutilisé, React lit `parametres`) — à nettoyer un jour. Les commentaires de provenance
-`// … crm.html` dans `page.js` sont conservés volontairement (doc du port).
+**Nettoyage final ✅ déployé + QA prod OK** (commit `c1a5733`) : retrait du champ orphelin
+`objectifCA: 0` du retour de `/api/crm-data` (aucun consommateur), et allègement des
+commentaires de section qui référençaient `crm.html` (fichier supprimé). QA prod : Finances
+rend correctement (KPIs 533 500 / +214 976, carte Objectif lue depuis `parametres`), rien
+cassé. Plus aucune référence à `crm.html` dans le code. **Migration 100% clôturée.**
 
 ---
 
