@@ -3740,7 +3740,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var hasCert = certsList.some(function(x) { return x.devis_id === c.id })
       var execStarted = c.statut === "converti" || (p.visite && p.visite.done) || (p.facture && p.facture.done) || (p.intervention && p.intervention.done) || hasFiche || hasCert
       if (execStarted) {
-        if (hasCert && p.encaissement && p.encaissement.done) return "cloture"
+        if (p.encaissement && p.encaissement.done) return "cloture"
         if (hasCert) return "encaissement"
         if ((p.intervention && p.intervention.done) || hasFiche) return "certificat"
         if (p.facture && p.facture.done) return "intervention"
@@ -3775,7 +3775,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
         ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
         c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
-        colId === "encaissement" ? e("button", { onClick: function() { marquerEncaisse(c) }, style: { width: "100%", marginTop: "8px", background: "#166534", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✓ Marquer encaissé") : null,
+        (["converti", "visite", "intervention", "certificat", "encaissement"].indexOf(colId) > -1) ? e("button", { onClick: function() { marquerEncaisse(c) }, style: { width: "100%", marginTop: "8px", background: "#166534", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✓ Marquer encaissé") : null,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
           e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
             [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(SALES_MOVES.map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
