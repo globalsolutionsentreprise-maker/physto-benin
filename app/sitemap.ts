@@ -18,6 +18,7 @@ function slugifier(titre: string): string {
 // Pages statiques du site vitrine (hors /admin, /espace-client)
 const pagesStatiques: MetadataRoute.Sitemap = [
   { url: BASE, changeFrequency: "weekly", priority: 1.0 },
+  { url: `${BASE}/contrat-conformite`, changeFrequency: "monthly", priority: 0.9 },
   { url: `${BASE}/services`, changeFrequency: "monthly", priority: 0.9 },
   { url: `${BASE}/services/desinsectisation-cotonou`, changeFrequency: "monthly", priority: 0.9 },
   { url: `${BASE}/services/deratisation-benin`, changeFrequency: "monthly", priority: 0.9 },

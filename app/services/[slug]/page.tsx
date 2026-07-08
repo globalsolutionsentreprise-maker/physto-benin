@@ -252,6 +252,23 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
+      {/* RENVOI VERS L'OFFRE CONTRAT (uniquement pour la fiche contrat) */}
+      {slug === "contrat-entretien-hygiene" && (
+        <a href="/contrat-conformite" style={{ textDecoration: "none", display: "block" }}>
+          <div style={{ backgroundColor: "#0a2e1a", borderBottom: "2px solid #d4a920", padding: "18px 60px" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "10px", fontWeight: "800", padding: "4px 10px", borderRadius: "20px", letterSpacing: "0.06em", flexShrink: 0 }}>OFFRE</span>
+                <span style={{ color: "#fff", fontSize: "14px", fontWeight: "500" }}>
+                  Découvrez notre <strong style={{ color: "#d4a920" }}>Contrat de conformité 3D</strong> — 3 formules + certificat mensuel + audit gratuit
+                </span>
+              </div>
+              <span style={{ color: "#d4a920", fontSize: "13px", fontWeight: "700", whiteSpace: "nowrap" }}>Voir l'offre →</span>
+            </div>
+          </div>
+        </a>
+      )}
+
       {/* HERO */}
       <section style={{ backgroundColor: "#0a2e1a", padding: "72px 60px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "-80px", right: "-80px", width: "320px", height: "320px", borderRadius: "50%", backgroundColor: "rgba(212,169,32,0.05)", pointerEvents: "none" }} />
