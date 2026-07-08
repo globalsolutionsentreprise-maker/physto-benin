@@ -187,6 +187,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {[
                 { label: "Accueil", href: "/" },
                 { label: "Services", href: "/services" },
+                { label: "Contrat conformité", href: "/contrat-conformite" },
                 { label: "Qui sommes-nous", href: "/qui-sommes-nous" },
                 { label: "Blog", href: "/blog" },
                 { label: "Contact", href: "/contact" },
