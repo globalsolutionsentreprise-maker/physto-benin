@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     siteName: "Phyto Bénin by GSE",
     locale: "fr_FR",
     type: "website",
+    images: [{ url: "https://www.phyto-benin.com/opengraph-image", width: 1200, height: 630 }],
   },
 }
 

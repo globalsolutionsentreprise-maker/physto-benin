@@ -5,6 +5,7 @@ import ArticleClient from "./ArticleClient"
 
 const BASE = "https://www.phyto-benin.com"
 const OG_IMAGE = `${BASE}/images/hero-bg.jpg`
+const OG_CARD = `${BASE}/opengraph-image`
 
 // Revalidation horaire : un article publié/modifié voit ses métadonnées rafraîchies sous 1h
 export const revalidate = 3600
@@ -61,13 +62,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Phyto Bénin by GSE",
       locale: "fr_FR",
       type: "article",
-      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: article.titre }],
+      images: [{ url: OG_CARD, width: 1200, height: 630, alt: article.titre }],
     },
     twitter: {
       card: "summary_large_image",
       title: article.titre,
       description,
-      images: [OG_IMAGE],
+      images: [OG_CARD],
     },
   }
 }

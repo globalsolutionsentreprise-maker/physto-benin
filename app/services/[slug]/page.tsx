@@ -189,7 +189,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Phyto Bénin by GSE",
       locale: "fr_FR",
       type: "website",
-      images: [{ url: "https://www.phyto-benin.com/images/hero-bg.jpg", width: 1200, height: 630, alt: s.metaTitle }],
+      images: [{ url: "https://www.phyto-benin.com/opengraph-image", width: 1200, height: 630, alt: s.metaTitle }],
     },
   }
 }

@@ -19,20 +19,13 @@ export const metadata: Metadata = {
     siteName: "Phyto Bénin by GSE",
     locale: "fr_FR",
     type: "website",
-    images: [
-      {
-        url: "https://www.phyto-benin.com/images/hero-bg.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Phyto Bénin — Désinsectisation et dératisation professionnelle au Bénin",
-      },
-    ],
+    // og:image fourni automatiquement par app/opengraph-image.tsx (carte de marque 1200×630)
   },
   twitter: {
     card: "summary_large_image",
     title: "Phyto Bénin — Hygiène Sanitaire 24h/24",
     description: "Désinsectisation, dératisation, désinfection au Bénin. Intervention rapide à Cotonou.",
-    images: ["https://www.phyto-benin.com/images/hero-bg.jpg"],
+    // twitter:image hérité de la carte OpenGraph générée
   },
 }
 
