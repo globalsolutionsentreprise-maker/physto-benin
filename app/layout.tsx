@@ -81,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Désinfection", "description": "Assainissement complet des locaux avec produits virucides et bactéricides certifiés." } },
               { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Anti-termites", "description": "Protection durable des structures contre les termites." } },
               { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Reptiles et Serpents", "description": "Sécurisation contre les reptiles, geckos et serpents." } },
-              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Punaises de lit", "description": "Élimination garantie des punaises de lit par traitement thermique et chimique." } }
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Punaises de lit", "description": "Traitement des punaises de lit par méthode thermique et chimique." } }
             ]
           },
           "sameAs": [

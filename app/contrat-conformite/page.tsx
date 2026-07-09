@@ -130,7 +130,7 @@ export default function ContratConformite() {
             <h1 style={{ fontSize: "clamp(30px, 4vw, 52px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.12", letterSpacing: "-0.02em", marginBottom: "20px" }}>
               Votre conformité sanitaire,
               <br />
-              <span style={{ color: "#d4a920" }}>garantie toute l'année.</span>
+              <span style={{ color: "#d4a920" }}>suivie toute l'année.</span>
             </h1>
             <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "520px", marginBottom: "28px" }}>
               Un seul contrat : désinsectisation, dératisation et désinfection régulières, avec un <strong style={{ color: "#fff" }}>certificat de conformité mensuel</strong> pour vos inspections HACCP. Pensé pour les hôtels, restaurants, agro-industries, cliniques et banques du Bénin.

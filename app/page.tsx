@@ -58,7 +58,7 @@ export default function Accueil() {
     { numero: "01", slug: "desinsectisation-cotonou", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation, on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
     { numero: "02", slug: "deratisation-benin", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
     { numero: "03", slug: "desinfection-locaux", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis, valable pour les inspections sanitaires." },
-    { numero: "04", slug: "anti-termites-benin", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, garantie longue durée. Diagnostic gratuit." },
+    { numero: "04", slug: "anti-termites-benin", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, protection longue durée. Diagnostic gratuit." },
     { numero: "05", slug: "reptiles-serpents-benin", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants, on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
     { numero: "06", slug: "punaises-de-lit-cotonou", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. On adapte le traitement à votre situation. Devis gratuit." },
   ]
@@ -110,7 +110,7 @@ export default function Accueil() {
             <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe.</span>
           </h1>
           <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
-            Techniciens certifiés, produits homologués OMS, résultats garantis. Partout au Bénin, pour les professionnels comme pour les particuliers.
+            Techniciens certifiés, produits homologués OMS. Partout au Bénin, pour les professionnels comme pour les particuliers.
           </p>
 
           {/* DEUX PARCOURS : pro / particulier */}
@@ -320,7 +320,7 @@ export default function Accueil() {
                   {r.photo_avant ? <img src={r.photo_avant} alt={`Avant intervention ${r.titre || "désinsectisation"}, Phyto Bénin Cotonou`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div></div>}
                 </div>
                 <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e8f5ee", overflow: "hidden" }}>
-                  {r.photo_apres ? <img src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"}, résultat garanti Phyto Bénin`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
+                  {r.photo_apres ? <img src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"}, par Phyto Bénin`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
                 </div>
                 <div style={{ gridColumn: "span 2", backgroundColor: "#1a1a1a", minHeight: "180px", position: "relative", overflow: "hidden" }}>
                   {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Équipe de techniciens certifiés Phyto Bénin, désinsectisation et dératisation au Bénin" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
@@ -449,7 +449,7 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>jamais seule.</strong>
           </h2>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", marginBottom: "48px" }}>
-            Besoin d'une intervention urgente ? Contactez-nous dès maintenant. Diagnostic et devis gratuit, réponse rapide garantie.
+            Besoin d'une intervention urgente ? Contactez-nous dès maintenant. Diagnostic et devis gratuit, réponse rapid'efficacité.
           </p>
           <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
