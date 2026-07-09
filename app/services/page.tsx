@@ -50,6 +50,8 @@ export default function Services() {
         .grid-2-mob { display: grid; grid-template-columns: 1fr 1fr; }
         .grid-3-mob { display: grid; grid-template-columns: repeat(3, 1fr); }
         .srv-row { display: grid; grid-template-columns: 1fr 2fr; gap: 60px; }
+        .srv-card { transition: border-top-color 0.2s; }
+        .srv-card:hover { border-top-color: #d4a920 !important; }
         @media (max-width: 768px) {
           .section-pad { padding: 48px 20px !important; }
           .hero-pad { padding: 48px 20px !important; }
@@ -77,48 +79,46 @@ export default function Services() {
         </div>
       </section>
 
-      {/* LISTE SERVICES */}
+      {/* FLAGSHIP — CONTRAT DE CONFORMITÉ */}
+      <section style={{ backgroundColor: "#0a2e1a", padding: "clamp(44px, 6vw, 64px) clamp(20px, 5vw, 60px)", borderBottom: "2px solid #d4a920" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.3fr 0.7fr", gap: "40px", alignItems: "center" }} className="grid-2-mob">
+          <div>
+            <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "14px" }}>LE PLUS DEMANDÉ PAR LES PROFESSIONNELS</div>
+            <h2 style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: "300", color: "#fff", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "14px" }}>
+              Contrat de conformité 3D <strong style={{ fontWeight: "700", color: "#d4a920" }}>toute l'année.</strong>
+            </h2>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", lineHeight: "1.8", maxWidth: "500px" }}>
+              Passages réguliers 3D + certificat de conformité mensuel pour hôtels, restaurants, agro-industries et cliniques. Tout commence par un audit gratuit sur site.
+            </p>
+          </div>
+          <a href="/contrat-conformite" style={{ display: "block", textAlign: "center", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px", borderRadius: "8px", textDecoration: "none" }}>
+            Voir l'offre &amp; réserver un audit
+          </a>
+        </div>
+      </section>
+
+      {/* GRILLE SERVICES */}
       <section className="section-pad" style={{ backgroundColor: "#f7f7f5" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "3px" }}>
-          {services.map(function(s, i) {
-            return (
-              <div key={s.id || i} style={{ backgroundColor: "#ffffff", padding: "48px", borderTop: i === 0 ? "3px solid #d4a920" : "3px solid transparent" }}>
-                <div className="srv-row" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "60px", alignItems: "start" }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}><div style={{ width: "28px", height: "1px", backgroundColor: "#d4a920" }} /><span style={{ fontSize: "9px", fontWeight: "700", letterSpacing: "0.15em", color: "#d4a920", textTransform: "uppercase" }}>0{i + 1}</span></div>
-                    <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#0a0a0a", marginBottom: "10px" }}>{s.titre}</h2>
-                    {s.accroche && <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "20px" }}>{s.accroche.toUpperCase()}</div>}
-                    <div style={{ display: "inline-block", fontSize: "11px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.1)", padding: "6px 14px", borderRadius: "4px" }}>
-                      {s.tag}
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div className="grid-3-mob" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
+            {services.filter(function(s) { return s.slug !== "contrat-entretien-hygiene" }).map(function(s, i) {
+              return (
+                <a key={s.id || i} href={`/services/${s.slug || ""}`} style={{ textDecoration: "none" }}>
+                  <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "36px 30px", minHeight: "240px", display: "flex", flexDirection: "column", borderTop: "3px solid transparent" }}>
+                    <div style={{ fontSize: "28px", marginBottom: "16px" }}>{s.ico}</div>
+                    {s.accroche && <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "8px" }}>{s.accroche.toUpperCase()}</div>}
+                    <h2 style={{ fontSize: "19px", fontWeight: "700", color: "#0a0a0a", marginBottom: "10px" }}>{s.titre}</h2>
+                    <p style={{ fontSize: "13px", color: "#777", lineHeight: "1.7", margin: 0, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{s.description}</p>
+                    <div style={{ flex: 1 }} />
+                    <div style={{ marginTop: "18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "10px", color: "#d4a920", fontWeight: "700", backgroundColor: "rgba(212,169,32,0.1)", padding: "5px 10px", borderRadius: "4px" }}>{s.tag}</span>
+                      <span style={{ fontSize: "12px", fontWeight: "700", color: "#0a2e1a", whiteSpace: "nowrap" }}>En savoir plus →</span>
                     </div>
                   </div>
-                  <div>
-                    <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.85", marginBottom: "24px" }}>{s.description}</p>
-                    {s.details && s.details.length > 0 && (
-                      <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
-                        {s.details.map(function(d, j) {
-                          return (
-                            <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: "12px", fontSize: "13px", color: "#444" }}>
-                              <span style={{ width: "10px", height: "1px", backgroundColor: "#d4a920", display: "inline-block", flexShrink: 0, marginTop: "8px" }} />
-                              {d}
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    )}
-                    <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-                      <a href={`/services/${s.slug || ""}`} style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
-                        En savoir plus →
-                      </a>
-                      <a href="/contact" style={{ fontSize: "13px", fontWeight: "600", color: "#1a6b38", textDecoration: "none" }}>
-                        Demander un devis
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+                </a>
+              )
+            })}
+          </div>
         </div>
       </section>
 

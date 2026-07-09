@@ -21,9 +21,9 @@ export default function QuiSommesNous() {
   const [engagement, setEngagement] = useState("Notre engagement est de délivrer des interventions professionnelles, rigoureuses et durables, avec des produits homologués et des techniciens certifiés.")
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
-    { id: 2, valeur: "7j/7", label: "Disponibilité" },
-    { id: 3, valeur: "100%", label: "Résultats probants" },
-    { id: 4, valeur: "24h/24", label: "Disponibilité" },
+    { id: 2, valeur: "+10 ans", label: "D'expérience" },
+    { id: 3, valeur: "7j/7", label: "Service continu" },
+    { id: 4, valeur: "24h/24", label: "Urgences" },
   ])
 
   useEffect(function() {
@@ -99,6 +99,28 @@ export default function QuiSommesNous() {
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
             Phyto Bénin est la branche hygiène sanitaire de Global Solutions Entreprise. Basés à Cotonou, on intervient partout au Bénin depuis plus de dix ans.
           </p>
+        </div>
+      </section>
+
+      {/* BANDEAU CONFIANCE */}
+      <section style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #eee", padding: "26px clamp(20px, 5vw, 60px)" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }} className="grid-4-mob">
+          {[
+            { t: "Agréé par l'État", s: "APA/26-025/CNGP-BEN" },
+            { t: "Produits homologués OMS", s: "Sans danger pour votre entourage" },
+            { t: "+10 ans d'expérience", s: "À Cotonou et dans tout le Bénin" },
+            { t: "Certificat officiel", s: "Remis après chaque intervention" },
+          ].map(function(x) {
+            return (
+              <div key={x.t} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0, marginTop: "2px" }}>✓</span>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>{x.t}</div>
+                  <div style={{ fontSize: "11px", color: "#888", marginTop: "2px", lineHeight: "1.4" }}>{x.s}</div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </section>
 
