@@ -47,7 +47,9 @@ export default function EspaceClientLogin() {
         {/* Logo / En-tête */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <div style={{ marginBottom: "20px" }}>
-            <img src="/logo-gse.jpeg" alt="Logo GSE" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px" }} />
+            <a href="/" aria-label="Retour à l'accueil">
+              <img src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px", cursor: "pointer" }} />
+            </a>
           </div>
           <h1 style={{ fontSize: "22px", fontWeight: "300", color: "#0a2e1a", margin: "0 0 8px", letterSpacing: "-0.02em" }}>
             Espace client
@@ -58,7 +60,7 @@ export default function EspaceClientLogin() {
         </div>
 
         {/* Formulaire */}
-        <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e8e6e0", padding: "40px 36px" }}>
+        <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e8e6e0", borderTop: "3px solid #d4a920", padding: "40px 36px" }}>
           {mode === "login" ? (
             <>
               <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0a2e1a", margin: "0 0 28px" }}>Connexion</h2>
@@ -153,7 +155,11 @@ export default function EspaceClientLogin() {
         </div>
 
         <p style={{ textAlign: "center", marginTop: "24px", fontSize: "12px", color: "#aaa" }}>
-          Pas encore de compte ? Contactez GSE pour obtenir vos accès.
+          Pas encore de compte ?{" "}
+          <a href="/contact" style={{ color: "#1a6b38", fontWeight: "600", textDecoration: "none" }}>Contactez-nous</a>{" "}pour obtenir vos accès.
+        </p>
+        <p style={{ textAlign: "center", marginTop: "10px", fontSize: "12px" }}>
+          <a href="/" style={{ color: "#aaa", textDecoration: "none" }}>← Retour au site</a>
         </p>
       </div>
     </main>
