@@ -132,7 +132,7 @@ export default function Blog() {
                     Un traitement efficace commence par un diagnostic rigoureux. C'est ce qui fait la différence entre une solution temporaire et une élimination définitive.
                   </p>
                   <div style={{ marginTop: "20px", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "700", letterSpacing: "0.08em" }}>
-, L'ÉQUIPE Phyto Bénin BÉNIN
+                    L'ÉQUIPE PHYTO BÉNIN
                   </div>
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function Blog() {
                     <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#0a0a0a", marginBottom: "12px", lineHeight: "1.4", flex: 1 }}>
                       {a.titre}
                     </h3>
-                    <p style={{ fontSize: "13px", color: "#888", lineHeight: "1.75", marginBottom: "20px" }}>
+                    <p style={{ fontSize: "13px", color: "#888", lineHeight: "1.75", marginBottom: "20px", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                       {a.resume}
                     </p>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "16px", borderTop: "1px solid #f0f0f0" }}>
@@ -173,6 +173,27 @@ export default function Blog() {
                 </a>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA CONVERSION */}
+      <section style={{ backgroundColor: "#0a2e1a", padding: "64px clamp(20px, 5vw, 60px)", textAlign: "center" }}>
+        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>BESOIN D'UNE INTERVENTION ?</div>
+          <h2 style={{ fontSize: "clamp(22px, 3vw, 34px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "16px" }}>
+            Une infestation ne s'arrange jamais <strong style={{ fontWeight: "700", color: "#d4a920" }}>seule.</strong>
+          </h2>
+          <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.55)", lineHeight: "1.8", marginBottom: "32px" }}>
+            Diagnostic et devis gratuit. Nos techniciens certifiés interviennent partout au Bénin.
+          </p>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
+              Demander un devis gratuit
+            </a>
+            <a href="/services" style={{ border: "1px solid rgba(255,255,255,0.25)", color: "#ffffff", fontWeight: "500", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
+              Voir nos services →
+            </a>
           </div>
         </div>
       </section>

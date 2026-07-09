@@ -104,11 +104,10 @@ export default function QuiSommesNous() {
 
       {/* BANDEAU CONFIANCE */}
       <section style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #eee", padding: "26px clamp(20px, 5vw, 60px)" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }} className="grid-4-mob">
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
           {[
             { t: "Agréé par l'État", s: "APA/26-025/CNGP-BEN" },
             { t: "Produits homologués OMS", s: "Sans danger pour votre entourage" },
-            { t: "+10 ans d'expérience", s: "À Cotonou et dans tout le Bénin" },
             { t: "Certificat officiel", s: "Remis après chaque intervention" },
           ].map(function(x) {
             return (
