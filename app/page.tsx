@@ -102,24 +102,28 @@ export default function Accueil() {
         <div className="hero-padding" style={{ position: "relative", zIndex: 2, padding: "0 60px 80px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.35)", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "6px 16px", borderRadius: "20px", letterSpacing: "0.08em", marginBottom: "28px" }}>
             <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#d4a920" }} />
-            BÉNIN · SPÉCIALISTE EN HYGIÈNE SANITAIRE PROFESSIONNELLE
+            BÉNIN · HYGIÈNE SANITAIRE · INTERVENTION 24H/24
           </div>
-          <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "700px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
-            Protégez votre espace.
+          <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "760px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
+            Cafards, rats, termites, serpents ?
             <br />
-            <span style={{ color: "#d4a920", fontWeight: "700" }}>Vivez et travaillez</span>
-            <br />
-            en toute sérénité.
+            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe</span> — vite, et pour de bon.
           </h1>
-          <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "520px", marginBottom: "40px", fontWeight: "300" }}>
-            Cafards, rats, termites, serpents — on s'en occupe. Techniciens certifiés, produits homologués OMS, résultats garantis. Pour les professionnels comme pour les particuliers, partout au Bénin.
+          <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
+            Techniciens certifiés, produits homologués OMS, résultats garantis. Partout au Bénin — pour les professionnels comme pour les particuliers.
           </p>
-          <div className="hero-btns" style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
-            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
-              Demander une intervention
+
+          {/* DEUX PARCOURS : pro / particulier */}
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", maxWidth: "660px" }}>
+            <a href="/contrat-conformite" style={{ textDecoration: "none", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.45)", borderRadius: "10px", padding: "20px 22px", display: "block" }}>
+              <div style={{ fontSize: "10px", fontWeight: "800", color: "#d4a920", letterSpacing: "0.1em", marginBottom: "8px" }}>PROFESSIONNELS</div>
+              <div style={{ fontSize: "17px", fontWeight: "700", color: "#ffffff", marginBottom: "4px" }}>Contrat de conformité 3D</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Audit gratuit + certificat mensuel →</div>
             </a>
-            <a href="/services" style={{ backgroundColor: "transparent", color: "#ffffff", fontWeight: "500", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
-              Découvrir nos services →
+            <a href="https://wa.me/2290153047950?text=Bonjour%2C%20je%20suis%20un%20particulier%20et%20je%20souhaite%20une%20intervention%20%C3%A0%20mon%20domicile." target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: "10px", padding: "20px 22px", display: "block" }}>
+              <div style={{ fontSize: "10px", fontWeight: "800", color: "#d4a920", letterSpacing: "0.1em", marginBottom: "8px" }}>PARTICULIERS</div>
+              <div style={{ fontSize: "17px", fontWeight: "700", color: "#ffffff", marginBottom: "4px" }}>Intervention à domicile</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Devis gratuit, réponse rapide · WhatsApp →</div>
             </a>
           </div>
 
@@ -138,28 +142,69 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* INTRO */}
-      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "100px 60px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE ENGAGEMENT</div>
-          <h2 style={{ fontSize: "clamp(26px, 3vw, 40px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "24px" }}>
-            Une seule intervention
+      {/* VOTRE PROBLÈME ? — auto-orientation du visiteur */}
+      <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "72px 60px" }}>
+        <div style={{ maxWidth: "1000px", margin: "0 auto", textAlign: "center" }}>
+          <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>VOTRE PROBLÈME ?</div>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "16px" }}>
+            Dites-nous ce qui vous dérange.
             <br />
-            <strong style={{ fontWeight: "700" }}>suffit à tout changer.</strong>
+            <strong style={{ fontWeight: "700" }}>On a la solution.</strong>
           </h2>
-          <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "16px" }}>
-            Phyto Bénin, c'est l'entreprise que les hôtels, restaurants et familles appellent quand ils ont un vrai problème de nuisibles. Depuis plus de dix ans, on intervient avec les bons produits, les bons techniciens — et on ne repart pas tant que c'est réglé.
+          <p style={{ fontSize: "15px", color: "#666", lineHeight: "1.8", marginBottom: "36px", maxWidth: "560px", margin: "0 auto 36px" }}>
+            Cliquez sur le nuisible qui vous concerne — on vous montre comment on le traite.
           </p>
-          <p style={{ fontSize: "15px", color: "#555", lineHeight: "1.9", marginBottom: "32px" }}>
-            Ce n'est pas qu'un traitement. C'est la tranquillité d'esprit qui vient avec.
-          </p>
-          <a href="/qui-sommes-nous" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
-            Découvrir notre histoire →
-          </a>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
+            {[
+              { label: "🪳 Cafards", slug: "desinsectisation-cotonou" },
+              { label: "🐀 Rats & souris", slug: "deratisation-benin" },
+              { label: "🐛 Termites", slug: "anti-termites-benin" },
+              { label: "🛏️ Punaises de lit", slug: "punaises-de-lit-cotonou" },
+              { label: "🦟 Moustiques", slug: "anti-moustiques-cotonou" },
+              { label: "🐍 Serpents", slug: "reptiles-serpents-benin" },
+              { label: "🧴 Désinfection", slug: "desinfection-locaux" },
+            ].map(function(p) {
+              return (
+                <a key={p.slug} href={`/services/${p.slug}`} style={{ fontSize: "14px", fontWeight: "600", color: "#0a2e1a", backgroundColor: "#f7f7f5", border: "1px solid #e5e5e5", padding: "11px 18px", borderRadius: "30px", textDecoration: "none" }}>
+                  {p.label}
+                </a>
+              )
+            })}
+          </div>
         </div>
-        <div style={{ position: "relative" }}>
-          <div style={{ borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#e8e8e8" }}>
-            <img src="/images/about-team.jpg" alt="Techniciens Phyto Bénin en intervention d'hygiène sanitaire à Cotonou, Bénin" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </section>
+
+      {/* BLOC PRO — CONTRAT CONFORMITÉ (mis en avant) */}
+      <section className="section-padding" style={{ backgroundColor: "#0a2e1a", padding: "80px 60px" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "48px", alignItems: "center" }} className="grid-2">
+          <div>
+            <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>POUR LES PROFESSIONNELS</div>
+            <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "20px" }}>
+              Un contrat, la conformité
+              <br />
+              <strong style={{ fontWeight: "700", color: "#d4a920" }}>toute l'année.</strong>
+            </h2>
+            <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", marginBottom: "24px", maxWidth: "480px" }}>
+              Hôtels, restaurants, agro-industries, cliniques, banques : passages réguliers 3D + <strong style={{ color: "#fff" }}>certificat de conformité chaque mois</strong> pour vos inspections HACCP. Tout commence par un audit gratuit sur site.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
+              {["Certificat officiel opposable à vos contrôles", "Ré-intervention gratuite en cas de résurgence", "Rapports et certificats dans votre espace client"].map(function(t) {
+                return (
+                  <li key={t} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "rgba(255,255,255,0.8)" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0 }}>✓</span>
+                    {t}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <a href="/contrat-conformite" style={{ display: "block", textAlign: "center", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "15px", padding: "16px", borderRadius: "8px", textDecoration: "none" }}>
+              Réserver mon audit gratuit
+            </a>
+            <a href="/contrat-conformite" style={{ display: "block", textAlign: "center", backgroundColor: "transparent", color: "#ffffff", fontWeight: "600", fontSize: "14px", padding: "14px", borderRadius: "8px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
+              Voir l'offre et les 3 formules →
+            </a>
           </div>
         </div>
       </section>
