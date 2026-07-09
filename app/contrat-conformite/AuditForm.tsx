@@ -51,10 +51,6 @@ export default function AuditForm() {
     }
   }
 
-  const waMessage = encodeURIComponent(
-    "Bonjour, je souhaite réserver un audit de conformité sanitaire gratuit pour mon établissement."
-  )
-
   if (etat === "ok") {
     return (
       <div style={{ backgroundColor: "#0a2e1a", border: "2px solid #d4a920", borderRadius: "12px", padding: "40px", textAlign: "center" }}>
@@ -62,17 +58,9 @@ export default function AuditForm() {
         <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#d4a920", marginBottom: "12px" }}>
           Demande reçue, merci !
         </h3>
-        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.7)", lineHeight: "1.7", marginBottom: "24px" }}>
-          Notre équipe vous rappelle sous 24 h pour planifier votre audit gratuit sur site. Pour aller plus vite, écrivez-nous directement sur WhatsApp.
+        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.7)", lineHeight: "1.7" }}>
+          Notre équipe vous rappelle sous 24 h pour planifier votre audit gratuit sur site.
         </p>
-        <a
-          href={`https://wa.me/2290153047950?text=${waMessage}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: "inline-block", backgroundColor: "#25d366", color: "#fff", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}
-        >
-          Continuer sur WhatsApp
-        </a>
       </div>
     )
   }
@@ -113,8 +101,8 @@ export default function AuditForm() {
       </div>
 
       <div style={{ marginBottom: "16px" }}>
-        <label style={labelStyle} htmlFor="af-tel">Téléphone / WhatsApp *</label>
-        <input id="af-tel" type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Ex. +229 01 53 04 79 50" style={inputStyle} />
+        <label style={labelStyle} htmlFor="af-tel">Téléphone</label>
+        <input id="af-tel" type="tel" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Ex. +229 01 23 45 67 89" style={inputStyle} />
       </div>
 
       <div style={{ marginBottom: "16px" }}>
@@ -153,18 +141,6 @@ export default function AuditForm() {
       >
         {etat === "envoi" ? "Envoi…" : "Réserver mon audit gratuit"}
       </button>
-
-      <div style={{ textAlign: "center", margin: "14px 0 6px", fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>
-        ou
-      </div>
-      <a
-        href={`https://wa.me/2290153047950?text=${waMessage}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ display: "block", textAlign: "center", backgroundColor: "transparent", color: "#25d366", fontWeight: "700", fontSize: "14px", padding: "12px", borderRadius: "8px", border: "1px solid #25d366", textDecoration: "none" }}
-      >
-        Réserver sur WhatsApp
-      </a>
     </form>
   )
 }

@@ -313,11 +313,8 @@ export default function ContratConformite() {
             ))}
           </div>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <a href="https://wa.me/2290153047950?text=Bonjour%2C%20je%20suis%20un%20particulier%20et%20je%20souhaite%20une%20intervention%20%C3%A0%20mon%20domicile." target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "#25d366", color: "#fff", fontWeight: "700", fontSize: "14px", padding: "13px 24px", borderRadius: "6px", textDecoration: "none" }}>
-              Intervention à domicile · WhatsApp
-            </a>
             <a href="/contact" style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "14px", padding: "13px 24px", borderRadius: "6px", textDecoration: "none" }}>
-              Demander un devis gratuit
+              Demander une intervention à domicile
             </a>
           </div>
         </div>

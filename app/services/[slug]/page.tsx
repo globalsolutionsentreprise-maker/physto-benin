@@ -288,9 +288,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>
               Devis gratuit
             </a>
-            <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#fff", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>
-              WhatsApp direct
-            </a>
           </div>
         </div>
       </section>
@@ -346,9 +343,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.55)", marginBottom: "24px", lineHeight: "1.6" }}>Diagnostic offert sans engagement.</div>
               <a href="/contact" style={{ display: "block", textAlign: "center", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "14px", borderRadius: "4px", textDecoration: "none", marginBottom: "10px" }}>
                 Demander un devis
-              </a>
-              <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", backgroundColor: "#25d366", color: "#fff", fontWeight: "700", fontSize: "14px", padding: "14px", borderRadius: "4px", textDecoration: "none" }}>
-                WhatsApp direct
               </a>
             </div>
 

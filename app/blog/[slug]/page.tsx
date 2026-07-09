@@ -241,9 +241,6 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
               <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "13px", padding: "12px 24px", borderRadius: "6px", textDecoration: "none" }}>
                 Demander une intervention
               </a>
-              <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#ffffff", fontWeight: "700", fontSize: "13px", padding: "12px 24px", borderRadius: "6px", textDecoration: "none" }}>
-                WhatsApp
-              </a>
             </div>
           </div>
         </div>

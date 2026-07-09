@@ -163,14 +163,11 @@ export default function Services() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>Contactez-nous dès maintenant.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", marginBottom: "40px" }}>
-            Diagnostic et devis gratuit, réponse rapid'efficacité.
+            Diagnostic et devis gratuit, réponse rapide.
           </p>
           <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
               Demander un devis gratuit
-            </a>
-            <a href="https://wa.me/2290153047950" target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25d366", color: "#ffffff", fontWeight: "700", fontSize: "14px", padding: "15px 32px", borderRadius: "6px", textDecoration: "none" }}>
-              WhatsApp direct
             </a>
           </div>
         </div>

@@ -36,7 +36,7 @@ export default function Footer() {
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Contact</h4>
           <span style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px" }}>{coord.adresse}</span>
           <a href={"tel:"+coord.telephone.replace(/\s/g,"")} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.telephone}</a>
-          <a href={"https://wa.me/"+coord.whatsapp} target="_blank" rel="noopener noreferrer" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>WhatsApp</a>
+          <a href="/contact" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Demander un devis</a>
           <a href={"mailto:"+coord.email} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.email}</a>
           <div style={{ marginTop: "14px", paddingTop: "14px", borderTop: "1px solid #eee" }}>
             <div style={{ fontSize: "10px", color: "#aaa", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "7px" }}>PAIEMENT ACCEPTÉ</div>
