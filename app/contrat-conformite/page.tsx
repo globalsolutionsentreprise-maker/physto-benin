@@ -10,18 +10,18 @@ export const metadata: Metadata = {
     "Contrat annuel de conformité sanitaire pour hôtels, restaurants, agro-industrie, cliniques et banques au Bénin. Désinsectisation, dératisation, désinfection + certificat de conformité mensuel. Audit gratuit sur site.",
   alternates: { canonical: CANONICAL },
   openGraph: {
-    title: "Contrat de conformité sanitaire 3D au Bénin — Phyto Bénin",
+    title: "Contrat de conformité sanitaire 3D au Bénin, Phyto Bénin",
     description:
       "Un contrat, la tranquillité toute l'année : 3D + certificat de conformité mensuel. Agréé par l'État. Audit gratuit sur site.",
     url: CANONICAL,
     siteName: "Phyto Bénin by GSE",
     locale: "fr_FR",
     type: "website",
-    images: [{ url: `${BASE}/opengraph-image`, width: 1200, height: 630, alt: "Contrat de conformité sanitaire 3D — Phyto Bénin" }],
+    images: [{ url: `${BASE}/opengraph-image`, width: 1200, height: 630, alt: "Contrat de conformité sanitaire 3D, Phyto Bénin" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Contrat de conformité sanitaire 3D au Bénin — Phyto Bénin",
+    title: "Contrat de conformité sanitaire 3D au Bénin, Phyto Bénin",
     description: "3D + certificat de conformité mensuel. Agréé par l'État. Audit gratuit.",
     images: [`${BASE}/opengraph-image`],
   },
@@ -64,14 +64,14 @@ const PALIERS = [
 ]
 
 const COUVERTURE = [
-  { titre: "Désinsectisation", desc: "Cafards, fourmis, moustiques, mouches — traitements ciblés et préventifs à chaque passage." },
+  { titre: "Désinsectisation", desc: "Cafards, fourmis, moustiques, mouches, traitements ciblés et préventifs à chaque passage." },
   { titre: "Dératisation", desc: "Postes d'appâtage sécurisés, suivi des consommations, sécurisation des points d'entrée." },
   { titre: "Désinfection", desc: "Assainissement des locaux avec produits homologués OMS, sur demande et en cas d'alerte." },
   { titre: "Certificat de conformité mensuel", desc: "Le document officiel pour vos inspections HACCP, vos clients et vos partenaires." },
 ]
 
 const FAQS = [
-  { q: "Pourquoi un contrat plutôt que des interventions ponctuelles ?", r: "Les nuisibles reviennent : une intervention unique ne protège pas dans la durée. Le contrat garantit des passages réguliers, une réaction rapide en cas de problème, et surtout un certificat de conformité à jour pour vos inspections — c'est ce qui vous protège vraiment." },
+  { q: "Pourquoi un contrat plutôt que des interventions ponctuelles ?", r: "Les nuisibles reviennent : une intervention unique ne protège pas dans la durée. Le contrat garantit des passages réguliers, une réaction rapide en cas de problème, et surtout un certificat de conformité à jour pour vos inspections, c'est ce qui vous protège vraiment." },
   { q: "Comment se passe l'audit gratuit ?", r: "Un technicien certifié passe sur votre site, inspecte les zones sensibles et vous remet un rapport photo des points critiques. Sans frais et sans engagement. Vous décidez ensuite en connaissance de cause." },
   { q: "Puis-je payer au mois ?", r: "Oui. Nos contrats se règlent mensuellement pour lisser la dépense, plutôt qu'en une seule facture annuelle." },
   { q: "Suis-je engagé longtemps ?", r: "Le contrat est annuel et renouvelable. Les modalités précises (durée, préavis) sont fixées ensemble après l'audit, selon votre établissement." },
@@ -177,7 +177,7 @@ export default function ContratConformite() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }} className="grid-3">
             {[
               { n: "01", t: "On inspecte", d: "Un technicien certifié passe chez vous et examine les zones sensibles : cuisines, réserves, points d'eau, accès." },
-              { n: "02", t: "On documente", d: "Vous recevez un rapport photo des points critiques trouvés — concret, pas une estimation à l'aveugle." },
+              { n: "02", t: "On documente", d: "Vous recevez un rapport photo des points critiques trouvés, concret, pas une estimation à l'aveugle." },
               { n: "03", t: "Vous décidez", d: "On vous propose le palier adapté. Sans frais et sans engagement : vous choisissez en connaissance de cause." },
             ].map((e) => (
               <div key={e.n} style={{ backgroundColor: "#fff", padding: "32px 28px", borderTop: "3px solid #d4a920" }}>
@@ -227,7 +227,7 @@ export default function ContratConformite() {
             ))}
           </div>
           <p style={{ textAlign: "center", fontSize: "13px", color: "#999", marginTop: "24px" }}>
-            Le tarif dépend de la surface, du secteur et de la fréquence — il est fixé après l'audit gratuit, sans surprise.
+            Le tarif dépend de la surface, du secteur et de la fréquence, il est fixé après l'audit gratuit, sans surprise.
           </p>
         </div>
       </section>

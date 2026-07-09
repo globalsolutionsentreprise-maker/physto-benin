@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 // Carte OpenGraph de marque, générée au build (statique, mise en cache).
 // Devient l'image de partage par défaut de toutes les pages du site.
-export const alt = "Phyto Bénin by GSE — Hygiène sanitaire professionnelle au Bénin"
+export const alt = "Phyto Bénin by GSE, Hygiène sanitaire professionnelle au Bénin"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 

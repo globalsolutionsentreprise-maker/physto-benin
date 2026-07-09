@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!article) {
     return {
-      title: "Article introuvable — Blog Phyto Bénin",
+      title: "Article introuvable | Blog Phyto Bénin",
       robots: { index: false, follow: true },
     }
   }
@@ -74,7 +74,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const canonical = `${BASE}/blog/${slug}`
   const resume: string = (article.resume || "").trim()
   const description = resume.length > 160 ? resume.slice(0, 157).trimEnd() + "…" : resume
-  const title = `${article.titre} — Blog Phyto Bénin`
+  const title = `${article.titre} | Blog Phyto Bénin`
 
   return {
     title,
@@ -212,7 +212,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             </div>
           )}
 
-          {/* SERVICE ASSOCIÉ — maillage interne SEO */}
+          {/* SERVICE ASSOCIÉ, maillage interne SEO */}
           {service && (
             <a href={"/services/" + service.slug} style={{ textDecoration: "none", display: "block", marginTop: "48px" }}>
               <div style={{ backgroundColor: "#f7f7f5", border: "1px solid #e8e8e8", borderLeft: "3px solid #d4a920", borderRadius: "8px", padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>

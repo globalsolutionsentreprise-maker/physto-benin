@@ -11,9 +11,9 @@ export default function Accueil() {
   ])
 
   const [temoignages, setTemoignages] = useState([
-    { id: 1, init: "A.K", nom: "A. Koné", role: "Directeur de restauration — Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire." },
-    { id: 2, init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier — Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
-    { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique — Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
+    { id: 1, init: "A.K", nom: "A. Koné", role: "Directeur de restauration, Cotonou", texte: "Une intervention le jour même, un résultat parfait. Notre restaurant a pu rouvrir dès le lendemain sans aucune réserve de l'inspection sanitaire." },
+    { id: 2, init: "F.S", nom: "F. Sow", role: "Directrice d'établissement hôtelier, Porto-Novo", texte: "Contrat trimestriel depuis deux ans. Nos clients ne se plaignent plus de rien. L'équipe est ponctuelle, discrète et extrêmement professionnelle." },
+    { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique, Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
   ])
 
   const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
@@ -21,7 +21,7 @@ export default function Accueil() {
   const [realisations, setRealisations] = useState<any[]>([])
 
   useEffect(function() {
-    // Client Supabase partagé (singleton) — évite les instances GoTrueClient multiples
+    // Client Supabase partagé (singleton), évite les instances GoTrueClient multiples
     const db = supabase
 
     async function charger() {
@@ -55,24 +55,24 @@ export default function Accueil() {
   }, [])
 
   const services = [
-    { numero: "01", slug: "desinsectisation-cotonou", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation — on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
+    { numero: "01", slug: "desinsectisation-cotonou", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation, on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
     { numero: "02", slug: "deratisation-benin", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
-    { numero: "03", slug: "desinfection-locaux", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis — valable pour les inspections sanitaires." },
+    { numero: "03", slug: "desinfection-locaux", titre: "Désinfection", accroche: "Assainissement complet de vos locaux", desc: "Locaux traités avec des produits virucides et bactéricides homologués OMS. Certificat officiel remis, valable pour les inspections sanitaires." },
     { numero: "04", slug: "anti-termites-benin", titre: "Anti-termites", accroche: "Protection des structures bois et béton", desc: "Les termites détruisent en silence. On les stoppe avec une barrière chimique par injection, garantie longue durée. Diagnostic gratuit." },
-    { numero: "05", slug: "reptiles-serpents-benin", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants — on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
+    { numero: "05", slug: "reptiles-serpents-benin", titre: "Reptiles et Serpents", accroche: "Geckos, serpents, lézards", desc: "Serpent dans la maison, geckos envahissants, on intervient. Répulsifs durables, barrières physiques, disponible 24h/24." },
     { numero: "06", slug: "punaises-de-lit-cotonou", titre: "Autres traitements", accroche: "Tout nuisible sur demande", desc: "Punaises de lit, puces, guêpes, frelons, chenilles processionnaires. On adapte le traitement à votre situation. Devis gratuit." },
   ]
 
   const etapes = [
-    { num: "01", titre: "Vous nous contactez", desc: "WhatsApp, téléphone ou formulaire — comme vous préférez. On répond rapidement, 24h/24 et 7j/7." },
-    { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien passe chez vous — sans frais — pour voir exactement ce qu'il y a à faire. Pas d'estimation à l'aveugle." },
-    { num: "03", titre: "Intervention", desc: "On traite avec les bons produits, proprement et discrètement. Pas besoin de tout préparer — on s'adapte à votre planning." },
+    { num: "01", titre: "Vous nous contactez", desc: "WhatsApp, téléphone ou formulaire, comme vous préférez. On répond rapidement, 24h/24 et 7j/7." },
+    { num: "02", titre: "Diagnostic gratuit", desc: "Un technicien passe chez vous, sans frais, pour voir exactement ce qu'il y a à faire. Pas d'estimation à l'aveugle." },
+    { num: "03", titre: "Intervention", desc: "On traite avec les bons produits, proprement et discrètement. Pas besoin de tout préparer, on s'adapte à votre planning." },
     { num: "04", titre: "Certificat et suivi", desc: "À la fin de chaque intervention, vous recevez un certificat officiel. Pour vous, vos partenaires ou l'inspection sanitaire." },
   ]
 
   const garanties = [
-    { titre: "Agréé par l'État du Bénin", desc: "On est officiellement agréés par les autorités sanitaires du Bénin. Pas une promesse — un document.", detail: agrement, accent: true },
-    { titre: "Produits homologués OMS", desc: "Tous nos produits passent les normes OMS — efficaces contre les nuisibles, sans danger pour votre entourage.", accent: false },
+    { titre: "Agréé par l'État du Bénin", desc: "On est officiellement agréés par les autorités sanitaires du Bénin. Pas une promesse, un document.", detail: agrement, accent: true },
+    { titre: "Produits homologués OMS", desc: "Tous nos produits passent les normes OMS, efficaces contre les nuisibles, sans danger pour votre entourage.", accent: false },
     { titre: "Disponibles 24h/24", desc: "Disponibles 24h/24 et 7j/7, y compris jours fériés. Urgences assurées sur Cotonou.", accent: false },
     { titre: "Certificat officiel remis", desc: "Chaque intervention se termine par un certificat signé. Valable pour les inspections sanitaires.", accent: false },
     { titre: "Techniciens certifiés", desc: "Nos techniciens sont formés, certifiés et connaissent le terrain béninois.", accent: false },
@@ -91,7 +91,7 @@ export default function Accueil() {
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/images/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.45 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020904 0%, rgba(2,9,4,0.75) 45%, rgba(2,9,4,0.2) 100%)" }} />
 
-        {/* BADGE AGRÉMENT — haut droite */}
+        {/* BADGE AGRÉMENT, haut droite */}
         <div className="badge-float" style={{ position: "absolute", top: "28px", right: "40px", zIndex: 10, display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(212,169,32,0.13)", border: "1.5px solid rgba(212,169,32,0.55)", padding: "10px 18px", borderRadius: "6px", backdropFilter: "blur(6px)" }}>
           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0 }}>✓</span>
           <div>
@@ -107,10 +107,10 @@ export default function Accueil() {
           <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "760px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
             Cafards, rats, termites, serpents ?
             <br />
-            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe</span> — vite, et pour de bon.
+            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe.</span> Vite, et pour de bon.
           </h1>
           <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
-            Techniciens certifiés, produits homologués OMS, résultats garantis. Partout au Bénin — pour les professionnels comme pour les particuliers.
+            Techniciens certifiés, produits homologués OMS, résultats garantis. Partout au Bénin, pour les professionnels comme pour les particuliers.
           </p>
 
           {/* DEUX PARCOURS : pro / particulier */}
@@ -142,7 +142,7 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* VOTRE PROBLÈME ? — auto-orientation du visiteur */}
+      {/* VOTRE PROBLÈME ?, auto-orientation du visiteur */}
       <section className="section-padding" style={{ backgroundColor: "#ffffff", padding: "72px 60px" }}>
         <div style={{ maxWidth: "1000px", margin: "0 auto", textAlign: "center" }}>
           <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>VOTRE PROBLÈME ?</div>
@@ -152,7 +152,7 @@ export default function Accueil() {
             <strong style={{ fontWeight: "700" }}>On a la solution.</strong>
           </h2>
           <p style={{ fontSize: "15px", color: "#666", lineHeight: "1.8", marginBottom: "36px", maxWidth: "560px", margin: "0 auto 36px" }}>
-            Cliquez sur le nuisible qui vous concerne — on vous montre comment on le traite.
+            Cliquez sur le nuisible qui vous concerne, on vous montre comment on le traite.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
             {[
@@ -174,7 +174,7 @@ export default function Accueil() {
         </div>
       </section>
 
-      {/* BLOC PRO — CONTRAT CONFORMITÉ (mis en avant) */}
+      {/* BLOC PRO, CONTRAT CONFORMITÉ (mis en avant) */}
       <section className="section-padding" style={{ backgroundColor: "#0a2e1a", padding: "80px 60px" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "48px", alignItems: "center" }} className="grid-2">
           <div>
@@ -257,7 +257,7 @@ export default function Accueil() {
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
             {[
               { img: "/images/client-hotel.jpg", label: "Hôtels et Resorts", desc: "On connaît les contraintes hôtelières : discrétion, horaires stricts, zéro interruption de service." },
-              { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Grandes surfaces, normes HACCP, suivi régulier — on s'adapte à vos exigences." },
+              { img: "/images/client-industrie.jpg", label: "Entrepôts et Industrie", desc: "Grandes surfaces, normes HACCP, suivi régulier, on s'adapte à vos exigences." },
               { img: "/images/client-bureau.jpg", label: "Bureaux et Entreprises", desc: "Interventions en dehors des heures ouvrées. Vos équipes ne voient rien, ne sentent rien." },
             ].map(function(c, i) {
               return (
@@ -317,13 +317,13 @@ export default function Accueil() {
             <div key={r.id} style={{ backgroundColor: "#f7f7f5", display: "grid", gridTemplateColumns: "1fr 1fr", marginBottom: "24px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
                 <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e0e0e0", overflow: "hidden" }}>
-                  {r.photo_avant ? <img src={r.photo_avant} alt={`Avant intervention ${r.titre || "désinsectisation"} — Phyto Bénin Cotonou`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div></div>}
+                  {r.photo_avant ? <img src={r.photo_avant} alt={`Avant intervention ${r.titre || "désinsectisation"}, Phyto Bénin Cotonou`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div></div>}
                 </div>
                 <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e8f5ee", overflow: "hidden" }}>
-                  {r.photo_apres ? <img src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"} — résultat garanti Phyto Bénin`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
+                  {r.photo_apres ? <img src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"}, résultat garanti Phyto Bénin`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
                 </div>
                 <div style={{ gridColumn: "span 2", backgroundColor: "#1a1a1a", minHeight: "180px", position: "relative", overflow: "hidden" }}>
-                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Équipe de techniciens certifiés Phyto Bénin — désinsectisation et dératisation au Bénin" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
+                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Équipe de techniciens certifiés Phyto Bénin, désinsectisation et dératisation au Bénin" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
                 </div>
               </div>
               <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -356,7 +356,7 @@ export default function Accueil() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {[
               { titre: "Remise automatique", desc: "Aucun code promo à saisir. La remise s'applique d'elle-même sur votre premier devis." },
-              { titre: "Valable sur tous nos services", desc: "Désinsectisation, dératisation, désinfection, anti-termites — tous nos traitements sont concernés." },
+              { titre: "Valable sur tous nos services", desc: "Désinsectisation, dératisation, désinfection, anti-termites, tous nos traitements sont concernés." },
               { titre: "Remise portée sur le contrat", desc: "Si votre devis débouche sur un contrat annuel, la remise de 10% est conservée." },
             ].map(function(item) {
               return (

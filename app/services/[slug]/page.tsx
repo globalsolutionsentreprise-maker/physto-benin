@@ -19,16 +19,16 @@ const SERVICES: Record<string, {
     titre: "Désinsectisation",
     ico: "🪳",
     accroche: "Cafards · Fourmis · Moustiques · Mouches",
-    description: "Cafards, fourmis, moustiques, mouches — on choisit la bonne méthode selon votre situation : gel appât, pulvérisation résiduelle ou fumigation. Techniciens certifiés, résultat garanti.",
+    description: "Cafards, fourmis, moustiques, mouches, on choisit la bonne méthode selon votre situation : gel appât, pulvérisation résiduelle ou fumigation. Techniciens certifiés, résultat garanti.",
     tag: "Devis gratuit",
     details: ["Diagnostic complet et gratuit avant intervention", "Gel appât professionnel longue durée", "Pulvérisation résiduelle certifiée OMS", "Fumigation pour les infestations sévères", "Contrat de suivi mensuel disponible"],
-    metaTitle: "Désinsectisation Cotonou — Cafards, Fourmis, Moustiques | Phyto Bénin",
+    metaTitle: "Désinsectisation Cotonou, Cafards, Fourmis, Moustiques | Phyto Bénin",
     metaDesc: "Désinsectisation professionnelle à Cotonou et au Bénin. Élimination cafards, fourmis, moustiques, mouches. Techniciens agréés, produits homologués. Devis gratuit.",
     mots: "désinsectisation Cotonou, désinsectisation Bénin, élimination cafards Cotonou, traitement insectes Bénin, cafards appartement Cotonou",
     faqs: [
       { q: "Combien de temps dure une intervention de désinsectisation ?", r: "Une intervention standard dure entre 1 et 3 heures selon la superficie. Nous recommandons de quitter les locaux pendant 2 à 4 heures après le traitement." },
-      { q: "Les produits utilisés sont-ils dangereux pour les enfants et animaux ?", r: "Non — tous nos produits passent les normes OMS et les standards béninois. On vous donne le délai exact à respecter avant de réoccuper les lieux, selon le traitement." },
-      { q: "Faut-il une deuxième intervention ?", r: "Pour les cafards, on recommande un passage de contrôle 3 à 4 semaines après — c'est le temps que mettent les œufs à éclore. Ça évite les rechutes et garantit le résultat dans la durée." },
+      { q: "Les produits utilisés sont-ils dangereux pour les enfants et animaux ?", r: "Non, tous nos produits passent les normes OMS et les standards béninois. On vous donne le délai exact à respecter avant de réoccuper les lieux, selon le traitement." },
+      { q: "Faut-il une deuxième intervention ?", r: "Pour les cafards, on recommande un passage de contrôle 3 à 4 semaines après, c'est le temps que mettent les œufs à éclore. Ça évite les rechutes et garantit le résultat dans la durée." },
       { q: "Intervenez-vous en urgence la nuit ou le week-end ?", r: "Oui, on est disponibles 24h/24 et 7j/7 à Cotonou et dans les zones prioritaires (Abomey-Calavi, Sèmè-Kpodji)." },
     ],
     secteursCibles: ["Restaurants et cuisines", "Hôtels et hébergements", "Entrepôts alimentaires", "Bureaux et entreprises", "Appartements et villas", "Établissements de santé"],
@@ -38,17 +38,17 @@ const SERVICES: Record<string, {
     titre: "Dératisation",
     ico: "🐀",
     accroche: "Rats · Souris · Rongeurs",
-    description: "Rats, souris, rongeurs — on les élimine et on sécurise vos points d'entrée pour qu'ils ne reviennent pas. Pièges homologués, raticides certifiés, suivi mensuel disponible.",
+    description: "Rats, souris, rongeurs, on les élimine et on sécurise vos points d'entrée pour qu'ils ne reviennent pas. Pièges homologués, raticides certifiés, suivi mensuel disponible.",
     tag: "Contrat mensuel disponible",
     details: ["Inspection complète des zones à risque", "Pièges professionnels certifiés", "Raticides homologués et sécurisés", "Sécurisation des points d'entrée", "Rapport d'intervention détaillé et suivi mensuel"],
-    metaTitle: "Dératisation Bénin — Rats et Souris | Intervention Rapide | Phyto Bénin",
+    metaTitle: "Dératisation Bénin, Rats et Souris | Intervention Rapide | Phyto Bénin",
     metaDesc: "Dératisation professionnelle au Bénin et à Cotonou. Élimination rats, souris, rongeurs. Pièges homologués, raticides certifiés. Intervention rapide 24h/24.",
     mots: "dératisation Cotonou, dératisation Bénin, élimination rats Cotonou, traitement rongeurs Bénin, souris maison Cotonou",
     faqs: [
-      { q: "Comment savoir si j'ai une infestation de rats ?", r: "Crottes noires, bruits la nuit, câbles ou emballages rongés, traces de morsures, odeurs — si vous avez un ou deux de ces signes, appelez-nous. Mieux vaut agir tôt." },
-      { q: "Vos raticides sont-ils dangereux pour les animaux domestiques ?", r: "Non — on utilise des stations d'appât fermées, inaccessibles aux enfants et aux animaux. Les produits sont dosés pour cibler les rongeurs, pas votre entourage." },
+      { q: "Comment savoir si j'ai une infestation de rats ?", r: "Crottes noires, bruits la nuit, câbles ou emballages rongés, traces de morsures, odeurs, si vous avez un ou deux de ces signes, appelez-nous. Mieux vaut agir tôt." },
+      { q: "Vos raticides sont-ils dangereux pour les animaux domestiques ?", r: "Non, on utilise des stations d'appât fermées, inaccessibles aux enfants et aux animaux. Les produits sont dosés pour cibler les rongeurs, pas votre entourage." },
       { q: "Combien de temps faut-il pour éliminer une infestation ?", r: "En général, entre 2 et 3 semaines selon l'ampleur. On propose aussi un contrat mensuel si vous voulez maintenir le résultat dans le temps." },
-      { q: "Intervenez-vous dans les entrepôts et industries ?", r: "Oui — la dératisation des entrepôts et industries agroalimentaires, c'est l'une de nos spécialités. Protocoles adaptés aux normes HACCP, suivi rigoureux." },
+      { q: "Intervenez-vous dans les entrepôts et industries ?", r: "Oui, la dératisation des entrepôts et industries agroalimentaires, c'est l'une de nos spécialités. Protocoles adaptés aux normes HACCP, suivi rigoureux." },
     ],
     secteursCibles: ["Entrepôts et industrie", "Restaurants et cuisine", "Marchés et commerces", "Résidences et villas", "Établissements de santé", "Hôtels et hébergements"],
     urgence: true,
@@ -60,14 +60,14 @@ const SERVICES: Record<string, {
     description: "Assainissement complet de vos locaux au Bénin avec produits virucides, bactéricides et fongicides homologués. Service certifié pour restaurants, hôtels et établissements de santé.",
     tag: "Certificat officiel remis",
     details: ["Désinfection totale des surfaces et équipements", "Produits virucides certifiés OMS", "Conforme aux normes sanitaires béninoises", "Certificat d'hygiène officiel remis à l'issue", "Traitement adapté aux ERP et établissements recevant du public"],
-    metaTitle: "Désinfection Locaux Cotonou — Certificat Hygiène Officiel | Phyto Bénin",
+    metaTitle: "Désinfection Locaux Cotonou, Certificat Hygiène Officiel | Phyto Bénin",
     metaDesc: "Désinfection professionnelle à Cotonou et au Bénin. Assainissement complet, produits virucides et bactéricides certifiés OMS. Certificat d'hygiène officiel. Restaurants, hôtels, santé.",
     mots: "désinfection Cotonou, assainissement locaux Bénin, certificat hygiène Bénin, désinfection restaurant Cotonou, désinfection hôtel Bénin",
     faqs: [
       { q: "À quelle fréquence faut-il désinfecter ses locaux ?", r: "Pour un restaurant ou un hôtel, une fois par mois c'est la base. Pour une clinique ou une pharmacie, ça peut être hebdomadaire selon votre activité." },
-      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui — notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA/26-025/CNGP-BEN). Il est accepté par les autorités sanitaires et les inspecteurs." },
-      { q: "Faut-il vider les locaux avant la désinfection ?", r: "Pas grand chose à faire de votre côté — juste retirer les denrées alimentaires exposées. On vous envoie un protocole précis avant de passer." },
-      { q: "Vos produits protègent-ils contre les virus et bactéries ?", r: "Oui — on travaille avec des produits virucides à large spectre homologués OMS : bactéries, virus, champignons, moisissures. Tout est couvert." },
+      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui, notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA/26-025/CNGP-BEN). Il est accepté par les autorités sanitaires et les inspecteurs." },
+      { q: "Faut-il vider les locaux avant la désinfection ?", r: "Pas grand chose à faire de votre côté, juste retirer les denrées alimentaires exposées. On vous envoie un protocole précis avant de passer." },
+      { q: "Vos produits protègent-ils contre les virus et bactéries ?", r: "Oui, on travaille avec des produits virucides à large spectre homologués OMS : bactéries, virus, champignons, moisissures. Tout est couvert." },
     ],
     secteursCibles: ["Restaurants et traiteurs", "Hôtels et hébergements", "Cliniques et pharmacies", "Crèches et écoles", "Marchés et surfaces commerciales", "Bureaux et open spaces"],
     urgence: false,
@@ -79,13 +79,13 @@ const SERVICES: Record<string, {
     description: "Protection durable de vos structures contre les termites au Bénin. Barrière chimique en profondeur, traitement par injection et garantie longue durée avec contrôle annuel inclus.",
     tag: "Garantie longue durée",
     details: ["Diagnostic complet des structures bois et béton", "Barrière chimique par injection en profondeur", "Traitement du bois et des fondations", "Garantie longue durée sur le traitement", "Contrôle annuel inclus dans le contrat"],
-    metaTitle: "Anti-termites Bénin — Protection Structures | Garantie Longue Durée | Phyto Bénin",
+    metaTitle: "Anti-termites Bénin, Protection Structures | Garantie Longue Durée | Phyto Bénin",
     metaDesc: "Traitement anti-termites professionnel au Bénin. Protection bois, béton et fondations. Barrière chimique certifiée, garantie longue durée, contrôle annuel. Devis gratuit.",
     mots: "anti-termites Bénin, traitement termites Cotonou, protection bois termites Bénin, termites maison Cotonou, barrière chimique termites",
     faqs: [
-      { q: "Comment savoir si ma maison est infestée de termites ?", r: "Regardez les murs et fondations : galeries de terre, bois qui sonne creux, ailes abandonnées près des fenêtres, menuiseries abîmées — si vous voyez un ou deux de ces signes, appelez-nous avant que ça s'aggrave." },
-      { q: "Le traitement anti-termites est-il dangereux pour les occupants ?", r: "Non — les produits vont dans les fondations et les structures, pas dans les espaces de vie. Les locaux restent habitables. On recommande juste d'aérer après le traitement des espaces fermés." },
-      { q: "Quelle est la durée de garantie du traitement ?", r: "Un contrôle annuel est inclus dans le contrat. La durée exacte de garantie dépend du type de traitement réalisé — on vous l'indique clairement avant de commencer." },
+      { q: "Comment savoir si ma maison est infestée de termites ?", r: "Regardez les murs et fondations : galeries de terre, bois qui sonne creux, ailes abandonnées près des fenêtres, menuiseries abîmées, si vous voyez un ou deux de ces signes, appelez-nous avant que ça s'aggrave." },
+      { q: "Le traitement anti-termites est-il dangereux pour les occupants ?", r: "Non, les produits vont dans les fondations et les structures, pas dans les espaces de vie. Les locaux restent habitables. On recommande juste d'aérer après le traitement des espaces fermés." },
+      { q: "Quelle est la durée de garantie du traitement ?", r: "Un contrôle annuel est inclus dans le contrat. La durée exacte de garantie dépend du type de traitement réalisé, on vous l'indique clairement avant de commencer." },
       { q: "Peut-on traiter une maison déjà construite contre les termites ?", r: "Oui, sans problème. On intervient sur les constructions existantes par injection dans les fondations, traitement des menuiseries et barrières périmétriques." },
     ],
     secteursCibles: ["Maisons individuelles", "Immeubles résidentiels", "Entrepôts et hangars", "Bureaux et commerces", "Villas et résidences", "Bâtiments industriels"],
@@ -96,16 +96,16 @@ const SERVICES: Record<string, {
     ico: "🐍",
     accroche: "Geckos · Serpents · Lézards",
     description: "Sécurisation complète contre les reptiles au Bénin. Répulsifs professionnels longue durée, barrières physiques et intervention d'urgence disponible 24h/24 à Cotonou.",
-    tag: "Urgence — disponible 24h/24",
+    tag: "Urgence, disponible 24h/24",
     details: ["Intervention d'urgence disponible 24h/24 à Cotonou", "Répulsifs professionnels longue durée", "Sécurisation périmétrique complète du site", "Pose de barrières physiques anti-reptiles", "Suivi post-intervention et contrôle inclus"],
-    metaTitle: "Serpents et Reptiles Bénin — Urgence 24h/24 Cotonou | Phyto Bénin",
+    metaTitle: "Serpents et Reptiles Bénin, Urgence 24h/24 Cotonou | Phyto Bénin",
     metaDesc: "Intervention d'urgence contre serpents, geckos et reptiles à Cotonou et au Bénin. Sécurisation complète, répulsifs professionnels. Disponible 24h/24.",
     mots: "serpents Cotonou, reptiles maison Bénin, élimination serpents Cotonou, geckos appartement Bénin, urgence serpent Cotonou",
     faqs: [
       { q: "Que faire si je trouve un serpent dans ma maison ?", r: "N'approchez pas l'animal. Fermez la pièce, éloignez les personnes et appelez-nous immédiatement. Notre équipe est disponible 24h/24 à Cotonou." },
-      { q: "Tous les serpents au Bénin sont-ils dangereux ?", r: "Non — mais certaines espèces présentes au Bénin sont venimeuses. Sans identification certaine, mieux vaut traiter chaque serpent comme potentiellement dangereux." },
+      { q: "Tous les serpents au Bénin sont-ils dangereux ?", r: "Non, mais certaines espèces présentes au Bénin sont venimeuses. Sans identification certaine, mieux vaut traiter chaque serpent comme potentiellement dangereux." },
       { q: "Comment empêcher les serpents d'entrer chez soi ?", r: "On installe des grillages, des joints de portes et on applique des répulsifs périmètriques durables. Un contrôle annuel suffit à maintenir la protection." },
-      { q: "Intervenez-vous aussi pour les geckos en grande quantité ?", r: "Oui — les proliférations de geckos dans les locaux commerciaux et entrepôts, c'est quelque chose qu'on traite régulièrement." },
+      { q: "Intervenez-vous aussi pour les geckos en grande quantité ?", r: "Oui, les proliférations de geckos dans les locaux commerciaux et entrepôts, c'est quelque chose qu'on traite régulièrement." },
     ],
     secteursCibles: ["Maisons et villas", "Jardins et terrasses", "Entrepôts et hangars", "Résidences avec espaces verts", "Hôtels et resorts", "Sites industriels"],
     urgence: true,
@@ -117,7 +117,7 @@ const SERVICES: Record<string, {
     description: "Traitement professionnel anti-moustiques à Cotonou et au Bénin. Élimination des gîtes larvaires, pulvérisation des espaces extérieurs et protection durable pour votre famille et vos employés.",
     tag: "Traitement extérieur inclus",
     details: ["Identification et traitement des gîtes larvaires", "Pulvérisation résiduelle des extérieurs", "Brumisation professionnelle des jardins", "Pose de diffuseurs longue durée", "Traitement préventif de saison des pluies"],
-    metaTitle: "Anti-moustiques Cotonou — Traitement Gîtes Larvaires | Phyto Bénin",
+    metaTitle: "Anti-moustiques Cotonou, Traitement Gîtes Larvaires | Phyto Bénin",
     metaDesc: "Traitement anti-moustiques professionnel à Cotonou et au Bénin. Élimination gîtes larvaires, brumisation jardins, protection durable. Particuliers et professionnels.",
     mots: "anti-moustiques Cotonou, traitement moustiques Bénin, élimination moustiques Cotonou, gîtes larvaires Bénin, brumisation jardin Cotonou",
     faqs: [
@@ -135,8 +135,8 @@ const SERVICES: Record<string, {
     accroche: "Hôtels · Appartements · Résidences",
     description: "Élimination complète et garantie des punaises de lit à Cotonou. Traitement thermique à 60°C et traitement chimique certifié. Inspection intégrale du mobilier et résultat garanti.",
     tag: "Résultat garanti",
-    details: ["Inspection complète du mobilier et literie", "Traitement thermique à 60°C — technique la plus efficace", "Traitement chimique résiduel complémentaire", "Protection des matelas incluse", "Garantie sans punaises 3 mois après intervention"],
-    metaTitle: "Punaises de Lit Cotonou — Traitement Thermique Garanti | Phyto Bénin",
+    details: ["Inspection complète du mobilier et literie", "Traitement thermique à 60°C, technique la plus efficace", "Traitement chimique résiduel complémentaire", "Protection des matelas incluse", "Garantie sans punaises 3 mois après intervention"],
+    metaTitle: "Punaises de Lit Cotonou, Traitement Thermique Garanti | Phyto Bénin",
     metaDesc: "Élimination punaises de lit à Cotonou et au Bénin. Traitement thermique à 60°C + traitement chimique certifié. Résultat garanti, inspection complète. Hôtels et particuliers.",
     mots: "punaises de lit Cotonou, traitement punaises Bénin, élimination punaises lit Cotonou, punaises hôtel Bénin, traitement thermique punaises",
     faqs: [
@@ -155,7 +155,7 @@ const SERVICES: Record<string, {
     description: "Programme d'entretien hygiénique régulier sur mesure au Bénin. Visites planifiées, rapports détaillés, alerte préventive et tarif préférentiel pour les entreprises et institutions.",
     tag: "À partir de 25 000 FCFA/mois",
     details: ["Fréquence mensuelle ou trimestrielle selon vos besoins", "Rapport détaillé après chaque visite d'entretien", "Alerte préventive par SMS et WhatsApp", "Tarif préférentiel sous contrat annuel", "Priorité d'intervention en cas d'urgence"],
-    metaTitle: "Contrat Entretien Hygiène Bénin — Mensuel à partir de 25 000 FCFA | Phyto Bénin",
+    metaTitle: "Contrat Entretien Hygiène Bénin, Mensuel à partir de 25 000 FCFA | Phyto Bénin",
     metaDesc: "Contrat d'entretien hygiénique au Bénin. Programme mensuel ou trimestriel, rapport détaillé, tarif préférentiel. Désinsectisation, dératisation, désinfection régulières.",
     mots: "contrat entretien hygiène Bénin, désinsectisation mensuelle Cotonou, programme hygiène entreprise Bénin, contrat dératisation Cotonou",
     faqs: [
@@ -260,7 +260,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "10px", fontWeight: "800", padding: "4px 10px", borderRadius: "20px", letterSpacing: "0.06em", flexShrink: 0 }}>OFFRE</span>
                 <span style={{ color: "#fff", fontSize: "14px", fontWeight: "500" }}>
-                  Découvrez notre <strong style={{ color: "#d4a920" }}>Contrat de conformité 3D</strong> — 3 formules + certificat mensuel + audit gratuit
+                  Découvrez notre <strong style={{ color: "#d4a920" }}>Contrat de conformité 3D</strong>, 3 formules + certificat mensuel + audit gratuit
                 </span>
               </div>
               <span style={{ color: "#d4a920", fontSize: "13px", fontWeight: "700", whiteSpace: "nowrap" }}>Voir l'offre →</span>
@@ -279,7 +279,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <h1 style={{ fontSize: "clamp(32px, 4vw, 56px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.1", letterSpacing: "-0.02em", marginBottom: "20px", maxWidth: "680px" }}>
             {s.titre}
             <br />
-            <span style={{ fontWeight: "300", color: "rgba(255,255,255,0.7)", fontSize: "0.75em" }}>au Bénin — Phyto Bénin by GSE</span>
+            <span style={{ fontWeight: "300", color: "rgba(255,255,255,0.7)", fontSize: "0.75em" }}>au Bénin, Phyto Bénin by GSE</span>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.6)", lineHeight: "1.85", maxWidth: "560px", marginBottom: "36px" }}>
             {s.description}

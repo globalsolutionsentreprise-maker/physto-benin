@@ -17,7 +17,7 @@ export default function Footer() {
       <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <img src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE — Hygiène sanitaire et phytosanitaire au Bénin" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
+            <img src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE, Hygiène sanitaire et phytosanitaire au Bénin" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
             <div className="nav-brand-text"><div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin</div><div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div></div>
           </div>
           <p style={{ fontSize: "12px", color: "#888", lineHeight: "1.8" }}>Spécialiste hygiène sanitaire et phytosanitaire au Bénin.</p>
@@ -48,7 +48,7 @@ export default function Footer() {
         </div>
       </div>
       <div style={{ borderTop: "1px solid #eee", paddingTop: "20px", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-        <p style={{ fontSize: "11px", color: "#aaa" }}>{new Date().getFullYear()} Phyto Bénin by GSE — Tous droits réservés</p>
+        <p style={{ fontSize: "11px", color: "#aaa" }}>{new Date().getFullYear()} Phyto Bénin by GSE, Tous droits réservés</p>
         <a href="/mentions-legales" style={{ fontSize: "11px", color: "#aaa", textDecoration: "none" }}>Mentions légales</a>
         <div style={{ display: "flex", gap: "8px" }}>
           {["Produits certifiés","Agréés par l'État","24h/24"].map(function(c) { return <span key={c} style={{ fontSize: "10px", backgroundColor: "#fff", border: "1px solid #eee", padding: "3px 10px", borderRadius: "4px", color: "#aaa" }}>{c}</span> })}

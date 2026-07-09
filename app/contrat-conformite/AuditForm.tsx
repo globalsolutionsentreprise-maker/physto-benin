@@ -36,7 +36,7 @@ export default function AuditForm() {
           telephone: telephone.trim(),
           ville: ville.trim() || null,
           nuisible: "Audit conformité 3D",
-          message: `Demande d'audit de conformité gratuit — Établissement : ${type}`,
+          message: `Demande d'audit de conformité gratuit, Établissement : ${type}`,
           urgence: false,
         }),
       })
@@ -60,7 +60,7 @@ export default function AuditForm() {
       <div style={{ backgroundColor: "#0a2e1a", border: "2px solid #d4a920", borderRadius: "12px", padding: "40px", textAlign: "center" }}>
         <div style={{ fontSize: "40px", marginBottom: "12px" }}>✅</div>
         <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#d4a920", marginBottom: "12px" }}>
-          Demande reçue — merci !
+          Demande reçue, merci !
         </h3>
         <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.7)", lineHeight: "1.7", marginBottom: "24px" }}>
           Notre équipe vous rappelle sous 24 h pour planifier votre audit gratuit sur site. Pour aller plus vite, écrivez-nous directement sur WhatsApp.

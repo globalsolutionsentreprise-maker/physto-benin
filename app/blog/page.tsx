@@ -132,7 +132,7 @@ export default function Blog() {
                     Un traitement efficace commence par un diagnostic rigoureux. C'est ce qui fait la différence entre une solution temporaire et une élimination définitive.
                   </p>
                   <div style={{ marginTop: "20px", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "700", letterSpacing: "0.08em" }}>
-                    — L'ÉQUIPE Phyto Bénin BÉNIN
+, L'ÉQUIPE Phyto Bénin BÉNIN
                   </div>
                 </div>
               </div>

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     canonical: "https://www.phyto-benin.com",
   },
   openGraph: {
-    title: "Phyto Bénin — Hygiène Sanitaire Professionnelle au Bénin",
+    title: "Phyto Bénin, Hygiène Sanitaire Professionnelle au Bénin",
     description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens agréés par l'État. Intervention rapide 24h/24 à Cotonou.",
     url: "https://www.phyto-benin.com",
     siteName: "Phyto Bénin by GSE",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Phyto Bénin — Hygiène Sanitaire 24h/24",
+    title: "Phyto Bénin, Hygiène Sanitaire 24h/24",
     description: "Désinsectisation, dératisation, désinfection au Bénin. Intervention rapide à Cotonou.",
     // twitter:image hérité de la carte OpenGraph générée
   },
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
-          "name": "Phyto Bénin by GSE — Global Solutions Entreprise",
+          "name": "Phyto Bénin by GSE, Global Solutions Entreprise",
           "description": "Spécialiste en hygiène sanitaire et phytosanitaire au Bénin. Désinsectisation, dératisation, désinfection, anti-termites. Agréé par l'État béninois.",
           "url": "https://www.phyto-benin.com",
           "logo": "https://www.phyto-benin.com/logo-gse.jpeg",
@@ -89,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ]
         })}} />
 
-        {/* Google Analytics GA4 — G-9XPCMJE1PJ */}
+        {/* Google Analytics GA4, G-9XPCMJE1PJ */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-9XPCMJE1PJ" />
         <script dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
@@ -235,7 +235,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "10px", fontWeight: "800", padding: "3px 9px", borderRadius: "20px", letterSpacing: "0.06em", flexShrink: 0 }}>−10%</span>
             <span style={{ color: "#ffffff", fontSize: "12px", fontWeight: "400" }}>
-              Offre de bienvenue — <strong>10% de remise</strong> sur votre premier traitement · Pour toute première demande
+              Offre de bienvenue, <strong>10% de remise</strong> sur votre premier traitement · Pour toute première demande
             </span>
           </div>
           <a href="/contact" style={{ color: "#d4a920", fontSize: "11px", fontWeight: "700", textDecoration: "none", whiteSpace: "nowrap", letterSpacing: "0.04em", flexShrink: 0 }}>

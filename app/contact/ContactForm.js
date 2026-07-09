@@ -107,7 +107,7 @@ export default function ContactForm() {
 
         {statut === "succes" && (
           <div style={{ backgroundColor: "rgba(26,107,56,0.25)", border: "1px solid rgba(26,107,56,0.5)", padding: "24px", marginBottom: "24px", textAlign: "center" }}>
-            <div style={{ fontSize: "18px", marginBottom: "8px", color: "#d4a920", fontWeight: "300" }}>— Envoyé</div>
+            <div style={{ fontSize: "18px", marginBottom: "8px", color: "#d4a920", fontWeight: "300" }}>, Envoyé</div>
             <div style={{ fontSize: "15px", fontWeight: "700", color: "#4ade80", marginBottom: "4px" }}>Message envoyé avec succès</div>
             <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>Notre équipe vous contacte rapidement.</div>
           </div>
@@ -167,14 +167,14 @@ export default function ContactForm() {
           <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
             <input type="checkbox" name="urgence" checked={formulaire.urgence} onChange={handleChange} style={{ width: "16px", height: "16px", accentColor: "#d4a920", flexShrink: 0 }} />
             <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: "1.5" }}>
-              Urgence — je souhaite être contacté(e) rapidement
+              Urgence, je souhaite être contacté(e) rapidement
             </span>
           </label>
 
           <div style={{ backgroundColor: "rgba(26,107,56,0.15)", border: "1px solid rgba(26,107,56,0.4)", borderRadius: "6px", padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "12px", fontWeight: "800", padding: "3px 10px", borderRadius: "20px", flexShrink: 0 }}>−10%</span>
             <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", lineHeight: "1.4" }}>
-              Votre remise de 10% est automatiquement incluse — valable pour toute première demande.
+              Votre remise de 10% est automatiquement incluse, valable pour toute première demande.
             </span>
           </div>
 
@@ -233,7 +233,7 @@ export default function ContactForm() {
             </div>
           </div>
           <div style={{ backgroundColor: "#ffffff", border: "1.5px solid #ffe082", borderRadius: "8px", padding: "14px 16px" }}>
-            <div style={{ fontSize: "10px", color: "#b45309", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "8px" }}>CODE USSD — COMPOSEZ :</div>
+            <div style={{ fontSize: "10px", color: "#b45309", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "8px" }}>CODE USSD, COMPOSEZ :</div>
             <div style={{ fontSize: "19px", fontWeight: "700", color: "#111", letterSpacing: "0.04em", fontFamily: "monospace" }}>
               *880*41*893118*<span style={{ color: "#b45309" }}>montant</span>#
             </div>

@@ -35,11 +35,11 @@ export default function VerifierPage() {
     ? new Date(att.date_traitement).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
     : att?.generated_at
     ? new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    : "—"
+    : ", "
 
   const generatedAt = att?.generated_at
     ? new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    : "—"
+    : ", "
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "#f7f7f5", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif", color: "#888" }}>
@@ -100,7 +100,7 @@ export default function VerifierPage() {
                     <td style={{ color: "#888", paddingBottom: "10px", width: "45%", verticalAlign: "top" }}>Client :</td>
                     <td style={{ fontWeight: "600", color: "#0a2e1a", paddingBottom: "10px" }}>
                       {att.clients?.prenom} {att.clients?.nom}
-                      {att.clients?.entreprise && <span style={{ color: "#666", fontWeight: "400" }}> — {att.clients.entreprise}</span>}
+                      {att.clients?.entreprise && <span style={{ color: "#666", fontWeight: "400" }}>, {att.clients.entreprise}</span>}
                     </td>
                   </tr>
                   <tr>
