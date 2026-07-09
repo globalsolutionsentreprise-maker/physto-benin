@@ -105,9 +105,9 @@ export default function Accueil() {
             BÉNIN · HYGIÈNE SANITAIRE · INTERVENTION 24H/24
           </div>
           <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "760px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
-            Cafards, rats, termites, serpents ?
+            Moustiques, cafards, serpents…
             <br />
-            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe.</span> Vite, et pour de bon.
+            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe.</span>
           </h1>
           <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
             Techniciens certifiés, produits homologués OMS, résultats garantis. Partout au Bénin, pour les professionnels comme pour les particuliers.
