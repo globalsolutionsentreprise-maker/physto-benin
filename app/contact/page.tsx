@@ -25,6 +25,28 @@ export default function Contact() {
         </div>
       </section>
 
+      {/* BANDEAU CONFIANCE */}
+      <section style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #eee", padding: "26px clamp(20px, 5vw, 60px)" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
+          {[
+            { t: "Diagnostic gratuit", s: "Visite de site sans engagement" },
+            { t: "Réponse rapide", s: "On vous recontacte au plus vite" },
+            { t: "Agréé par l'État", s: "APA/26-025/CNGP-BEN" },
+            { t: "Remise −10%", s: "Sur votre première demande" },
+          ].map(function(x) {
+            return (
+              <div key={x.t} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0, marginTop: "2px" }}>✓</span>
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>{x.t}</div>
+                  <div style={{ fontSize: "11px", color: "#888", marginTop: "2px", lineHeight: "1.4" }}>{x.s}</div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
       {/* FORMULAIRE + INFOS */}
       <section style={{ backgroundColor: "#f7f7f5", padding: "80px 60px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
