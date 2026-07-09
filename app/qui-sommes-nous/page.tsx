@@ -12,7 +12,7 @@ function creerSupabase() {
 
 export default function QuiSommesNous() {
   const [equipe, setEquipe] = useState([
-    { id: 1, init: "YK", nom: "Yakoubou Kabir", role: "Directeur Général", description: "Fondateur de Global Solutions Entreprise, fort de plus de 10 ans d'expérience en conseil et gestion d'entreprise au Bénin et en France." },
+    { id: 1, init: "YK", nom: "Yakoubou Kabir", role: "Directeur Général", description: "Fondateur de Global Solutions Entreprise, expérimenté en conseil et gestion d'entreprise au Bénin et en France." },
     { id: 2, init: "AT", nom: "Amadou T.", role: "Responsable Technique", description: "Technicien certifié en hygiène phytosanitaire, spécialisé dans les traitements anti-termites et désinsectisation." },
     { id: 3, init: "MB", nom: "Marie B.", role: "Chargée de Clientèle", description: "Responsable de la relation client, des devis et du suivi des contrats d'entretien." },
   ])
@@ -21,7 +21,7 @@ export default function QuiSommesNous() {
   const [engagement, setEngagement] = useState("Notre engagement est de délivrer des interventions professionnelles, rigoureuses et durables, avec des produits homologués et des techniciens certifiés.")
   const [chiffres, setChiffres] = useState([
     { id: 1, valeur: "+50", label: "Clients protégés" },
-    { id: 2, valeur: "+10 ans", label: "D'expérience" },
+    { id: 2, valeur: "Gratuit", label: "Devis & diagnostic" },
     { id: 3, valeur: "7j/7", label: "Service continu" },
     { id: 4, valeur: "24h/24", label: "Urgences" },
   ])
@@ -97,7 +97,7 @@ export default function QuiSommesNous() {
             <strong style={{ fontWeight: "700", color: "#d4a920" }}>au service du Bénin.</strong>
           </h1>
           <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.55)", lineHeight: "1.85", maxWidth: "560px", fontWeight: "300" }}>
-            Phyto Bénin est la branche hygiène sanitaire de Global Solutions Entreprise. Basés à Cotonou, on intervient partout au Bénin depuis plus de dix ans.
+            Phyto Bénin est la branche hygiène sanitaire de Global Solutions Entreprise. Basés à Cotonou, nous intervenons partout au Bénin.
           </p>
         </div>
       </section>
