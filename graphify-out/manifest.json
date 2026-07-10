@@ -15,13 +15,13 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1783554250.8948374,
-    "ast_hash": "1bdd3f41a98829f561bb03bf550bf805",
+    "mtime": 1783720463.7523377,
+    "ast_hash": "0d7861a4bd5c1af4fd43ee95e34e0c16",
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783718232.7526913,
-    "ast_hash": "648adc19c912114009b7cfe232f2c5a4",
+    "mtime": 1783721850.3393652,
+    "ast_hash": "0163e7e18bf1162e010072f10ae67efd",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -35,13 +35,13 @@
     "semantic_hash": ""
   },
   "app/api/analyze-rapport/route.js": {
-    "mtime": 1783717291.411112,
+    "mtime": 1783718501.5095901,
     "ast_hash": "94752236a8cfe6adc2e7be109ff65115",
     "semantic_hash": ""
   },
   "app/api/create-client/route.js": {
-    "mtime": 1783096702.1186132,
-    "ast_hash": "d18a8efe2c9f78b0300482e088a005fe",
+    "mtime": 1783721126.564323,
+    "ast_hash": "35229343acda4e4d11d63461da3d6e5c",
     "semantic_hash": ""
   },
   "app/api/create-payment/route.ts": {
@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1783118107.7750754,
-    "ast_hash": "d245d550bf8715e2fd467db7d27dbafd",
+    "mtime": 1783721835.2496083,
+    "ast_hash": "7b6dab91d34fc70c203b784e32398c04",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
@@ -605,8 +605,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1783718406.1092362,
-    "ast_hash": "e3c55d15309bdbef85a253923730ca71",
+    "mtime": 1783721901.0383089,
+    "ast_hash": "4ac6222778c56134ec97c42659b16624",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -757,6 +757,11 @@
   ".superpowers/sdd/task-3-report.md": {
     "mtime": 1783718271.5910952,
     "ast_hash": "1f1ae28e14cf9efbb923899f39fd8ea0",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260711000000_backfill_crm_statut_null.sql": {
+    "mtime": 1783721193.009801,
+    "ast_hash": "b7ee6f2381b7f0610b703a9b9c554ae6",
     "semantic_hash": ""
   }
 }

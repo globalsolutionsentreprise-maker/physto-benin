@@ -267,7 +267,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5138",
+      "source_location": "L5141",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5147",
+      "source_location": "L5150",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5154",
+      "source_location": "L5157",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5158",
+      "source_location": "L5161",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5237",
+      "source_location": "L5240",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5439",
+      "source_location": "L5442",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5493",
+      "source_location": "L5496",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
@@ -467,7 +467,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/create-client/route.js",
-      "source_location": "L26",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "create_client_route_post",
       "community": 46,
@@ -8838,9 +8838,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report",
-      "target": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention"
     },
     {
       "relation": "contains",
@@ -8848,9 +8848,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_branch_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_branch_commit"
     },
     {
       "relation": "contains",
@@ -8858,9 +8858,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_build_result",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_build_result"
     },
     {
       "relation": "contains",
@@ -8868,9 +8868,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis"
     },
     {
       "relation": "contains",
@@ -8878,9 +8878,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_concerns",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_concerns"
     },
     {
       "relation": "contains",
@@ -8888,9 +8888,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_fix_wave_final_review",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_fix_wave_final_review"
     },
     {
       "relation": "contains",
@@ -8898,9 +8898,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_reuse_confirmation",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_reuse_confirmation"
     },
     {
       "relation": "contains",
@@ -8908,9 +8908,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_self_review",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_self_review"
     },
     {
       "relation": "contains",
@@ -8918,9 +8918,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_1_\u00e9tats_intervention_after_l1400_uploadingphotointerv",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_step_1_\u00e9tats_intervention_after_l1400_uploadingphotointerv"
     },
     {
       "relation": "contains",
@@ -8928,9 +8928,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_2_bouton_liste_notes_vocales_jsx_intervention_modal_l2608_2626",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_step_2_bouton_liste_notes_vocales_jsx_intervention_modal_l2608_2626"
     },
     {
       "relation": "contains",
@@ -8938,9 +8938,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_3_genererrapportintervia_fetch_body_l2463_2469",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_step_3_genererrapportintervia_fetch_body_l2463_2469"
     },
     {
       "relation": "contains",
@@ -8948,9 +8948,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_4_vider_les_audios_apr\u00e8s_succ\u00e8s_l2489_inside_the_else_success_branch",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_step_4_vider_les_audios_apr\u00e8s_succ\u00e8s_l2489_inside_the_else_success_branch"
     },
     {
       "relation": "contains",
@@ -8958,9 +8958,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_5_d\u00e9bloquer_le_bouton_g\u00e9n\u00e9rer_si_seul_l_audio_est_fourni_l2650_2651",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_step_5_d\u00e9bloquer_le_bouton_g\u00e9n\u00e9rer_si_seul_l_audio_est_fourni_l2650_2651"
     },
     {
       "relation": "contains",
@@ -8968,9 +8968,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_build_result_76",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_build_result_76"
     },
     {
       "relation": "contains",
@@ -8978,9 +8978,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_commit"
     },
     {
       "relation": "contains",
@@ -8988,9 +8988,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_concerns_82",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_concerns_82"
     },
     {
       "relation": "contains",
@@ -8998,9 +8998,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_1_lower_per_file_cap_module_level_l17_18",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_fix_1_lower_per_file_cap_module_level_l17_18"
     },
     {
       "relation": "contains",
@@ -9008,9 +9008,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_2_total_payload_guard_before_each_fetch",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_fix_2_total_payload_guard_before_each_fetch"
     },
     {
       "relation": "contains",
@@ -9018,9 +9018,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_3_graceful_non_json_error_handling",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_fix_3_graceful_non_json_error_handling"
     },
     {
       "relation": "contains",
@@ -9028,9 +9028,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_4_minor_include_uploadingaudio_in_g\u00e9n\u00e9rer_button_gating",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_fix_4_minor_include_uploadingaudio_in_g\u00e9n\u00e9rer_button_gating"
     },
     {
       "relation": "contains",
@@ -9038,9 +9038,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_real_intervention_identifiers_used_confirmed_not_guessed",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_real_intervention_identifiers_used_confirmed_not_guessed"
     },
     {
       "relation": "contains",
@@ -10594,5 +10594,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "767f79b3febd9c2c94a62398a562a0e8b441a5ac"
+  "built_at_commit": "efc2681d2af1396790698b67c16bbaa14759d7e8"
 }

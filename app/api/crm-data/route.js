@@ -368,5 +368,25 @@ export async function POST(req) {
     return Response.json({ ok: true, count: inserted.length })
   }
 
+  if (action === "add_devis") {
+    const { clientId, prestations } = body
+    if (!clientId) return Response.json({ error: "clientId manquant" }, { status: 400 })
+    const prestationStr = Array.isArray(prestations) && prestations.length > 0 ? prestations.join(" + ") : (prestations || "À définir")
+    // Numéro garanti unique via crypto (le RPC generate_devis_numero renvoie parfois un
+    // doublon → violation contrainte unique). crm_statut requis sinon masqué du dashboard.
+    const numero = "DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase()
+    const { data: newDevis, error } = await supabase.from("devis").insert({
+      client_id: clientId,
+      numero,
+      prestation: prestationStr,
+      montant_net: 0,
+      montant_total: 0,
+      statut: "brouillon",
+      crm_statut: "contact",
+    }).select("*, clients(id, nom, prenom, entreprise, email, telephone)").single()
+    if (error) return Response.json({ error: "Erreur insertion devis: " + error.message + " | code: " + error.code }, { status: 500 })
+    return Response.json({ ok: true, devis: newDevis })
+  }
+
   return Response.json({ error: "Action inconnue" }, { status: 400 })
 }

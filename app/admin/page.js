@@ -1630,25 +1630,26 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   async function creerNouveauDevisClient(cl) {
     if (nouveauDevisPresta.length === 0) { setMsg("Sélectionnez au moins une prestation."); return }
-    var prestationStr = nouveauDevisPresta.join(" + ")
-    var { data: num } = await db.rpc("generate_devis_numero")
-    var numero = num || ("DEV-GSE-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-4))
-    var { data: newDevis, error } = await db.from("devis").insert({
-      client_id: cl.id,
-      numero: numero,
-      prestation: prestationStr,
-      montant_net: 0,
-      montant_total: 0,
-      statut: "brouillon",
-      // crm_statut requis : le dashboard CRM masque les devis dont crm_statut IS NULL
-      crm_statut: "contact"
-    }).select("*, clients(id, nom, prenom, entreprise, email, telephone)").single()
-    if (error) { setMsg("Erreur : " + error.message); return }
-    setShowNouveauDevis(false)
-    setNouveauDevisPresta([])
-    await charger()
-    ouvrirEditionDevis(newDevis)
-    setVue("devis")
+    // Création via l'API (service_role) : l'insert direct côté client sur devis (table RLS)
+    // échouait silencieusement. Standard projet : toute écriture Supabase passe par l'API.
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/crm-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ action: "add_devis", clientId: cl.id, prestations: nouveauDevisPresta })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "création du devis impossible")); return }
+      setShowNouveauDevis(false)
+      setNouveauDevisPresta([])
+      await charger()
+      ouvrirEditionDevis(data.devis)
+      setVue("devis")
+    } catch (e) {
+      setMsg("Erreur réseau : " + e.message)
+    }
   }
 
   async function creerDevis() {
