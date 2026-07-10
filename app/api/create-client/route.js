@@ -16,6 +16,10 @@ async function creerBrouillonDevis(supabase, clientId, description) {
       montant_net: 0,
       montant_total: 0,
       statut: "brouillon",
+      // crm_statut doit être renseigné : le dashboard CRM filtre les devis
+      // dont crm_statut IS NULL (crm-data/route.js), sinon le devis est créé
+      // mais jamais visible. "contact" = mapping brouillon (voir migration 20260527).
+      crm_statut: "contact",
     })
     if (error) console.error("creerBrouillonDevis error:", error.message)
   } catch (e) {

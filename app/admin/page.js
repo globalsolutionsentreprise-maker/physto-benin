@@ -1639,7 +1639,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       prestation: prestationStr,
       montant_net: 0,
       montant_total: 0,
-      statut: "brouillon"
+      statut: "brouillon",
+      // crm_statut requis : le dashboard CRM masque les devis dont crm_statut IS NULL
+      crm_statut: "contact"
     }).select("*, clients(id, nom, prenom, entreprise, email, telephone)").single()
     if (error) { setMsg("Erreur : " + error.message); return }
     setShowNouveauDevis(false)

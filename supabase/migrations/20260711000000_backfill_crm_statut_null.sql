@@ -1,0 +1,12 @@
+-- Backfill crm_statut : les devis créés via « + Nouveau client » (/api/create-client
+-- → creerBrouillonDevis) et « + Nouveau devis » (page.js → creerNouveauDevisClient)
+-- étaient insérés sans crm_statut → NULL. Or le dashboard CRM filtre
+-- `crm_statut IS NULL` (app/api/crm-data/route.js), donc ces devis existaient en base
+-- mais n'apparaissaient jamais dans le dashboard (le client s'affichait « sans devis »).
+--
+-- Les inserts sont corrigés (crm_statut = 'contact'). Ce backfill rend visibles les
+-- devis déjà créés avant le correctif. Sûr : les 3 seuls inserts de devis du code sont
+-- désormais tous non-null, donc tout crm_statut NULL restant est un brouillon admin à
+-- exposer. 'contact' = mapping du statut 'brouillon' (voir migration 20260527).
+-- Voir tasks/lessons.md 2026-07-11.
+UPDATE devis SET crm_statut = 'contact' WHERE crm_statut IS NULL;
