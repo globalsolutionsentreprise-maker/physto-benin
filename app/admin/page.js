@@ -15,7 +15,8 @@ const CHIFFRES_DEFAUT = [
 ]
 
 var AUDIO_MAX_FILES = 5
-var AUDIO_MAX_BYTES = 15 * 1024 * 1024
+var AUDIO_MAX_BYTES = 3 * 1024 * 1024
+var AUDIO_MAX_TOTAL_B64 = 4300000
 function mimeAudioDepuisNom(file) {
   if (file.type) return file.type
   var n = (file.name || '').toLowerCase()
@@ -2011,7 +2012,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var lus = []
       for (var i = 0; i < aTraiter.length; i++) {
         var f = aTraiter[i]
-        if (f.size > AUDIO_MAX_BYTES) { setMsg('Fichier trop volumineux (max 15 Mo) : ' + f.name); continue }
+        if (f.size > AUDIO_MAX_BYTES) { setMsg('Fichier trop volumineux (max 3 Mo) : ' + f.name); continue }
         lus.push(await lireAudioBase64(f))
       }
       if (lus.length) setAudios(function(prev) { return prev.concat(lus) })
@@ -2069,6 +2070,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var { devis, client } = rapportVisiteModal
     var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
     try {
+      var totalB64V = (audiosVisite || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
+      if (totalB64V > AUDIO_MAX_TOTAL_B64) {
+        setRapportVisiteErreurIA('Notes vocales trop volumineuses au total (~' + Math.round(totalB64V / 1024 / 1024) + ' Mo). Réduisez la durée ou le nombre de notes (limite ~4 Mo au total).')
+        setGeneratingRapportVisite(false)
+        return
+      }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2080,9 +2087,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           context: { clientNom, adresse: rapportVisiteForm.adresseSite, date: rapportVisiteForm.dateVisite, technicien: rapportVisiteForm.technicien, prestation: devis.prestation, audiosCount: audiosVisite.length },
         })
       })
-      var data = await res.json()
-      if (!res.ok || !data.success) {
-        setRapportVisiteErreurIA(data.error || 'Erreur inconnue')
+      var data = null
+      try { data = await res.json() } catch (_) { data = null }
+      if (!res.ok || !data || !data.success) {
+        setRapportVisiteErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportVisiteForm(function(prev) {
@@ -2279,8 +2287,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportVisiteIA,
-              disabled: generatingRapportVisite || uploadingPhotoVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length)) ? 0.5 : 1 }
+              disabled: generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length)) ? 0.5 : 1 }
             }, generatingRapportVisite ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
@@ -2458,6 +2466,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var { devis, client } = rapportIntervModal
     var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
     try {
+      var totalB64I = (audiosInterv || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
+      if (totalB64I > AUDIO_MAX_TOTAL_B64) {
+        setRapportIntervErreurIA('Notes vocales trop volumineuses au total (~' + Math.round(totalB64I / 1024 / 1024) + ' Mo). Réduisez la durée ou le nombre de notes (limite ~4 Mo au total).')
+        setGeneratingRapportInterv(false)
+        return
+      }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2469,9 +2483,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation, audiosCount: audiosInterv.length },
         })
       })
-      var data = await res.json()
-      if (!res.ok || !data.success) {
-        setRapportIntervErreurIA(data.error || 'Erreur inconnue')
+      var data = null
+      try { data = await res.json() } catch (_) { data = null }
+      if (!res.ok || !data || !data.success) {
+        setRapportIntervErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportIntervForm(function(prev) {
@@ -2647,8 +2662,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportIntervIA,
-              disabled: generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length)) ? 0.5 : 1 }
+              disabled: generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length)) ? 0.5 : 1 }
             }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
