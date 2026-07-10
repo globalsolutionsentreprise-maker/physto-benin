@@ -27,7 +27,7 @@ async function callGeminiWithRetry(body, maxRetries = 3) {
 
 export async function POST(req) {
   try {
-    const { type, notes, photos, context } = await req.json()
+    const { type, notes, photos, audios, context } = await req.json()
 
     const parts = []
 
@@ -45,6 +45,13 @@ export async function POST(req) {
         parts.push({ inlineData: { mimeType, data: base64 } })
       } catch {
         // skip failed images
+      }
+    }
+
+    // Notes vocales : déjà en base64 dans le body, passées directement en inlineData (max 5)
+    for (const a of (audios || []).slice(0, 5)) {
+      if (a && a.data && a.mimeType) {
+        parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } })
       }
     }
 
@@ -99,6 +106,8 @@ ${notes || "(aucune note fournie)"}
 
 ${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
 
+${(ctx?.audiosCount > 0) ? `${ctx.audiosCount} note${ctx.audiosCount > 1 ? 's' : ''} vocale${ctx.audiosCount > 1 ? 's' : ''} du technicien jointe${ctx.audiosCount > 1 ? 's' : ''} — écoute-les attentivement, transcris les informations utiles et intègre-les au rapport (état des lieux, nuisibles observés, zones infestées, observations, recommandations).` : ""}
+
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
 {
@@ -127,6 +136,8 @@ NOTES BRUTES DU TECHNICIEN :
 ${notes || "(aucune note fournie)"}
 
 ${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
+
+${(ctx?.audiosCount > 0) ? `${ctx.audiosCount} note${ctx.audiosCount > 1 ? 's' : ''} vocale${ctx.audiosCount > 1 ? 's' : ''} du technicien jointe${ctx.audiosCount > 1 ? 's' : ''} — écoute-les attentivement, transcris les informations utiles et intègre-les au rapport (état des lieux, nuisibles observés, zones infestées, observations, recommandations).` : ""}
 
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
