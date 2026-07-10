@@ -1398,6 +1398,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [rapportIntervForm, setRapportIntervForm] = React.useState({})
   const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
   const [uploadingPhotoInterv, setUploadingPhotoInterv] = React.useState(false)
+  const [audiosInterv, setAudiosInterv] = React.useState([])
+  const [uploadingAudioInterv, setUploadingAudioInterv] = React.useState(false)
   const [extractingFramesVisite, setExtractingFramesVisite] = React.useState(null)
   const [extractingFramesInterv, setExtractingFramesInterv] = React.useState(null)
   const [generatingRapportVisite, setGeneratingRapportVisite] = React.useState(false)
@@ -2463,7 +2465,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           type: 'intervention',
           notes: rapportIntervForm.notesTechnicien,
           photos: rapportIntervForm.photos || [],
-          context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation },
+          audios: audiosInterv.map(function(a) { return { mimeType: a.mimeType, data: a.data } }),
+          context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation, audiosCount: audiosInterv.length },
         })
       })
       var data = await res.json()
@@ -2483,6 +2486,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         })
         setRapportIntervPhase('genere')
+        setAudiosInterv([])
       }
     } catch(e) { setRapportIntervErreurIA(e.message) }
     setGeneratingRapportInterv(false)
@@ -2609,6 +2613,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
               uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
             ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingAudioInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600', marginLeft: '8px' } },
+              React.createElement('input', { type: 'file', accept: 'audio/*', multiple: true, style: { display: 'none' }, onChange: function(e) { ajouterAudios(e.target.files, audiosInterv, setAudiosInterv, setUploadingAudioInterv); e.target.value = '' }, disabled: uploadingAudioInterv }),
+              uploadingAudioInterv ? '⏳ Lecture…' : '+ Ajouter note vocale'
+            ),
+            audiosInterv.length > 0 && React.createElement('div', { style: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' } },
+              audiosInterv.map(function(a, i) {
+                return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#0369a1' } },
+                  React.createElement('span', null, '🎤 ' + (a.name || ('Note vocale ' + (i + 1)))),
+                  React.createElement('button', { type: 'button', onClick: function() { setAudiosInterv(function(prev) { return prev.filter(function(_, j) { return j !== i }) }) }, style: { border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', padding: 0 } }, '✕')
+                )
+              })
+            ),
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
                 var files = Array.from(e.target.files).slice(0, 3)
@@ -2631,8 +2647,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportIntervIA,
-              disabled: generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length)) ? 0.5 : 1 }
+              disabled: generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length)) ? 0.5 : 1 }
             }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
