@@ -14,6 +14,33 @@ const CHIFFRES_DEFAUT = [
   { id: 4, valeur: "24h/24", label: "Disponibilite urgence", ordre: 4 },
 ]
 
+var AUDIO_MAX_FILES = 5
+var AUDIO_MAX_BYTES = 3 * 1024 * 1024
+var AUDIO_MAX_TOTAL_B64 = 4300000
+function mimeAudioDepuisNom(file) {
+  if (file.type) return file.type
+  var n = (file.name || '').toLowerCase()
+  if (n.endsWith('.opus') || n.endsWith('.ogg')) return 'audio/ogg'
+  if (n.endsWith('.m4a') || n.endsWith('.mp4')) return 'audio/mp4'
+  if (n.endsWith('.mp3')) return 'audio/mpeg'
+  if (n.endsWith('.wav')) return 'audio/wav'
+  if (n.endsWith('.aac')) return 'audio/aac'
+  if (n.endsWith('.flac')) return 'audio/flac'
+  return 'audio/ogg'
+}
+function lireAudioBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader()
+    reader.onload = function() {
+      var res = reader.result || ''
+      var base64 = String(res).split(',')[1] || ''
+      resolve({ name: file.name || 'note-vocale', mimeType: mimeAudioDepuisNom(file), data: base64 })
+    }
+    reader.onerror = function() { reject(reader.error) }
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function Admin() {
   const [connecte, setConnecte] = useState(false)
   const [emailLogin, setEmailLogin] = useState("")
@@ -1366,10 +1393,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [rapportVisiteForm, setRapportVisiteForm] = React.useState({})
   const [savingRapportVisite, setSavingRapportVisite] = React.useState(false)
   const [uploadingPhotoVisite, setUploadingPhotoVisite] = React.useState(false)
+  const [audiosVisite, setAudiosVisite] = React.useState([])
+  const [uploadingAudioVisite, setUploadingAudioVisite] = React.useState(false)
   const [rapportIntervModal, setRapportIntervModal] = React.useState(null)
   const [rapportIntervForm, setRapportIntervForm] = React.useState({})
   const [savingRapportInterv, setSavingRapportInterv] = React.useState(false)
   const [uploadingPhotoInterv, setUploadingPhotoInterv] = React.useState(false)
+  const [audiosInterv, setAudiosInterv] = React.useState([])
+  const [uploadingAudioInterv, setUploadingAudioInterv] = React.useState(false)
   const [extractingFramesVisite, setExtractingFramesVisite] = React.useState(null)
   const [extractingFramesInterv, setExtractingFramesInterv] = React.useState(null)
   const [generatingRapportVisite, setGeneratingRapportVisite] = React.useState(false)
@@ -1972,6 +2003,26 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).filter(function(u) { return u !== url }) }) })
   }
 
+  async function ajouterAudios(files, existants, setAudios, setUploading) {
+    setUploading(true)
+    try {
+      var restants = AUDIO_MAX_FILES - existants.length
+      if (restants <= 0) { setMsg('Maximum ' + AUDIO_MAX_FILES + ' notes vocales'); return }
+      var aTraiter = Array.from(files).slice(0, restants)
+      var lus = []
+      for (var i = 0; i < aTraiter.length; i++) {
+        var f = aTraiter[i]
+        if (f.size > AUDIO_MAX_BYTES) { setMsg('Fichier trop volumineux (max 3 Mo) : ' + f.name); continue }
+        lus.push(await lireAudioBase64(f))
+      }
+      if (lus.length) setAudios(function(prev) { return prev.concat(lus) })
+    } catch (e) {
+      setMsg('Erreur lecture audio : ' + (e && e.message ? e.message : 'inconnue'))
+    } finally {
+      setUploading(false)
+    }
+  }
+
   async function extraireFramesVideo(file, formSetter, setExtracting) {
     var objectUrl = URL.createObjectURL(file)
     var video = document.createElement('video')
@@ -2019,6 +2070,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var { devis, client } = rapportVisiteModal
     var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
     try {
+      var totalB64V = (audiosVisite || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
+      if (totalB64V > AUDIO_MAX_TOTAL_B64) {
+        setRapportVisiteErreurIA('Notes vocales trop volumineuses au total (~' + Math.round(totalB64V / 1024 / 1024) + ' Mo). Réduisez la durée ou le nombre de notes (limite ~4 Mo au total).')
+        setGeneratingRapportVisite(false)
+        return
+      }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2026,12 +2083,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           type: 'visite',
           notes: rapportVisiteForm.notesTechnicien,
           photos: rapportVisiteForm.photos || [],
-          context: { clientNom, adresse: rapportVisiteForm.adresseSite, date: rapportVisiteForm.dateVisite, technicien: rapportVisiteForm.technicien, prestation: devis.prestation },
+          audios: audiosVisite.map(function(a) { return { mimeType: a.mimeType, data: a.data } }),
+          context: { clientNom, adresse: rapportVisiteForm.adresseSite, date: rapportVisiteForm.dateVisite, technicien: rapportVisiteForm.technicien, prestation: devis.prestation, audiosCount: audiosVisite.length },
         })
       })
-      var data = await res.json()
-      if (!res.ok || !data.success) {
-        setRapportVisiteErreurIA(data.error || 'Erreur inconnue')
+      var data = null
+      try { data = await res.json() } catch (_) { data = null }
+      if (!res.ok || !data || !data.success) {
+        setRapportVisiteErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportVisiteForm(function(prev) {
@@ -2045,6 +2104,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         })
         setRapportVisitePhase('genere')
+        setAudiosVisite([])
       }
     } catch(e) { setRapportVisiteErreurIA(e.message) }
     setGeneratingRapportVisite(false)
@@ -2199,6 +2259,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoVisite, setRapportVisiteForm) }) }, disabled: uploadingPhotoVisite }),
               uploadingPhotoVisite ? '⏳ Envoi...' : '+ Ajouter des photos'
             ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingAudioVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600', marginLeft: '8px' } },
+              React.createElement('input', { type: 'file', accept: 'audio/*', multiple: true, style: { display: 'none' }, onChange: function(e) { ajouterAudios(e.target.files, audiosVisite, setAudiosVisite, setUploadingAudioVisite); e.target.value = '' }, disabled: uploadingAudioVisite }),
+              uploadingAudioVisite ? '⏳ Lecture…' : '+ Ajouter note vocale'
+            ),
+            audiosVisite.length > 0 && React.createElement('div', { style: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' } },
+              audiosVisite.map(function(a, i) {
+                return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#0369a1' } },
+                  React.createElement('span', null, '🎤 ' + (a.name || ('Note vocale ' + (i + 1)))),
+                  React.createElement('button', { type: 'button', onClick: function() { setAudiosVisite(function(prev) { return prev.filter(function(_, j) { return j !== i }) }) }, style: { border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', padding: 0 } }, '✕')
+                )
+              })
+            ),
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
                 var files = Array.from(e.target.files).slice(0, 3)
@@ -2215,8 +2287,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportVisiteIA,
-              disabled: generatingRapportVisite || uploadingPhotoVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length)) ? 0.5 : 1 }
+              disabled: generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length)) ? 0.5 : 1 }
             }, generatingRapportVisite ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
@@ -2394,6 +2466,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var { devis, client } = rapportIntervModal
     var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
     try {
+      var totalB64I = (audiosInterv || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
+      if (totalB64I > AUDIO_MAX_TOTAL_B64) {
+        setRapportIntervErreurIA('Notes vocales trop volumineuses au total (~' + Math.round(totalB64I / 1024 / 1024) + ' Mo). Réduisez la durée ou le nombre de notes (limite ~4 Mo au total).')
+        setGeneratingRapportInterv(false)
+        return
+      }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2401,12 +2479,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           type: 'intervention',
           notes: rapportIntervForm.notesTechnicien,
           photos: rapportIntervForm.photos || [],
-          context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation },
+          audios: audiosInterv.map(function(a) { return { mimeType: a.mimeType, data: a.data } }),
+          context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation, audiosCount: audiosInterv.length },
         })
       })
-      var data = await res.json()
-      if (!res.ok || !data.success) {
-        setRapportIntervErreurIA(data.error || 'Erreur inconnue')
+      var data = null
+      try { data = await res.json() } catch (_) { data = null }
+      if (!res.ok || !data || !data.success) {
+        setRapportIntervErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportIntervForm(function(prev) {
@@ -2421,6 +2501,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         })
         setRapportIntervPhase('genere')
+        setAudiosInterv([])
       }
     } catch(e) { setRapportIntervErreurIA(e.message) }
     setGeneratingRapportInterv(false)
@@ -2547,6 +2628,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: function(e) { Array.from(e.target.files).forEach(function(f) { uploaderPhotoRapport(f, setUploadingPhotoInterv, setRapportIntervForm) }) }, disabled: uploadingPhotoInterv }),
               uploadingPhotoInterv ? '⏳ Envoi...' : '+ Ajouter des photos'
             ),
+            React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bae6fd', backgroundColor: '#f0f9ff', cursor: uploadingAudioInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#0369a1', fontWeight: '600', marginLeft: '8px' } },
+              React.createElement('input', { type: 'file', accept: 'audio/*', multiple: true, style: { display: 'none' }, onChange: function(e) { ajouterAudios(e.target.files, audiosInterv, setAudiosInterv, setUploadingAudioInterv); e.target.value = '' }, disabled: uploadingAudioInterv }),
+              uploadingAudioInterv ? '⏳ Lecture…' : '+ Ajouter note vocale'
+            ),
+            audiosInterv.length > 0 && React.createElement('div', { style: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' } },
+              audiosInterv.map(function(a, i) {
+                return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#0369a1' } },
+                  React.createElement('span', null, '🎤 ' + (a.name || ('Note vocale ' + (i + 1)))),
+                  React.createElement('button', { type: 'button', onClick: function() { setAudiosInterv(function(prev) { return prev.filter(function(_, j) { return j !== i }) }) }, style: { border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', padding: 0 } }, '✕')
+                )
+              })
+            ),
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
                 var files = Array.from(e.target.files).slice(0, 3)
@@ -2569,8 +2662,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportIntervIA,
-              disabled: generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length)) ? 0.5 : 1 }
+              disabled: generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length)) ? 0.5 : 1 }
             }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
