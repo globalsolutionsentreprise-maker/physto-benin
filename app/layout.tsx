@@ -209,17 +209,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/contact" style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "#1a6b38", color: "#fff", fontSize: "12px", fontWeight: "600", padding: "9px 16px", borderRadius: "8px", textDecoration: "none" }}>
                 Devis gratuit
               </a>
-              <a href="tel:+2290153047950" style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "12px", fontWeight: "600", padding: "9px 14px", borderRadius: "8px", textDecoration: "none" }}>
-                Appel
-              </a>
             </div>
 
             <div className="nav-mobile-btn" style={{ display: "none", alignItems: "center", gap: "8px" }}>
               <a href="/contact" style={{ backgroundColor: "#1a6b38", color: "#fff", fontSize: "11px", fontWeight: "600", padding: "8px 12px", borderRadius: "8px", textDecoration: "none" }}>
                 Devis
-              </a>
-              <a href="tel:+2290153047950" style={{ backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "8px 12px", borderRadius: "8px", textDecoration: "none" }}>
-                Appel
               </a>
             </div>
           </div>

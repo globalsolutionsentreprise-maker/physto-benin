@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 export default function Footer() {
-  const [coord, setCoord] = useState({ email: "contact@phyto-benin.com", telephone: "+229 01 53 04 79 50", adresse: "Cotonou, Bénin", whatsapp: "2290153047950" })
+  const [coord, setCoord] = useState({ email: "contact@phyto-benin.com", telephone: "", adresse: "Cotonou, Bénin", whatsapp: "" })
   useEffect(function() {
     supabase.from("parametres").select("cle, valeur").then(function({ data }: { data: any }) {
       if (data) {
@@ -35,7 +35,6 @@ export default function Footer() {
         <div>
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Contact</h4>
           <span style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px" }}>{coord.adresse}</span>
-          <a href={"tel:"+coord.telephone.replace(/\s/g,"")} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.telephone}</a>
           <a href="/contact" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Demander un devis</a>
           <a href={"mailto:"+coord.email} style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{coord.email}</a>
           <div style={{ marginTop: "14px", paddingTop: "14px", borderTop: "1px solid #eee" }}>

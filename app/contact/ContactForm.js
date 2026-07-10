@@ -4,8 +4,6 @@ import { useState } from "react"
 export default function ContactForm() {
 
   const FORMSPREE_URL = "https://formspree.io/f/mreorevl"
-  const TEL = "+2290153047950"
-  const TEL_AFFICHE = "+229 01 53 04 79 50"
   const EMAIL = "contact@phyto-benin.com"
 
   const [statut, setStatut] = useState("idle")
@@ -189,7 +187,6 @@ export default function ContactForm() {
           <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "24px" }}>CONTACTS DIRECTS</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {[
-              { ico: "☎", label: "Téléphone", valeur: TEL_AFFICHE, href: "tel:" + TEL, couleur: "#0a2e1a" },
               { ico: "✉", label: "Email", valeur: EMAIL, href: "mailto:" + EMAIL, couleur: "#0a2e1a" },
               { ico: "📍", label: "Adresse", valeur: "Cotonou, Bénin", href: "#", couleur: "#0a2e1a" },
             ].map(function(c) {

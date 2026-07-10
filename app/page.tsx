@@ -455,9 +455,6 @@ export default function Accueil() {
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
               Demander une intervention
             </a>
-            <a href="tel:+2290153047950" style={{ backgroundColor: "transparent", color: "#ffffff", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
-              Nous appeler
-            </a>
           </div>
         </div>
       </section>
