@@ -4040,102 +4040,52 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
       React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, "Modifier " + editingDevis.numero),
       React.createElement("div", { style: { marginBottom: "14px" } },
-        React.createElement("label", { style: lbl }, "Prestation(s) * — sélectionnez une ou plusieurs"),
-        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "4px", padding: "12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", backgroundColor: "#fff" } },
-          PRESTATIONS.map(function(p) {
-            var checked = (formDevis.prestations || []).includes(p)
-            return React.createElement("div", { key: p,
-              style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "13px", cursor: "pointer", padding: "6px 8px", borderRadius: "4px", backgroundColor: checked ? "#f0fdf4" : "transparent", border: checked ? "1px solid #bbf7d0" : "1px solid transparent", userSelect: "none" },
-              onClick: function() {
+        React.createElement("label", { style: lbl }, "Lignes du devis * — une ligne par secteur/zone"),
+        React.createElement("div", { style: { border: "1.5px solid #e0ddd6", borderRadius: "8px", overflow: "hidden" } },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.4fr 1.4fr 0.8fr 0.9fr 1fr 32px", gap: "6px", padding: "8px 10px", backgroundColor: "#0a2e1a", fontSize: "10px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.06em" } },
+            React.createElement("span", null, "Prestation"),
+            React.createElement("span", null, "Secteur / zone"),
+            React.createElement("span", { style: { textAlign: "right" } }, "Surface"),
+            React.createElement("span", { style: { textAlign: "right" } }, "Prix/m²"),
+            React.createElement("span", { style: { textAlign: "right" } }, "Montant"),
+            React.createElement("span", null, "")
+          ),
+          (formDevis.lignes || []).map(function(l, idx) {
+            var m = montantLigne(l)
+            var setLigne = function(champ, val) {
+              setFormDevis(function(prev) {
+                var arr = (prev.lignes || []).map(function(x, i) { return i === idx ? Object.assign({}, x, (function(){ var o={}; o[champ]=val; return o })()) : x })
+                var total = arr.reduce(function(s, x) { return s + montantLigne(x) }, 0)
+                return Object.assign({}, prev, { lignes: arr, montantBrut: total > 0 ? String(total) : prev.montantBrut })
+              })
+            }
+            return React.createElement("div", { key: idx, style: { display: "grid", gridTemplateColumns: "1.4fr 1.4fr 0.8fr 0.9fr 1fr 32px", gap: "6px", padding: "8px 10px", alignItems: "center", borderTop: "1px solid #f0ede8", backgroundColor: "#fff" } },
+              React.createElement("select", { value: l.prestation || "", onChange: function(e) { setLigne("prestation", e.target.value) }, style: Object.assign({}, inp, { padding: "7px 8px" }) },
+                React.createElement("option", { value: "" }, "— choisir —"),
+                PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) })
+              ),
+              React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Ex: Bloc A", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
+              React.createElement("input", { type: "number", value: l.superficie || "", onChange: function(e) { setLigne("superficie", e.target.value) }, placeholder: "m²", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
+              React.createElement("input", { type: "number", value: l.prixM2 || "", onChange: function(e) { setLigne("prixM2", e.target.value) }, placeholder: "FCFA", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
+              React.createElement("span", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", textAlign: "right" } }, m > 0 ? m.toLocaleString("fr-FR") : "—"),
+              React.createElement("button", { type: "button", title: "Supprimer la ligne", onClick: function() {
                 setFormDevis(function(prev) {
-                  var current = prev.prestations || []
-                  var newList = current.includes(p) ? current.filter(function(x) { return x !== p }) : current.concat([p])
-                  return Object.assign({}, prev, { prestations: newList })
+                  var arr = (prev.lignes || []).filter(function(x, i) { return i !== idx })
+                  if (arr.length === 0) arr = [{ prestation: "", secteur: "", superficie: "", prixM2: "" }]
+                  var total = arr.reduce(function(s, x) { return s + montantLigne(x) }, 0)
+                  return Object.assign({}, prev, { lignes: arr, montantBrut: total > 0 ? String(total) : "" })
                 })
-              }
-            },
-              React.createElement("input", {
-                type: "checkbox",
-                checked: checked,
-                onChange: function() {},
-                style: { accentColor: "#0a2e1a", width: "14px", height: "14px", flexShrink: 0, pointerEvents: "none" }
-              }),
-              p
-            )
-          })
-        ),
-        (formDevis.prestations && formDevis.prestations.length > 0) && React.createElement("div", { style: { marginTop: "6px", fontSize: "12px", color: "#065f46", backgroundColor: "#f0fdf4", padding: "6px 10px", borderRadius: "4px" } },
-          "Sélectionnées : " + formDevis.prestations.join(" + ")
-        )
-      ),
-      (function() {
-        var prestations = formDevis.prestations || []
-        if (prestations.length === 0) return null
-        return React.createElement("div", { style: { marginBottom: "12px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px", padding: "14px 16px" } },
-          React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" } }, "Superficie et prix par prestation"),
-          prestations.map(function(p) {
-            var supVal = formDevis.superficieParPrestation ? (formDevis.superficieParPrestation[p] || "") : ""
-            var pm2 = formDevis.prixParPrestation ? (formDevis.prixParPrestation[p] || "") : ""
-            var montantP = (supVal && pm2) ? Math.round(parseFloat(supVal) * parseFloat(pm2)) : 0
-            return React.createElement("div", { key: p, style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" } },
-              React.createElement("span", { style: { flex: "0 0 140px", fontSize: "13px", color: "#0a2e1a", fontWeight: "600" } }, p),
-              React.createElement("input", {
-                type: "number",
-                value: supVal,
-                onChange: function(e) {
-                  var val = e.target.value
-                  setFormDevis(function(prev) {
-                    var newSPP = Object.assign({}, prev.superficieParPrestation || {})
-                    newSPP[p] = val
-                    var total = (prev.prestations || []).reduce(function(sum, pr) {
-                      var s = parseFloat(pr === p ? val : (newSPP[pr] || 0)) || 0
-                      var v = parseFloat((prev.prixParPrestation || {})[pr] || 0) || 0
-                      return sum + (s && v ? Math.round(s * v) : 0)
-                    }, 0)
-                    return Object.assign({}, prev, { superficieParPrestation: newSPP, montantBrut: total > 0 ? String(total) : prev.montantBrut })
-                  })
-                },
-                placeholder: "m²",
-                style: Object.assign({}, inp, { width: "80px", textAlign: "right" })
-              }),
-              React.createElement("span", { style: { fontSize: "11px", color: "#888" } }, "m² ×"),
-              React.createElement("input", {
-                type: "number",
-                value: pm2,
-                onChange: function(e) {
-                  var val = e.target.value
-                  setFormDevis(function(prev) {
-                    var newPPP = Object.assign({}, prev.prixParPrestation || {})
-                    newPPP[p] = val
-                    var total = (prev.prestations || []).reduce(function(sum, pr) {
-                      var s = parseFloat((prev.superficieParPrestation || {})[pr] || 0) || 0
-                      var v = parseFloat(pr === p ? val : (newPPP[pr] || 0)) || 0
-                      return sum + (s && v ? Math.round(s * v) : 0)
-                    }, 0)
-                    return Object.assign({}, prev, { prixParPrestation: newPPP, montantBrut: total > 0 ? String(total) : prev.montantBrut })
-                  })
-                },
-                placeholder: "FCFA/m²",
-                style: Object.assign({}, inp, { width: "110px", textAlign: "right" })
-              }),
-              React.createElement("span", { style: { fontSize: "12px", color: "#888", minWidth: "110px", textAlign: "right" } },
-                montantP > 0 ? "= " + montantP.toLocaleString("fr-FR") + " FCFA" : "= —"
-              )
+              }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
             )
           }),
-          React.createElement("div", { style: { borderTop: "1px solid #e0ddd6", marginTop: "8px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } },
-            React.createElement("span", null, "Total prestations"),
-            React.createElement("span", null, (function() {
-              var t = prestations.reduce(function(s, pr) {
-                var sup = parseFloat((formDevis.superficieParPrestation || {})[pr]) || 0
-                var pm2v = parseFloat((formDevis.prixParPrestation || {})[pr]) || 0
-                return s + (sup && pm2v ? Math.round(sup * pm2v) : 0)
-              }, 0)
-              return t > 0 ? t.toLocaleString("fr-FR") + " FCFA" : "—"
-            })())
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderTop: "1px solid #e0ddd6", backgroundColor: "#f8f7f4" } },
+            React.createElement("button", { type: "button", onClick: function() {
+              setFormDevis(function(prev) { return Object.assign({}, prev, { lignes: (prev.lignes || []).concat([{ prestation: "", secteur: "", superficie: "", prixM2: "" }]) }) })
+            }, style: { background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter une ligne"),
+            React.createElement("span", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, "Total brut : " + ((formDevis.lignes || []).reduce(function(s, x) { return s + montantLigne(x) }, 0)).toLocaleString("fr-FR") + " FCFA")
           )
         )
-      })(),
+      ),
       React.createElement("div", { style: { marginBottom: "12px" } },
         React.createElement("label", { style: lbl }, "Prix de base FCFA *" + (formDevis.superficie && formDevis.prixM2 ? " — calculé automatiquement" : "")),
         React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { montantBrut: v }) }) }, placeholder: "200000", style: inp })
