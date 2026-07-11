@@ -3342,10 +3342,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   // ── G5 : kanban commercial (statut) ──────────────────────────────────────
   async function deplacerCarte(devisId, newStatut) {
     if (!newStatut) return
+    // Déplacer vers une étape commerciale réinitialise le parcours d'exécution
+    // (voir action "move" côté API) : sinon la carte reste verrouillée dans sa
+    // colonne d'exécution car colUnifiee fait primer parcours.*.done.
+    var resetParcours = ["contact", "devis", "relance", "echec"].indexOf(newStatut) > -1
     setFinData(function(prev) {
       if (!prev) return prev
       return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) { return c.id === devisId ? Object.assign({}, c, { statut: newStatut }) : c }) })
     })
+    if (resetParcours) {
+      setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { parcours: {} }) : d }) })
+    }
     setMsg("Déplacé : " + (ST_META[newStatut] ? ST_META[newStatut].label : newStatut))
     try {
       var sess = await db.auth.getSession()

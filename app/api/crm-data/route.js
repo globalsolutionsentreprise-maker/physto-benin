@@ -159,6 +159,13 @@ export async function POST(req) {
 
   if (action === "move") {
     const updateData = { crm_statut: body.statut }
+    // Garde-fou : déplacer une carte vers une étape COMMERCIALE (avant exécution)
+    // réinitialise le parcours d'exécution, sinon colUnifiee (front) la garde
+    // verrouillée dans sa colonne d'exécution (parcours.*.done prime) → le
+    // déplacement paraîtrait « sans effet ». Les rapports/fiches restent en base.
+    if (["contact", "devis", "relance", "echec"].includes(body.statut)) {
+      updateData.parcours = {}
+    }
     if (body.statut === "converti") {
       const { data: row } = await supabase.from("devis").select("montant_net, montant_facture_crm").eq("id", body.id).single()
       if (row && !row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0

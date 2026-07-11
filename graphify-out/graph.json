@@ -267,7 +267,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5133",
+      "source_location": "L5140",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5142",
+      "source_location": "L5149",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5149",
+      "source_location": "L5156",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5153",
+      "source_location": "L5160",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5232",
+      "source_location": "L5239",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5434",
+      "source_location": "L5441",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5488",
+      "source_location": "L5495",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
@@ -8928,9 +8928,9 @@
       "source_file": ".superpowers/sdd/progress.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_progress",
-      "target": "sdd_progress_sdd_progress_devis_lignes_multi_secteurs",
-      "confidence_score": 1.0
+      "target": "sdd_progress_sdd_progress_devis_lignes_multi_secteurs"
     },
     {
       "relation": "contains",
@@ -8938,9 +8938,9 @@
       "source_file": ".superpowers/sdd/task-1-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_1_brief",
-      "target": "sdd_task_1_brief_task_1_migration_colonne_lignes",
-      "confidence_score": 1.0
+      "target": "sdd_task_1_brief_task_1_migration_colonne_lignes"
     },
     {
       "relation": "contains",
@@ -9168,9 +9168,9 @@
       "source_file": ".superpowers/sdd/task-2-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_brief",
-      "target": "sdd_task_2_brief_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_brief_task_2_helpers_lignesfromdevis_lignevide_resumeprestations"
     },
     {
       "relation": "contains",
@@ -9178,9 +9178,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report",
-      "target": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes"
     },
     {
       "relation": "contains",
@@ -9188,9 +9188,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_build",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_build"
     },
     {
       "relation": "contains",
@@ -9198,9 +9198,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_changes_app_admin_page_js_composant_sectionclientsdevis",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_changes_app_admin_page_js_composant_sectionclientsdevis"
     },
     {
       "relation": "contains",
@@ -9208,9 +9208,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_commit"
     },
     {
       "relation": "contains",
@@ -9218,9 +9218,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_concerns",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_concerns"
     },
     {
       "relation": "contains",
@@ -9228,9 +9228,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_diff_final_git_show_73f57e6_stat",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_diff_final_git_show_73f57e6_stat"
     },
     {
       "relation": "contains",
@@ -9238,9 +9238,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_grep_de_v\u00e9rification_post_\u00e9dition",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_grep_de_v\u00e9rification_post_\u00e9dition"
     },
     {
       "relation": "contains",
@@ -9248,9 +9248,9 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
-      "target": "sdd_task_2_report_point_non_modifi\u00e9_intentionnel_\u00e0_v\u00e9rifier_en_task_3",
-      "confidence_score": 1.0
+      "target": "sdd_task_2_report_point_non_modifi\u00e9_intentionnel_\u00e0_v\u00e9rifier_en_task_3"
     },
     {
       "relation": "contains",
@@ -9258,9 +9258,9 @@
       "source_file": ".superpowers/sdd/task-3-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_brief",
-      "target": "sdd_task_3_brief_task_3_ouvrireditiondevis_charge_les_lignes",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_brief_task_3_ouvrireditiondevis_charge_les_lignes"
     },
     {
       "relation": "contains",
@@ -9268,9 +9268,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report",
-      "target": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat"
     },
     {
       "relation": "contains",
@@ -9278,9 +9278,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_build",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_build"
     },
     {
       "relation": "contains",
@@ -9288,9 +9288,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_changement",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_changement"
     },
     {
       "relation": "contains",
@@ -9298,9 +9298,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_commit"
     },
     {
       "relation": "contains",
@@ -9308,9 +9308,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_concern",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_concern"
     },
     {
       "relation": "contains",
@@ -9318,9 +9318,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_self_review_git_show",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_self_review_git_show"
     },
     {
       "relation": "contains",
@@ -9328,9 +9328,9 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
-      "target": "sdd_task_3_report_\u00e9tape_3_du_brief_script_ponctuel_de_v\u00e9rification_db",
-      "confidence_score": 1.0
+      "target": "sdd_task_3_report_\u00e9tape_3_du_brief_script_ponctuel_de_v\u00e9rification_db"
     },
     {
       "relation": "contains",
@@ -9338,9 +9338,9 @@
       "source_file": ".superpowers/sdd/task-4-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_brief",
-      "target": "sdd_task_4_brief_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_brief_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes"
     },
     {
       "relation": "contains",
@@ -9348,9 +9348,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report",
-      "target": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur"
     },
     {
       "relation": "contains",
@@ -9358,9 +9358,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_boundaries_replaced",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_boundaries_replaced"
     },
     {
       "relation": "contains",
@@ -9368,9 +9368,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_build_result",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_build_result"
     },
     {
       "relation": "contains",
@@ -9378,9 +9378,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_commit"
     },
     {
       "relation": "contains",
@@ -9388,9 +9388,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_concerns",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_concerns"
     },
     {
       "relation": "contains",
@@ -9398,9 +9398,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_replacement",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_replacement"
     },
     {
       "relation": "contains",
@@ -9408,9 +9408,9 @@
       "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
-      "target": "sdd_task_4_report_self_review_of_diff",
-      "confidence_score": 1.0
+      "target": "sdd_task_4_report_self_review_of_diff"
     },
     {
       "relation": "contains",
@@ -9418,9 +9418,9 @@
       "source_file": ".superpowers/sdd/task-5-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_brief",
-      "target": "sdd_task_5_brief_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_brief_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9"
     },
     {
       "relation": "contains",
@@ -9428,9 +9428,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report",
-      "target": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation"
     },
     {
       "relation": "contains",
@@ -9438,9 +9438,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_build_result",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_build_result"
     },
     {
       "relation": "contains",
@@ -9448,9 +9448,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_commit"
     },
     {
       "relation": "contains",
@@ -9458,9 +9458,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_concerns",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_concerns"
     },
     {
       "relation": "contains",
@@ -9468,9 +9468,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_self_review_of_diff",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_self_review_of_diff"
     },
     {
       "relation": "contains",
@@ -9478,9 +9478,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_status_done",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_status_done"
     },
     {
       "relation": "contains",
@@ -9488,9 +9488,9 @@
       "source_file": ".superpowers/sdd/task-5-report.md",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
-      "target": "sdd_task_5_report_steps_applied",
-      "confidence_score": 1.0
+      "target": "sdd_task_5_report_steps_applied"
     },
     {
       "relation": "contains",
@@ -9498,9 +9498,9 @@
       "source_file": ".superpowers/sdd/task-6-brief.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_brief",
-      "target": "sdd_task_6_brief_task_6_impression_colonne_secteur",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_brief_task_6_impression_colonne_secteur"
     },
     {
       "relation": "contains",
@@ -9508,9 +9508,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report",
-      "target": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur"
     },
     {
       "relation": "contains",
@@ -9518,9 +9518,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_build_result",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_build_result"
     },
     {
       "relation": "contains",
@@ -9528,9 +9528,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_commit",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_commit"
     },
     {
       "relation": "contains",
@@ -9538,9 +9538,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_concerns",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_concerns"
     },
     {
       "relation": "contains",
@@ -9548,9 +9548,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_exact_change",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_exact_change"
     },
     {
       "relation": "contains",
@@ -9558,9 +9558,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_iife_boundaries_verified_before_editing",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_iife_boundaries_verified_before_editing"
     },
     {
       "relation": "contains",
@@ -9568,9 +9568,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_self_review_of_diff",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_self_review_of_diff"
     },
     {
       "relation": "contains",
@@ -9578,9 +9578,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_status",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_status"
     },
     {
       "relation": "contains",
@@ -9588,9 +9588,9 @@
       "source_file": ".superpowers/sdd/task-6-report.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
-      "target": "sdd_task_6_report_table_column_confirmation",
-      "confidence_score": 1.0
+      "target": "sdd_task_6_report_table_column_confirmation"
     },
     {
       "relation": "contains",
@@ -10368,9 +10368,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan"
     },
     {
       "relation": "contains",
@@ -10378,9 +10378,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints"
     },
     {
       "relation": "contains",
@@ -10388,9 +10388,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L442",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_notes_de_d\u00e9pendances_entre_t\u00e2ches",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_notes_de_d\u00e9pendances_entre_t\u00e2ches"
     },
     {
       "relation": "contains",
@@ -10398,9 +10398,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_1_migration_colonne_lignes",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_1_migration_colonne_lignes"
     },
     {
       "relation": "contains",
@@ -10408,9 +10408,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_2_helpers_lignesfromdevis_lignevide_resumeprestations"
     },
     {
       "relation": "contains",
@@ -10418,9 +10418,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_3_ouvrireditiondevis_charge_les_lignes",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_3_ouvrireditiondevis_charge_les_lignes"
     },
     {
       "relation": "contains",
@@ -10428,9 +10428,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes"
     },
     {
       "relation": "contains",
@@ -10438,9 +10438,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L269",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9"
     },
     {
       "relation": "contains",
@@ -10448,9 +10448,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L343",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_6_impression_colonne_secteur",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_6_impression_colonne_secteur"
     },
     {
       "relation": "contains",
@@ -10458,9 +10458,9 @@
       "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
       "source_location": "L409",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
-      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_7_d\u00e9ploiement_qa_prod",
-      "confidence_score": 1.0
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_7_d\u00e9ploiement_qa_prod"
     },
     {
       "relation": "contains",
@@ -11048,9 +11048,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design"
     },
     {
       "relation": "contains",
@@ -11058,9 +11058,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es"
     },
     {
       "relation": "contains",
@@ -11068,9 +11068,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_2_r\u00e9trocompatibilit\u00e9_anciens_devis",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_2_r\u00e9trocompatibilit\u00e9_anciens_devis"
     },
     {
       "relation": "contains",
@@ -11078,9 +11078,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_3_formulaire_renderformdevis",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_3_formulaire_renderformdevis"
     },
     {
       "relation": "contains",
@@ -11088,9 +11088,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L103",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_4_sauvegarde_creerdevis",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_4_sauvegarde_creerdevis"
     },
     {
       "relation": "contains",
@@ -11098,9 +11098,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L116",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_5_impression_du_devis_imprimerdevis",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_5_impression_du_devis_imprimerdevis"
     },
     {
       "relation": "contains",
@@ -11108,9 +11108,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_6_affichage_listes_tableau_de_bord",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_6_affichage_listes_tableau_de_bord"
     },
     {
       "relation": "contains",
@@ -11118,9 +11118,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L137",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_7_tests_v\u00e9rification",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_7_tests_v\u00e9rification"
     },
     {
       "relation": "contains",
@@ -11128,9 +11128,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_approche_retenue_lignes_unifi\u00e9es_approche_a",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_approche_retenue_lignes_unifi\u00e9es_approche_a"
     },
     {
       "relation": "contains",
@@ -11138,9 +11138,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L149",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_fichiers_touch\u00e9s",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_fichiers_touch\u00e9s"
     },
     {
       "relation": "contains",
@@ -11148,9 +11148,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_objectif",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_objectif"
     },
     {
       "relation": "contains",
@@ -11158,9 +11158,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_probl\u00e8me",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_probl\u00e8me"
     },
     {
       "relation": "contains",
@@ -11168,9 +11168,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_risques_notes",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_risques_notes"
     },
     {
       "relation": "contains",
@@ -11178,9 +11178,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_colonnes_conserv\u00e9es_r\u00e9trocompatibilit\u00e9_consommateurs_existants",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_colonnes_conserv\u00e9es_r\u00e9trocompatibilit\u00e9_consommateurs_existants"
     },
     {
       "relation": "contains",
@@ -11188,9 +11188,9 @@
       "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
-      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_nouvelle_colonne",
-      "confidence_score": 1.0
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_nouvelle_colonne"
     },
     {
       "relation": "contains",
@@ -11394,5 +11394,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "00bd015200b9159950ffe7745264221337f38aed"
+  "built_at_commit": "9c13cad676701552c79813d916b80190f0db33ff"
 }
