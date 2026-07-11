@@ -1440,7 +1440,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [showNouveauDevis, setShowNouveauDevis] = React.useState(false)
   const [nouveauDevisPresta, setNouveauDevisPresta] = React.useState([])
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
-  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
+  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
   const [showFormClient, setShowFormClient] = React.useState(false)
   const [editingClient, setEditingClient] = React.useState(null)
   const [submittingClient, setSubmittingClient] = React.useState(false)
@@ -1462,6 +1462,38 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     annule: { label: "Annulé", c: "#991b1b", bg: "#fee2e2" }
   }
   const PRESTATIONS = ["Désinsectisation", "Dératisation", "Désinfection", "Anti-termites", "Anti-moustiques", "Punaises de lit", "Reptiles et Serpents", "Contrat d'entretien"]
+
+  function ligneVide() { return { prestation: "", secteur: "", superficie: "", prixM2: "" } }
+
+  function montantLigne(l) {
+    var s = parseFloat(l.superficie) || 0
+    var p = parseFloat(l.prixM2) || 0
+    return (s && p) ? Math.round(s * p) : 0
+  }
+
+  // Rétrocompat : reconstruit les lignes d'un devis. Si d.lignes existe → l'utilise ;
+  // sinon reconstruit depuis l'ancien format (prestation + maps par prestation).
+  function lignesFromDevis(d) {
+    if (Array.isArray(d.lignes) && d.lignes.length > 0) {
+      return d.lignes.map(function(l) {
+        return { prestation: l.prestation || "", secteur: l.secteur || "", superficie: l.superficie != null ? String(l.superficie) : "", prixM2: l.prix_m2 != null ? String(l.prix_m2) : "" }
+      })
+    }
+    var ppp = d.prix_par_prestation || d.prixParPrestation || {}
+    var spp = d.superficie_par_prestation || d.superficieParPrestation || {}
+    var types = d.prestation ? String(d.prestation).split(" + ").map(function(p) { return p.trim() }).filter(Boolean) : []
+    if (types.length === 0) return [ligneVide()]
+    return types.map(function(p) {
+      return { prestation: p, secteur: "", superficie: spp[p] != null ? String(spp[p]) : "", prixM2: ppp[p] != null ? String(ppp[p]) : "" }
+    })
+  }
+
+  function resumePrestations(lignes) {
+    var seen = []
+    ;(lignes || []).forEach(function(l) { if (l.prestation && seen.indexOf(l.prestation) === -1) seen.push(l.prestation) })
+    return seen.join(" + ")
+  }
+
   const inp = { width: "100%", padding: "10px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
@@ -1682,7 +1714,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var prixM2Val = formDevis.prixM2 ? parseFloat(formDevis.prixM2) : null
 
     var viderForm = function() {
-      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
+      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
     }
 
     if (editingDevis) {
@@ -4203,7 +4235,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("button", { onClick: creerDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } },
           formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer"
         ),
-        React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
       )
     )
   }
