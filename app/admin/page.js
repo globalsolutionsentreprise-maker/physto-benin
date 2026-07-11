@@ -1695,12 +1695,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   async function creerDevis() {
-    var prestationStr = (formDevis.prestations && formDevis.prestations.length > 0)
-      ? formDevis.prestations.join(" + ")
-      : formDevis.prestation
+    var lignesClean = (formDevis.lignes || [])
+      .filter(function(l) { return l.prestation })
+      .map(function(l) { return { prestation: l.prestation, secteur: (l.secteur || "").trim(), superficie: parseFloat(l.superficie) || 0, prix_m2: parseFloat(l.prixM2) || 0, montant: montantLigne(l) } })
+    var prestationStr = resumePrestations(lignesClean)
     if ((!formDevis.clientId && !formDevis.nom) || !prestationStr || !formDevis.montantBrut) {
       setMsg("Remplissez tous les champs obligatoires."); return
     }
+    if (lignesClean.filter(function(l) { return l.montant > 0 }).length === 0) { setMsg("Ajoutez au moins une ligne avec surface et prix."); return }
     setMsg("")
 
     var brut = parseFloat(formDevis.montantBrut) || 0
@@ -1732,8 +1734,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         conditions_paiement: formDevis.conditionsPaiement || null,
         superficie: superficieVal,
         prix_m2: prixM2Val,
-        prix_par_prestation: (formDevis.prixParPrestation && Object.keys(formDevis.prixParPrestation).length > 0) ? formDevis.prixParPrestation : null,
-        superficie_par_prestation: (formDevis.superficieParPrestation && Object.keys(formDevis.superficieParPrestation).length > 0) ? formDevis.superficieParPrestation : null
+        lignes: lignesClean,
+        prix_par_prestation: null,
+        superficie_par_prestation: null
       }).eq("id", editingDevis.id)
       if (error) { setMsg("Erreur: " + error.message); return }
       if (enLigne && cl && cl.email) {
@@ -1743,7 +1746,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
       } else if (!enLigne) {
         setMsg("✓ Devis modifié")
-        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, superficieParPrestation: formDevis.superficieParPrestation || {}, prixParPrestation: formDevis.prixParPrestation || {}, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
+        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, lignes: lignesClean, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
         imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
       setEditingDevis(null)
