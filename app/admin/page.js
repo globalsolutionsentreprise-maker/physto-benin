@@ -3108,35 +3108,32 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       "</div>" +
       "<div class=\"sec\">Prestation(s)</div>" +
       (function() {
-        var prestList = d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }).filter(Boolean) : []
-        var ppp = d.prixParPrestation || {}
-        var spp = d.superficieParPrestation || {}
-        var hasMulti = prestList.length >= 1 && Object.keys(ppp).length > 0
-        if (hasMulti) {
-          var lignes = prestList.filter(function(p) { return parseFloat(ppp[p]) > 0 }).map(function(p) {
-            var pm2 = parseFloat(ppp[p]) || 0
-            var sup = parseFloat(spp[p]) || 0
-            var montP = (pm2 && sup) ? Math.round(sup * pm2) : 0
-            return "<tr>" +
-              "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600\">" + p + "</td>" +
-              "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (sup ? sup.toLocaleString("fr-FR") + " m²" : "—") + "</td>" +
-              "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right\">" + pm2.toLocaleString("fr-FR") + " FCFA/m²</td>" +
-              "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right\">" + (montP > 0 ? montP.toLocaleString("fr-FR") + " FCFA" : "—") + "</td>" +
-              "</tr>"
-          }).join("")
-          return "<div class=\"pbox\" style=\"padding:0;overflow:hidden\">" +
-            "<table style=\"width:100%;border-collapse:collapse\">" +
-            "<thead><tr style=\"background:#0a2e1a\">" +
-            "<th style=\"padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.08em;text-align:left\">Prestation</th>" +
-            "<th style=\"padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.08em;text-align:center\">Superficie</th>" +
-            "<th style=\"padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.08em;text-align:right\">Prix/m²</th>" +
-            "<th style=\"padding:8px 10px;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.08em;text-align:right\">Montant</th>" +
-            "</tr></thead><tbody>" + lignes + "</tbody></table>" +
-            (d.description ? "<div class=\"pdesc\" style=\"padding:10px 14px;font-size:12px;color:#555;border-top:1px solid #e8e6e0\">" + d.description + "</div>" : "") +
-            "</div>"
+        var lignes = lignesFromDevis(d).filter(function(l) { return montantLigne(l) > 0 })
+        if (lignes.length === 0) {
+          return "<div class=\"pbox\"><div class=\"pname\">" + (d.prestation || "Prestation") + "</div>" + (d.description ? "<div class=\"pdesc\">" + d.description + "</div>" : "") + "</div>"
         }
-        return "<div class=\"pbox\"><div class=\"pname\">" + d.prestation + "</div>" +
-          (d.description ? "<div class=\"pdesc\" style=\"margin-top:6px\">" + d.description + "</div>" : "") +
+        var rows = lignes.map(function(l) {
+          var pm2 = parseFloat(l.prixM2) || 0
+          var sup = parseFloat(l.superficie) || 0
+          var montP = montantLigne(l)
+          return "<tr>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600\">" + (l.prestation || "") + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#555\">" + (l.secteur ? l.secteur : "—") + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (sup ? sup.toLocaleString("fr-FR") + " m²" : "—") + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right\">" + pm2.toLocaleString("fr-FR") + " FCFA/m²</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right\">" + montP.toLocaleString("fr-FR") + " FCFA</td>" +
+            "</tr>"
+        }).join("")
+        return "<div class=\"pbox\" style=\"padding:0;overflow:hidden\">" +
+          "<table style=\"width:100%;border-collapse:collapse\">" +
+          "<thead><tr style=\"background:#0a2e1a\">" +
+          "<th style=\"padding:8px 10px;text-align:left;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.06em\">Prestation</th>" +
+          "<th style=\"padding:8px 10px;text-align:left;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.06em\">Secteur</th>" +
+          "<th style=\"padding:8px 10px;text-align:center;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.06em\">Surface</th>" +
+          "<th style=\"padding:8px 10px;text-align:right;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.06em\">Prix/m²</th>" +
+          "<th style=\"padding:8px 10px;text-align:right;font-size:10px;color:#d4a920;text-transform:uppercase;letter-spacing:0.06em\">Montant</th>" +
+          "</tr></thead><tbody>" + rows + "</tbody></table>" +
+          (d.description ? "<div style=\"padding:10px 12px;font-size:12px;color:#555;border-top:1px solid #e8e6e0\">" + d.description + "</div>" : "") +
           "</div>"
       })() +
       "<div class=\"sec\">Détail financier</div>" +
