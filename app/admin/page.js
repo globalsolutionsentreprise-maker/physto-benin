@@ -1117,7 +1117,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="pipeline" />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="devis" />
             </div>
           )}
 

@@ -92,7 +92,8 @@ export async function POST(req) {
       if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
       clientId = newClient.id
 
-      await creerBrouillonDevis(supabase, clientId, leadDescription)
+      // Plus de devis brouillon auto : un nouveau client n'a plus de devis fantôme
+      // « À définir / 0 FCFA ». Le devis se crée explicitement depuis la fiche client.
       return NextResponse.json({
         success: true,
         clientId,
@@ -175,7 +176,7 @@ export async function POST(req) {
       console.error("Resend error:", resendData)
     }
 
-    await creerBrouillonDevis(supabase, clientId)
+    // Plus de devis brouillon auto (voir plus haut) : le devis se crée à la demande.
     return NextResponse.json({
       success: true,
       clientId,
