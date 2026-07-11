@@ -4086,8 +4086,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           )
         )
       ),
-      React.createElement("div", { style: { marginBottom: "12px" } },
-        React.createElement("label", { style: lbl }, "Prix de base FCFA *" + (formDevis.superficie && formDevis.prixM2 ? " — calculé automatiquement" : "")),
+      ((formDevis.lignes || []).reduce(function(s, x) { return s + montantLigne(x) }, 0) === 0) && React.createElement("div", { style: { marginBottom: "12px" } },
+        React.createElement("label", { style: lbl }, "Prix de base FCFA * — saisie manuelle (aucune ligne chiffrée)"),
         React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { montantBrut: v }) }) }, placeholder: "200000", style: inp })
       ),
       React.createElement("div", { style: { marginBottom: "12px" } },

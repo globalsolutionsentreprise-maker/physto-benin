@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783770924.061205,
-    "ast_hash": "4e558de24fd1efc1e0554ff5a9f52d70",
+    "mtime": 1783771526.967554,
+    "ast_hash": "4b26b8a712f9f7d68ef38f7bce07cfe6",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -605,8 +605,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1783768758.5254881,
-    "ast_hash": "5441ed736c61cd6b31383f26b934f99e",
+    "mtime": 1783771096.6185179,
+    "ast_hash": "ae214a574b41994dd79a5e89e7e37590",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -715,8 +715,8 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/progress.md": {
-    "mtime": 1783771053.2945065,
-    "ast_hash": "f6e702ea816917b76c6ae3cc83d3e7ec",
+    "mtime": 1783771111.146957,
+    "ast_hash": "9b52b062b1acb6c171c6fc1c40b21a8c",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-1-brief.md": {
