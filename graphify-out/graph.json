@@ -267,7 +267,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5150",
+      "source_location": "L5133",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5159",
+      "source_location": "L5142",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5166",
+      "source_location": "L5149",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5170",
+      "source_location": "L5153",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5249",
+      "source_location": "L5232",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5451",
+      "source_location": "L5434",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5505",
+      "source_location": "L5488",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
@@ -1250,7 +1250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_espace_client_attestations_id_page_tsx_id_page",
-      "community": 81,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "id_page_attestationpage",
-      "community": 81,
+      "community": 3,
       "norm_label": "attestationpage()"
     },
     {
@@ -1270,7 +1270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dashboard_page",
-      "community": 81,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1280,7 +1280,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "dashboard_page_statut_labels",
-      "community": 81,
+      "community": 3,
       "norm_label": "statut_labels"
     },
     {
@@ -1290,7 +1290,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "dashboard_page_dashboard",
-      "community": 81,
+      "community": 3,
       "norm_label": "dashboard()"
     },
     {
@@ -1300,7 +1300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_espace_client_devis_id_page_tsx_id_page",
-      "community": 81,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1310,7 +1310,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "id_page_statut_labels",
-      "community": 81,
+      "community": 3,
       "norm_label": "statut_labels"
     },
     {
@@ -1320,7 +1320,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "id_page_devispage",
-      "community": 81,
+      "community": 3,
       "norm_label": "devispage()"
     },
     {
@@ -1330,7 +1330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "espace_client_page",
-      "community": 81,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
@@ -1340,7 +1340,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "espace_client_page_espaceclientlogin",
-      "community": 81,
+      "community": 3,
       "norm_label": "espaceclientlogin()"
     },
     {
@@ -1826,7 +1826,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_supabase_client",
-      "community": 81,
+      "community": 3,
       "norm_label": "supabase-client.ts"
     },
     {
@@ -1836,7 +1836,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_supabase_client_supabase",
-      "community": 81,
+      "community": 3,
       "norm_label": "supabase"
     },
     {
@@ -3120,6 +3120,16 @@
       "norm_label": "progress.md"
     },
     {
+      "label": "SDD Progress \u2014 devis-lignes-multi-secteurs",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/progress.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_progress_sdd_progress_devis_lignes_multi_secteurs",
+      "community": 79,
+      "norm_label": "sdd progress \u2014 devis-lignes-multi-secteurs"
+    },
+    {
       "label": "task-1-brief.md",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-1-brief.md",
@@ -3130,14 +3140,14 @@
       "norm_label": "task-1-brief.md"
     },
     {
-      "label": "Task 1: Backend \u2014 accepter et transmettre l'audio \u00e0 Gemini",
+      "label": "Task 1: Migration \u2014 colonne `lignes`",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-1-brief.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sdd_task_1_brief_task_1_backend_accepter_et_transmettre_l_audio_\u00e0_gemini",
+      "id": "sdd_task_1_brief_task_1_migration_colonne_lignes",
       "community": 77,
-      "norm_label": "task 1: backend \u2014 accepter et transmettre l'audio a gemini"
+      "norm_label": "task 1: migration \u2014 colonne `lignes`"
     },
     {
       "label": "task-1-report.md",
@@ -3380,14 +3390,14 @@
       "norm_label": "task-2-brief.md"
     },
     {
-      "label": "Task 2: Front \u2014 notes vocales dans le modal rapport de VISITE",
+      "label": "Task 2: Helpers `lignesFromDevis`, `ligneVide`, `resumePrestations`",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-2-brief.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sdd_task_2_brief_task_2_front_notes_vocales_dans_le_modal_rapport_de_visite",
+      "id": "sdd_task_2_brief_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
       "community": 78,
-      "norm_label": "task 2: front \u2014 notes vocales dans le modal rapport de visite"
+      "norm_label": "task 2: helpers `lignesfromdevis`, `lignevide`, `resumeprestations`"
     },
     {
       "label": "task-2-report.md",
@@ -3400,94 +3410,84 @@
       "norm_label": "task-2-report.md"
     },
     {
-      "label": "Task 2 \u2014 Report: notes vocales dans le modal rapport de VISITE",
+      "label": "Task 2 Report \u2014 Helpers lignesFromDevis + \u00e9tat formDevis.lignes",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
+      "id": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
       "community": 74,
-      "norm_label": "task 2 \u2014 report: notes vocales dans le modal rapport de visite"
-    },
-    {
-      "label": "Status: DONE_WITH_CONCERNS (see \"Deviation from brief\" below \u2014 not blocking, but flagged as instructed)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_status_done_with_concerns_see_deviation_from_brief_below_not_blocking_but_flagged_as_instructed",
-      "community": 74,
-      "norm_label": "status: done_with_concerns (see \"deviation from brief\" below \u2014 not blocking, but flagged as instructed)"
-    },
-    {
-      "label": "Component structure discovery (important)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L5",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_component_structure_discovery_important",
-      "community": 74,
-      "norm_label": "component structure discovery (important)"
-    },
-    {
-      "label": "Changes made (app/admin/page.js)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_changes_made_app_admin_page_js",
-      "community": 74,
-      "norm_label": "changes made (app/admin/page.js)"
-    },
-    {
-      "label": "Build result",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L51",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_build_result",
-      "community": 74,
-      "norm_label": "build result"
-    },
-    {
-      "label": "Files changed",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L55",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_files_changed",
-      "community": 74,
-      "norm_label": "files changed"
-    },
-    {
-      "label": "Self-review",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L59",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_self_review",
-      "community": 74,
-      "norm_label": "self-review"
-    },
-    {
-      "label": "Minor observation (not a blocker, not in brief scope)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L67",
-      "_origin": "ast",
-      "id": "sdd_task_2_report_minor_observation_not_a_blocker_not_in_brief_scope",
-      "community": 74,
-      "norm_label": "minor observation (not a blocker, not in brief scope)"
+      "norm_label": "task 2 report \u2014 helpers lignesfromdevis + etat formdevis.lignes"
     },
     {
       "label": "Commit",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L71",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "sdd_task_2_report_commit",
       "community": 74,
       "norm_label": "commit"
+    },
+    {
+      "label": "Changes (app/admin/page.js, composant SectionClientsDevis)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_changes_app_admin_page_js_composant_sectionclientsdevis",
+      "community": 74,
+      "norm_label": "changes (app/admin/page.js, composant sectionclientsdevis)"
+    },
+    {
+      "label": "Grep de v\u00e9rification post-\u00e9dition",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_grep_de_v\u00e9rification_post_\u00e9dition",
+      "community": 74,
+      "norm_label": "grep de verification post-edition"
+    },
+    {
+      "label": "Point non modifi\u00e9 (intentionnel, \u00e0 v\u00e9rifier en Task 3)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_point_non_modifi\u00e9_intentionnel_\u00e0_v\u00e9rifier_en_task_3",
+      "community": 74,
+      "norm_label": "point non modifie (intentionnel, a verifier en task 3)"
+    },
+    {
+      "label": "Build",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_build",
+      "community": 74,
+      "norm_label": "build"
+    },
+    {
+      "label": "Diff final (git show 73f57e6 --stat)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L57",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_diff_final_git_show_73f57e6_stat",
+      "community": 74,
+      "norm_label": "diff final (git show 73f57e6 --stat)"
+    },
+    {
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-2-report.md",
+      "source_location": "L62",
+      "_origin": "ast",
+      "id": "sdd_task_2_report_concerns",
+      "community": 74,
+      "norm_label": "concerns"
     },
     {
       "label": "task-3-brief.md",
@@ -3500,24 +3500,14 @@
       "norm_label": "task-3-brief.md"
     },
     {
-      "label": "Task 3: Front \u2014 notes vocales dans le modal rapport d'INTERVENTION",
+      "label": "Task 3: `ouvrirEditionDevis` charge les lignes",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-brief.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sdd_task_3_brief_task_3_front_notes_vocales_dans_le_modal_rapport_d_intervention",
+      "id": "sdd_task_3_brief_task_3_ouvrireditiondevis_charge_les_lignes",
       "community": 76,
-      "norm_label": "task 3: front \u2014 notes vocales dans le modal rapport d'intervention"
-    },
-    {
-      "label": "Notes de fin",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-brief.md",
-      "source_location": "L81",
-      "_origin": "ast",
-      "id": "sdd_task_3_brief_notes_de_fin",
-      "community": 76,
-      "norm_label": "notes de fin"
+      "norm_label": "task 3: `ouvrireditiondevis` charge les lignes"
     },
     {
       "label": "task-3-report.md",
@@ -3530,213 +3520,393 @@
       "norm_label": "task-3-report.md"
     },
     {
-      "label": "Task 3 Report \u2014 Front : notes vocales dans le modal rapport d'INTERVENTION",
+      "label": "Task 3 Report \u2014 `ouvrirEditionDevis` charge lignes (r\u00e9trocompat)",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
+      "id": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
       "community": 80,
-      "norm_label": "task 3 report \u2014 front : notes vocales dans le modal rapport d'intervention"
+      "norm_label": "task 3 report \u2014 `ouvrireditiondevis` charge lignes (retrocompat)"
     },
     {
-      "label": "Branch / commit",
+      "label": "Changement",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "sdd_task_3_report_branch_commit",
+      "id": "sdd_task_3_report_changement",
       "community": 80,
-      "norm_label": "branch / commit"
+      "norm_label": "changement"
     },
     {
-      "label": "Changes (app/admin/page.js, component `SectionClientsDevis`)",
+      "label": "Build",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L7",
+      "source_location": "L24",
       "_origin": "ast",
-      "id": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
+      "id": "sdd_task_3_report_build",
       "community": 80,
-      "norm_label": "changes (app/admin/page.js, component `sectionclientsdevis`)"
+      "norm_label": "build"
     },
     {
-      "label": "Step 1 \u2014 \u00c9tats intervention (after L1400, `uploadingPhotoInterv`)",
+      "label": "\u00c9tape 3 du brief (script ponctuel de v\u00e9rification DB)",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L9",
+      "source_location": "L28",
       "_origin": "ast",
-      "id": "sdd_task_3_report_step_1_\u00e9tats_intervention_after_l1400_uploadingphotointerv",
+      "id": "sdd_task_3_report_\u00e9tape_3_du_brief_script_ponctuel_de_v\u00e9rification_db",
       "community": 80,
-      "norm_label": "step 1 \u2014 etats intervention (after l1400, `uploadingphotointerv`)"
-    },
-    {
-      "label": "Step 2 \u2014 Bouton + liste notes vocales (JSX, intervention modal, ~L2608-2626)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L16",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_step_2_bouton_liste_notes_vocales_jsx_intervention_modal_l2608_2626",
-      "community": 80,
-      "norm_label": "step 2 \u2014 bouton + liste notes vocales (jsx, intervention modal, ~l2608-2626)"
-    },
-    {
-      "label": "Step 3 \u2014 `genererRapportIntervIA` fetch body (~L2463-2469)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_step_3_genererrapportintervia_fetch_body_l2463_2469",
-      "community": 80,
-      "norm_label": "step 3 \u2014 `genererrapportintervia` fetch body (~l2463-2469)"
-    },
-    {
-      "label": "Step 4 \u2014 Vider les audios apr\u00e8s succ\u00e8s (~L2489, inside the `else` success branch)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L31",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_step_4_vider_les_audios_apr\u00e8s_succ\u00e8s_l2489_inside_the_else_success_branch",
-      "community": 80,
-      "norm_label": "step 4 \u2014 vider les audios apres succes (~l2489, inside the `else` success branch)"
-    },
-    {
-      "label": "Step 5 \u2014 D\u00e9bloquer le bouton G\u00e9n\u00e9rer si seul l'audio est fourni (~L2650-2651)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L34",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_step_5_d\u00e9bloquer_le_bouton_g\u00e9n\u00e9rer_si_seul_l_audio_est_fourni_l2650_2651",
-      "community": 80,
-      "norm_label": "step 5 \u2014 debloquer le bouton generer si seul l'audio est fourni (~l2650-2651)"
-    },
-    {
-      "label": "Reuse confirmation",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L37",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_reuse_confirmation",
-      "community": 80,
-      "norm_label": "reuse confirmation"
-    },
-    {
-      "label": "Build result",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L41",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_build_result",
-      "community": 80,
-      "norm_label": "build result"
-    },
-    {
-      "label": "Self-review",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L44",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_self_review",
-      "community": 80,
-      "norm_label": "self-review"
-    },
-    {
-      "label": "Concerns",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L51",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_concerns",
-      "community": 80,
-      "norm_label": "concerns"
-    },
-    {
-      "label": "Fix wave (final review)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L54",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_fix_wave_final_review",
-      "community": 80,
-      "norm_label": "fix wave (final review)"
-    },
-    {
-      "label": "Fix 1 \u2014 Lower per-file cap (module-level, ~L17-18)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L58",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_fix_1_lower_per_file_cap_module_level_l17_18",
-      "community": 80,
-      "norm_label": "fix 1 \u2014 lower per-file cap (module-level, ~l17-18)"
-    },
-    {
-      "label": "Fix 2 \u2014 Total-payload guard before each fetch",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L61",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_fix_2_total_payload_guard_before_each_fetch",
-      "community": 80,
-      "norm_label": "fix 2 \u2014 total-payload guard before each fetch"
-    },
-    {
-      "label": "Fix 3 \u2014 Graceful non-JSON error handling",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L66",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_fix_3_graceful_non_json_error_handling",
-      "community": 80,
-      "norm_label": "fix 3 \u2014 graceful non-json error handling"
-    },
-    {
-      "label": "Fix 4 (Minor) \u2014 include uploadingAudio* in G\u00e9n\u00e9rer button gating",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L69",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_fix_4_minor_include_uploadingaudio_in_g\u00e9n\u00e9rer_button_gating",
-      "community": 80,
-      "norm_label": "fix 4 (minor) \u2014 include uploadingaudio* in generer button gating"
-    },
-    {
-      "label": "Real intervention identifiers used (confirmed, not guessed)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L73",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_real_intervention_identifiers_used_confirmed_not_guessed",
-      "community": 80,
-      "norm_label": "real intervention identifiers used (confirmed, not guessed)"
-    },
-    {
-      "label": "Build result",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L76",
-      "_origin": "ast",
-      "id": "sdd_task_3_report_build_result_76",
-      "community": 80,
-      "norm_label": "build result"
+      "norm_label": "etape 3 du brief (script ponctuel de verification db)"
     },
     {
       "label": "Commit",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L79",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "sdd_task_3_report_commit",
       "community": 80,
       "norm_label": "commit"
     },
     {
-      "label": "Concerns",
+      "label": "Self-review (git show)",
       "file_type": "document",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L82",
+      "source_location": "L36",
       "_origin": "ast",
-      "id": "sdd_task_3_report_concerns_82",
+      "id": "sdd_task_3_report_self_review_git_show",
       "community": 80,
+      "norm_label": "self-review (git show)"
+    },
+    {
+      "label": "Concern",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "sdd_task_3_report_concern",
+      "community": 80,
+      "norm_label": "concern"
+    },
+    {
+      "label": "task-4-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_4_brief",
+      "community": 86,
+      "norm_label": "task-4-brief.md"
+    },
+    {
+      "label": "Task 4: Formulaire \u2014 r\u00e9p\u00e9teur de lignes",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_4_brief_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
+      "community": 86,
+      "norm_label": "task 4: formulaire \u2014 repeteur de lignes"
+    },
+    {
+      "label": "task-4-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_4_report",
+      "community": 84,
+      "norm_label": "task-4-report.md"
+    },
+    {
+      "label": "Task 4 Report \u2014 Formulaire devis en lignes (r\u00e9p\u00e9teur)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "community": 84,
+      "norm_label": "task 4 report \u2014 formulaire devis en lignes (repeteur)"
+    },
+    {
+      "label": "Boundaries replaced",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_boundaries_replaced",
+      "community": 84,
+      "norm_label": "boundaries replaced"
+    },
+    {
+      "label": "Replacement",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_replacement",
+      "community": 84,
+      "norm_label": "replacement"
+    },
+    {
+      "label": "Build result",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_build_result",
+      "community": 84,
+      "norm_label": "build result"
+    },
+    {
+      "label": "Self-review of diff",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_self_review_of_diff",
+      "community": 84,
+      "norm_label": "self-review of diff"
+    },
+    {
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_commit",
+      "community": 84,
+      "norm_label": "commit"
+    },
+    {
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "sdd_task_4_report_concerns",
+      "community": 84,
+      "norm_label": "concerns"
+    },
+    {
+      "label": "task-5-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_5_brief",
+      "community": 87,
+      "norm_label": "task-5-brief.md"
+    },
+    {
+      "label": "Task 5: Sauvegarde \u2014 \u00e9crire `lignes` + r\u00e9sum\u00e9",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_5_brief_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
+      "community": 87,
+      "norm_label": "task 5: sauvegarde \u2014 ecrire `lignes` + resume"
+    },
+    {
+      "label": "task-5-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_5_report",
+      "community": 85,
+      "norm_label": "task-5-report.md"
+    },
+    {
+      "label": "Task 5 Report \u2014 creerDevis enregistre lignes + resume prestation",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "community": 85,
+      "norm_label": "task 5 report \u2014 creerdevis enregistre lignes + resume prestation"
+    },
+    {
+      "label": "Status: DONE",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_status_done",
+      "community": 85,
+      "norm_label": "status: done"
+    },
+    {
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_commit",
+      "community": 85,
+      "norm_label": "commit"
+    },
+    {
+      "label": "Steps applied",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_steps_applied",
+      "community": 85,
+      "norm_label": "steps applied"
+    },
+    {
+      "label": "Build result",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_build_result",
+      "community": 85,
+      "norm_label": "build result"
+    },
+    {
+      "label": "Self-review of diff",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_self_review_of_diff",
+      "community": 85,
+      "norm_label": "self-review of diff"
+    },
+    {
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "sdd_task_5_report_concerns",
+      "community": 85,
+      "norm_label": "concerns"
+    },
+    {
+      "label": "task-6-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_6_brief",
+      "community": 88,
+      "norm_label": "task-6-brief.md"
+    },
+    {
+      "label": "Task 6: Impression \u2014 colonne Secteur",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_6_brief_task_6_impression_colonne_secteur",
+      "community": 88,
+      "norm_label": "task 6: impression \u2014 colonne secteur"
+    },
+    {
+      "label": "task-6-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_6_report",
+      "community": 83,
+      "norm_label": "task-6-report.md"
+    },
+    {
+      "label": "Task 6 Report \u2014 Impression devis avec colonne Secteur",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "community": 83,
+      "norm_label": "task 6 report \u2014 impression devis avec colonne secteur"
+    },
+    {
+      "label": "Status",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_status",
+      "community": 83,
+      "norm_label": "status"
+    },
+    {
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_commit",
+      "community": 83,
+      "norm_label": "commit"
+    },
+    {
+      "label": "IIFE boundaries (verified before editing)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_iife_boundaries_verified_before_editing",
+      "community": 83,
+      "norm_label": "iife boundaries (verified before editing)"
+    },
+    {
+      "label": "Exact change",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_exact_change",
+      "community": 83,
+      "norm_label": "exact change"
+    },
+    {
+      "label": "Build result",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_build_result",
+      "community": 83,
+      "norm_label": "build result"
+    },
+    {
+      "label": "Table column confirmation",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_table_column_confirmation",
+      "community": 83,
+      "norm_label": "table column confirmation"
+    },
+    {
+      "label": "Self-review of diff",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_self_review_of_diff",
+      "community": 83,
+      "norm_label": "self-review of diff"
+    },
+    {
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "sdd_task_6_report_concerns",
+      "community": 83,
       "norm_label": "concerns"
     },
     {
@@ -4600,6 +4770,116 @@
       "norm_label": "notes de fin"
     },
     {
+      "label": "2026-07-11-devis-lignes-multi-secteurs.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs",
+      "community": 82,
+      "norm_label": "2026-07-11-devis-lignes-multi-secteurs.md"
+    },
+    {
+      "label": "Devis \u00e0 lignes multiples (multi-secteurs) \u2014 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
+      "community": 82,
+      "norm_label": "devis a lignes multiples (multi-secteurs) \u2014 implementation plan"
+    },
+    {
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "community": 82,
+      "norm_label": "global constraints"
+    },
+    {
+      "label": "Task 1: Migration \u2014 colonne `lignes`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_1_migration_colonne_lignes",
+      "community": 82,
+      "norm_label": "task 1: migration \u2014 colonne `lignes`"
+    },
+    {
+      "label": "Task 2: Helpers `lignesFromDevis`, `ligneVide`, `resumePrestations`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
+      "community": 82,
+      "norm_label": "task 2: helpers `lignesfromdevis`, `lignevide`, `resumeprestations`"
+    },
+    {
+      "label": "Task 3: `ouvrirEditionDevis` charge les lignes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L145",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_3_ouvrireditiondevis_charge_les_lignes",
+      "community": 82,
+      "norm_label": "task 3: `ouvrireditiondevis` charge les lignes"
+    },
+    {
+      "label": "Task 4: Formulaire \u2014 r\u00e9p\u00e9teur de lignes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L186",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
+      "community": 82,
+      "norm_label": "task 4: formulaire \u2014 repeteur de lignes"
+    },
+    {
+      "label": "Task 5: Sauvegarde \u2014 \u00e9crire `lignes` + r\u00e9sum\u00e9",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L269",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
+      "community": 82,
+      "norm_label": "task 5: sauvegarde \u2014 ecrire `lignes` + resume"
+    },
+    {
+      "label": "Task 6: Impression \u2014 colonne Secteur",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L343",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_6_impression_colonne_secteur",
+      "community": 82,
+      "norm_label": "task 6: impression \u2014 colonne secteur"
+    },
+    {
+      "label": "Task 7: D\u00e9ploiement + QA prod",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L409",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_task_7_d\u00e9ploiement_qa_prod",
+      "community": 82,
+      "norm_label": "task 7: deploiement + qa prod"
+    },
+    {
+      "label": "Notes de d\u00e9pendances entre t\u00e2ches",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L442",
+      "_origin": "ast",
+      "id": "plans_2026_07_11_devis_lignes_multi_secteurs_notes_de_d\u00e9pendances_entre_t\u00e2ches",
+      "community": 82,
+      "norm_label": "notes de dependances entre taches"
+    },
+    {
       "label": "2026-06-04-video-frames-rapport-visite-design.md",
       "file_type": "document",
       "source_file": "docs/superpowers/specs/2026-06-04-video-frames-rapport-visite-design.md",
@@ -5218,6 +5498,166 @@
       "id": "specs_2026_07_10_notes_vocales_rapports_design_crit\u00e8res_de_succ\u00e8s",
       "community": 73,
       "norm_label": "criteres de succes"
+    },
+    {
+      "label": "2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design",
+      "community": 81,
+      "norm_label": "2026-07-11-devis-lignes-multi-secteurs-design.md"
+    },
+    {
+      "label": "Devis \u00e0 lignes multiples (multi-secteurs) \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "community": 81,
+      "norm_label": "devis a lignes multiples (multi-secteurs) \u2014 design"
+    },
+    {
+      "label": "Probl\u00e8me",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_probl\u00e8me",
+      "community": 81,
+      "norm_label": "probleme"
+    },
+    {
+      "label": "Objectif",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_objectif",
+      "community": 81,
+      "norm_label": "objectif"
+    },
+    {
+      "label": "Approche retenue : \u00ab Lignes unifi\u00e9es \u00bb (Approche A)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_approche_retenue_lignes_unifi\u00e9es_approche_a",
+      "community": 81,
+      "norm_label": "approche retenue : \u00ab lignes unifiees \u00bb (approche a)"
+    },
+    {
+      "label": "1. Mod\u00e8le de donn\u00e9es",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
+      "community": 81,
+      "norm_label": "1. modele de donnees"
+    },
+    {
+      "label": "Nouvelle colonne",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L38",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_nouvelle_colonne",
+      "community": 81,
+      "norm_label": "nouvelle colonne"
+    },
+    {
+      "label": "Colonnes conserv\u00e9es (r\u00e9trocompatibilit\u00e9 + consommateurs existants)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L58",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_colonnes_conserv\u00e9es_r\u00e9trocompatibilit\u00e9_consommateurs_existants",
+      "community": 81,
+      "norm_label": "colonnes conservees (retrocompatibilite + consommateurs existants)"
+    },
+    {
+      "label": "2. R\u00e9trocompatibilit\u00e9 (anciens devis)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_2_r\u00e9trocompatibilit\u00e9_anciens_devis",
+      "community": 81,
+      "norm_label": "2. retrocompatibilite (anciens devis)"
+    },
+    {
+      "label": "3. Formulaire (`renderFormDevis`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L85",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_3_formulaire_renderformdevis",
+      "community": 81,
+      "norm_label": "3. formulaire (`renderformdevis`)"
+    },
+    {
+      "label": "4. Sauvegarde (`creerDevis`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L103",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_4_sauvegarde_creerdevis",
+      "community": 81,
+      "norm_label": "4. sauvegarde (`creerdevis`)"
+    },
+    {
+      "label": "5. Impression du devis (`imprimerDevis`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_5_impression_du_devis_imprimerdevis",
+      "community": 81,
+      "norm_label": "5. impression du devis (`imprimerdevis`)"
+    },
+    {
+      "label": "6. Affichage listes / tableau de bord",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L130",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_6_affichage_listes_tableau_de_bord",
+      "community": 81,
+      "norm_label": "6. affichage listes / tableau de bord"
+    },
+    {
+      "label": "7. Tests / v\u00e9rification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L137",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_7_tests_v\u00e9rification",
+      "community": 81,
+      "norm_label": "7. tests / verification"
+    },
+    {
+      "label": "Fichiers touch\u00e9s",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L149",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_fichiers_touch\u00e9s",
+      "community": 81,
+      "norm_label": "fichiers touches"
+    },
+    {
+      "label": "Risques / notes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L160",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_risques_notes",
+      "community": 81,
+      "norm_label": "risques / notes"
     },
     {
       "label": "lessons.md",
@@ -8485,12 +8925,22 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/progress.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "sdd_progress",
+      "target": "sdd_progress_sdd_progress_devis_lignes_multi_secteurs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-1-brief.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "sdd_task_1_brief",
-      "target": "sdd_task_1_brief_task_1_backend_accepter_et_transmettre_l_audio_\u00e0_gemini"
+      "target": "sdd_task_1_brief_task_1_migration_colonne_lignes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8718,9 +9168,9 @@
       "source_file": ".superpowers/sdd/task-2-brief.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "sdd_task_2_brief",
-      "target": "sdd_task_2_brief_task_2_front_notes_vocales_dans_le_modal_rapport_de_visite"
+      "target": "sdd_task_2_brief_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8728,39 +9178,29 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "sdd_task_2_report",
-      "target": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite"
+      "target": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L51",
+      "source_location": "L42",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_build_result"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_build",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L19",
+      "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_changes_made_app_admin_page_js"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L71",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_commit"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_changes_app_admin_page_js_composant_sectionclientsdevis",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8768,59 +9208,49 @@
       "source_file": ".superpowers/sdd/task-2-report.md",
       "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_component_structure_discovery_important"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_commit",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L55",
+      "source_location": "L62",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_files_changed"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_concerns",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L67",
+      "source_location": "L57",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_minor_observation_not_a_blocker_not_in_brief_scope"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_diff_final_git_show_73f57e6_stat",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L59",
+      "source_location": "L25",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_self_review"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_grep_de_v\u00e9rification_post_\u00e9dition",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-2-report.md",
-      "source_location": "L3",
+      "source_location": "L36",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_2_report_task_2_report_notes_vocales_dans_le_modal_rapport_de_visite",
-      "target": "sdd_task_2_report_status_done_with_concerns_see_deviation_from_brief_below_not_blocking_but_flagged_as_instructed"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-brief.md",
-      "source_location": "L81",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_brief",
-      "target": "sdd_task_3_brief_notes_de_fin"
+      "source": "sdd_task_2_report_task_2_report_helpers_lignesfromdevis_\u00e9tat_formdevis_lignes",
+      "target": "sdd_task_2_report_point_non_modifi\u00e9_intentionnel_\u00e0_v\u00e9rifier_en_task_3",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8828,9 +9258,9 @@
       "source_file": ".superpowers/sdd/task-3-brief.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "sdd_task_3_brief",
-      "target": "sdd_task_3_brief_task_3_front_notes_vocales_dans_le_modal_rapport_d_intervention"
+      "target": "sdd_task_3_brief_task_3_ouvrireditiondevis_charge_les_lignes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8838,9 +9268,19 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "sdd_task_3_report",
-      "target": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention"
+      "target": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_build",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -8848,199 +9288,309 @@
       "source_file": ".superpowers/sdd/task-3-report.md",
       "source_location": "L3",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_branch_commit"
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_changement",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L41",
+      "source_location": "L32",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_build_result"
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_commit",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L7",
+      "source_location": "L40",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis"
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_concern",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L51",
+      "source_location": "L36",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_concerns"
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_self_review_git_show",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L54",
+      "source_location": "L28",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_fix_wave_final_review"
+      "source": "sdd_task_3_report_task_3_report_ouvrireditiondevis_charge_lignes_r\u00e9trocompat",
+      "target": "sdd_task_3_report_\u00e9tape_3_du_brief_script_ponctuel_de_v\u00e9rification_db",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L37",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_reuse_confirmation"
+      "source": "sdd_task_4_brief",
+      "target": "sdd_task_4_brief_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L44",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_task_3_report_front_notes_vocales_dans_le_modal_rapport_d_intervention",
-      "target": "sdd_task_3_report_self_review"
+      "source": "sdd_task_4_report",
+      "target": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L9",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L3",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_1_\u00e9tats_intervention_after_l1400_uploadingphotointerv"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_boundaries_replaced",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L16",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_2_bouton_liste_notes_vocales_jsx_intervention_modal_l2608_2626"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_build_result",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L19",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L28",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_3_genererrapportintervia_fetch_body_l2463_2469"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_commit",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L31",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_4_vider_les_audios_apr\u00e8s_succ\u00e8s_l2489_inside_the_else_success_branch"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_file": ".superpowers/sdd/task-4-report.md",
       "source_location": "L34",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_changes_app_admin_page_js_component_sectionclientsdevis",
-      "target": "sdd_task_3_report_step_5_d\u00e9bloquer_le_bouton_g\u00e9n\u00e9rer_si_seul_l_audio_est_fourni_l2650_2651"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_concerns",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L76",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L12",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_build_result_76"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_replacement",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L79",
+      "source_file": ".superpowers/sdd/task-4-report.md",
+      "source_location": "L20",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_commit"
+      "source": "sdd_task_4_report_task_4_report_formulaire_devis_en_lignes_r\u00e9p\u00e9teur",
+      "target": "sdd_task_4_report_self_review_of_diff",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L82",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_concerns_82"
+      "source": "sdd_task_5_brief",
+      "target": "sdd_task_5_brief_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L58",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_1_lower_per_file_cap_module_level_l17_18"
+      "source": "sdd_task_5_report",
+      "target": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L61",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L37",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_2_total_payload_guard_before_each_fetch"
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_build_result",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L66",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_3_graceful_non_json_error_handling"
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_commit",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L69",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L47",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_fix_4_minor_include_uploadingaudio_in_g\u00e9n\u00e9rer_button_gating"
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_concerns",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/task-3-report.md",
-      "source_location": "L73",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L40",
       "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "sdd_task_3_report_fix_wave_final_review",
-      "target": "sdd_task_3_report_real_intervention_identifiers_used_confirmed_not_guessed"
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_self_review_of_diff",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_status_done",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-5-report.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "sdd_task_5_report_task_5_report_creerdevis_enregistre_lignes_resume_prestation",
+      "target": "sdd_task_5_report_steps_applied",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "sdd_task_6_brief",
+      "target": "sdd_task_6_brief_task_6_impression_colonne_secteur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "sdd_task_6_report",
+      "target": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_build_result",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_commit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_concerns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_exact_change",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_iife_boundaries_verified_before_editing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_self_review_of_diff",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_status",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "sdd_task_6_report_task_6_report_impression_devis_avec_colonne_secteur",
+      "target": "sdd_task_6_report_table_column_confirmation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9815,6 +10365,106 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L442",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_devis_\u00e0_lignes_multiples_multi_secteurs_implementation_plan",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_notes_de_d\u00e9pendances_entre_t\u00e2ches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_1_migration_colonne_lignes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_2_helpers_lignesfromdevis_lignevide_resumeprestations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L145",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_3_ouvrireditiondevis_charge_les_lignes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_4_formulaire_r\u00e9p\u00e9teur_de_lignes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L269",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_5_sauvegarde_\u00e9crire_lignes_r\u00e9sum\u00e9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L343",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_6_impression_colonne_secteur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md",
+      "source_location": "L409",
+      "weight": 1.0,
+      "source": "plans_2026_07_11_devis_lignes_multi_secteurs_global_constraints",
+      "target": "plans_2026_07_11_devis_lignes_multi_secteurs_task_7_d\u00e9ploiement_qa_prod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "docs/superpowers/specs/2026-06-04-video-frames-rapport-visite-design.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -10395,6 +11045,156 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_2_r\u00e9trocompatibilit\u00e9_anciens_devis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_3_formulaire_renderformdevis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_4_sauvegarde_creerdevis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_5_impression_du_devis_imprimerdevis",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L130",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_6_affichage_listes_tableau_de_bord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L137",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_7_tests_v\u00e9rification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_approche_retenue_lignes_unifi\u00e9es_approche_a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_fichiers_touch\u00e9s",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_objectif",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_probl\u00e8me",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L160",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_devis_\u00e0_lignes_multiples_multi_secteurs_design",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_risques_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_colonnes_conserv\u00e9es_r\u00e9trocompatibilit\u00e9_consommateurs_existants",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_devis_lignes_multi_secteurs_design_1_mod\u00e8le_de_donn\u00e9es",
+      "target": "specs_2026_07_11_devis_lignes_multi_secteurs_design_nouvelle_colonne",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tasks/lessons.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -10594,5 +11394,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e7866fae067b806ba38685db9e4bca7a60c3ba12"
+  "built_at_commit": "00bd015200b9159950ffe7745264221337f38aed"
 }

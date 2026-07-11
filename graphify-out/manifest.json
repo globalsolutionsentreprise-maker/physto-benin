@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783768639.102923,
-    "ast_hash": "6421ea126c8ef65ddec7d9037fd09c10",
+    "mtime": 1783770924.061205,
+    "ast_hash": "4e558de24fd1efc1e0554ff5a9f52d70",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -605,8 +605,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1783767909.36739,
-    "ast_hash": "a780026424a8fc056f9460cf7a42d7da",
+    "mtime": 1783768758.5254881,
+    "ast_hash": "5441ed736c61cd6b31383f26b934f99e",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -715,13 +715,13 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/progress.md": {
-    "mtime": 1783718406.1062062,
-    "ast_hash": "d5e530f70240302645668db67bbb929a",
+    "mtime": 1783771053.2945065,
+    "ast_hash": "f6e702ea816917b76c6ae3cc83d3e7ec",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-1-brief.md": {
-    "mtime": 1783717210.5616884,
-    "ast_hash": "d2eeacd75e0d8940c1d55209d101fc13",
+    "mtime": 1783770167.166359,
+    "ast_hash": "be739754eeee164207bdec042c1abac4",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-1-report.md": {
@@ -730,18 +730,18 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-2-brief.md": {
-    "mtime": 1783717402.9476254,
-    "ast_hash": "8cad8ac9c0a502ec6c821ef6f637032e",
+    "mtime": 1783770286.176857,
+    "ast_hash": "29e9a073bb169fa3003086537008c785",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-2-report.md": {
-    "mtime": 1783717597.864002,
-    "ast_hash": "abdabd26ba98d82200fbdf0553210c57",
+    "mtime": 1783770493.9263093,
+    "ast_hash": "175ae233029adf9294caefa5d3c879a0",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-3-brief.md": {
-    "mtime": 1783717700.7276316,
-    "ast_hash": "267e2fe5ec51fb861bd824213d99e81c",
+    "mtime": 1783770543.2264662,
+    "ast_hash": "1e53220af8611e75194eeb1234b99674",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-notes-vocales-rapports.md": {
@@ -755,8 +755,8 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-3-report.md": {
-    "mtime": 1783718271.5910952,
-    "ast_hash": "1f1ae28e14cf9efbb923899f39fd8ea0",
+    "mtime": 1783770627.222689,
+    "ast_hash": "ca606d0e94705ef68511722a3e80be11",
     "semantic_hash": ""
   },
   "supabase/migrations/20260711000000_backfill_crm_statut_null.sql": {
@@ -767,6 +767,51 @@
   "supabase/migrations/20260711010000_fix_generate_devis_numero_unique.sql": {
     "mtime": 1783722144.3439622,
     "ast_hash": "5afda42e9268eb9a2b16ce52ffadc0ae",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260711020000_devis_lignes.sql": {
+    "mtime": 1783770189.9312012,
+    "ast_hash": "55c71743a828152737e0a04089dafce2",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-4-brief.md": {
+    "mtime": 1783770642.3153865,
+    "ast_hash": "44aced859b4af6c06bc3106c9e0c7471",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-4-report.md": {
+    "mtime": 1783770737.8069985,
+    "ast_hash": "3d2db4a783c00c63937210297a35a54c",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-5-brief.md": {
+    "mtime": 1783770760.6516373,
+    "ast_hash": "98913c8681d4416578596b2b47cb2b85",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-5-report.md": {
+    "mtime": 1783770852.507313,
+    "ast_hash": "e042140bbbd3e6accfcab6101ceff09a",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-6-brief.md": {
+    "mtime": 1783770874.5029318,
+    "ast_hash": "c350962b50f2a2c035a6fdf1c760ffd8",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-6-report.md": {
+    "mtime": 1783770962.3790293,
+    "ast_hash": "3350295bd582f2e41f719f972d8cccce",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md": {
+    "mtime": 1783770046.5177188,
+    "ast_hash": "551b9b4a7ae0283c0b26415b5bbbd68f",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md": {
+    "mtime": 1783769844.84756,
+    "ast_hash": "2afa9f8896383bb0995c7cdb95648130",
     "semantic_hash": ""
   }
 }

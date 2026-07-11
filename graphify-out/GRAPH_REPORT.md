@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-07-11)
 
 ## Corpus Check
-- 135 files · ~624,709 words
+- 144 files · ~630,441 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 542 nodes · 509 edges · 82 communities (50 shown, 32 thin omitted)
+- 586 nodes · 545 edges · 89 communities (53 shown, 36 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e7866fae`
+- Built from commit: `00bd0152`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -83,20 +83,28 @@
 - [[_COMMUNITY_Community 76|Community 76]]
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 80|Community 80]]
 - [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
-2. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
-3. `Agent WhatsApp IA — Implementation Plan` - 12 edges
-4. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
-5. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
-6. `/deploy-gse` - 10 edges
-7. `Task 1 Report: Backend — accepter et transmettre l'audio à Gemini` - 10 edges
-8. `Spec — Notes vocales dans les rapports de visite/intervention` - 10 edges
-9. `Task 2 — Report: notes vocales dans le modal rapport de VISITE` - 9 edges
-10. `Fix wave (final review)` - 9 edges
+2. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
+3. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
+4. `Agent WhatsApp IA — Implementation Plan` - 12 edges
+5. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
+6. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
+7. `/deploy-gse` - 10 edges
+8. `Task 1 Report: Backend — accepter et transmettre l'audio à Gemini` - 10 edges
+9. `Spec — Notes vocales dans les rapports de visite/intervention` - 10 edges
+10. `Task 6 Report — Impression devis avec colonne Secteur` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -104,7 +112,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (82 total, 32 thin omitted)
+## Communities (89 total, 36 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -119,8 +127,8 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.13
-Nodes (12): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), getSupabase(), supabase, getAllArticles (+4 more)
+Cohesion: 0.08
+Nodes (15): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), STATUT_LABELS, STATUT_LABELS, supabase (+7 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
@@ -243,31 +251,47 @@ Cohesion: 0.10
 Nodes (19): Affichage, Architecture, Bouton d'upload, Composant 1 — Front (`app/admin/page.js`), Composant 2 — Backend (`app/api/analyze-rapport/route.js`), Contexte & problème, Critères de succès, Décisions produit (validées) (+11 more)
 
 ### Community 74 - "Community 74"
-Cohesion: 0.20
-Nodes (9): Build result, Changes made (app/admin/page.js), Commit, Component structure discovery (important), Files changed, Minor observation (not a blocker, not in brief scope), Self-review, Status: DONE_WITH_CONCERNS (see "Deviation from brief" below — not blocking, but flagged as instructed) (+1 more)
+Cohesion: 0.22
+Nodes (8): Build, Changes (app/admin/page.js, composant SectionClientsDevis), Commit, Concerns, Diff final (git show 73f57e6 --stat), Grep de vérification post-édition, Point non modifié (intentionnel, à vérifier en Task 3), Task 2 Report — Helpers lignesFromDevis + état formDevis.lignes
 
 ### Community 75 - "Community 75"
 Cohesion: 0.29
 Nodes (6): Global Constraints, Notes de fin, Notes vocales dans les rapports — Implementation Plan, Task 1: Backend — accepter et transmettre l'audio à Gemini, Task 2: Front — notes vocales dans le modal rapport de VISITE, Task 3: Front — notes vocales dans le modal rapport d'INTERVENTION
 
 ### Community 80 - "Community 80"
-Cohesion: 0.09
-Nodes (21): Branch / commit, Build result, Build result, Changes (app/admin/page.js, component `SectionClientsDevis`), Commit, Concerns, Concerns, Fix 1 — Lower per-file cap (module-level, ~L17-18) (+13 more)
+Cohesion: 0.25
+Nodes (7): Build, Changement, Commit, Concern, Self-review (git show), Task 3 Report — `ouvrirEditionDevis` charge lignes (rétrocompat), Étape 3 du brief (script ponctuel de vérification DB)
 
 ### Community 81 - "Community 81"
-Cohesion: 0.23
-Nodes (3): STATUT_LABELS, STATUT_LABELS, supabase
+Cohesion: 0.12
+Nodes (15): 1. Modèle de données, 2. Rétrocompatibilité (anciens devis), 3. Formulaire (`renderFormDevis`), 4. Sauvegarde (`creerDevis`), 5. Impression du devis (`imprimerDevis`), 6. Affichage listes / tableau de bord, 7. Tests / vérification, Approche retenue : « Lignes unifiées » (Approche A) (+7 more)
+
+### Community 82 - "Community 82"
+Cohesion: 0.18
+Nodes (10): Devis à lignes multiples (multi-secteurs) — Implementation Plan, Global Constraints, Notes de dépendances entre tâches, Task 1: Migration — colonne `lignes`, Task 2: Helpers `lignesFromDevis`, `ligneVide`, `resumePrestations`, Task 3: `ouvrirEditionDevis` charge les lignes, Task 4: Formulaire — répéteur de lignes, Task 5: Sauvegarde — écrire `lignes` + résumé (+2 more)
+
+### Community 83 - "Community 83"
+Cohesion: 0.20
+Nodes (9): Build result, Commit, Concerns, Exact change, IIFE boundaries (verified before editing), Self-review of diff, Status, Table column confirmation (+1 more)
+
+### Community 84 - "Community 84"
+Cohesion: 0.25
+Nodes (7): Boundaries replaced, Build result, Commit, Concerns, Replacement, Self-review of diff, Task 4 Report — Formulaire devis en lignes (répéteur)
+
+### Community 85 - "Community 85"
+Cohesion: 0.25
+Nodes (7): Build result, Commit, Concerns, Self-review of diff, Status: DONE, Steps applied, Task 5 Report — creerDevis enregistre lignes + resume prestation
 
 ## Knowledge Gaps
-- **303 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+298 more)
+- **334 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+329 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _303 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _334 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -275,7 +299,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.12648221343873517 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08235294117647059 - nodes in this community are weakly interconnected._
 - **Should `Community 6` be split into smaller, more focused modules?**
   _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
 - **Should `Community 7` be split into smaller, more focused modules?**
