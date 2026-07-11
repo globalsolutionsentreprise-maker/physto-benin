@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783721850.3393652,
-    "ast_hash": "0163e7e18bf1162e010072f10ae67efd",
+    "mtime": 1783767848.6742675,
+    "ast_hash": "8848ed4c2dfee9eb08a4989bfc165322",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -605,8 +605,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1783721901.0383089,
-    "ast_hash": "4ac6222778c56134ec97c42659b16624",
+    "mtime": 1783767909.36739,
+    "ast_hash": "a780026424a8fc056f9460cf7a42d7da",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -762,6 +762,11 @@
   "supabase/migrations/20260711000000_backfill_crm_statut_null.sql": {
     "mtime": 1783721193.009801,
     "ast_hash": "b7ee6f2381b7f0610b703a9b9c554ae6",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260711010000_fix_generate_devis_numero_unique.sql": {
+    "mtime": 1783722144.3439622,
+    "ast_hash": "5afda42e9268eb9a2b16ce52ffadc0ae",
     "semantic_hash": ""
   }
 }

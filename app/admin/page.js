@@ -1545,15 +1545,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   async function sauvegarderClient() {
     if (!formClient.nom) { setMsg("Le nom est obligatoire."); return }
     setSubmittingClient(true); setMsg("")
+    // Évite le "doublon" d'affichage : si l'entreprise est identique au nom, on la
+    // vide — sinon le rendu « nom — entreprise » affiche deux fois la même valeur.
+    var entRedondante = (formClient.entreprise || "").trim().toLowerCase() === (formClient.nom || "").trim().toLowerCase()
+    var formClientNorm = Object.assign({}, formClient, { entreprise: entRedondante ? "" : formClient.entreprise })
     if (editingClient) {
-      const { error } = await db.from("clients").update(formClient).eq("id", editingClient.id)
+      const { error } = await db.from("clients").update(formClientNorm).eq("id", editingClient.id)
       if (error) { setMsg("Erreur: " + error.message); setSubmittingClient(false); return }
       setMsg("✓ Client mis à jour")
       setShowFormClient(false); setEditingClient(null)
       var editedId = editingClient.id
       await charger()
       if (clientDetail && clientDetail.id === editedId) {
-        setClientDetail(function(prev) { return Object.assign({}, prev, formClient) })
+        setClientDetail(function(prev) { return Object.assign({}, prev, formClientNorm) })
       }
       setSubmittingClient(false)
     } else {
@@ -1568,7 +1572,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         const res = await fetch("/api/create-client", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(Object.assign({}, formClient, { leadDescription: leadDescription }))
+          body: JSON.stringify(Object.assign({}, formClientNorm, { leadDescription: leadDescription }))
         })
         const data = await res.json()
         if (!res.ok) { setMsg("Erreur: " + (data.error || "Échec")); setSubmittingClient(false); return }
@@ -1604,6 +1608,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function ouvrirEditionDevis(d) {
     var cl = clients.find(function(c) { return c.id === d.client_id })
     setEditingDevis(d)
+    // Le formulaire d'édition n'est rendu que dans la vue "devis" (renderFormDevis
+    // n'est appelé que par renderVueDevis). Sans ce setVue, un clic sur « Modifier
+    // devis » depuis le tableau de bord client (vue "devis-client") ne montrait rien.
+    setVue("devis")
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" })
     setFormDevis({
       clientId: d.client_id || "",
       prenom: cl ? (cl.prenom || "") : "",
