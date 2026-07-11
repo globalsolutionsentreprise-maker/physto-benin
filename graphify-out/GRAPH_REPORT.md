@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-07-11)
 
 ## Corpus Check
-- 144 files · ~630,925 words
+- 146 files · ~632,748 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 586 nodes · 545 edges · 89 communities (53 shown, 36 thin omitted)
+- 598 nodes · 556 edges · 90 communities (54 shown, 36 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9c13cad6`
+- Built from commit: `62960185`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -93,6 +93,7 @@
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -101,10 +102,10 @@
 4. `Agent WhatsApp IA — Implementation Plan` - 12 edges
 5. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
 6. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
-7. `/deploy-gse` - 10 edges
-8. `Task 1 Report: Backend — accepter et transmettre l'audio à Gemini` - 10 edges
-9. `Spec — Notes vocales dans les rapports de visite/intervention` - 10 edges
-10. `Task 6 Report — Impression devis avec colonne Secteur` - 9 edges
+7. `Pipeline unifié piloté par `etape` — Design` - 11 edges
+8. `/deploy-gse` - 10 edges
+9. `Task 1 Report: Backend — accepter et transmettre l'audio à Gemini` - 10 edges
+10. `Spec — Notes vocales dans les rapports de visite/intervention` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -112,7 +113,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (89 total, 36 thin omitted)
+## Communities (90 total, 36 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -282,8 +283,12 @@ Nodes (7): Boundaries replaced, Build result, Commit, Concerns, Replacement, Sel
 Cohesion: 0.25
 Nodes (7): Build result, Commit, Concerns, Self-review of diff, Status: DONE, Steps applied, Task 5 Report — creerDevis enregistre lignes + resume prestation
 
+### Community 89 - "Community 89"
+Cohesion: 0.17
+Nodes (11): 1. Le parcours (ordre canonique), 2. Migration + backfill, 3. `colUnifiee` (simplifié), 4. Écriture de `etape` — tous les points, 5. Les 4 améliorations UI (`renderVuePipelineUnifie`), 6. Non concerné / conservé, 7. Tests / vérification, Décision d'architecture (+3 more)
+
 ## Knowledge Gaps
-- **334 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+329 more)
+- **344 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+339 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -291,7 +296,7 @@ Nodes (7): Build result, Commit, Concerns, Self-review of diff, Status: DONE, St
 _Questions this graph is uniquely positioned to answer:_
 
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _334 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _344 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

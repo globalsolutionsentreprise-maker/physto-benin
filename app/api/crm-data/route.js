@@ -158,17 +158,29 @@ export async function POST(req) {
   const { action } = body
 
   if (action === "move") {
-    const updateData = { crm_statut: body.statut }
-    // Garde-fou : déplacer une carte vers une étape COMMERCIALE (avant exécution)
-    // réinitialise le parcours d'exécution, sinon colUnifiee (front) la garde
-    // verrouillée dans sa colonne d'exécution (parcours.*.done prime) → le
-    // déplacement paraîtrait « sans effet ». Les rapports/fiches restent en base.
-    if (["contact", "devis", "relance", "echec"].includes(body.statut)) {
-      updateData.parcours = {}
-    }
-    if (body.statut === "converti") {
+    // Déplacement unifié : le front envoie une `etape` (source de vérité pipeline).
+    // On dérive crm_statut (legacy) + un parcours cohérent. Rétrocompat : accepte
+    // encore body.statut (ancien format = crm_statut direct).
+    const ORDER = ["prospect", "devis", "relance", "converti", "visite", "intervention", "certificat", "encaissement", "cloture"]
+    const CRM = { prospect: "contact", devis: "devis", relance: "relance", converti: "converti", visite: "converti", intervention: "converti", certificat: "converti", encaissement: "converti", cloture: "converti", perdu: "echec" }
+    const etape = body.etape || body.statut
+    const idx = ORDER.indexOf(etape)
+    const parcours = {}
+    if (idx >= 4) parcours.visite = { done: true }
+    if (idx >= 5) parcours.facture = { done: true }
+    if (idx >= 6) parcours.intervention = { done: true }
+    if (idx >= 8) parcours.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
+    const updateData = { etape, crm_statut: CRM[etape] || "contact", parcours }
+    // Deal gagné (converti+) : initialiser le montant facturé ; encaissement (clôturé)
+    // → paiements_recus = facturé (cohérence Finances) ; sinon 0.
+    if (idx >= 3) {
       const { data: row } = await supabase.from("devis").select("montant_net, montant_facture_crm").eq("id", body.id).single()
-      if (row && !row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0
+      if (row) {
+        if (!row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0
+        updateData.paiements_recus = (idx >= 8) ? (row.montant_facture_crm || row.montant_net || 0) : 0
+      }
+    } else {
+      updateData.paiements_recus = 0
     }
     await supabase.from("devis").update(updateData).eq("id", body.id)
     return Response.json({ ok: true })

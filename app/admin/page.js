@@ -1494,6 +1494,57 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return seen.join(" + ")
   }
 
+  // ── Pipeline : parcours client piloté par le champ `devis.etape` ───────────
+  var ETAPES = [
+    { id: "prospect",     label: "📞 Prospect",     lane: "commercial" },
+    { id: "devis",        label: "📄 Devis envoyé", lane: "commercial" },
+    { id: "relance",      label: "🔔 Relance",      lane: "commercial" },
+    { id: "converti",     label: "✅ Converti",      lane: "commercial" },
+    { id: "visite",       label: "🔍 Visite",       lane: "execution" },
+    { id: "intervention", label: "🔧 Intervention", lane: "execution" },
+    { id: "certificat",   label: "📋 Certificat",   lane: "execution" },
+    { id: "encaissement", label: "💳 Encaissement", lane: "execution" },
+    { id: "cloture",      label: "🏁 Clôturé",      lane: "execution" }
+  ]
+  var ETAPE_IDS = ETAPES.map(function(x) { return x.id })
+  var ETAPE_PERDU = { id: "perdu", label: "❌ Perdu" }
+  var ETAPE_LABEL = {}
+  ETAPES.concat([ETAPE_PERDU]).forEach(function(e) { ETAPE_LABEL[e.id] = e.label })
+  var ETAPE_CRM = { prospect: "contact", devis: "devis", relance: "relance", converti: "converti", visite: "converti", intervention: "converti", certificat: "converti", encaissement: "converti", cloture: "converti", perdu: "echec" }
+  var PROCHAINE_ETAPE = { prospect: "devis", devis: "converti", relance: "converti", converti: "visite", visite: "intervention", intervention: "certificat", certificat: "encaissement", encaissement: "cloture" }
+
+  // Filet : étape par défaut d'un devis sans `etape` stocké (rétrocompat).
+  function etapeParDefaut(crmStatut) {
+    if (crmStatut === "echec") return "perdu"
+    if (crmStatut === "devis") return "devis"
+    if (crmStatut === "attente" || crmStatut === "relance") return "relance"
+    if (crmStatut === "converti" || crmStatut === "termine") return "converti"
+    return "prospect"
+  }
+
+  // Étape déduite d'un parcours d'exécution (utilisée par saveParcours).
+  // Le mapping suit l'ancienne logique colUnifiee (facture.done → intervention).
+  function etapeFromParcours(parcours) {
+    var p = parcours || {}
+    if (p.encaissement && p.encaissement.done) return "cloture"
+    if (p.intervention && p.intervention.done) return "certificat"
+    if (p.facture && p.facture.done) return "intervention"
+    if (p.visite && p.visite.done) return "visite"
+    return null
+  }
+
+  // Parcours cumulé cohérent pour une étape d'exécution (déplacement manuel).
+  // Seul `encaissement.done` (= payé) est critique : lu par les Finances.
+  function parcoursForEtape(etape) {
+    var idx = ETAPE_IDS.indexOf(etape)
+    var p = {}
+    if (idx >= 4) p.visite = { done: true }
+    if (idx >= 5) p.facture = { done: true }
+    if (idx >= 6) p.intervention = { done: true }
+    if (idx >= 8) p.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
+    return p
+  }
+
   const inp = { width: "100%", padding: "10px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
@@ -1540,7 +1591,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var d = devisList.find(function(x) { return x.id === devisId }) || {}
     var wasEncaisse = !!(d.parcours && d.parcours.encaissement && d.parcours.encaissement.done)
     var nowEncaisse = !!(newParcours.encaissement && newParcours.encaissement.done)
-    var update = { parcours: newParcours }
+    // Avancement d'exécution → l'étape suit le parcours (source de vérité pipeline).
+    // Parcours vidé en contexte Dossier = retour à « converti » (exécution démarrée).
+    var etapeDerivee = etapeFromParcours(newParcours) || "converti"
+    var update = { parcours: newParcours, etape: etapeDerivee }
     var paiementChange
     if (nowEncaisse !== wasEncaisse) {
       paiementChange = nowEncaisse ? (d.montant_facture_crm || d.montant_net || 0) : 0
@@ -1548,7 +1602,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
     await db.from('devis').update(update).eq('id', devisId)
     setDevisList(function(prev) {
-      return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { parcours: newParcours }, paiementChange !== undefined ? { paiements_recus: paiementChange } : {}) : x })
+      return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { parcours: newParcours, etape: etapeDerivee }, paiementChange !== undefined ? { paiements_recus: paiementChange } : {}) : x })
     })
     // Reflet immédiat de l'encaissement dans les données Finances/Analyse (aplati), sans rechargement
     if (paiementChange !== undefined) {
@@ -1557,6 +1611,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         return Object.assign({}, prev, { clients: (prev.clients || []).map(function(x) { return x.id === devisId ? Object.assign({}, x, { paiementsRecus: paiementChange }) : x }) })
       })
     }
+  }
+
+  // Avance l'étape d'un devis SEULEMENT vers l'avant (jamais reculer), en
+  // fusionnant le parcours. Appelé quand un vrai document est créé (certificat,
+  // fiche) pour que le pipeline reflète le travail réalisé.
+  async function avancerEtapeMin(devisId, cibleEtape) {
+    var d = devisList.find(function(x) { return x.id === devisId })
+    if (!d) return
+    var actuelle = d.etape || "prospect"
+    if (ETAPE_IDS.indexOf(cibleEtape) <= ETAPE_IDS.indexOf(actuelle)) return
+    var parcours = Object.assign({}, d.parcours || {}, parcoursForEtape(cibleEtape))
+    await db.from("devis").update({ etape: cibleEtape, parcours: parcours, crm_statut: ETAPE_CRM[cibleEtape] || "converti" }).eq("id", devisId)
+    setDevisList(function(prev) { return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { etape: cibleEtape, parcours: parcours }) : x }) })
   }
 
   function ouvrirAjoutClient() {
@@ -1736,7 +1803,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         prix_m2: prixM2Val,
         lignes: lignesClean,
         prix_par_prestation: null,
-        superficie_par_prestation: null
+        superficie_par_prestation: null,
+        // Enregistrer/renvoyer un devis = étape « Devis envoyé », sans jamais faire
+        // reculer une carte déjà convertie/en exécution.
+        etape: (!editingDevis.etape || editingDevis.etape === "prospect") ? "devis" : editingDevis.etape
       }).eq("id", editingDevis.id)
       if (error) { setMsg("Erreur: " + error.message); return }
       if (enLigne && cl && cl.email) {
@@ -1823,6 +1893,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         if (insErr) { setMsg('Erreur: ' + insErr.message); setCertSaving(false); return }
         setCertModal(function(prev) { return Object.assign({}, prev, { editingId: inserted.id, existingNumero: certNumero }) })
         setMsg('✓ Certificat ' + certNumero + ' sauvegardé')
+        await avancerEtapeMin(devisId, 'certificat')
       }
       await charger()
     } catch(e) { setMsg('Erreur: ' + e.message) }
@@ -2869,6 +2940,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         opErr = ins.error
       }
       if (opErr) { setMsg('Erreur: ' + opErr.message); setSavingFiche(false); return }
+      if (!isEditing && ficheModal.devis) await avancerEtapeMin(ficheModal.devis.id, 'certificat')
       var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero)
       var w = window.open('', '_blank', 'width=920,height=1100')
       if (w) { w.document.write(html); w.document.close() }
@@ -3339,25 +3411,29 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     } catch (e) { setMsg("Erreur suppression") }
   }
 
-  // ── G5 : kanban commercial (statut) ──────────────────────────────────────
-  async function deplacerCarte(devisId, newStatut) {
-    if (!newStatut) return
-    // Déplacer vers une étape commerciale réinitialise le parcours d'exécution
-    // (voir action "move" côté API) : sinon la carte reste verrouillée dans sa
-    // colonne d'exécution car colUnifiee fait primer parcours.*.done.
-    var resetParcours = ["contact", "devis", "relance", "echec"].indexOf(newStatut) > -1
+  // ── Déplacement unifié : une carte = une `etape` (source de vérité) ────────
+  // Écrit `etape` + parcours cohérent (voir action "move" API). Avancer pose les
+  // coches d'exécution ; reculer les retire → plus de déplacement « sans effet ».
+  async function deplacerCarte(devisId, newEtape) {
+    if (!newEtape) return
+    var idx = ETAPE_IDS.indexOf(newEtape)
+    var crm = ETAPE_CRM[newEtape] || "contact"
+    var parcours = idx >= 0 ? parcoursForEtape(newEtape) : {}
+    // Optimiste : colUnifiee lit devisMap[c.id].etape → MAJ devisList d'abord.
+    setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { etape: newEtape, parcours: parcours }) : d }) })
     setFinData(function(prev) {
       if (!prev) return prev
-      return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) { return c.id === devisId ? Object.assign({}, c, { statut: newStatut }) : c }) })
+      return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) {
+        if (c.id !== devisId) return c
+        var pr = idx >= 8 ? (c.montantFacture || c.montantDevis || 0) : (idx >= 3 ? c.paiementsRecus : 0)
+        return Object.assign({}, c, { statut: crm, paiementsRecus: pr })
+      }) })
     })
-    if (resetParcours) {
-      setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { parcours: {} }) : d }) })
-    }
-    setMsg("Déplacé : " + (ST_META[newStatut] ? ST_META[newStatut].label : newStatut))
+    setMsg("Déplacé : " + (ETAPE_LABEL[newEtape] || newEtape))
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, statut: newStatut }) })
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, etape: newEtape }) })
     } catch (e) { setMsg("Erreur déplacement") }
   }
   function ouvrirDossierCommercial(devisId) {
@@ -3869,32 +3945,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       { id: "cloture",      label: "🏁 Clôturé",      bg: "#D1FAE5", tc: "#065f46" },
       { id: "perdu",        label: "❌ Perdu",        bg: "#F1EFE8", tc: "#2C2C2A" },
     ]
-    var SALES_MOVES = [
-      { id: "contact", label: "📞 Prospect" },
-      { id: "devis", label: "📄 Devis envoyé" },
-      { id: "relance", label: "🔔 Relance" },
-      { id: "converti", label: "✅ Converti" },
-      { id: "echec", label: "❌ Perdu" },
-    ]
-
+    // Source de vérité unique : le champ `etape` du devis. Filet `etapeParDefaut`
+    // pour un devis ancien sans etape (le backfill l'a normalement rempli).
     function colUnifiee(c) {
-      if (c.statut === "echec") return "perdu"
       var rd = devisMap[c.id] || {}
-      var p = rd.parcours || {}
-      var hasFiche = fichesList.some(function(f) { return f.devis_id === c.id })
-      var hasCert = certsList.some(function(x) { return x.devis_id === c.id })
-      var execStarted = c.statut === "converti" || (p.visite && p.visite.done) || (p.facture && p.facture.done) || (p.intervention && p.intervention.done) || hasFiche || hasCert
-      if (execStarted) {
-        if (p.encaissement && p.encaissement.done) return "cloture"
-        if (hasCert) return "encaissement"
-        if ((p.intervention && p.intervention.done) || hasFiche) return "certificat"
-        if (p.facture && p.facture.done) return "intervention"
-        if (p.visite && p.visite.done) return "visite"
-        return "converti"
-      }
-      if (c.statut === "devis") return "devis"
-      if (c.statut === "attente" || c.statut === "relance") return "relance"
-      return "prospect"
+      return rd.etape || etapeParDefaut(c.statut)
     }
 
     function marquerEncaisse(c) {
@@ -3913,49 +3968,74 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     function renderCard(c, colId) {
       var ni = finNextIntervention(c)
       var niSoon = ni && (new Date(ni + "T00:00:00") - new Date()) < 30 * 864e5
+      var etapeIdx = ETAPE_IDS.indexOf(colId)
+      var estPerdu = colId === "perdu"
+      var prochaine = PROCHAINE_ETAPE[colId]
+      // Mini-stepper : où en est le client dans le parcours (barres = étapes).
+      var stepper = estPerdu
+        ? e("div", { style: { fontSize: "10px", color: "#991b1b", fontWeight: "700", marginBottom: "6px" } }, "❌ Perdu")
+        : e("div", { style: { display: "flex", gap: "2px", marginBottom: "7px" }, title: "Étape : " + (ETAPE_LABEL[colId] || colId) },
+            ETAPE_IDS.map(function(id, i) {
+              var bg = i < etapeIdx ? "#0a2e1a" : (i === etapeIdx ? "#d4a920" : "#e6e3dc")
+              return e("div", { key: id, style: { flex: 1, height: "4px", borderRadius: "2px", background: bg } })
+            })
+          )
       return e("div", { key: c.id, style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+        stepper,
         e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
         e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
         e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, finFmt(c.montantDevis) + " FCFA" + (c.typeContrat === "contrat" ? " / " + (c.dureeContratMois || 12) + "m" : "")),
         c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
         ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
         c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
-        (["converti", "visite", "intervention", "certificat", "encaissement"].indexOf(colId) > -1) ? e("button", { onClick: function() { marquerEncaisse(c) }, style: { width: "100%", marginTop: "8px", background: "#166534", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✓ Marquer encaissé") : null,
+        prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Avancer → " + (ETAPE_LABEL[prochaine] || prochaine)) : null,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
           e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
-            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(SALES_MOVES.map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
+            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(ETAPES.concat([ETAPE_PERDU]).map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
           ),
-          e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (avancer l'exécution)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
+          e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (documents, rapports)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
         )
       )
     }
 
-    return e("div", null,
-      e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "14px" } }, "Cycle complet : vente (Prospect → Converti) puis exécution (Visite → Clôturé). « Déplacer vers » gère la vente ; l'exécution avance via le Dossier."),
-      e("div", { style: { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" } },
-        COLS.map(function(col) {
-          var cards = byCol[col.id] || []
-          var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
-          var colLeads = col.id === "prospect" ? leads : []
-          var leadEls = colLeads.map(function(lead) {
-            return e("div", { key: "lead-" + lead.id, style: { background: "#fffdf7", border: "1px dashed #d4a920", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
-              e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", gap: "6px" } },
-                e("div", { style: { fontWeight: "600", fontSize: "13px" } }, lead.nom),
-                e("span", { style: { fontSize: "9px", fontWeight: "700", background: "#fdf6e3", color: "#8a6d1a", border: "1px solid #ecd9a0", borderRadius: "10px", padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" } }, "🌱 LEAD")
-              ),
-              e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
-              lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
-              e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
-            )
-          })
-          return e("div", { key: col.id, style: { minWidth: "225px", width: "225px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
-            e("div", { style: { background: col.bg, color: col.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, col.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
-            tot > 0 ? e("div", { style: { fontSize: "11px", color: col.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
-            leadEls,
-            (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
-          )
-        })
+    function renderColonne(col) {
+      var cards = byCol[col.id] || []
+      var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
+      var colLeads = col.id === "prospect" ? leads : []
+      var leadEls = colLeads.map(function(lead) {
+        return e("div", { key: "lead-" + lead.id, style: { background: "#fffdf7", border: "1px dashed #d4a920", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", gap: "6px" } },
+            e("div", { style: { fontWeight: "600", fontSize: "13px" } }, lead.nom),
+            e("span", { style: { fontSize: "9px", fontWeight: "700", background: "#fdf6e3", color: "#8a6d1a", border: "1px solid #ecd9a0", borderRadius: "10px", padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" } }, "🌱 LEAD")
+          ),
+          e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
+          lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
+          e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
+        )
+      })
+      return e("div", { key: col.id, style: { minWidth: "225px", width: "225px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
+        e("div", { style: { background: col.bg, color: col.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, col.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
+        tot > 0 ? e("div", { style: { fontSize: "11px", color: col.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
+        leadEls,
+        (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
       )
+    }
+
+    var laneRow = { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" }
+    var laneTitle = { fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#888", margin: "4px 0 8px" }
+    function colsDe(ids) { return COLS.filter(function(x) { return ids.indexOf(x.id) > -1 }) }
+    var colsCommercial = colsDe(["prospect", "devis", "relance", "converti"])
+    var colsExecution = colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
+    var colsPerdu = colsDe(["perdu"])
+
+    return e("div", null,
+      e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "16px" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
+      e("div", { style: laneTitle }, "◆ Commercial"),
+      e("div", { style: laneRow }, colsCommercial.map(renderColonne)),
+      e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Exécution"),
+      e("div", { style: laneRow }, colsExecution.map(renderColonne)),
+      e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Perdu"),
+      e("div", { style: laneRow }, colsPerdu.map(renderColonne))
     )
   }
 

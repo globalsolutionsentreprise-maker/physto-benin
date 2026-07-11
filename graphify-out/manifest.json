@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783772766.8513703,
-    "ast_hash": "41a62ce4e6f178394fd07d82530ba916",
+    "mtime": 1783773884.2507846,
+    "ast_hash": "c9aa1dfc188a95cbc422e362d3c3b25a",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1783772757.7554219,
-    "ast_hash": "16a3ff1c8238e792db71a14b4a2e49b3",
+    "mtime": 1783773615.7737775,
+    "ast_hash": "9bba510b87a5d185d0bf3740e484e80f",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
@@ -812,6 +812,16 @@
   "docs/superpowers/specs/2026-07-11-devis-lignes-multi-secteurs-design.md": {
     "mtime": 1783769844.84756,
     "ast_hash": "2afa9f8896383bb0995c7cdb95648130",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260711030000_devis_etape.sql": {
+    "mtime": 1783773349.9844186,
+    "ast_hash": "cd960d6a737c894ab9ceba1eeb51384a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md": {
+    "mtime": 1783773230.186196,
+    "ast_hash": "d328517d8579c07f76e0cdec7a4dfd93",
     "semantic_hash": ""
   }
 }

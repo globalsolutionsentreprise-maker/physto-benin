@@ -267,7 +267,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5140",
+      "source_location": "L5220",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5149",
+      "source_location": "L5229",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5156",
+      "source_location": "L5236",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5160",
+      "source_location": "L5240",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5239",
+      "source_location": "L5319",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5441",
+      "source_location": "L5521",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5495",
+      "source_location": "L5575",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
@@ -5658,6 +5658,126 @@
       "id": "specs_2026_07_11_devis_lignes_multi_secteurs_design_risques_notes",
       "community": 81,
       "norm_label": "risques / notes"
+    },
+    {
+      "label": "2026-07-11-pipeline-etape-unifie-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design",
+      "community": 89,
+      "norm_label": "2026-07-11-pipeline-etape-unifie-design.md"
+    },
+    {
+      "label": "Pipeline unifi\u00e9 pilot\u00e9 par `etape` \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "community": 89,
+      "norm_label": "pipeline unifie pilote par `etape` \u2014 design"
+    },
+    {
+      "label": "Probl\u00e8me",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_probl\u00e8me",
+      "community": 89,
+      "norm_label": "probleme"
+    },
+    {
+      "label": "D\u00e9cision d'architecture",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_d\u00e9cision_d_architecture",
+      "community": 89,
+      "norm_label": "decision d'architecture"
+    },
+    {
+      "label": "1. Le parcours (ordre canonique)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_1_le_parcours_ordre_canonique",
+      "community": 89,
+      "norm_label": "1. le parcours (ordre canonique)"
+    },
+    {
+      "label": "2. Migration + backfill",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_2_migration_backfill",
+      "community": 89,
+      "norm_label": "2. migration + backfill"
+    },
+    {
+      "label": "3. `colUnifiee` (simplifi\u00e9)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L60",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_3_colunifiee_simplifi\u00e9",
+      "community": 89,
+      "norm_label": "3. `colunifiee` (simplifie)"
+    },
+    {
+      "label": "4. \u00c9criture de `etape` \u2014 tous les points",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_4_\u00e9criture_de_etape_tous_les_points",
+      "community": 89,
+      "norm_label": "4. ecriture de `etape` \u2014 tous les points"
+    },
+    {
+      "label": "5. Les 4 am\u00e9liorations UI (`renderVuePipelineUnifie`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L96",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_5_les_4_am\u00e9liorations_ui_rendervuepipelineunifie",
+      "community": 89,
+      "norm_label": "5. les 4 ameliorations ui (`rendervuepipelineunifie`)"
+    },
+    {
+      "label": "6. Non concern\u00e9 / conserv\u00e9",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L112",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_6_non_concern\u00e9_conserv\u00e9",
+      "community": 89,
+      "norm_label": "6. non concerne / conserve"
+    },
+    {
+      "label": "7. Tests / v\u00e9rification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L120",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_7_tests_v\u00e9rification",
+      "community": 89,
+      "norm_label": "7. tests / verification"
+    },
+    {
+      "label": "Risques",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L134",
+      "_origin": "ast",
+      "id": "specs_2026_07_11_pipeline_etape_unifie_design_risques",
+      "community": 89,
+      "norm_label": "risques"
     },
     {
       "label": "lessons.md",
@@ -11195,6 +11315,116 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_1_le_parcours_ordre_canonique",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_2_migration_backfill",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_3_colunifiee_simplifi\u00e9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_4_\u00e9criture_de_etape_tous_les_points",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_5_les_4_am\u00e9liorations_ui_rendervuepipelineunifie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_6_non_concern\u00e9_conserv\u00e9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_7_tests_v\u00e9rification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_d\u00e9cision_d_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_probl\u00e8me",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "specs_2026_07_11_pipeline_etape_unifie_design_pipeline_unifi\u00e9_pilot\u00e9_par_etape_design",
+      "target": "specs_2026_07_11_pipeline_etape_unifie_design_risques",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tasks/lessons.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -11394,5 +11624,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9c13cad676701552c79813d916b80190f0db33ff"
+  "built_at_commit": "6296018520eb7948f03afdd61150f20e63872246"
 }
