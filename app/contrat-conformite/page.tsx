@@ -45,9 +45,9 @@ const PALIERS = [
     accent: true,
     points: [
       "Tout l'Essentiel, avec passages renforcés (3D complet)",
-      "Ré-intervention gratuite sous 15 j en cas de résurgence",
       "Espace client : rapports et certificats en ligne",
       "Interventions hors heures d'ouverture",
+      "Rapport de passage détaillé après chaque intervention",
     ],
   },
   {

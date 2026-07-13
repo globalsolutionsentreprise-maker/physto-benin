@@ -188,7 +188,7 @@ export default function Accueil() {
               Hôtels, restaurants, agro-industries, cliniques, banques : passages réguliers 3D + <strong style={{ color: "#fff" }}>certificat de conformité chaque mois</strong> pour vos inspections HACCP. Tout commence par un audit gratuit sur site.
             </p>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-              {["Certificat officiel opposable à vos contrôles", "Ré-intervention gratuite en cas de résurgence", "Rapports et certificats dans votre espace client"].map(function(t) {
+              {["Certificat officiel opposable à vos contrôles", "Interventions hors heures d'ouverture", "Rapports et certificats dans votre espace client"].map(function(t) {
                 return (
                   <li key={t} style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "14px", color: "rgba(255,255,255,0.8)" }}>
                     <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "11px", fontWeight: "900", flexShrink: 0 }}>✓</span>
