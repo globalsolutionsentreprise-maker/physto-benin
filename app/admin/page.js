@@ -3158,11 +3158,55 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
   // ── FIN FICHES DE PASSAGE ──────────────────────────
 
+  // Nom de fichier proposé par Chrome à l'enregistrement en PDF : il vient du
+  // <title> du document. On le veut directement exploitable (pas de tiret
+  // cadratin, pas de caractère interdit par le système de fichiers) pour que
+  // l'utilisateur n'ait pas à le retaper dans la boîte d'enregistrement.
+  function nomFichierDoc() {
+    var parts = []
+    for (var i = 0; i < arguments.length; i++) {
+      var v = (arguments[i] == null ? "" : String(arguments[i])).trim()
+      if (v) parts.push(v)
+    }
+    return parts.join(" ")
+      .replace(/[—–]/g, "-")
+      .replace(/[\/\\:*?"<>|]/g, "-")
+      .replace(/\s+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+  }
+
+  // Ouvre un document imprimable dans une nouvelle fenêtre.
+  //
+  // On passe par une URL blob plutôt que par window.open("") + document.write :
+  // ce dernier produit un about:blank, un document sans URL réelle. Quand
+  // l'utilisateur prend quelques secondes dans la boîte « Enregistrer au format
+  // PDF » de Chrome (typiquement pour renommer le fichier), ce document peut
+  // être régénéré sans source stable et le PDF sort vide. Une URL blob donne au
+  // document une vraie source, rechargeable à tout moment.
+  // Repli sur document.write si les URL blob sont indisponibles.
+  function ouvrirDocImprimable(html, largeur, hauteur) {
+    var dims = "width=" + (largeur || 920) + ",height=" + (hauteur || 1100)
+    try {
+      var url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }))
+      var w = window.open(url, "_blank", dims)
+      if (!w) { URL.revokeObjectURL(url); return null }
+      // Révocation différée : une fois le document chargé, la révocation
+      // n'affecte plus la fenêtre ouverte.
+      setTimeout(function() { URL.revokeObjectURL(url) }, 60000)
+      return w
+    } catch (e) {
+      var wf = window.open("", "_blank", dims)
+      if (wf) { wf.document.write(html); wf.document.close() }
+      return wf
+    }
+  }
+
   function imprimerDevis(d) {
     var nomClient = [d.clientPrenom, d.clientNom].filter(Boolean).join(" ")
     var dateStr = new Date().toLocaleDateString("fr-FR")
     var validiteDate = new Date(Date.now() + 30 * 24 * 3600 * 1000).toLocaleDateString("fr-FR")
-    var html = "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>Devis " + d.numero + " — GSE</title><style>" +
+    var html = "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>" + nomFichierDoc("Devis", d.numero, nomClient) + "</title><style>" +
       "* { box-sizing: border-box; margin: 0; padding: 0; }" +
       "body { font-family: Georgia, serif; background: #f5f5f0; }" +
       ".page { max-width: 780px; margin: 0 auto; background: #fff; }" +
@@ -3273,8 +3317,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       "</div>" +
       gseFooter() +
       "</div></body></html>"
-    var w = window.open("", "_blank", "width=820,height=900")
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 820, 900)
   }
 
   function renduDevis(d) {
@@ -4000,6 +4043,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var etapeIdx = ETAPE_IDS.indexOf(colId)
       var estPerdu = colId === "perdu"
       var prochaine = PROCHAINE_ETAPE[colId]
+      // Contrat d'entretien : la question se pose dès que l'affaire est convertie.
+      // Le modal existait déjà mais n'était accessible que depuis le tableau de bord
+      // client (renderVueDevisClient), une vue qu'on ne traverse pas en travaillant
+      // dans le pipeline — donc introuvable en pratique. Affiché à partir de
+      // « Converti » (et non uniquement dessus) : un devis déjà passé en Visite ou
+      // en Intervention doit rester éligible.
+      var devisCarte = devisMap[c.id]
+      var contratCarte = contratsList.find(function(ct) { return ct.devis_id === c.id })
+      var boutonContrat = (!estPerdu && devisCarte && etapeIdx >= ETAPE_IDS.indexOf("converti"))
+        ? e("button", {
+            onClick: function() {
+              if (contratCarte) { ouvrirContratExistant(contratCarte); return }
+              setContratModal(devisCarte)
+              setContratAnalyse(null)
+              setContratErreur(null)
+              setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "", prixNegocie: "", inclureNoteDevis: false })
+            },
+            title: contratCarte ? "Réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
+            style: { width: "100%", marginTop: "6px", background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+          }, contratCarte ? "🖨️ Réimprimer le contrat" : "📄 Proposer un contrat")
+        : null
       // Mini-stepper : où en est le client dans le parcours (barres = étapes).
       var stepper = estPerdu
         ? e("div", { style: { fontSize: "10px", color: "#991b1b", fontWeight: "700", marginBottom: "6px" } }, "❌ Perdu")
@@ -4018,6 +4082,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
         c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
         prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Avancer → " + (ETAPE_LABEL[prochaine] || prochaine)) : null,
+        boutonContrat,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
           e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
             [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(ETAPES.concat([ETAPE_PERDU]).map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
