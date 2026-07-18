@@ -1931,8 +1931,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function imprimerCertificat() {
     var html = buildCertificatHtml(certModal.type, certForm)
-    var w = window.open('', '_blank', 'width=920,height=1050')
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 920, 1050)
   }
 
   async function genererCertificat() {
@@ -2056,8 +2055,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function apercuCert(cert) {
     var form = cert.form_data || {}
     var html = buildCertificatHtml(cert.type, form)
-    var w = window.open('', '_blank', 'width=920,height=1050')
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 920, 1050)
   }
 
   function apercuFiche(fiche, client) {
@@ -2082,8 +2080,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       superviseurContact: fiche.superviseur_contact || '',
     }
     var html = buildFichePassageHtml(form, client || {}, fiche.numero_unique)
-    var w = window.open('', '_blank', 'width=920,height=1100')
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 920, 1100)
   }
 
   async function supprimerFiche(id) {
@@ -2262,8 +2259,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!rapportVisiteModal) return
     var { client, devis } = rapportVisiteModal
     var html = buildRapportVisiteHtml(rapportVisiteForm, client, devis)
-    var w = window.open('', '_blank', 'width=920,height=1100')
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 920, 1100)
   }
 
   async function sauvegarderRapportVisite() {
@@ -2659,8 +2655,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!rapportIntervModal) return
     var { client, devis } = rapportIntervModal
     var html = buildRapportIntervHtml(rapportIntervForm, client, devis)
-    var w = window.open('', '_blank', 'width=920,height=1100')
-    if (w) { w.document.write(html); w.document.close() }
+    ouvrirDocImprimable(html, 920, 1100)
   }
 
   async function supprimerRapportInterv() {
@@ -2971,8 +2966,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       if (opErr) { setMsg('Erreur: ' + opErr.message); setSavingFiche(false); return }
       if (!isEditing && ficheModal.devis) await avancerEtapeMin(ficheModal.devis.id, 'certificat')
       var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero)
-      var w = window.open('', '_blank', 'width=920,height=1100')
-      if (w) { w.document.write(html); w.document.close() }
+      ouvrirDocImprimable(html, 920, 1100)
       setFicheModal(null)
       setMsg(isEditing ? '✓ Fiche mise à jour — imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
     } catch(e) { setMsg('Erreur: ' + e.message) }
@@ -3157,50 +3151,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
   // ── FIN FICHES DE PASSAGE ──────────────────────────
-
-  // Nom de fichier proposé par Chrome à l'enregistrement en PDF : il vient du
-  // <title> du document. On le veut directement exploitable (pas de tiret
-  // cadratin, pas de caractère interdit par le système de fichiers) pour que
-  // l'utilisateur n'ait pas à le retaper dans la boîte d'enregistrement.
-  function nomFichierDoc() {
-    var parts = []
-    for (var i = 0; i < arguments.length; i++) {
-      var v = (arguments[i] == null ? "" : String(arguments[i])).trim()
-      if (v) parts.push(v)
-    }
-    return parts.join(" ")
-      .replace(/[—–]/g, "-")
-      .replace(/[\/\\:*?"<>|]/g, "-")
-      .replace(/\s+/g, "_")
-      .replace(/_+/g, "_")
-      .replace(/^_|_$/g, "")
-  }
-
-  // Ouvre un document imprimable dans une nouvelle fenêtre.
-  //
-  // On passe par une URL blob plutôt que par window.open("") + document.write :
-  // ce dernier produit un about:blank, un document sans URL réelle. Quand
-  // l'utilisateur prend quelques secondes dans la boîte « Enregistrer au format
-  // PDF » de Chrome (typiquement pour renommer le fichier), ce document peut
-  // être régénéré sans source stable et le PDF sort vide. Une URL blob donne au
-  // document une vraie source, rechargeable à tout moment.
-  // Repli sur document.write si les URL blob sont indisponibles.
-  function ouvrirDocImprimable(html, largeur, hauteur) {
-    var dims = "width=" + (largeur || 920) + ",height=" + (hauteur || 1100)
-    try {
-      var url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }))
-      var w = window.open(url, "_blank", dims)
-      if (!w) { URL.revokeObjectURL(url); return null }
-      // Révocation différée : une fois le document chargé, la révocation
-      // n'affecte plus la fenêtre ouverte.
-      setTimeout(function() { URL.revokeObjectURL(url) }, 60000)
-      return w
-    } catch (e) {
-      var wf = window.open("", "_blank", dims)
-      if (wf) { wf.document.write(html); wf.document.close() }
-      return wf
-    }
-  }
 
   function imprimerDevis(d) {
     var nomClient = [d.clientPrenom, d.clientNom].filter(Boolean).join(" ")
@@ -5311,6 +5261,51 @@ var GSE_DOC_STYLES = '<style>' +
   '  .photos-grid img { height: 42px; }' +
   '}'
 
+// Nom de fichier proposé par Chrome à l'enregistrement en PDF : il vient du
+// <title> du document. On le veut directement exploitable (pas de tiret
+// cadratin, pas de caractère interdit par le système de fichiers) pour que
+// l'utilisateur n'ait pas à le retaper dans la boîte d'enregistrement — c'est
+// justement ce renommage qui produisait un PDF vide (voir ouvrirDocImprimable).
+function nomFichierDoc() {
+  var parts = []
+  for (var i = 0; i < arguments.length; i++) {
+    var v = (arguments[i] == null ? "" : String(arguments[i])).trim()
+    if (v) parts.push(v)
+  }
+  return parts.join(" ")
+    .replace(/[—–]/g, "-")
+    .replace(/[\/\\:*?"<>|]/g, "-")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+}
+
+// Ouvre un document imprimable dans une nouvelle fenêtre.
+//
+// On passe par une URL blob plutôt que par window.open("") + document.write :
+// ce dernier produit un about:blank, un document sans URL réelle. Quand
+// l'utilisateur prend quelques secondes dans la boîte « Enregistrer au format
+// PDF » de Chrome (typiquement pour renommer le fichier), ce document peut être
+// régénéré sans source stable et le PDF sort vide. Une URL blob donne au
+// document une vraie source, rechargeable à tout moment.
+// Repli sur document.write si les URL blob sont indisponibles.
+function ouvrirDocImprimable(html, largeur, hauteur) {
+  var dims = "width=" + (largeur || 920) + ",height=" + (hauteur || 1100)
+  try {
+    var url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }))
+    var w = window.open(url, "_blank", dims)
+    if (!w) { URL.revokeObjectURL(url); return null }
+    // Révocation différée : une fois le document chargé, la révocation
+    // n'affecte plus la fenêtre ouverte.
+    setTimeout(function() { URL.revokeObjectURL(url) }, 60000)
+    return w
+  } catch (e) {
+    var wf = window.open("", "_blank", dims)
+    if (wf) { wf.document.write(html); wf.document.close() }
+    return wf
+  }
+}
+
 function gseHeader(title, ref) {
   return '<div class="hdr">' +
     '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
@@ -5368,7 +5363,7 @@ function buildCertificatHtml(type, form) {
 
   var dateRef = 'Cotonou le ' + (form.dateJour || '__') + ' - ' + (form.dateMois || '__') + ' 2026 &nbsp;·&nbsp; Réf : ' + (form.ref || '')
 
-  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + titre + ' — GSE</title>' +
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Certificat', operationType, form.ref, form.entreprise) + '</title>' +
     GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
@@ -5454,7 +5449,7 @@ function buildFichePassageHtml(form, client, numero) {
   }).join('')
 
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">' +
-    '<title>Fiche de Passage ' + numero + ' — GSE</title>' +
+    '<title>' + nomFichierDoc('Fiche_passage', numero, (client && (client.entreprise || client.nom)) || '') + '</title>' +
     '<style>' +
     '* { box-sizing: border-box; margin: 0; padding: 0; }' +
     'body { font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; color: #111; background: #f5f5f0; }' +
@@ -5617,7 +5612,7 @@ function buildRapportVisiteHtml(form, client, devis) {
   var nuisiblesStr = (form.nuisibles || []).concat(form.autresNuisible ? [form.autresNuisible] : []).join(', ') || '—'
   var niveauColor = form.niveauInfestation === 'Faible' ? '#16a34a' : form.niveauInfestation === 'Élevé' ? '#dc2626' : '#d97706'
   var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
-  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport de visite — GSE</title>' +
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Rapport_visite', (client && (client.entreprise || client.nom)) || '', form.dateVisite) + '</title>' +
     GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
@@ -5669,7 +5664,7 @@ function buildRapportVisiteHtml(form, client, devis) {
 function buildRapportIntervHtml(form, client, devis) {
   var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
   var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
-  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Rapport d\'intervention — GSE</title>' +
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Rapport_intervention', (client && (client.entreprise || client.nom)) || '', form.dateIntervention) + '</title>' +
     GSE_DOC_STYLES +
     '</style></head><body>' +
     '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
