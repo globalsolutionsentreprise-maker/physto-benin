@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -44,35 +45,60 @@ export async function POST(req) {
 
     if (devisErr || !devis) return NextResponse.json({ error: "Devis introuvable" }, { status: 404 })
 
-    // Historique du client
-    const { data: historique } = await supabase
+    const socle = construireSocleDevis(devis)
+
+    // Historique du client. La requête lisait `montant`, colonne inexistante:
+    // elle échouait en 400 et `historique` valait null, donc tout client
+    // apparaissait comme nouveau et la remise fidélité ne se déclenchait jamais.
+    const histRes = await supabase
       .from("devis")
-      .select("id, statut, created_at, montant")
+      .select("id, statut, created_at, montant_net")
       .eq("client_id", devis.client_id)
       .order("created_at", { ascending: false })
+    const historiqueDispo = !histRes.error
+    const nbDevisAnterieurs = (histRes.data || []).filter(d => d.id !== devisId).length
 
-    const { data: fiches } = await supabase
+    const fichesRes = await supabase
       .from("fiches_passage")
-      .select("id, date_passage, type_passage")
+      .select("id, date_passage")
       .eq("client_id", devis.client_id)
       .order("date_passage", { ascending: false })
+    const fichesDispo = !fichesRes.error
+    const nbFiches = (fichesRes.data || []).length
+
+    // Rapport de visite: le plus récent du devis fait référence. À défaut, on
+    // accepte un rapport du même client sur un autre dossier (même site, même
+    // infestation), en déclarant explicitement son origine.
+    let rapports = []
+    let rapportOrigine = "aucun"
+    const rvDevis = await supabase
+      .from("rapports_visite")
+      .select("*")
+      .eq("devis_id", devisId)
+      .order("date_visite", { ascending: false })
+
+    if (rvDevis.error) {
+      rapportOrigine = "indisponible"
+    } else if ((rvDevis.data || []).length > 0) {
+      rapports = rvDevis.data
+      rapportOrigine = "devis"
+    } else {
+      const rvClient = await supabase
+        .from("rapports_visite")
+        .select("*")
+        .eq("client_id", devis.client_id)
+        .order("date_visite", { ascending: false })
+        .limit(1)
+      if (!rvClient.error && (rvClient.data || []).length > 0) {
+        rapports = rvClient.data
+        rapportOrigine = "autre_dossier"
+      }
+    }
+    const rapport = rapports[0] || null
+    const rapportsPrecedents = rapports.slice(1)
 
     const client = devis.clients
     const nomClient = [client?.prenom, client?.nom].filter(Boolean).join(" ")
-    const nbDevisAntérieurs = (historique || []).filter(d => d.id !== devisId).length
-    const nbFiches = (fiches || []).length
-
-    // Extraire la fréquence depuis la demande client (déterministe, pas laissé à l'IA)
-    function parseFrequenceClient(texte) {
-      const t = (texte || "").toLowerCase()
-      if (/\b1\s*passage|\bune?\s*fois|\bannuel|\b1\s*fois/.test(t)) return { freq: 1, paiement: "annuel" }
-      if (/\b2\s*passages?|\bsemestriel|\bdeux\s*fois|\bdeux\s*passages?|\b2\s*fois/.test(t)) return { freq: 2, paiement: "semestriel" }
-      if (/\b4\s*passages?|\btrimestriel|\bquatre\s*fois|\bquatre\s*passages?|\b4\s*fois/.test(t)) return { freq: 4, paiement: "trimestriel_avance" }
-      if (/\b6\s*passages?|\bbimestriel|\bsix\s*fois/.test(t)) return { freq: 6, paiement: "trimestriel_avance" }
-      if (/\b12\s*passages?|\bmensuel|\bchaque\s*mois|\btous\s*les\s*mois/.test(t)) return { freq: 12, paiement: "mensuel" }
-      return null
-    }
-
     const freqClient = parseFrequenceClient(demandeClient)
 
     const prompt = `Tu es un conseiller commercial senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
