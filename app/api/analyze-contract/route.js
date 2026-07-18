@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -32,7 +32,9 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
   try {
-    const { devisId, typeEtablissement, demandeClient, notes } = await req.json()
+    const body = await req.json()
+    const { devisId, typeEtablissement, demandeClient, notes } = body
+    const phase = body.phase === "questions" ? "questions" : "analyse"
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -100,6 +102,10 @@ export async function POST(req) {
     const client = devis.clients
     const nomClient = [client?.prenom, client?.nom].filter(Boolean).join(" ")
     const freqClient = parseFrequenceClient(demandeClient)
+    const reponsesTechniques = Object.entries(body.reponsesTechniques || {})
+      .filter(([, v]) => String(v || "").trim())
+      .map(([k, v]) => "- " + k + " : " + v)
+      .join("\n") || null
 
     const prompt = `Tu es un conseiller commercial senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
@@ -108,30 +114,38 @@ Tu dois analyser les informations ci-dessous et produire une recommandation stru
 ---
 DEVIS DE RÉFÉRENCE
 - Référence : ${devis.numero}
-- Client : ${nomClient}${client?.entreprise ? " — " + client.entreprise : ""}
-- Prestation(s) : ${Array.isArray(devis.prestations) ? devis.prestations.join(" + ") : devis.prestation || "Non précisé"}
-- Superficie : ${devis.superficie ? devis.superficie + " m²" : "Non précisée"}
-- Montant devis : ${devis.montant ? devis.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
-- Remise accordée : ${devis.remise ? devis.remise + "%" : "Aucune"}
-- Statut devis : ${devis.statut}
+- Client : ${nomClient}${client?.entreprise ? " (" + client.entreprise + ")" : ""}
+- Prestation(s) : ${socle.prestation || "Non précisé"}
+- Superficie totale : ${socle.superficie ? socle.superficie + " m²" : "Non précisée"}
+- Montant du devis : ${socle.montant ? socle.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
+- Remise déjà accordée sur le devis : ${socle.remise ? socle.remise.toLocaleString("fr-FR") + " FCFA" : "Aucune"}
+- Statut : ${devis.statut}
+${socle.lignes.length > 0 ? "- Détail des lignes :\n" + socle.lignes.map(l =>
+  "  · " + (l.prestation || "?") + (l.secteur ? " / " + l.secteur : "") +
+  " : " + (Number(l.superficie) || 0) + " m² à " + (Number(l.prix_m2) || 0) + " FCFA/m² = " +
+  (Number(l.montant) || 0).toLocaleString("fr-FR") + " FCFA"
+).join("\n") : ""}
+
+${blocRapport(rapport, rapportsPrecedents, rapportOrigine)}
 
 PROFIL CLIENT
-- Nombre de devis antérieurs avec GSE : ${nbDevisAntérieurs}
-- Nombre de fiches de passage antérieures : ${nbFiches}
-- Statut : ${nbDevisAntérieurs === 0 && nbFiches === 0 ? "Nouveau client" : "Client existant"}
+- Devis antérieurs avec GSE : ${historiqueDispo ? nbDevisAnterieurs : "information indisponible"}
+- Fiches de passage antérieures : ${fichesDispo ? nbFiches : "information indisponible"}
+- Statut : ${!historiqueDispo || !fichesDispo ? "indéterminé (historique incomplet)" : (nbDevisAnterieurs === 0 && nbFiches === 0 ? "Nouveau client" : "Client existant")}
+${reponsesTechniques ? "\nRÉPONSES TECHNIQUES FOURNIES PAR LE COMMERCIAL\n" + reponsesTechniques : ""}
 
 CONTEXTE COMPLÉMENTAIRE
 - Type d'établissement : ${typeEtablissement || "Non précisé"}
 - Demande du client : ${demandeClient || "Non précisé"}
 - Notes : ${notes || "Aucune"}
 ${freqClient ? `
-⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an — paiementRecommande = "${freqClient.paiement}"
+⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an, paiementRecommande = "${freqClient.paiement}"
 Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
 ` : ""}
 RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
 
-1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié — utilisé tel quel sans modification."
-2. Si le client a ${nbFiches} fiches de passage ou ${nbDevisAntérieurs} devis antérieurs, c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché.
+1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié, utilisé tel quel sans modification."
+2. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché. Si l'historique est indisponible, n'applique aucune remise fidélité et signale-le dans pointsAttention.
 3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
 4. Sois agile : si le contexte donne assez d'informations, propose une recommandation directe et concrète. Évite les réponses génériques.
 ---
@@ -165,7 +179,7 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
         generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
       })
     } catch (e) {
-      return NextResponse.json({ error: "❌ Gemini indisponible — réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
+      return NextResponse.json({ error: "❌ Gemini indisponible, réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
     }
 
     const geminiData = await geminiRes.json()
@@ -181,11 +195,13 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       return NextResponse.json({ error: "Réponse Gemini non parseable", raw: rawText }, { status: 500 })
     }
 
-    // Garantie finale : si la fréquence client a été parsée, on l'impose quelle que soit la réponse de l'IA
-    if (freqClient) {
-      analyse.frequencePassages = freqClient.freq
-      analyse.paiementRecommande = freqClient.paiement
-    }
+    // Garde-fou métier appliqué après le JSON.parse: plancher d'infestation et
+    // fréquence client, jamais laissés à la seule confiance du prompt.
+    analyse = appliquerContraintes({
+      analyse,
+      freqClient,
+      niveauInfestation: rapport ? rapport.niveau_infestation : null,
+    })
 
     return NextResponse.json({
       success: true,
@@ -195,10 +211,17 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
         entreprise: client?.entreprise,
         telephone: client?.telephone,
         adresse: client?.adresse,
-        superficie: devis.superficie,
-        prestations: Array.isArray(devis.prestations) ? devis.prestations : [devis.prestation].filter(Boolean),
-        montant: devis.montant,
+        superficie: socle.superficie,
+        prestations: socle.prestation ? [socle.prestation] : [],
+        montant: socle.montant,
       },
+      rapport: rapport ? {
+        numero: rapport.numero_unique,
+        date: rapport.date_visite,
+        niveau: rapport.niveau_infestation,
+        origine: rapportOrigine,
+      } : null,
+      rapportOrigine,
       analyse
     })
 
