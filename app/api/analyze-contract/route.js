@@ -99,6 +99,51 @@ export async function POST(req) {
     const rapport = rapports[0] || null
     const rapportsPrecedents = rapports.slice(1)
 
+    if (phase === "questions") {
+      const promptQuestions = `Tu es un conseiller technique senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
+
+Aucune visite terrain n'a été réalisée pour ce dossier. Tu dois poser au commercial les questions qui te manquent pour recommander un contrat d'entretien pertinent.
+
+DEVIS
+- Prestation(s) : ${socle.prestation || "Non précisé"}
+- Superficie totale : ${socle.superficie ? socle.superficie + " m²" : "Non précisée"}
+- Montant : ${socle.montant ? socle.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
+- Type d'établissement : ${typeEtablissement || "Non précisé"}
+- Demande du client : ${demandeClient || "Non précisé"}
+- Notes : ${notes || "Aucune"}
+
+RÈGLES IMPÉRATIVES
+1. Maximum 5 questions.
+2. Chaque question doit être répondable DEPUIS LE BUREAU par le commercial : horaires d'exploitation, accès aux locaux, historique d'infestation connu, contraintes réglementaires ou HACCP, sensibilité des zones.
+3. INTERDIT : toute question exigeant un retour sur site, une mesure, une inspection ou un comptage.
+4. Pas de question dont la réponse est déjà dans le devis ci-dessus.
+5. Formule des questions courtes et concrètes.
+
+Réponds UNIQUEMENT avec ce JSON, sans markdown :
+{"questions":[{"id":"identifiant_court_sans_espace","question":"La question posée","pourquoi":"En quoi la réponse change la recommandation, en une phrase"}]}`
+
+      let qRes
+      try {
+        qRes = await callGeminiWithRetry({
+          contents: [{ parts: [{ text: promptQuestions }] }],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 2048 }
+        })
+      } catch (e) {
+        return NextResponse.json({ error: "Gemini indisponible, réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
+      }
+
+      const qData = await qRes.json()
+      const qRaw = qData.candidates?.[0]?.content?.parts?.[0]?.text || ""
+      const qCleaned = qRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
+      let questions = []
+      try {
+        questions = (JSON.parse(qCleaned).questions || []).slice(0, 5)
+      } catch {
+        return NextResponse.json({ error: "Réponse Gemini non parseable", raw: qRaw }, { status: 500 })
+      }
+      return NextResponse.json({ success: true, phase: "questions", questions, rapportOrigine })
+    }
+
     const client = devis.clients
     const nomClient = [client?.prenom, client?.nom].filter(Boolean).join(" ")
     const freqClient = parseFrequenceClient(demandeClient)
