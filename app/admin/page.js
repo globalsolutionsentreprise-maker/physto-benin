@@ -1417,6 +1417,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
   const [contratAnalyse, setContratAnalyse] = React.useState(null)
+  const [contratRapport, setContratRapport] = React.useState(null)
+  const [contratQuestions, setContratQuestions] = React.useState(null)
+  const [contratReponses, setContratReponses] = React.useState({})
   const [finData, setFinData] = React.useState(null)
   const [finLoading, setFinLoading] = React.useState(false)
   const [depModal, setDepModal] = React.useState(false)
@@ -4008,6 +4011,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               setContratModal(devisCarte)
               setContratAnalyse(null)
               setContratErreur(null)
+              setContratRapport(null); setContratQuestions(null); setContratReponses({})
               setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "", prixNegocie: "", inclureNoteDevis: false })
             },
             title: contratCarte ? "Réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
@@ -4546,7 +4550,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('double', d) }, style: { background: '#f0fdf4', border: '1px solid #6ee7b7', color: '#064e3b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲🐭 Désinsect. + Dératis.'),
-            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
+            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
             React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
           )
         )
@@ -4616,6 +4620,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var data = await res.json()
       if (data.success) {
         setContratAnalyse(data.analyse)
+        setContratRapport(data.rapport || { origine: data.rapportOrigine })
       } else {
         var errMsg = data.error || "Erreur inconnue"
         if (errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED")) {
@@ -4650,8 +4655,26 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " — " + nomClient),
             React.createElement("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA · " + (d.prestation || ""))
           ),
-          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
+          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
         ),
+
+        contratRapport ? (function() {
+          var org = contratRapport.origine
+          var absent = !contratRapport.numero
+          var texte = absent
+            ? "Aucun rapport de visite. Analyse fondée sur le devis et vos réponses."
+            : "Rapport " + contratRapport.numero + " du " + contratRapport.date + ", niveau " + contratRapport.niveau +
+              (org === "autre_dossier" ? " (relevé sur un autre dossier du même client)" : "")
+          return React.createElement("div", {
+            style: {
+              display: "flex", alignItems: "center", gap: "8px", marginBottom: "18px",
+              padding: "9px 13px", borderRadius: "8px", fontSize: "12px",
+              backgroundColor: absent ? "#fffbeb" : "#f0fdf4",
+              border: "1px solid " + (absent ? "#fde68a" : "#bbf7d0"),
+              color: absent ? "#92400e" : "#065f46"
+            }
+          }, React.createElement("span", null, absent ? "⚠️" : "📋"), React.createElement("span", null, texte))
+        })() : null,
 
         // Formulaire contexte
         !a && React.createElement("div", null,
