@@ -1494,6 +1494,21 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return seen.join(" + ")
   }
 
+  function totalLignes(lignes) {
+    return (lignes || []).reduce(function(s, x) { return s + montantLigne(x) }, 0)
+  }
+
+  // Prix de base d'un devis. Dès qu'il y a des lignes chiffrées, ELLES font foi :
+  // `montantBrut` n'est qu'une saisie manuelle de secours (aucune ligne chiffrée).
+  // Sans cette règle, `montantBrut` pouvait rester figé sur une ancienne valeur
+  // (ex. le montant net d'une version précédente du devis, chargé par
+  // ouvrirEditionDevis) pendant que les lignes affichaient un autre total : le
+  // client était facturé sur l'ancien montant, plus bas que les prestations.
+  function baseDevis(form) {
+    var t = totalLignes(form.lignes)
+    return t > 0 ? t : (parseFloat(form.montantBrut) || 0)
+  }
+
   // ── Pipeline : parcours client piloté par le champ `devis.etape` ───────────
   var ETAPES = [
     { id: "prospect",     label: "📞 Prospect",     lane: "commercial" },
@@ -1706,6 +1721,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function ouvrirEditionDevis(d) {
     var cl = clients.find(function(c) { return c.id === d.client_id })
+    // Le prix de base repart des lignes du devis. Reprendre `montant_net` (montant
+    // APRÈS remise de la version précédente) comme base rendait la remise cumulative
+    // à chaque réouverture, en plus de désynchroniser la base du total des lignes.
+    var lignesD = lignesFromDevis(d)
+    var baseD = totalLignes(lignesD)
     setEditingDevis(d)
     // Le formulaire d'édition n'est rendu que dans la vue "devis" (renderFormDevis
     // n'est appelé que par renderVueDevis). Sans ce setVue, un clic sur « Modifier
@@ -1721,13 +1741,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       entreprise: cl ? (cl.entreprise || "") : "",
       prestation: d.prestation || "",
       prestations: d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }).filter(function(p) { return PRESTATIONS.includes(p) }) : [],
-      lignes: lignesFromDevis(d),
+      lignes: lignesD,
       superficie: d.superficie ? String(d.superficie) : "",
       prixM2: d.prix_m2 ? String(d.prix_m2) : "",
       prixParPrestation: d.prix_par_prestation || {},
       superficieParPrestation: d.superficie_par_prestation || {},
       description: d.description || "",
-      montantBrut: d.montant_net || d.montant_total || "",
+      montantBrut: baseD > 0 ? String(baseD) : (d.montant_net || d.montant_total || ""),
       remise: d.remise_bienvenue ? String(d.remise_bienvenue) : "",
       remiseType: "pct",
       modeTransmission: "email",
@@ -1772,7 +1792,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (lignesClean.filter(function(l) { return l.montant > 0 }).length === 0) { setMsg("Ajoutez au moins une ligne avec surface et prix."); return }
     setMsg("")
 
-    var brut = parseFloat(formDevis.montantBrut) || 0
+    var brut = baseDevis(formDevis)
     var remiseVal = formDevis.remise ? parseFloat(formDevis.remise) : 0
     var remiseMontant = formDevis.remiseType === "pct"
       ? Math.round(brut * remiseVal / 100)
@@ -1782,6 +1802,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var montantClient = enLigne ? Math.round(montantNet * (1 + COMMISSION_FEDAPAY)) : Math.round(montantNet)
     var superficieVal = formDevis.superficie ? parseFloat(formDevis.superficie) : null
     var prixM2Val = formDevis.prixM2 ? parseFloat(formDevis.prixM2) : null
+
+    // Le formulaire d'édition est très haut : une fois démonté (setEditingDevis(null)),
+    // la page raccourcit brutalement et le navigateur garde le scroll → l'utilisateur
+    // reste dans le vide sous le contenu (« page blanche »), sans voir le message de
+    // confirmation ni la liste. On remonte donc en haut après chaque sauvegarde.
+    var remonterEnHaut = function() {
+      if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" })
+    }
 
     var viderForm = function() {
       setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
@@ -1821,6 +1849,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       } else { setMsg("✓ Devis modifié") }
       setEditingDevis(null)
       viderForm()
+      remonterEnHaut()
       await charger()
       return
     }
@@ -4188,7 +4217,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       ),
       (function() {
-        var brut = parseFloat(formDevis.montantBrut) || 0
+        var brut = baseDevis(formDevis)
         var remiseVal = formDevis.remise ? parseFloat(formDevis.remise) : 0
         var remiseMontant = formDevis.remiseType === "pct" ? Math.round(brut * remiseVal / 100) : Math.round(remiseVal)
         var montantNetCalc = Math.max(0, brut - remiseMontant)
@@ -4273,7 +4302,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("button", { onClick: creerDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } },
           formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer"
         ),
-        React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
+        React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }); if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
       )
     )
   }
