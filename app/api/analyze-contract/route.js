@@ -124,9 +124,12 @@ Réponds UNIQUEMENT avec ce JSON, sans markdown :
 
       let qRes
       try {
+        // gemini-2.5-flash consomme des tokens de sortie pour son raisonnement
+        // interne avant d'émettre le JSON: 2048 produisait une réponse tronquée
+        // et un JSON.parse en échec. Aligné sur l'appel d'analyse ci-dessous.
         qRes = await callGeminiWithRetry({
           contents: [{ parts: [{ text: promptQuestions }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 2048 }
+          generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
         })
       } catch (e) {
         return NextResponse.json({ error: "Gemini indisponible, réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
