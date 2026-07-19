@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, prixContrat } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, prixContrat, montantNegocie, PASSAGES_DEFAUT } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -179,6 +179,32 @@ Réponds UNIQUEMENT avec ce JSON, sans markdown :
     // fréquence de façon cohérente dès le départ (le garde-fou serveur
     // appliquerContraintes reste le filet de sécurité si elle l'ignore).
     const plancherAnalyse = plancherPour(rapport ? rapport.niveau_infestation : null)
+
+    // Fréquence et prix sont décidés AVANT d'appeler l'IA, puis injectés dans le
+    // prompt. Les lui laisser produire pour les écraser ensuite rendait ses
+    // textes libres (argumentCommercial, justificationFormule) incohérents avec
+    // le montant finalement affiché.
+    // Trimestriel par défaut, sauf demande explicite du client qui reste souverain.
+    const frequenceImposee = freqClient ? freqClient.freq : PASSAGES_DEFAUT
+    const paiementImpose = freqClient ? freqClient.paiement : "trimestriel_avance"
+    // Un prix déjà négocié avec le client prime sur le prix calculé: c'est un
+    // engagement pris. Extrait dans le code, jamais laissé à l'IA.
+    const negocie = montantNegocie(notes)
+    const tarifCalcule = prixContrat({
+      totalLignes: socle.totalLignes,
+      montantNet: socle.montant,
+      passages: frequenceImposee,
+    })
+    const prixImpose = negocie != null ? negocie : tarifCalcule.prixAnnuel
+    const remiseImposee = negocie != null ? 0 : tarifCalcule.remisePct
+    const justificationImposee = negocie != null
+      ? "Prix négocié avec le client, utilisé tel quel sans modification."
+      : (tarifCalcule.remisePct > 0
+        ? "Prix calculé : " + socle.totalLignes.toLocaleString("fr-FR") + " FCFA par passage x " +
+          frequenceImposee + " passages = " + tarifCalcule.prixReference.toLocaleString("fr-FR") +
+          " FCFA, moins la remise de " + tarifCalcule.remisePct + " % accordée aux nouveaux contrats."
+        : "Prix calculé : " + tarifCalcule.prixReference.toLocaleString("fr-FR") + " FCFA pour " +
+          frequenceImposee + " passages, remise déjà incluse dans le devis de référence.")
     const reponsesTechniques = Object.entries(body.reponsesTechniques || {})
       .filter(([, v]) => String(v || "").trim())
       .map(([k, v]) => "- " + k + " : " + v)
@@ -219,14 +245,20 @@ ${freqClient ? `
 ⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an, paiementRecommande = "${freqClient.paiement}"
 Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
 ` : ""}
-RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
-${plancherAnalyse ? `
-⚠️ PLANCHER TERRAIN : le constat terrain (niveau d'infestation "${rapport.niveau_infestation}") justifie au minimum ${plancherAnalyse} passage(s) par an. Tu peux proposer davantage, jamais moins. "prixSuggere", "prixTrimestre" et "paiementRecommande" doivent correspondre à la fréquence effectivement retenue.
-` : ""}
-1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié, utilisé tel quel sans modification."
-2. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché. Si l'historique est indisponible, n'applique aucune remise fidélité et signale-le dans pointsAttention.
-3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
-4. Sois agile : si le contexte donne assez d'informations, propose une recommandation directe et concrète. Évite les réponses génériques.
+CHIFFRES DÉJÀ ARRÊTÉS, NON NÉGOCIABLES
+Ces valeurs sont calculées par GSE, tu ne les recalcules pas et tu ne les contredis jamais dans tes textes.
+- Fréquence retenue : ${frequenceImposee} passage(s) par an
+- Paiement retenu : ${paiementImpose}
+- Prix annuel du contrat : ${prixImpose.toLocaleString("fr-FR")} FCFA
+- Remise appliquée : ${remiseImposee} %
+- Origine du prix : ${justificationImposee}
+${plancherAnalyse && plancherAnalyse > frequenceImposee ? `- Le constat terrain justifierait ${plancherAnalyse} passages : signale cet écart dans pointsAttention, sans changer la fréquence retenue.` : ""}
+
+RÈGLES DE DÉCISION :
+1. Ton rôle est d'ARGUMENTER et de RECOMMANDER, pas de chiffrer. Tout montant que tu cites dans tes textes doit être celui ci-dessus.
+2. Prestations : le contrat ne couvre QUE ce que le constat terrain a relevé. N'ajoute jamais une prestation absente du constat, ni dans les clauses ni comme "incluse". Si tu juges une prestation supplémentaire utile, formule-la comme une recommandation dans pointsAttention, clairement hors contrat.
+3. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), signale-le comme argument de fidélisation. Si l'historique est indisponible, ne conclus rien et signale-le dans pointsAttention.
+4. Sois concret : appuie-toi sur le constat terrain (nuisibles, zones, observations du technicien). Évite les réponses génériques.
 ---
 
 Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT avec le JSON, sans markdown) :
@@ -237,12 +269,12 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
   "justificationRisque": "Pourquoi ce niveau de risque en 1-2 phrases",
   "formuleRecommandee": "Formule Standard | Formule Intégrale",
   "justificationFormule": "Pourquoi cette formule en 1-2 phrases",
-  "prixSuggere": 200000,
-  "prixTrimestre": 50000,
-  "justificationPrix": "Explication du prix proposé par rapport au devis",
-  "remiseContrat": 20,
-  "frequencePassages": ${freqClient ? freqClient.freq : 4},
-  "controlesMensuels": ${freqClient && freqClient.freq <= 2 ? 0 : 8},
+  "prixSuggere": ${prixImpose},
+  "prixTrimestre": ${Math.round(prixImpose / frequenceImposee)},
+  "justificationPrix": "${justificationImposee}",
+  "remiseContrat": ${remiseImposee},
+  "frequencePassages": ${frequenceImposee},
+  "controlesMensuels": ${frequenceImposee <= 2 ? 0 : 8},
   "auditAnnuel": true,
   "clausesSpecifiques": ["clause 1", "clause 2", "clause 3"],
   "pointsAttention": ["point 1", "point 2"],
@@ -282,26 +314,16 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       niveauInfestation: rapport ? rapport.niveau_infestation : null,
     })
 
-    // Le prix est calculé dans le code, jamais laissé à l'IA : elle produisait
-    // un montant différent à chaque exécution sur le même dossier (320 000 puis
-    // 400 000) à partir d'un tarif de référence qu'elle s'inventait, et une
-    // remise fantaisiste (50 % au lieu des 10 % accordés aux nouveaux clients).
-    // Calculé APRÈS appliquerContraintes, pour suivre la fréquence réellement
-    // retenue (plancher d'infestation et plafond commercial déjà appliqués).
-    const tarif = prixContrat({
-      totalLignes: socle.totalLignes,
-      montantNet: socle.montant,
-      passages: analyse.frequencePassages,
-    })
-    analyse.prixSuggere = tarif.prixAnnuel
-    analyse.prixTrimestre = Math.round(tarif.prixAnnuel / (analyse.frequencePassages || 4))
-    analyse.remiseContrat = tarif.remisePct
-    analyse.justificationPrix = tarif.remisePct > 0
-      ? "Prix calculé : " + socle.totalLignes.toLocaleString("fr-FR") + " FCFA par passage x " +
-        analyse.frequencePassages + " passages = " + tarif.prixReference.toLocaleString("fr-FR") +
-        " FCFA, moins la remise de " + tarif.remisePct + " % accordée aux nouveaux contrats."
-      : "Prix calculé : " + tarif.prixReference.toLocaleString("fr-FR") +
-        " FCFA pour " + analyse.frequencePassages + " passages, remise déjà incluse dans le devis de référence."
+    // Filet de sécurité : on réimpose les valeurs arrêtées avant l'appel, au cas
+    // où l'IA les aurait modifiées malgré la consigne. Elles ne sont PAS
+    // recalculées ici, sinon elles pourraient diverger de celles injectées dans
+    // le prompt, et les textes de l'IA citeraient un montant différent.
+    analyse.frequencePassages = frequenceImposee
+    analyse.paiementRecommande = paiementImpose
+    analyse.prixSuggere = prixImpose
+    analyse.prixTrimestre = Math.round(prixImpose / frequenceImposee)
+    analyse.remiseContrat = remiseImposee
+    analyse.justificationPrix = justificationImposee
 
     return NextResponse.json({
       success: true,
