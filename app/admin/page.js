@@ -5412,10 +5412,20 @@ function nomFichierDoc() {
 // régénéré sans source stable et le PDF sort vide. Une URL blob donne au
 // document une vraie source, rechargeable à tout moment.
 // Repli sur document.write si les URL blob sont indisponibles.
+// Dans un document blob:, les chemins relatifs ne se resolvent plus contre le
+// domaine : le logo `<img src="/logo-gse.jpeg">` ne chargeait plus dans AUCUN
+// document imprime. On injecte une balise <base> pointant sur l'origine, ce qui
+// retablit tous les chemins racine d'un coup, ici et pour tout futur document.
+function injecterBase(html) {
+  if (typeof window === "undefined") return html
+  if (/<base\s/i.test(html)) return html
+  return html.replace(/<head>/i, '<head><base href="' + window.location.origin + '/">')
+}
+
 function ouvrirDocImprimable(html, largeur, hauteur) {
   var dims = "width=" + (largeur || 920) + ",height=" + (hauteur || 1100)
   try {
-    var url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }))
+    var url = URL.createObjectURL(new Blob([injecterBase(html)], { type: "text/html;charset=utf-8" }))
     var w = window.open(url, "_blank", dims)
     if (!w) { URL.revokeObjectURL(url); return null }
     // Révocation différée : une fois le document chargé, la révocation
@@ -5424,7 +5434,7 @@ function ouvrirDocImprimable(html, largeur, hauteur) {
     return w
   } catch (e) {
     var wf = window.open("", "_blank", dims)
-    if (wf) { wf.document.write(html); wf.document.close() }
+    if (wf) { wf.document.write(injecterBase(html)); wf.document.close() }
     return wf
   }
 }
