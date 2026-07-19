@@ -4673,12 +4673,36 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setAnalysingContrat(false)
   }
 
+  // Source locale du rapport de visite pour un devis, disponible dès l'ouverture
+  // du modal (avant tout appel API). Reproduit la logique de
+  // /api/analyze-contract (lignes 71 à 99) : le rapport le plus récent du devis
+  // fait référence ; à défaut, le plus récent du même client sur un autre
+  // dossier ; à défaut, aucun rapport. Une fois l'analyse IA effectuée, la
+  // réponse de l'API (contratRapport) prime sur cette source locale.
+  function rapportLocalPourDevis(dv) {
+    var parDateDesc = function(a, b) { return new Date(b.date_visite || 0) - new Date(a.date_visite || 0) }
+    var rvDevis = rapportsVisite.filter(function(r) { return r.devis_id === dv.id }).sort(parDateDesc)
+    if (rvDevis.length > 0) {
+      var r = rvDevis[0]
+      return { numero: r.numero_unique, date: r.date_visite, niveau: r.niveau_infestation, origine: "devis" }
+    }
+    var rvClient = rapportsVisite.filter(function(r) { return r.client_id === dv.client_id }).sort(parDateDesc)
+    if (rvClient.length > 0) {
+      var rc = rvClient[0]
+      return { numero: rc.numero_unique, date: rc.date_visite, niveau: rc.niveau_infestation, origine: "autre_dossier" }
+    }
+    return { origine: "aucun" }
+  }
+
   function renderContratModal() {
     if (!contratModal) return null
     var d = contratModal
     var cl = d.clients
     var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ")
     var a = contratAnalyse
+    // La réponse de l'API (après analyse) fait autorité ; avant tout appel, on
+    // retombe sur la source locale calculée depuis rapportsVisite (déjà chargé).
+    var rapportAffiche = contratRapport || rapportLocalPourDevis(d)
 
     var niveauColor = { "CRITIQUE": "#991b1b", "ÉLEVÉ": "#92400e", "MOYEN": "#1e40af", "FAIBLE": "#065f46" }
     var niveauBg    = { "CRITIQUE": "#fee2e2", "ÉLEVÉ": "#fef3c7", "MOYEN": "#dbeafe", "FAIBLE": "#d1fae5" }
@@ -4696,12 +4720,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
         ),
 
-        contratRapport ? (function() {
-          var org = contratRapport.origine
-          var absent = !contratRapport.numero
+        rapportAffiche ? (function() {
+          var org = rapportAffiche.origine
+          var absent = !rapportAffiche.numero
           var texte = absent
             ? "Aucun rapport de visite. Analyse fondée sur le devis et vos réponses."
-            : "Rapport " + contratRapport.numero + " du " + contratRapport.date + ", niveau " + contratRapport.niveau +
+            : "Rapport " + rapportAffiche.numero + " du " + rapportAffiche.date + ", niveau " + rapportAffiche.niveau +
               (org === "autre_dossier" ? " (relevé sur un autre dossier du même client)" : "")
           return React.createElement("div", {
             style: {
@@ -4793,7 +4817,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               )
             })
           ) : null,
-          (!contratQuestions && contratRapport && !contratRapport.numero) ? React.createElement("button", {
+          (!contratQuestions && !rapportAffiche.numero) ? React.createElement("button", {
             onClick: demanderQuestionsContrat,
             disabled: analysingContrat,
             style: { width: "100%", marginBottom: "8px", background: "#fff", color: "#92400e", border: "1px solid #fde68a", borderRadius: "8px", padding: "11px", fontSize: "13px", fontWeight: "700", cursor: analysingContrat ? "wait" : "pointer", fontFamily: "inherit" }
