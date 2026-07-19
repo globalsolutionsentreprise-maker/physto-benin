@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -31,7 +32,9 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
   try {
-    const { devisId, typeEtablissement, demandeClient, notes } = await req.json()
+    const body = await req.json()
+    const { devisId, typeEtablissement, demandeClient, notes } = body
+    const phase = body.phase === "questions" ? "questions" : "analyse"
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -44,36 +47,142 @@ export async function POST(req) {
 
     if (devisErr || !devis) return NextResponse.json({ error: "Devis introuvable" }, { status: 404 })
 
-    // Historique du client
-    const { data: historique } = await supabase
+    const socle = construireSocleDevis(devis)
+
+    // Historique du client. La requête lisait `montant`, colonne inexistante:
+    // elle échouait en 400 et `historique` valait null, donc tout client
+    // apparaissait comme nouveau et la remise fidélité ne se déclenchait jamais.
+    const histRes = await supabase
       .from("devis")
-      .select("id, statut, created_at, montant")
+      .select("id, statut, created_at, montant_net")
       .eq("client_id", devis.client_id)
       .order("created_at", { ascending: false })
+    const historiqueDispo = !histRes.error
+    const nbDevisAnterieurs = (histRes.data || []).filter(d => d.id !== devisId).length
 
-    const { data: fiches } = await supabase
+    const fichesRes = await supabase
       .from("fiches_passage")
-      .select("id, date_passage, type_passage")
+      .select("id, date_passage")
       .eq("client_id", devis.client_id)
       .order("date_passage", { ascending: false })
+    const fichesDispo = !fichesRes.error
+    const nbFiches = (fichesRes.data || []).length
+
+    // Rapport de visite: le plus récent du devis fait référence. À défaut, on
+    // accepte un rapport du même client sur un autre dossier (même site, même
+    // infestation), en déclarant explicitement son origine.
+    let rapports = []
+    let rapportOrigine = "aucun"
+    const rvDevis = await supabase
+      .from("rapports_visite")
+      .select("*")
+      .eq("devis_id", devisId)
+      .order("date_visite", { ascending: false })
+
+    if (rvDevis.error) {
+      rapportOrigine = "indisponible"
+    } else if ((rvDevis.data || []).length > 0) {
+      rapports = rvDevis.data
+      rapportOrigine = "devis"
+    } else {
+      const rvClient = await supabase
+        .from("rapports_visite")
+        .select("*")
+        .eq("client_id", devis.client_id)
+        .order("date_visite", { ascending: false })
+        .limit(1)
+      if (rvClient.error) {
+        // La lecture de repli a aussi échoué: l'information n'a pas pu être
+        // lue, ce n'est pas la même chose qu'une absence réelle de rapport.
+        rapportOrigine = "indisponible"
+      } else if ((rvClient.data || []).length > 0) {
+        rapports = rvClient.data
+        rapportOrigine = "autre_dossier"
+      }
+    }
+    const rapport = rapports[0] || null
+    const rapportsPrecedents = rapports.slice(1)
+
+    if (phase === "questions") {
+      // La route est l'autorité sur les données: si un rapport existe déjà
+      // (saisi entre-temps depuis un autre poste), ne pas mentir à l'IA en
+      // affirmant "aucune visite" et ne pas produire de questions. On
+      // renvoie plutôt le rapport pour que l'interface se remette à jour
+      // (même forme que la phase "analyse": success + rapport + rapportOrigine).
+      if (rapport) {
+        return NextResponse.json({
+          success: true,
+          phase: "questions",
+          rapportDisponible: true,
+          questions: [],
+          rapport: {
+            numero: rapport.numero_unique,
+            date: rapport.date_visite,
+            niveau: rapport.niveau_infestation,
+            origine: rapportOrigine,
+          },
+          rapportOrigine,
+        })
+      }
+
+      const promptQuestions = `Tu es un conseiller technique senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
+
+Aucune visite terrain n'a été réalisée pour ce dossier. Tu dois poser au commercial les questions qui te manquent pour recommander un contrat d'entretien pertinent.
+
+DEVIS
+- Prestation(s) : ${socle.prestation || "Non précisé"}
+- Superficie totale : ${socle.superficie ? socle.superficie + " m²" : "Non précisée"}
+- Montant : ${socle.montant ? socle.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
+- Type d'établissement : ${typeEtablissement || "Non précisé"}
+- Demande du client : ${demandeClient || "Non précisé"}
+- Notes : ${notes || "Aucune"}
+
+RÈGLES IMPÉRATIVES
+1. Maximum 5 questions.
+2. Chaque question doit être répondable DEPUIS LE BUREAU par le commercial : horaires d'exploitation, accès aux locaux, historique d'infestation connu, contraintes réglementaires ou HACCP, sensibilité des zones.
+3. INTERDIT : toute question exigeant un retour sur site, une mesure, une inspection ou un comptage.
+4. Pas de question dont la réponse est déjà dans le devis ci-dessus.
+5. Formule des questions courtes et concrètes.
+
+Réponds UNIQUEMENT avec ce JSON, sans markdown :
+{"questions":[{"id":"identifiant_court_sans_espace","question":"La question posée","pourquoi":"En quoi la réponse change la recommandation, en une phrase"}]}`
+
+      let qRes
+      try {
+        // gemini-2.5-flash consomme des tokens de sortie pour son raisonnement
+        // interne avant d'émettre le JSON: 2048 produisait une réponse tronquée
+        // et un JSON.parse en échec. Aligné sur l'appel d'analyse ci-dessous.
+        qRes = await callGeminiWithRetry({
+          contents: [{ parts: [{ text: promptQuestions }] }],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 8192 }
+        })
+      } catch (e) {
+        return NextResponse.json({ error: "Gemini indisponible, réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
+      }
+
+      const qData = await qRes.json()
+      const qRaw = qData.candidates?.[0]?.content?.parts?.[0]?.text || ""
+      const qCleaned = qRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim()
+      let questions = []
+      try {
+        questions = (JSON.parse(qCleaned).questions || []).slice(0, 5)
+      } catch {
+        return NextResponse.json({ error: "Réponse Gemini non parseable", raw: qRaw }, { status: 500 })
+      }
+      return NextResponse.json({ success: true, phase: "questions", questions, rapportOrigine })
+    }
 
     const client = devis.clients
     const nomClient = [client?.prenom, client?.nom].filter(Boolean).join(" ")
-    const nbDevisAntérieurs = (historique || []).filter(d => d.id !== devisId).length
-    const nbFiches = (fiches || []).length
-
-    // Extraire la fréquence depuis la demande client (déterministe, pas laissé à l'IA)
-    function parseFrequenceClient(texte) {
-      const t = (texte || "").toLowerCase()
-      if (/\b1\s*passage|\bune?\s*fois|\bannuel|\b1\s*fois/.test(t)) return { freq: 1, paiement: "annuel" }
-      if (/\b2\s*passages?|\bsemestriel|\bdeux\s*fois|\bdeux\s*passages?|\b2\s*fois/.test(t)) return { freq: 2, paiement: "semestriel" }
-      if (/\b4\s*passages?|\btrimestriel|\bquatre\s*fois|\bquatre\s*passages?|\b4\s*fois/.test(t)) return { freq: 4, paiement: "trimestriel_avance" }
-      if (/\b6\s*passages?|\bbimestriel|\bsix\s*fois/.test(t)) return { freq: 6, paiement: "trimestriel_avance" }
-      if (/\b12\s*passages?|\bmensuel|\bchaque\s*mois|\btous\s*les\s*mois/.test(t)) return { freq: 12, paiement: "mensuel" }
-      return null
-    }
-
     const freqClient = parseFrequenceClient(demandeClient)
+    // Déclaré à l'IA en amont pour qu'elle dimensionne prix, paiement et
+    // fréquence de façon cohérente dès le départ (le garde-fou serveur
+    // appliquerContraintes reste le filet de sécurité si elle l'ignore).
+    const plancherAnalyse = plancherPour(rapport ? rapport.niveau_infestation : null)
+    const reponsesTechniques = Object.entries(body.reponsesTechniques || {})
+      .filter(([, v]) => String(v || "").trim())
+      .map(([k, v]) => "- " + k + " : " + v)
+      .join("\n") || null
 
     const prompt = `Tu es un conseiller commercial senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
@@ -82,30 +191,40 @@ Tu dois analyser les informations ci-dessous et produire une recommandation stru
 ---
 DEVIS DE RÉFÉRENCE
 - Référence : ${devis.numero}
-- Client : ${nomClient}${client?.entreprise ? " — " + client.entreprise : ""}
-- Prestation(s) : ${Array.isArray(devis.prestations) ? devis.prestations.join(" + ") : devis.prestation || "Non précisé"}
-- Superficie : ${devis.superficie ? devis.superficie + " m²" : "Non précisée"}
-- Montant devis : ${devis.montant ? devis.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
-- Remise accordée : ${devis.remise ? devis.remise + "%" : "Aucune"}
-- Statut devis : ${devis.statut}
+- Client : ${nomClient}${client?.entreprise ? " (" + client.entreprise + ")" : ""}
+- Prestation(s) : ${socle.prestation || "Non précisé"}
+- Superficie totale : ${socle.superficie ? socle.superficie + " m²" : "Non précisée"}
+- Montant du devis : ${socle.montant ? socle.montant.toLocaleString("fr-FR") + " FCFA" : "Non précisé"}
+- Remise déjà accordée sur le devis : ${socle.remise ? socle.remise.toLocaleString("fr-FR") + " FCFA" : "Aucune"}
+- Statut : ${devis.statut}
+${socle.lignes.length > 0 ? "- Détail des lignes :\n" + socle.lignes.map(l =>
+  "  · " + (l.prestation || "?") + (l.secteur ? " / " + l.secteur : "") +
+  " : " + (Number(l.superficie) || 0) + " m² à " + (Number(l.prix_m2) || 0) + " FCFA/m² = " +
+  (Number(l.montant) || 0).toLocaleString("fr-FR") + " FCFA"
+).join("\n") : ""}
+
+${blocRapport(rapport, rapportsPrecedents, rapportOrigine)}
 
 PROFIL CLIENT
-- Nombre de devis antérieurs avec GSE : ${nbDevisAntérieurs}
-- Nombre de fiches de passage antérieures : ${nbFiches}
-- Statut : ${nbDevisAntérieurs === 0 && nbFiches === 0 ? "Nouveau client" : "Client existant"}
+- Devis antérieurs avec GSE : ${historiqueDispo ? nbDevisAnterieurs : "information indisponible"}
+- Fiches de passage antérieures : ${fichesDispo ? nbFiches : "information indisponible"}
+- Statut : ${!historiqueDispo || !fichesDispo ? "indéterminé (historique incomplet)" : (nbDevisAnterieurs === 0 && nbFiches === 0 ? "Nouveau client" : "Client existant")}
+${reponsesTechniques ? "\nRÉPONSES TECHNIQUES FOURNIES PAR LE COMMERCIAL\n" + reponsesTechniques : ""}
 
 CONTEXTE COMPLÉMENTAIRE
 - Type d'établissement : ${typeEtablissement || "Non précisé"}
 - Demande du client : ${demandeClient || "Non précisé"}
 - Notes : ${notes || "Aucune"}
 ${freqClient ? `
-⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an — paiementRecommande = "${freqClient.paiement}"
+⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an, paiementRecommande = "${freqClient.paiement}"
 Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
 ` : ""}
 RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
-
-1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié — utilisé tel quel sans modification."
-2. Si le client a ${nbFiches} fiches de passage ou ${nbDevisAntérieurs} devis antérieurs, c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché.
+${plancherAnalyse ? `
+⚠️ PLANCHER TERRAIN : le constat terrain (niveau d'infestation "${rapport.niveau_infestation}") justifie au minimum ${plancherAnalyse} passage(s) par an. Tu peux proposer davantage, jamais moins. "prixSuggere", "prixTrimestre" et "paiementRecommande" doivent correspondre à la fréquence effectivement retenue.
+` : ""}
+1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié, utilisé tel quel sans modification."
+2. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché. Si l'historique est indisponible, n'applique aucune remise fidélité et signale-le dans pointsAttention.
 3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
 4. Sois agile : si le contexte donne assez d'informations, propose une recommandation directe et concrète. Évite les réponses génériques.
 ---
@@ -139,7 +258,7 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
         generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
       })
     } catch (e) {
-      return NextResponse.json({ error: "❌ Gemini indisponible — réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
+      return NextResponse.json({ error: "❌ Gemini indisponible, réessaie dans quelques secondes. (" + (e.message || "") + ")" }, { status: 503 })
     }
 
     const geminiData = await geminiRes.json()
@@ -155,11 +274,13 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       return NextResponse.json({ error: "Réponse Gemini non parseable", raw: rawText }, { status: 500 })
     }
 
-    // Garantie finale : si la fréquence client a été parsée, on l'impose quelle que soit la réponse de l'IA
-    if (freqClient) {
-      analyse.frequencePassages = freqClient.freq
-      analyse.paiementRecommande = freqClient.paiement
-    }
+    // Garde-fou métier appliqué après le JSON.parse: plancher d'infestation et
+    // fréquence client, jamais laissés à la seule confiance du prompt.
+    analyse = appliquerContraintes({
+      analyse,
+      freqClient,
+      niveauInfestation: rapport ? rapport.niveau_infestation : null,
+    })
 
     return NextResponse.json({
       success: true,
@@ -169,10 +290,17 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
         entreprise: client?.entreprise,
         telephone: client?.telephone,
         adresse: client?.adresse,
-        superficie: devis.superficie,
-        prestations: Array.isArray(devis.prestations) ? devis.prestations : [devis.prestation].filter(Boolean),
-        montant: devis.montant,
+        superficie: socle.superficie,
+        prestations: socle.prestation ? [socle.prestation] : [],
+        montant: socle.montant,
       },
+      rapport: rapport ? {
+        numero: rapport.numero_unique,
+        date: rapport.date_visite,
+        niveau: rapport.niveau_infestation,
+        origine: rapportOrigine,
+      } : null,
+      rapportOrigine,
       analyse
     })
 

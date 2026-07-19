@@ -1417,6 +1417,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [contratModal, setContratModal] = React.useState(null)
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
   const [contratAnalyse, setContratAnalyse] = React.useState(null)
+  const [contratRapport, setContratRapport] = React.useState(null)
+  const [contratQuestions, setContratQuestions] = React.useState(null)
+  const [contratReponses, setContratReponses] = React.useState({})
   const [finData, setFinData] = React.useState(null)
   const [finLoading, setFinLoading] = React.useState(false)
   const [depModal, setDepModal] = React.useState(false)
@@ -4008,6 +4011,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               setContratModal(devisCarte)
               setContratAnalyse(null)
               setContratErreur(null)
+              setContratRapport(null); setContratQuestions(null); setContratReponses({})
               setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "", prixNegocie: "", inclureNoteDevis: false })
             },
             title: contratCarte ? "Réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
@@ -4546,7 +4550,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('double', d) }, style: { background: '#f0fdf4', border: '1px solid #6ee7b7', color: '#064e3b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲🐭 Désinsect. + Dératis.'),
-            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
+            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
             React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
           )
         )
@@ -4602,6 +4606,42 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
+  // Sur un dossier sans rapport de visite, on demande d'abord à l'IA ce qui lui
+  // manque. Les réponses sont facultatives: l'analyse reste lançable sans elles.
+  async function demanderQuestionsContrat() {
+    if (!contratModal) return
+    setAnalysingContrat(true)
+    setContratErreur(null)
+    try {
+      var res = await fetch("/api/analyze-contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          devisId: contratModal.id,
+          phase: "questions",
+          typeEtablissement: contratForm.typeEtablissement,
+          demandeClient: contratForm.demandeClient,
+          notes: contratForm.notes
+        })
+      })
+      var data = await res.json()
+      if (data.success) {
+        setContratQuestions(data.questions || [])
+        // Ne pas jeter numero/date/niveau déjà connus localement : la route
+        // renvoie parfois seulement l'origine (rapport absent ou illisible),
+        // et contratRapport prime ensuite sur la source locale pour toute
+        // la session du modal. data.rapport (rapport trouvé côté serveur)
+        // reste prioritaire quand il est fourni.
+        setContratRapport(data.rapport || Object.assign({}, rapportLocalPourDevis(contratModal), { origine: data.rapportOrigine }))
+      } else {
+        setContratErreur("Erreur : " + (data.error || "inconnue"))
+      }
+    } catch (e) {
+      setContratErreur("Erreur réseau : " + e.message)
+    }
+    setAnalysingContrat(false)
+  }
+
   async function lancerAnalyseContrat() {
     if (!contratModal) return
     setAnalysingContrat(true)
@@ -4611,11 +4651,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var res = await fetch("/api/analyze-contract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ devisId: contratModal.id, typeEtablissement: contratForm.typeEtablissement, demandeClient: contratForm.demandeClient, notes: contratForm.notes })
+        body: JSON.stringify({
+          devisId: contratModal.id,
+          phase: "analyse",
+          typeEtablissement: contratForm.typeEtablissement,
+          demandeClient: contratForm.demandeClient,
+          notes: contratForm.notes,
+          reponsesTechniques: contratReponses
+        })
       })
       var data = await res.json()
       if (data.success) {
         setContratAnalyse(data.analyse)
+        setContratRapport(data.rapport || { origine: data.rapportOrigine })
       } else {
         var errMsg = data.error || "Erreur inconnue"
         if (errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED")) {
@@ -4630,12 +4678,36 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setAnalysingContrat(false)
   }
 
+  // Source locale du rapport de visite pour un devis, disponible dès l'ouverture
+  // du modal (avant tout appel API). Reproduit la logique de
+  // /api/analyze-contract (lignes 71 à 99) : le rapport le plus récent du devis
+  // fait référence ; à défaut, le plus récent du même client sur un autre
+  // dossier ; à défaut, aucun rapport. Une fois l'analyse IA effectuée, la
+  // réponse de l'API (contratRapport) prime sur cette source locale.
+  function rapportLocalPourDevis(dv) {
+    var parDateDesc = function(a, b) { return new Date(b.date_visite || 0) - new Date(a.date_visite || 0) }
+    var rvDevis = rapportsVisite.filter(function(r) { return r.devis_id === dv.id }).sort(parDateDesc)
+    if (rvDevis.length > 0) {
+      var r = rvDevis[0]
+      return { numero: r.numero_unique, date: r.date_visite, niveau: r.niveau_infestation, origine: "devis" }
+    }
+    var rvClient = rapportsVisite.filter(function(r) { return r.client_id === dv.client_id }).sort(parDateDesc)
+    if (rvClient.length > 0) {
+      var rc = rvClient[0]
+      return { numero: rc.numero_unique, date: rc.date_visite, niveau: rc.niveau_infestation, origine: "autre_dossier" }
+    }
+    return { origine: "aucun" }
+  }
+
   function renderContratModal() {
     if (!contratModal) return null
     var d = contratModal
     var cl = d.clients
     var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ")
     var a = contratAnalyse
+    // La réponse de l'API (après analyse) fait autorité ; avant tout appel, on
+    // retombe sur la source locale calculée depuis rapportsVisite (déjà chargé).
+    var rapportAffiche = contratRapport || rapportLocalPourDevis(d)
 
     var niveauColor = { "CRITIQUE": "#991b1b", "ÉLEVÉ": "#92400e", "MOYEN": "#1e40af", "FAIBLE": "#065f46" }
     var niveauBg    = { "CRITIQUE": "#fee2e2", "ÉLEVÉ": "#fef3c7", "MOYEN": "#dbeafe", "FAIBLE": "#d1fae5" }
@@ -4650,8 +4722,33 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " — " + nomClient),
             React.createElement("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA · " + (d.prestation || ""))
           ),
-          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
+          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
         ),
+
+        rapportAffiche ? (function() {
+          var org = rapportAffiche.origine
+          // "indisponible" (erreur de lecture) n'est pas la même chose que
+          // "aucun rapport" (visite réellement jamais faite) : afficher un
+          // texte propre à chaque cas plutôt que de les confondre.
+          var indisponible = org === "indisponible"
+          var absent = !rapportAffiche.numero && !indisponible
+          var degrade = absent || indisponible
+          var texte = indisponible
+            ? "Le constat terrain n'a pas pu être lu (erreur de lecture) : ne rien en conclure sur l'état du site."
+            : absent
+              ? "Aucun rapport de visite. Analyse fondée sur le devis et vos réponses."
+              : "Rapport " + rapportAffiche.numero + " du " + (rapportAffiche.date ? new Date(rapportAffiche.date).toLocaleDateString("fr-FR") : "date inconnue") + ", niveau " + rapportAffiche.niveau +
+                (org === "autre_dossier" ? " (relevé sur un autre dossier du même client)" : "")
+          return React.createElement("div", {
+            style: {
+              display: "flex", alignItems: "center", gap: "8px", marginBottom: "18px",
+              padding: "9px 13px", borderRadius: "8px", fontSize: "12px",
+              backgroundColor: degrade ? "#fffbeb" : "#f0fdf4",
+              border: "1px solid " + (degrade ? "#fde68a" : "#bbf7d0"),
+              color: degrade ? "#92400e" : "#065f46"
+            }
+          }, React.createElement("span", null, degrade ? "⚠️" : "📋"), React.createElement("span", null, texte))
+        })() : null,
 
         // Formulaire contexte
         !a && React.createElement("div", null,
@@ -4711,6 +4808,32 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             },
             style: { width: "100%", backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", marginBottom: "10px" }
           }, "⚡ Générer directement — " + parseInt(contratForm.prixNegocie || 0).toLocaleString("fr-FR") + " FCFA/an"),
+          contratQuestions && contratQuestions.length > 0 ? React.createElement("div", {
+            style: { marginBottom: "16px", padding: "14px 16px", backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px" }
+          },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#92400e", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" } },
+              "Questions techniques (réponses facultatives)"),
+            contratQuestions.map(function(q) {
+              return React.createElement("div", { key: q.id, style: { marginBottom: "12px" } },
+                React.createElement("label", { style: { display: "block", fontSize: "13px", color: "#1c1917", marginBottom: "3px", fontWeight: "600" } }, q.question),
+                q.pourquoi ? React.createElement("div", { style: { fontSize: "11px", color: "#a16207", marginBottom: "5px", fontStyle: "italic" } }, q.pourquoi) : null,
+                React.createElement("input", {
+                  value: contratReponses[q.id] || "",
+                  onChange: function(e) {
+                    var v = e.target.value
+                    setContratReponses(function(prev) { var o = Object.assign({}, prev); o[q.id] = v; return o })
+                  },
+                  placeholder: "Laisser vide si vous ne savez pas",
+                  style: { width: "100%", padding: "8px 11px", border: "1.5px solid #fde68a", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+                })
+              )
+            })
+          ) : null,
+          (!contratQuestions && !rapportAffiche.numero) ? React.createElement("button", {
+            onClick: demanderQuestionsContrat,
+            disabled: analysingContrat,
+            style: { width: "100%", marginBottom: "8px", background: "#fff", color: "#92400e", border: "1px solid #fde68a", borderRadius: "8px", padding: "11px", fontSize: "13px", fontWeight: "700", cursor: analysingContrat ? "wait" : "pointer", fontFamily: "inherit" }
+          }, analysingContrat ? "…" : "Ce dossier n'a pas de rapport de visite : demander les questions techniques") : null,
           React.createElement("button", { onClick: lancerAnalyseContrat, disabled: analysingContrat, style: { width: "100%", backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: analysingContrat ? "wait" : "pointer", fontFamily: "inherit" } },
             analysingContrat ? "Analyse en cours par l'IA…" : "Analyser avec l'IA"
           )
