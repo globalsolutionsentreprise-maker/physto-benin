@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -150,6 +150,10 @@ Réponds UNIQUEMENT avec ce JSON, sans markdown :
     const client = devis.clients
     const nomClient = [client?.prenom, client?.nom].filter(Boolean).join(" ")
     const freqClient = parseFrequenceClient(demandeClient)
+    // Déclaré à l'IA en amont pour qu'elle dimensionne prix, paiement et
+    // fréquence de façon cohérente dès le départ (le garde-fou serveur
+    // appliquerContraintes reste le filet de sécurité si elle l'ignore).
+    const plancherAnalyse = plancherPour(rapport ? rapport.niveau_infestation : null)
     const reponsesTechniques = Object.entries(body.reponsesTechniques || {})
       .filter(([, v]) => String(v || "").trim())
       .map(([k, v]) => "- " + k + " : " + v)
@@ -191,7 +195,9 @@ ${freqClient ? `
 Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
 ` : ""}
 RÈGLES DE DÉCISION (à appliquer dans l'ordre) :
-
+${plancherAnalyse ? `
+⚠️ PLANCHER TERRAIN : le constat terrain (niveau d'infestation "${rapport.niveau_infestation}") justifie au minimum ${plancherAnalyse} passage(s) par an. Tu peux proposer davantage, jamais moins. "prixSuggere", "prixTrimestre" et "paiementRecommande" doivent correspondre à la fréquence effectivement retenue.
+` : ""}
 1. Si les notes mentionnent un montant déjà négocié ou un prix convenu (ex : "150 000 FCFA", "négocié à 200k", "prix accordé 180000", "accepté pour 250000"), extrais ce montant et utilise-le EXACTEMENT pour prixSuggere. Calcule prixTrimestre = Math.round(prixSuggere / ${freqClient ? freqClient.freq : 4}). Dans ce cas, justificationPrix = "Prix négocié, utilisé tel quel sans modification."
 2. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), c'est un client fidèle : applique une remise supplémentaire de 5 à 10 % sur le prix de référence marché. Si l'historique est indisponible, n'applique aucune remise fidélité et signale-le dans pointsAttention.
 3. Sinon, propose un prix adapté au profil de risque, à la superficie et au type d'établissement.
