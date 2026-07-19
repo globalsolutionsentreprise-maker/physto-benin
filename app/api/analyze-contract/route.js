@@ -91,7 +91,11 @@ export async function POST(req) {
         .eq("client_id", devis.client_id)
         .order("date_visite", { ascending: false })
         .limit(1)
-      if (!rvClient.error && (rvClient.data || []).length > 0) {
+      if (rvClient.error) {
+        // La lecture de repli a aussi échoué: l'information n'a pas pu être
+        // lue, ce n'est pas la même chose qu'une absence réelle de rapport.
+        rapportOrigine = "indisponible"
+      } else if ((rvClient.data || []).length > 0) {
         rapports = rvClient.data
         rapportOrigine = "autre_dossier"
       }
@@ -100,6 +104,27 @@ export async function POST(req) {
     const rapportsPrecedents = rapports.slice(1)
 
     if (phase === "questions") {
+      // La route est l'autorité sur les données: si un rapport existe déjà
+      // (saisi entre-temps depuis un autre poste), ne pas mentir à l'IA en
+      // affirmant "aucune visite" et ne pas produire de questions. On
+      // renvoie plutôt le rapport pour que l'interface se remette à jour
+      // (même forme que la phase "analyse": success + rapport + rapportOrigine).
+      if (rapport) {
+        return NextResponse.json({
+          success: true,
+          phase: "questions",
+          rapportDisponible: true,
+          questions: [],
+          rapport: {
+            numero: rapport.numero_unique,
+            date: rapport.date_visite,
+            niveau: rapport.niveau_infestation,
+            origine: rapportOrigine,
+          },
+          rapportOrigine,
+        })
+      }
+
       const promptQuestions = `Tu es un conseiller technique senior de Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
 Aucune visite terrain n'a été réalisée pour ce dossier. Tu dois poser au commercial les questions qui te manquent pour recommander un contrat d'entretien pertinent.

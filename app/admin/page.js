@@ -4627,7 +4627,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var data = await res.json()
       if (data.success) {
         setContratQuestions(data.questions || [])
-        setContratRapport({ origine: data.rapportOrigine })
+        // Ne pas jeter numero/date/niveau déjà connus localement : la route
+        // renvoie parfois seulement l'origine (rapport absent ou illisible),
+        // et contratRapport prime ensuite sur la source locale pour toute
+        // la session du modal. data.rapport (rapport trouvé côté serveur)
+        // reste prioritaire quand il est fourni.
+        setContratRapport(data.rapport || Object.assign({}, rapportLocalPourDevis(contratModal), { origine: data.rapportOrigine }))
       } else {
         setContratErreur("Erreur : " + (data.error || "inconnue"))
       }
@@ -4722,20 +4727,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
         rapportAffiche ? (function() {
           var org = rapportAffiche.origine
-          var absent = !rapportAffiche.numero
-          var texte = absent
-            ? "Aucun rapport de visite. Analyse fondée sur le devis et vos réponses."
-            : "Rapport " + rapportAffiche.numero + " du " + rapportAffiche.date + ", niveau " + rapportAffiche.niveau +
-              (org === "autre_dossier" ? " (relevé sur un autre dossier du même client)" : "")
+          // "indisponible" (erreur de lecture) n'est pas la même chose que
+          // "aucun rapport" (visite réellement jamais faite) : afficher un
+          // texte propre à chaque cas plutôt que de les confondre.
+          var indisponible = org === "indisponible"
+          var absent = !rapportAffiche.numero && !indisponible
+          var degrade = absent || indisponible
+          var texte = indisponible
+            ? "Le constat terrain n'a pas pu être lu (erreur de lecture) : ne rien en conclure sur l'état du site."
+            : absent
+              ? "Aucun rapport de visite. Analyse fondée sur le devis et vos réponses."
+              : "Rapport " + rapportAffiche.numero + " du " + (rapportAffiche.date ? new Date(rapportAffiche.date).toLocaleDateString("fr-FR") : "date inconnue") + ", niveau " + rapportAffiche.niveau +
+                (org === "autre_dossier" ? " (relevé sur un autre dossier du même client)" : "")
           return React.createElement("div", {
             style: {
               display: "flex", alignItems: "center", gap: "8px", marginBottom: "18px",
               padding: "9px 13px", borderRadius: "8px", fontSize: "12px",
-              backgroundColor: absent ? "#fffbeb" : "#f0fdf4",
-              border: "1px solid " + (absent ? "#fde68a" : "#bbf7d0"),
-              color: absent ? "#92400e" : "#065f46"
+              backgroundColor: degrade ? "#fffbeb" : "#f0fdf4",
+              border: "1px solid " + (degrade ? "#fde68a" : "#bbf7d0"),
+              color: degrade ? "#92400e" : "#065f46"
             }
-          }, React.createElement("span", null, absent ? "⚠️" : "📋"), React.createElement("span", null, texte))
+          }, React.createElement("span", null, degrade ? "⚠️" : "📋"), React.createElement("span", null, texte))
         })() : null,
 
         // Formulaire contexte
