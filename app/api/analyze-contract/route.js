@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, prixContrat } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -281,6 +281,27 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       freqClient,
       niveauInfestation: rapport ? rapport.niveau_infestation : null,
     })
+
+    // Le prix est calculé dans le code, jamais laissé à l'IA : elle produisait
+    // un montant différent à chaque exécution sur le même dossier (320 000 puis
+    // 400 000) à partir d'un tarif de référence qu'elle s'inventait, et une
+    // remise fantaisiste (50 % au lieu des 10 % accordés aux nouveaux clients).
+    // Calculé APRÈS appliquerContraintes, pour suivre la fréquence réellement
+    // retenue (plancher d'infestation et plafond commercial déjà appliqués).
+    const tarif = prixContrat({
+      totalLignes: socle.totalLignes,
+      montantNet: socle.montant,
+      passages: analyse.frequencePassages,
+    })
+    analyse.prixSuggere = tarif.prixAnnuel
+    analyse.prixTrimestre = Math.round(tarif.prixAnnuel / (analyse.frequencePassages || 4))
+    analyse.remiseContrat = tarif.remisePct
+    analyse.justificationPrix = tarif.remisePct > 0
+      ? "Prix calculé : " + socle.totalLignes.toLocaleString("fr-FR") + " FCFA par passage x " +
+        analyse.frequencePassages + " passages = " + tarif.prixReference.toLocaleString("fr-FR") +
+        " FCFA, moins la remise de " + tarif.remisePct + " % accordée aux nouveaux contrats."
+      : "Prix calculé : " + tarif.prixReference.toLocaleString("fr-FR") +
+        " FCFA pour " + analyse.frequencePassages + " passages, remise déjà incluse dans le devis de référence."
 
     return NextResponse.json({
       success: true,
