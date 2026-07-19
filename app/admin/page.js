@@ -1418,6 +1418,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [contratForm, setContratForm] = React.useState({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "" })
   const [contratAnalyse, setContratAnalyse] = React.useState(null)
   const [contratRapport, setContratRapport] = React.useState(null)
+  const [offreChoisie, setOffreChoisie] = React.useState(null)
   const [contratQuestions, setContratQuestions] = React.useState(null)
   const [contratReponses, setContratReponses] = React.useState({})
   const [finData, setFinData] = React.useState(null)
@@ -4011,7 +4012,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               setContratModal(devisCarte)
               setContratAnalyse(null)
               setContratErreur(null)
-              setContratRapport(null); setContratQuestions(null); setContratReponses({})
+              setContratRapport(null); setContratQuestions(null); setContratReponses({}); setOffreChoisie(null)
               setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "", prixNegocie: "", inclureNoteDevis: false })
             },
             title: contratCarte ? "Réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
@@ -4550,7 +4551,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('desinsect', d) }, style: { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#065f46', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲 Certificat désinsect.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('derat', d) }, style: { background: '#fefce8', border: '1px solid #fde68a', color: '#92400e', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🐭 Certificat dératis.'),
             d.statut !== 'annule' && React.createElement('button', { onClick: function() { openCertModal('double', d) }, style: { background: '#f0fdf4', border: '1px solid #6ee7b7', color: '#064e3b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🪲🐭 Désinsect. + Dératis.'),
-            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
+            React.createElement('button', { onClick: function() { setContratModal(d); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setOffreChoisie(null); setContratForm({ typeEtablissement: '', demandeClient: 'trimestriel sur un an', notes: '', prixNegocie: '', inclureNoteDevis: false }) }, style: { background: '#faf5ff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '📄 Contrat'),
             React.createElement('button', { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑 Supprimer')
           )
         )
@@ -4705,6 +4706,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var cl = d.clients
     var nomClient = [(cl && cl.prenom) || "", (cl && cl.nom) || ""].filter(Boolean).join(" ")
     var a = contratAnalyse
+
+    // Formules d'engagement proposées par l'IA. La sélection de l'utilisateur
+    // prime sur la recommandation, et c'est elle qui alimente la génération du
+    // contrat : sans ça, choisir une formule à l'écran n'aurait aucun effet sur
+    // le document produit.
+    var offresContrat = (a && Array.isArray(a.offres)) ? a.offres.filter(function(o) { return Number(o.prixTotal) > 0 }) : []
+    var dureeSelectionnee = offreChoisie || (a && a.offreRecommandee) || (a && a.dureeContrat) || 12
+    var offreSelectionnee = offresContrat.filter(function(o) { return Number(o.dureeMois) === Number(dureeSelectionnee) })[0] || null
+    var prixRetenu = offreSelectionnee ? Number(offreSelectionnee.prixTotal) : Number(a && a.prixSuggere) || 0
+    var passagesSurDuree = Math.max(1, Math.round((Number(a && a.frequencePassages) || 4) * Number(dureeSelectionnee) / 12))
+    var prixParPeriode = Math.round(prixRetenu / passagesSurDuree)
     // La réponse de l'API (après analyse) fait autorité ; avant tout appel, on
     // retombe sur la source locale calculée depuis rapportsVisite (déjà chargé).
     var rapportAffiche = contratRapport || rapportLocalPourDevis(d)
@@ -4722,7 +4734,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " — " + nomClient),
             React.createElement("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA · " + (d.prestation || ""))
           ),
-          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
+          React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setOffreChoisie(null) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
         ),
 
         rapportAffiche ? (function() {
@@ -4855,11 +4867,41 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("div", { style: { fontSize: "12px", color: "#666", marginTop: "6px", fontStyle: "italic" } }, a.justificationRisque)
           ),
 
+          // Score commercial et niveau de contrat, arrêtés par le code
+          (a.scoreCommercial != null) && React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", padding: "10px 14px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "8px" } },
+            React.createElement("div", { style: { fontSize: "20px", fontWeight: "700", color: "#6b21a8" } }, a.scoreCommercial + "/100"),
+            React.createElement("div", null,
+              React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#6b21a8" } }, a.niveauContrat || ""),
+              a.detailScore ? React.createElement("div", { style: { fontSize: "10px", color: "#7e5aa2", marginTop: "2px" } },
+                "surface " + a.detailScore.superficie + " · infestation " + a.detailScore.infestation + " · client " + a.detailScore.typeClient + " · fréquence " + a.detailScore.frequence + " · fidélisation " + a.detailScore.fidelisation) : null
+            )
+          ),
+
+          // Les trois formules d'engagement, sélectionnables
+          offresContrat.length > 0 && React.createElement("div", { style: { marginBottom: "16px" } },
+            React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", marginBottom: "8px" } }, "Formules d'engagement"),
+            React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(" + offresContrat.length + ",1fr)", gap: "8px" } },
+              offresContrat.map(function(o) {
+                var actif = Number(o.dureeMois) === Number(dureeSelectionnee)
+                return React.createElement("div", {
+                  key: o.dureeMois,
+                  onClick: function() { setOffreChoisie(Number(o.dureeMois)) },
+                  style: { cursor: "pointer", borderRadius: "8px", padding: "12px", textAlign: "center", border: "2px solid " + (actif ? "#0a2e1a" : "#e8e6e0"), backgroundColor: actif ? "#0a2e1a" : "#fff" }
+                },
+                  React.createElement("div", { style: { fontSize: "10px", textTransform: "uppercase", color: actif ? "#d4a920" : "#888", fontWeight: "700" } }, o.dureeMois + " mois"),
+                  React.createElement("div", { style: { fontSize: "17px", fontWeight: "300", color: actif ? "#fff" : "#0a2e1a", marginTop: "4px" } }, Number(o.prixTotal).toLocaleString("fr-FR")),
+                  React.createElement("div", { style: { fontSize: "10px", color: actif ? "#aaa" : "#999", marginTop: "2px" } }, Math.round(Number(o.prixTotal) / Number(o.dureeMois)).toLocaleString("fr-FR") + " / mois")
+                )
+              })
+            ),
+            offreSelectionnee && offreSelectionnee.argumentaire ? React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "8px", fontStyle: "italic" } }, offreSelectionnee.argumentaire) : null
+          ),
+
           // Grille prix / structure
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "16px" } },
             React.createElement("div", { style: { backgroundColor: "#0a2e1a", borderRadius: "8px", padding: "14px", textAlign: "center" } },
-              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#d4a920" } }, Number(a.prixSuggere).toLocaleString("fr-FR")),
-              React.createElement("div", { style: { fontSize: "9px", color: "#aaa", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / an")
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#d4a920" } }, Number(prixRetenu).toLocaleString("fr-FR")),
+              React.createElement("div", { style: { fontSize: "9px", color: "#aaa", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / " + dureeSelectionnee + " mois")
             ),
             React.createElement("div", { style: { backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "14px", textAlign: "center" } },
               React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#065f46" } }, Number(a.prixTrimestre).toLocaleString("fr-FR")),
@@ -4909,12 +4951,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             onClick: function() {
               var params = new URLSearchParams({
                 devisId: d.id,
-                prixAnnuel: a.prixSuggere,
-                prixTrimestre: a.prixTrimestre,
+                prixAnnuel: prixRetenu,
+                prixTrimestre: prixParPeriode,
                 formule: a.formuleRecommandee,
                 passages: a.frequencePassages,
                 controles: a.controlesMensuels || 0,
-                duree: a.dureeContrat || 12,
+                duree: dureeSelectionnee,
                 paiement: a.paiementRecommande || "trimestriel_avance",
                 typeEtablissement: contratForm.typeEtablissement,
                 remise: a.remiseContrat || d.remise_bienvenue || 0,
