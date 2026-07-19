@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, prixContrat, montantNegocie, PASSAGES_DEFAUT } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -180,31 +180,27 @@ Réponds UNIQUEMENT avec ce JSON, sans markdown :
     // appliquerContraintes reste le filet de sécurité si elle l'ignore).
     const plancherAnalyse = plancherPour(rapport ? rapport.niveau_infestation : null)
 
-    // Fréquence et prix sont décidés AVANT d'appeler l'IA, puis injectés dans le
-    // prompt. Les lui laisser produire pour les écraser ensuite rendait ses
-    // textes libres (argumentCommercial, justificationFormule) incohérents avec
-    // le montant finalement affiché.
-    // Trimestriel par défaut, sauf demande explicite du client qui reste souverain.
+    // Fréquence retenue : trimestriel par défaut, sauf demande explicite du
+    // client, qui reste souverain.
     const frequenceImposee = freqClient ? freqClient.freq : PASSAGES_DEFAUT
     const paiementImpose = freqClient ? freqClient.paiement : "trimestriel_avance"
-    // Un prix déjà négocié avec le client prime sur le prix calculé: c'est un
-    // engagement pris. Extrait dans le code, jamais laissé à l'IA.
+
+    // Un prix déjà négocié avec le client prime sur toute proposition de l'IA:
+    // c'est un engagement pris. Extrait dans le code, jamais laissé à l'IA.
     const negocie = montantNegocie(notes)
-    const tarifCalcule = prixContrat({
-      totalLignes: socle.totalLignes,
-      montantNet: socle.montant,
-      passages: frequenceImposee,
+
+    // Score commercial. Il qualifie le NIVEAU DE SERVICE du dossier, jamais son
+    // prix : c'est le niveau qui est transmis à l'IA, à charge pour elle de
+    // construire une offre réaliste. Calculé ici pour être reproductible.
+    const scoring = scoreCommercial({
+      superficie: socle.superficie,
+      niveauInfestation: rapport ? rapport.niveau_infestation : null,
+      typeClient: typeEtablissement,
+      frequence: frequenceImposee,
+      clientAvecHistorique: historiqueDispo && (nbDevisAnterieurs > 0 || nbFiches > 0),
     })
-    const prixImpose = negocie != null ? negocie : tarifCalcule.prixAnnuel
-    const remiseImposee = negocie != null ? 0 : tarifCalcule.remisePct
-    const justificationImposee = negocie != null
-      ? "Prix négocié avec le client, utilisé tel quel sans modification."
-      : (tarifCalcule.remisePct > 0
-        ? "Prix calculé : " + socle.totalLignes.toLocaleString("fr-FR") + " FCFA par passage x " +
-          frequenceImposee + " passages = " + tarifCalcule.prixReference.toLocaleString("fr-FR") +
-          " FCFA, moins la remise de " + tarifCalcule.remisePct + " % accordée aux nouveaux contrats."
-        : "Prix calculé : " + tarifCalcule.prixReference.toLocaleString("fr-FR") + " FCFA pour " +
-          frequenceImposee + " passages, remise déjà incluse dans le devis de référence.")
+    const niveau = niveauContrat(scoring.score)
+
     const reponsesTechniques = Object.entries(body.reponsesTechniques || {})
       .filter(([, v]) => String(v || "").trim())
       .map(([k, v]) => "- " + k + " : " + v)
@@ -245,20 +241,31 @@ ${freqClient ? `
 ⚠️ FRÉQUENCE IMPOSÉE PAR LE CLIENT : ${freqClient.freq} passage(s)/an, paiementRecommande = "${freqClient.paiement}"
 Tu DOIS mettre "frequencePassages": ${freqClient.freq} et "paiementRecommande": "${freqClient.paiement}" dans ta réponse JSON. Ces deux valeurs sont NON NÉGOCIABLES. Si tu estimes la fréquence insuffisante, ajoute une note dans "pointsAttention" uniquement.
 ` : ""}
-CHIFFRES DÉJÀ ARRÊTÉS, NON NÉGOCIABLES
-Ces valeurs sont calculées par GSE, tu ne les recalcules pas et tu ne les contredis jamais dans tes textes.
+QUALIFICATION DU DOSSIER, ARRÊTÉE PAR GSE
+Ce score est calculé par GSE, tu ne le recalcules pas et tu ne le contestes pas.
+- Score commercial : ${scoring.score} / 100
+- Niveau de contrat : ${niveau.libelle}
+- Détail : superficie ${scoring.detail.superficie}/100, infestation ${scoring.detail.infestation}/100, type de client ${scoring.detail.typeClient}/100 (${scoring.categorieClient}), fréquence ${scoring.detail.frequence}/100, fidélisation ${scoring.detail.fidelisation}/100
 - Fréquence retenue : ${frequenceImposee} passage(s) par an
 - Paiement retenu : ${paiementImpose}
-- Prix annuel du contrat : ${prixImpose.toLocaleString("fr-FR")} FCFA
-- Remise appliquée : ${remiseImposee} %
-- Origine du prix : ${justificationImposee}
+${negocie != null ? `- PRIX DÉJÀ NÉGOCIÉ AVEC LE CLIENT : ${negocie.toLocaleString("fr-FR")} FCFA par an. C'est un engagement pris, tu construis tes formules autour de ce montant pour l'offre 12 mois.` : ""}
 ${plancherAnalyse && plancherAnalyse > frequenceImposee ? `- Le constat terrain justifierait ${plancherAnalyse} passages : signale cet écart dans pointsAttention, sans changer la fréquence retenue.` : ""}
 
+TA MISSION
+Tu es le Responsable Commercial et Technique de Phyto Bénin. Tu construis une offre de maintenance comme le ferait un directeur commercial expérimenté qui vient de visiter le site, pas un tableur.
+
+Le devis n'est qu'une RÉFÉRENCE qui te renseigne sur la taille, la complexité et la valeur du client. Tu ne recopies jamais son montant, tu ne le divises pas, tu ne le multiplies pas par le nombre de passages.
+
+Tu proposes TROIS formules d'engagement : 3 mois, 6 mois et 12 mois, avec des montants différents et cohérents entre eux. Un engagement plus long doit coûter plus cher au total et moins cher au mois : c'est ce qui rend l'engagement attractif. Le premier passage est curatif et plus lourd, les suivants sont de l'entretien : ta tarification doit refléter cette réalité.
+
+Tu fixes les montants selon le niveau de contrat ci-dessus, la superficie, les nuisibles constatés, le type de client et le potentiel de fidélisation, en respectant les pratiques du marché béninois. Un montant doit pouvoir être défendu devant le client.
+
 RÈGLES DE DÉCISION :
-1. Ton rôle est d'ARGUMENTER et de RECOMMANDER, pas de chiffrer. Tout montant que tu cites dans tes textes doit être celui ci-dessus.
-2. Prestations : le contrat ne couvre QUE ce que le constat terrain a relevé. N'ajoute jamais une prestation absente du constat, ni dans les clauses ni comme "incluse". Si tu juges une prestation supplémentaire utile, formule-la comme une recommandation dans pointsAttention, clairement hors contrat.
-3. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), signale-le comme argument de fidélisation. Si l'historique est indisponible, ne conclus rien et signale-le dans pointsAttention.
-4. Sois concret : appuie-toi sur le constat terrain (nuisibles, zones, observations du technicien). Évite les réponses génériques.
+1. Prestations : le contrat ne couvre QUE ce que le constat terrain a relevé. N'ajoute jamais une prestation absente du constat, ni dans les clauses ni comme "incluse". Si tu juges une prestation supplémentaire utile, formule-la comme une recommandation dans pointsAttention, clairement hors contrat.
+2. Si le client a des passages ou des devis antérieurs avec GSE (voir PROFIL CLIENT ci-dessus), sers-t'en comme argument de fidélisation. Si l'historique est indisponible, ne conclus rien et signale-le dans pointsAttention.
+3. Sois concret : appuie-toi sur le constat terrain (nuisibles, zones, observations du technicien). Évite les réponses génériques.
+4. Tout montant que tu cites dans tes textes doit être l'un de ceux de tes formules.
+5. Les zéros du gabarit JSON ci-dessous sont des marqueurs de FORMAT, jamais des valeurs. Tu les remplaces par les montants que TU détermines pour CE dossier. Deux dossiers de superficie, de niveau d'infestation ou de type de client différents doivent produire des montants différents : recopier un exemple serait une faute.
 ---
 
 Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT avec le JSON, sans markdown) :
@@ -269,10 +276,16 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
   "justificationRisque": "Pourquoi ce niveau de risque en 1-2 phrases",
   "formuleRecommandee": "Formule Standard | Formule Intégrale",
   "justificationFormule": "Pourquoi cette formule en 1-2 phrases",
-  "prixSuggere": ${prixImpose},
-  "prixTrimestre": ${Math.round(prixImpose / frequenceImposee)},
-  "justificationPrix": "${justificationImposee}",
-  "remiseContrat": ${remiseImposee},
+  "offres": [
+    {"dureeMois": 3, "prixTotal": 0, "argumentaire": "Pourquoi cette formule convient, en une phrase"},
+    {"dureeMois": 6, "prixTotal": 0, "argumentaire": "..."},
+    {"dureeMois": 12, "prixTotal": 0, "argumentaire": "..."}
+  ],
+  "offreRecommandee": 12,
+  "prixSuggere": 0,
+  "prixTrimestre": 0,
+  "justificationPrix": "Comment tu as construit ces montants, en 2 phrases, sans jamais citer le montant du devis",
+  "remiseContrat": 0,
   "frequencePassages": ${frequenceImposee},
   "controlesMensuels": ${frequenceImposee <= 2 ? 0 : 8},
   "auditAnnuel": true,
@@ -314,16 +327,44 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       niveauInfestation: rapport ? rapport.niveau_infestation : null,
     })
 
-    // Filet de sécurité : on réimpose les valeurs arrêtées avant l'appel, au cas
-    // où l'IA les aurait modifiées malgré la consigne. Elles ne sont PAS
-    // recalculées ici, sinon elles pourraient diverger de celles injectées dans
-    // le prompt, et les textes de l'IA citeraient un montant différent.
+    // Fréquence et paiement restent arrêtés par le code : ce sont des règles
+    // métier, pas du jugement commercial. Les montants, eux, appartiennent à
+    // l'IA (score commercial, pas formule de prix).
     analyse.frequencePassages = frequenceImposee
     analyse.paiementRecommande = paiementImpose
-    analyse.prixSuggere = prixImpose
-    analyse.prixTrimestre = Math.round(prixImpose / frequenceImposee)
-    analyse.remiseContrat = remiseImposee
-    analyse.justificationPrix = justificationImposee
+    analyse.scoreCommercial = scoring.score
+    analyse.detailScore = scoring.detail
+    analyse.niveauContrat = niveau.libelle
+
+    // Un prix négocié est un engagement pris : il prime sur l'offre annuelle.
+    if (negocie != null) {
+      analyse.offres = (Array.isArray(analyse.offres) ? analyse.offres : [])
+        .map(o => (Number(o.dureeMois) === 12 ? Object.assign({}, o, { prixTotal: negocie }) : o))
+      analyse.justificationPrix = "Prix négocié avec le client, utilisé tel quel pour l'engagement annuel."
+    }
+
+    // Garde-fous de cohérence entre formules. Ils ne dictent aucun prix : ils
+    // signalent une gamme incohérente (engagement long moins avantageux, offre
+    // annuelle bradée sous le devis) pour arbitrage avant envoi.
+    const alertesOffres = verifierCoherenceOffres(analyse.offres, { montantDevis: socle.montant })
+    if (alertesOffres.length > 0) {
+      analyse.pointsAttention = alertesOffres.concat(
+        Array.isArray(analyse.pointsAttention) ? analyse.pointsAttention : []
+      )
+    }
+
+    // prixSuggere et prixTrimestre alimentent la génération du contrat : on les
+    // aligne sur la formule recommandée par l'IA, à défaut sur l'annuelle.
+    const offres = Array.isArray(analyse.offres) ? analyse.offres : []
+    const recommandee = offres.find(o => Number(o.dureeMois) === Number(analyse.offreRecommandee))
+      || offres.find(o => Number(o.dureeMois) === 12)
+      || offres[offres.length - 1]
+    if (recommandee) {
+      analyse.prixSuggere = Number(recommandee.prixTotal) || analyse.prixSuggere
+      analyse.dureeContrat = Number(recommandee.dureeMois) || 12
+      const passagesSurDuree = Math.max(1, Math.round(frequenceImposee * analyse.dureeContrat / 12))
+      analyse.prixTrimestre = Math.round(analyse.prixSuggere / passagesSurDuree)
+    }
 
     return NextResponse.json({
       success: true,
@@ -344,6 +385,8 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
         origine: rapportOrigine,
       } : null,
       rapportOrigine,
+      score: scoring.score,
+      niveauContrat: niveau.libelle,
       analyse
     })
 
