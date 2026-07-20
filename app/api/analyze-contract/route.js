@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres, divergencePrestations } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -343,6 +343,19 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       analyse.justificationPrix = "Prix négocié avec le client, utilisé tel quel pour l'engagement annuel."
     }
 
+    // Divergence entre ce qui est facturé au devis et ce que le constat terrain
+    // justifie. Le rapport fait foi pour le périmètre du contrat : une
+    // prestation facturée sans constat correspondant est signalée, jamais
+    // retirée d'office, l'arbitrage est commercial.
+    const divergence = divergencePrestations({ prestationDevis: socle.prestation, rapport })
+    if (divergence.verifiable && divergence.enTrop.length > 0) {
+      analyse.pointsAttention = [
+        "Le devis facture " + divergence.enTrop.join(" et ") +
+        ", que le constat terrain ne justifie pas (nuisibles relevés : " +
+        divergence.attendues.join(", ") + "). À vérifier avant de contractualiser."
+      ].concat(Array.isArray(analyse.pointsAttention) ? analyse.pointsAttention : [])
+    }
+
     // Garde-fous de cohérence entre formules. Ils ne dictent aucun prix : ils
     // signalent une gamme incohérente (engagement long moins avantageux, offre
     // annuelle bradée sous le devis) pour arbitrage avant envoi.
@@ -387,6 +400,7 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
       rapportOrigine,
       score: scoring.score,
       niveauContrat: niveau.libelle,
+      divergencePrestations: divergence,
       analyse
     })
 
