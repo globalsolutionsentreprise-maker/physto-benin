@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
+import { datesPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -405,6 +406,57 @@ export async function POST(req) {
     }).select("*, clients(id, nom, prenom, entreprise, email, telephone)").single()
     if (error) return Response.json({ error: "Erreur insertion devis: " + error.message + " | code: " + error.code }, { status: 500 })
     return Response.json({ ok: true, devis: newDevis })
+  }
+
+  // Marquer un contrat comme signé et poser son planning d'interventions.
+  // Le contrat signé vit sur le devis : type_crm, date de début, durée et
+  // fréquence. La table contrats ne trace que les PDF générés.
+  if (action === "marquer_contrat_signe") {
+    const { devisId, dateDebut, dureeMois, frequence } = body
+    if (!devisId || !dateDebut) return Response.json({ error: "devisId et dateDebut requis" }, { status: 400 })
+
+    const duree = Number(dureeMois) || 12
+    const freq = frequence || "trimestrielle"
+
+    const { data: devis, error: errDevis } = await supabase
+      .from("devis")
+      .select("id, client_id, clients(nom)")
+      .eq("id", devisId)
+      .single()
+    if (errDevis || !devis) return Response.json({ error: "Devis introuvable" }, { status: 404 })
+
+    const { error: errUp } = await supabase.from("devis").update({
+      type_crm: "contrat",
+      date_debut_contrat: dateDebut,
+      duree_contrat_mois: duree,
+      frequence_intervention: freq,
+    }).eq("id", devisId)
+    if (errUp) return Response.json({ error: "Erreur mise à jour devis: " + errUp.message }, { status: 500 })
+
+    // Planning : on ne recrée jamais par dessus un planning existant, sous peine
+    // de dupliquer des passages déjà organisés avec les techniciens.
+    const { data: dejaLa } = await supabase
+      .from("interventions")
+      .select("id")
+      .eq("devis_id", devisId)
+    const nbExistantes = (dejaLa || []).length
+    let creees = 0
+    if (nbExistantes === 0) {
+      const passages = datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
+      if (passages.length > 0) {
+        const lignes = passages.map(p => ({
+          devis_id: devisId,
+          client_nom: (devis.clients && devis.clients.nom) || "",
+          date_intervention: p.date,
+          type_passage: p.type,
+          statut: "planifiee",
+        }))
+        const { error: errIns } = await supabase.from("interventions").insert(lignes)
+        if (errIns) return Response.json({ error: "Contrat marqué signé, mais planning non créé: " + errIns.message }, { status: 500 })
+        creees = lignes.length
+      }
+    }
+    return Response.json({ ok: true, passagesCrees: creees, passagesExistants: nbExistantes })
   }
 
   return Response.json({ error: "Action inconnue" }, { status: 400 })

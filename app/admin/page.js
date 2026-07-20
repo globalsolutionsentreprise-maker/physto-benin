@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { resumeContrat, dateFinContrat } from "@/lib/contrat-analyse.mjs"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -1419,6 +1420,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [contratAnalyse, setContratAnalyse] = React.useState(null)
   const [contratRapport, setContratRapport] = React.useState(null)
   const [offreChoisie, setOffreChoisie] = React.useState(null)
+  const [signForm, setSignForm] = React.useState({})
+  const [signEnCours, setSignEnCours] = React.useState(null)
   const [contratQuestions, setContratQuestions] = React.useState(null)
   const [contratReponses, setContratReponses] = React.useState({})
   const [finData, setFinData] = React.useState(null)
@@ -4158,7 +4161,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
+      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["contrats", "Contrats"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -5129,6 +5132,183 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     window.open("/api/generate-contract?" + params.toString(), "_blank")
   }
 
+  // ── Onglet Contrats : suivi des engagements signés ────────────────────────
+  // Le contrat signé vit sur le devis (type_crm, date_debut_contrat, durée,
+  // fréquence). La table contrats ne trace que les PDF générés : un PDF généré
+  // ne veut pas dire signé, d'où les deux sections distinctes.
+  async function marquerContratSigne(devisId) {
+    var f = signForm[devisId] || {}
+    if (!f.dateDebut) { setMsg("Erreur : indiquez la date de début du contrat."); return }
+    setSignEnCours(devisId)
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/crm-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({
+          action: "marquer_contrat_signe",
+          devisId: devisId,
+          dateDebut: f.dateDebut,
+          dureeMois: parseInt(f.dureeMois) || 12,
+          frequence: f.frequence || "trimestrielle"
+        })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "signature impossible")) }
+      else if (data.passagesExistants > 0) { setMsg("✓ Contrat marqué signé. Planning conservé : " + data.passagesExistants + " passages déjà en place.") }
+      else { setMsg("✓ Contrat marqué signé, " + data.passagesCrees + " passages planifiés.") }
+      await charger()
+    } catch (e) { setMsg("Erreur réseau : " + e.message) }
+    setSignEnCours(null)
+  }
+
+  function renderVueContrats() {
+    var e = React.createElement
+    var auj = new Date().toISOString().slice(0, 10)
+    var signes = devisList.filter(function(d) { return d.type_crm === "contrat" || d.date_debut_contrat })
+    // PDF générés dont le devis n'est pas marqué signé : ils ne sont pas des contrats.
+    var idsSignes = {}
+    signes.forEach(function(d) { idsSignes[d.id] = true })
+    var aSigner = (contratsList || []).filter(function(c) { return !idsSignes[c.devis_id] })
+
+    var ST_CONTRAT = {
+      actif:        { libelle: "Actif",         bg: "#f0fdf4", tc: "#065f46", bord: "#bbf7d0" },
+      a_renouveler: { libelle: "À renouveler",  bg: "#fffbeb", tc: "#92400e", bord: "#fde68a" },
+      a_venir:      { libelle: "À venir",       bg: "#eff6ff", tc: "#1e40af", bord: "#bfdbfe" },
+      termine:      { libelle: "Terminé",       bg: "#f5f5f4", tc: "#57534e", bord: "#e7e5e4" },
+      sans_date:    { libelle: "Sans date",     bg: "#fef2f2", tc: "#991b1b", bord: "#fecaca" },
+    }
+    var fmtJ = function(iso) { return iso ? new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+
+    function renderFrise(d) {
+      var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+      var r = resumeContrat({ devis: d, interventions: interventionsList }, auj)
+      var st = ST_CONTRAT[r.statut] || ST_CONTRAT.actif
+      var t0 = r.debut ? new Date(r.debut + "T00:00:00").getTime() : null
+      var t1 = r.fin ? new Date(r.fin + "T00:00:00").getTime() : null
+      var span = (t0 && t1 && t1 > t0) ? (t1 - t0) : null
+      var pctAuj = span ? Math.min(100, Math.max(0, (new Date(auj + "T00:00:00").getTime() - t0) / span * 100)) : null
+
+      return e("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "18px 20px", marginBottom: "14px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "4px" } },
+          e("div", null,
+            e("div", { style: { fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, (cl && cl.nom) || "Client inconnu"),
+            e("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } },
+              d.numero + " · " + (d.frequence_intervention || "trimestrielle") + " · " + Number(d.montant_net || 0).toLocaleString("fr-FR") + " FCFA")
+          ),
+          e("span", { style: { flexShrink: 0, backgroundColor: st.bg, color: st.tc, border: "1px solid " + st.bord, borderRadius: "20px", padding: "3px 12px", fontSize: "11px", fontWeight: "700" } }, st.libelle)
+        ),
+        e("div", { style: { fontSize: "12px", color: "#555", marginBottom: "14px" } }, d.prestation || ""),
+
+        // Frise : barre de durée + jalons de passage
+        span ? e("div", { style: { position: "relative", height: "38px", marginBottom: "10px" } },
+          e("div", { style: { position: "absolute", top: "16px", left: 0, right: 0, height: "4px", backgroundColor: "#e8e6e0", borderRadius: "2px" } }),
+          pctAuj != null ? e("div", { style: { position: "absolute", top: "16px", left: 0, width: pctAuj + "%", height: "4px", backgroundColor: "#0a2e1a", borderRadius: "2px" } }) : null,
+          r.passages.map(function(p, i) {
+            var pct = Math.min(100, Math.max(0, (new Date(p.date + "T00:00:00").getTime() - t0) / span * 100))
+            var fait = p.statut === "terminee"
+            var ctrl = p.type === "controle"
+            var retard = !fait && p.date < auj
+            return e("div", {
+              key: i,
+              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé" : (retard ? "EN RETARD" : "prévu")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
+              style: {
+                position: "absolute", top: ctrl ? "12px" : "10px", left: "calc(" + pct + "% - 6px)",
+                width: ctrl ? "10px" : "14px", height: ctrl ? "10px" : "14px", borderRadius: "50%",
+                backgroundColor: fait ? "#0a2e1a" : (retard ? "#fee2e2" : "#fff"),
+                border: "2px solid " + (fait ? "#0a2e1a" : (retard ? "#991b1b" : (ctrl ? "#bbb" : "#0a2e1a"))),
+                boxSizing: "border-box", cursor: "help"
+              }
+            })
+          })
+        ) : null,
+
+        e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#888", marginBottom: "10px" } },
+          e("span", null, r.debut ? fmtJ(r.debut) : "début non renseigné"),
+          e("span", null, r.fin ? "→ " + fmtJ(r.fin) : "")
+        ),
+
+        e("div", { style: { display: "flex", gap: "14px", flexWrap: "wrap", fontSize: "12px", alignItems: "center" } },
+          e("span", { style: { color: "#555" } }, "● intervention   ○ contrôle"),
+          e("span", { style: { color: "#0a2e1a", fontWeight: "600" } }, r.faits + " / " + r.total + " passages faits"),
+          (r.enRetard && r.enRetard.length > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "700" } },
+            "⚠ " + r.enRetard.length + " passage(s) en retard, depuis le " + fmtJ(r.enRetard[0].date)) : null,
+          r.prochain ? e("span", { style: { color: "#1e40af" } }, "→ prochain : " + fmtJ(r.prochain.date) + " " + (r.prochain.type === "controle" ? "contrôle" : "intervention")) : null,
+          r.sansTechnicien > 0 ? e("span", { style: { color: "#92400e", fontWeight: "600" } }, "⚠ " + r.sansTechnicien + " passage(s) sans technicien") : null,
+          (r.total === 0 && r.passagesAttendus > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "600" } }, "⚠ aucun passage planifié, " + r.passagesAttendus + " attendus") : null
+        ),
+        e("div", { style: { marginTop: "12px" } },
+          e("button", { onClick: function() { voirDevisClient(cl) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📊 Ouvrir le dossier")
+        )
+      )
+    }
+
+    function renderASigner(c) {
+      var d = devisList.find(function(x) { return x.id === c.devis_id })
+      var cl = (d && d.clients) || clients.find(function(x) { return x.id === c.client_id })
+      var f = signForm[c.devis_id] || {}
+      var maj = function(champ, val) {
+        setSignForm(function(prev) {
+          var o = Object.assign({}, prev)
+          o[c.devis_id] = Object.assign({}, o[c.devis_id] || {}, (function() { var q = {}; q[champ] = val; return q })())
+          return o
+        })
+      }
+      var inp2 = { padding: "7px 9px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" }
+      return e("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e9d5ff", borderRadius: "10px", padding: "14px 16px", marginBottom: "10px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" } },
+          e("div", null,
+            e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#6b21a8" } }, (cl && cl.nom) || "Client inconnu"),
+            e("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, c.reference + " · PDF généré le " + fmtJ(c.date_generation ? String(c.date_generation).slice(0, 10) : null))
+          ),
+          e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
+            e("input", { type: "date", value: f.dateDebut || "", onChange: function(ev) { maj("dateDebut", ev.target.value) }, title: "Date de début du contrat", style: inp2 }),
+            e("select", { value: f.dureeMois || "12", onChange: function(ev) { maj("dureeMois", ev.target.value) }, style: inp2 },
+              ["3", "6", "12", "24"].map(function(m) { return e("option", { key: m, value: m }, m + " mois") })
+            ),
+            e("select", { value: f.frequence || "trimestrielle", onChange: function(ev) { maj("frequence", ev.target.value) }, style: inp2 },
+              ["mensuelle", "bimestrielle", "trimestrielle", "semestrielle", "annuelle"].map(function(x) { return e("option", { key: x, value: x }, x) })
+            ),
+            e("button", {
+              onClick: function() { marquerContratSigne(c.devis_id) },
+              disabled: signEnCours === c.devis_id,
+              style: { backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+            }, signEnCours === c.devis_id ? "..." : "Marquer signé")
+          )
+        )
+      )
+    }
+
+    var actifs = signes.filter(function(d) {
+      var st = resumeContrat({ devis: d, interventions: interventionsList }, auj).statut
+      return st === "actif" || st === "a_renouveler" || st === "a_venir"
+    })
+    var totalActif = actifs.reduce(function(s, d) { return s + Number(d.montant_net || 0) }, 0)
+
+    return e("div", null,
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
+        e("strong", { style: { fontSize: "15px", color: "#111" } }, "Contrats signés"),
+        e("span", { style: { fontSize: "12px", color: "#888" } },
+          actifs.length + " en cours · " + totalActif.toLocaleString("fr-FR") + " FCFA")
+      ),
+      signes.length === 0
+        ? e("div", { style: { textAlign: "center", padding: "36px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888", fontSize: "13px" } },
+            "Aucun contrat signé. Marquez un contrat généré comme signé ci-dessous pour le suivre ici.")
+        : e("div", null, signes.map(renderFrise)),
+
+      aSigner.length > 0 ? e("div", { style: { marginTop: "26px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+          e("strong", { style: { fontSize: "13px", color: "#6b21a8" } }, "Contrats générés, non marqués signés"),
+          e("span", { style: { fontSize: "12px", color: "#888" } }, aSigner.length)
+        ),
+        e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "10px" } },
+          "Un PDF généré ne vaut pas signature. Renseignez la date de début pour lancer le suivi et planifier les passages."),
+        aSigner.map(renderASigner)
+      ) : null
+    )
+  }
+
   function renderVueDocuments() {
     var docs = []
     certsList.forEach(function(c) {
@@ -5372,6 +5552,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     vue === "pipeline" ? renderVuePipelineUnifie() : null,
     vue === "finances" ? renderVueFinances() : null,
     vue === "analyse" ? renderVueAnalyse() : null,
+    vue === "contrats" ? renderVueContrats() : null,
     vue === "documents" ? renderVueDocuments() : null
   )
 }
