@@ -4907,12 +4907,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement("div", { style: { fontSize: "9px", color: "#aaa", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / " + dureeSelectionnee + " mois")
             ),
             React.createElement("div", { style: { backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "14px", textAlign: "center" } },
-              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#065f46" } }, Number(a.prixTrimestre).toLocaleString("fr-FR")),
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#065f46" } }, Number(prixParPeriode).toLocaleString("fr-FR")),
               React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / " + (a.paiementRecommande === "semestriel" ? "semestre" : a.paiementRecommande === "mensuel" ? "mois" : a.paiementRecommande === "annuel" ? "an" : "trimestre"))
             ),
             React.createElement("div", { style: { backgroundColor: "#fef9ee", borderRadius: "8px", padding: "14px", textAlign: "center" } },
-              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#92400e" } }, a.remiseContrat + "%"),
-              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, "remise contrat")
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#92400e" } }, passagesSurDuree),
+              React.createElement("div", { style: { fontSize: "9px", color: "#888", textTransform: "uppercase", marginTop: "4px" } }, passagesSurDuree > 1 ? "passages inclus" : "passage inclus")
             )
           ),
 

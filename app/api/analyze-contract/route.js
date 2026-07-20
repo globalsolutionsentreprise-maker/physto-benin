@@ -332,6 +332,12 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
     // l'IA (score commercial, pas formule de prix).
     analyse.frequencePassages = frequenceImposee
     analyse.paiementRecommande = paiementImpose
+    // Le prix est désormais construit par l'IA, la remise y est incorporée : il
+    // n'y a plus de pourcentage de remise à afficher. Une valeur libre laissée
+    // à l'IA a produit "50000 %" en production, qui partait ensuite dans
+    // generate-contract et y faussait le prix de référence imprimé.
+    const remiseIA = Number(analyse.remiseContrat)
+    analyse.remiseContrat = (Number.isFinite(remiseIA) && remiseIA >= 0 && remiseIA <= 90) ? Math.round(remiseIA) : 0
     analyse.scoreCommercial = scoring.score
     analyse.detailScore = scoring.detail
     analyse.niveauContrat = niveau.libelle
