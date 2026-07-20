@@ -3,12 +3,27 @@ import { datesPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
+// Un jeton Supabase valide ne suffit PAS : les clients de l'espace client ont
+// eux aussi un compte Supabase. Sans le contrôle sur admin_acces ci-dessous,
+// n'importe lequel d'entre eux pouvait lire tout le CRM et toute la RH avec le
+// jeton de sa propre session. Le contrôle existait uniquement côté navigateur,
+// donc il ne protégeait rien.
 async function verifyAdmin(req) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "")
   if (!token) return null
   const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   const { data: { user } } = await anon.auth.getUser(token)
-  return user || null
+  if (!user || !user.email) return null
+  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const { data: acces, error } = await admin
+    .from("admin_acces")
+    .select("email, actif")
+    .eq("email", user.email)
+    .maybeSingle()
+  // En cas d'erreur de lecture, on refuse : une panne ne doit jamais ouvrir
+  // l'accès, elle doit le fermer.
+  if (error || !acces || acces.actif !== true) return null
+  return user
 }
 
 function mapStatut(statut) {
