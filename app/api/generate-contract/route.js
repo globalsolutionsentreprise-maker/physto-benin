@@ -348,7 +348,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
           <td style="text-align:right">− ${remiseMontant.toLocaleString("fr-FR")} FCFA</td>
         </tr>
         <tr class="total">
-          <td>MONTANT ANNUEL DU CONTRAT (TTC)</td>
+          <td>MONTANT ANNUEL DU CONTRAT</td>
           <td style="text-align:right">${prixAnnuel.toLocaleString("fr-FR")} FCFA</td>
         </tr>
         <tr class="alt">
@@ -357,6 +357,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         </tr>
       </tbody>
     </table>
+    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
     ${!sansNoteDevis ? `<p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">* L'intervention initiale ${esc(devis.numero)} (${esc(montant)} FCFA) est facturée séparément.</p>` : ""}
 
     ${artTitle("Article 5 — Modalités de paiement")}
