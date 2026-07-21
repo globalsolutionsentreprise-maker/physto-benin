@@ -3243,6 +3243,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       "<div class=\"cr\"><span>Prix de base</span><span>" + Number(d.montantBrut).toLocaleString("fr-FR") + " FCFA</span></div>" +
       (d.remiseMontant > 0 ? "<div class=\"cr remise\"><span>Remise accordée (" + d.remiseLabel + ")</span><span>- " + d.remiseMontant.toLocaleString("fr-FR") + " FCFA</span></div>" : "") +
       "<div class=\"cr total\"><span>Montant total</span><span>" + Number(d.montantNet).toLocaleString("fr-FR") + " FCFA</span></div>" +
+      "<div style=\"font-size:11px;color:#888;font-style:italic;margin-top:6px\">TVA non applicable, entreprise non assujettie. Montant net à payer.</div>" +
       "</div>" +
       (function() {
         var pA = d.pctAcompte || 60; var pS = 100 - pA
