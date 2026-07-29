@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres, divergencePrestations } from "@/lib/contrat-analyse.mjs"
+import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres, divergencePrestations, offresContrat, passagesPourDuree } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -342,11 +342,39 @@ Produis une analyse en JSON avec exactement cette structure (réponds UNIQUEMENT
     analyse.detailScore = scoring.detail
     analyse.niveauContrat = niveau.libelle
 
-    // Un prix négocié est un engagement pris : il prime sur l'offre annuelle.
+    // Prix DÉTERMINISTE : les montants ne sont plus fixés par l'IA (elle sortait
+    // 320 000 puis 400 000 sur le même dossier) mais calculés à partir du devis,
+    // pour être reproductibles. On ne garde de l'IA que son argumentaire par
+    // formule. Le client choisira sa durée sur le contrat (case à cocher).
+    const detContrat = offresContrat({ prixPonctuel: socle.montant, passagesAnnuels: frequenceImposee })
+    const argParDuree = {}
+    for (const o of (Array.isArray(analyse.offres) ? analyse.offres : [])) {
+      if (o && o.dureeMois != null) argParDuree[Number(o.dureeMois)] = o.argumentaire || ""
+    }
+    analyse.offres = detContrat.offres.map(o => ({
+      dureeMois: o.dureeMois,
+      passages: o.passages,
+      prixPassage: o.prixPassage,
+      prixTotal: o.prixTotal,
+      argumentaire: argParDuree[o.dureeMois] || "",
+    }))
+    analyse.plancherPassage = detContrat.plancherPassage
+    analyse.prixPonctuel = detContrat.prixPonctuel
+
+    // Un prix négocié est un engagement pris devant le client : il prime sur
+    // l'offre 12 mois calculée. On ne l'écrase pas (ce serait renier une
+    // promesse), mais s'il passe sous le plancher de rentabilité, on l'alerte.
     if (negocie != null) {
-      analyse.offres = (Array.isArray(analyse.offres) ? analyse.offres : [])
-        .map(o => (Number(o.dureeMois) === 12 ? Object.assign({}, o, { prixTotal: negocie }) : o))
-      analyse.justificationPrix = "Prix négocié avec le client, utilisé tel quel pour l'engagement annuel."
+      const passages12 = passagesPourDuree(frequenceImposee, 12)
+      const plancherAnnuel = detContrat.plancherPassage * passages12
+      analyse.offres = analyse.offres.map(o => (Number(o.dureeMois) === 12
+        ? Object.assign({}, o, { prixTotal: negocie, prixPassage: Math.round(negocie / (o.passages || 1)) })
+        : o))
+      analyse.justificationPrix = "Prix négocié avec le client, appliqué à l'engagement 12 mois."
+      if (negocie < plancherAnnuel) {
+        analyse.pointsAttention = ["⚠ Prix négocié (" + negocie.toLocaleString("fr-FR") + " FCFA/an) sous le plancher de rentabilité (" + plancherAnnuel.toLocaleString("fr-FR") + " FCFA/an) : à valider par la direction."]
+          .concat(Array.isArray(analyse.pointsAttention) ? analyse.pointsAttention : [])
+      }
     }
 
     // Divergence entre ce qui est facturé au devis et ce que le constat terrain

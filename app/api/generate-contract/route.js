@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { offresContrat } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -50,6 +51,14 @@ export async function GET(req) {
     const aDeratisation     = /deratis|rongeur|raticide/.test(prestNorm)
     const aDesinsectisation = /desinsect|insecticide/.test(prestNorm)
     const aDesinfection     = /desinfect/.test(prestNorm)
+
+    // Formules d'engagement (3 / 6 / 12 mois) calculées de façon déterministe
+    // depuis le devis. Le client coche sa durée sur le contrat, GSE applique.
+    const prixPonctuel = Number(
+      devis.montant_net != null ? devis.montant_net
+      : (devis.montant_total != null ? devis.montant_total : (devis.montant || 0))
+    )
+    const { offres: offresEngagement, plancherPassage } = offresContrat({ prixPonctuel, passagesAnnuels: passages })
 
     const today  = new Date()
     const annee  = today.getFullYear()
@@ -346,31 +355,31 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </tbody>
     </table>
 
-    ${artTitle("Article 4 — Conditions financières")}
+    ${artTitle("Article 4 — Formule d'engagement (à cocher par le Client)")}
+    <p class="art-text">Le Client choisit la durée de son engagement en cochant <strong>une seule</strong> case ci-dessous. Le tarif par passage diminue à mesure que l'engagement s'allonge. Prix de référence d'un passage ponctuel : <strong>${prixPonctuel.toLocaleString("fr-FR")} FCFA</strong>.</p>
     <table class="finances">
       <thead>
-        <tr><th>Désignation</th><th style="width:35%;text-align:right">Montant</th></tr>
+        <tr>
+          <th style="width:12%;text-align:center">Choix</th>
+          <th>Engagement</th>
+          <th style="width:24%;text-align:right">Prix / passage</th>
+          <th style="width:24%;text-align:right">Montant total</th>
+        </tr>
       </thead>
       <tbody>
-        <tr class="alt">
-          <td>Prix de référence — ${passages} passages ponctuels</td>
-          <td style="text-align:right">${prixRef.toLocaleString("fr-FR")} FCFA</td>
-        </tr>
-        <tr>
-          <td>Remise contrat annuel (${remisePct} %)</td>
-          <td style="text-align:right">− ${remiseMontant.toLocaleString("fr-FR")} FCFA</td>
-        </tr>
-        <tr class="total">
-          <td>MONTANT ANNUEL DU CONTRAT</td>
-          <td style="text-align:right">${prixAnnuel.toLocaleString("fr-FR")} FCFA</td>
-        </tr>
-        <tr class="alt">
-          <td>${paiementLabel()}</td>
-          <td style="text-align:right">${paiementMontant()}</td>
-        </tr>
+        ${offresEngagement.map(function(o) {
+          const reco = o.dureeMois === 12
+          const cls = reco ? ' class="total"' : (o.dureeMois === 6 ? ' class="alt"' : '')
+          return `<tr${cls}>
+          <td style="text-align:center;font-size:18px">☐</td>
+          <td>${o.dureeMois} mois — ${o.passages} passage${o.passages > 1 ? "s" : ""} inclus${reco ? " <strong>(le plus avantageux)</strong>" : ""}</td>
+          <td style="text-align:right">${o.prixPassage.toLocaleString("fr-FR")} FCFA</td>
+          <td style="text-align:right">${o.prixTotal.toLocaleString("fr-FR")} FCFA</td>
+        </tr>`
+        }).join("")}
       </tbody>
     </table>
-    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
+    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
     ${!sansNoteDevis ? `<p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">* L'intervention initiale ${esc(devis.numero)} (${esc(montant)} FCFA) est facturée séparément.</p>` : ""}
 
     ${artTitle("Article 5 — Modalités de paiement")}
@@ -378,8 +387,8 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
     ${artTitle("Article 6 — Durée et renouvellement")}
     <ul class="clauses">
-      ${li(`Le contrat est conclu pour une durée de ${duree} mois à compter de la date de signature.`)}
-      ${li(`À l'échéance, il est reconduit tacitement pour une nouvelle période de ${duree} mois, sauf dénonciation.`)}
+      ${li("Le contrat est conclu pour la durée d'engagement cochée à l'Article 4, à compter de la date de signature.")}
+      ${li("À l'échéance, il est reconduit tacitement pour une durée identique, sauf dénonciation écrite avant le terme.")}
       ${li("La date du premier passage sera fixée d'un commun accord dans les 30 jours suivant la signature.")}
     </ul>
 
