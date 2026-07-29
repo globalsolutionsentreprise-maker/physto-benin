@@ -3194,7 +3194,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ".noprint { text-align: center; padding: 16px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }" +
       ".noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 10px 28px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin: 4px; }" +
       ".noprint button.sec-btn { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }" +
-      "@media print { .noprint { display: none; } .momo-block { display: none !important; } body { background: #fff; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 7mm 10mm; } .page { max-width: 100%; } .hdr { padding: 8px 16px; } .hdr-left .name { font-size: 14px; } .agr { padding: 3px 8px; font-size: 8px; } .body { padding: 12px 18px; } .meta { margin-bottom: 12px; } .sec { margin-bottom: 8px; padding-bottom: 4px; } .pbox { padding: 10px 14px; margin-bottom: 12px; } .pname { font-size: 14px; } .pdesc { font-size: 11px; } .calc { margin-bottom: 12px; } .cr { padding: 5px 0; font-size: 11px; } .cr.total { font-size: 14px; } .valid { padding: 6px 10px; margin-bottom: 12px; font-size: 10px; } .sig-zone { min-height: 44px; padding: 6px; } .sig-title { font-size: 8px; } .gse-footer { padding: 4px 16px; font-size: 8px; } }" +
+      "@media print { .noprint { display: none; } body { background: #fff; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 7mm 10mm; } .page { max-width: 100%; } .hdr { padding: 8px 16px; } .hdr-left .name { font-size: 14px; } .agr { padding: 3px 8px; font-size: 8px; } .body { padding: 12px 18px; } .meta { margin-bottom: 12px; } .sec { margin-bottom: 8px; padding-bottom: 4px; } .pbox { padding: 10px 14px; margin-bottom: 12px; } .pname { font-size: 14px; } .pdesc { font-size: 11px; } .calc { margin-bottom: 10px; } .cr { padding: 5px 0; font-size: 11px; } .cr.total { font-size: 14px; } .pay-grid { gap: 10px !important; margin-bottom: 10px !important; } .pay-ech { padding: 8px 10px !important; font-size: 11px !important; } .momo-block { padding: 8px 10px !important; } .mb-t { margin-bottom: 6px !important; } .mb-h { margin-bottom: 6px !important; gap: 8px !important; } .mb-ic { width: 26px !important; height: 26px !important; font-size: 14px !important; } .mb-u { padding: 6px 10px !important; } .mb-code { font-size: 13px !important; } .valid { padding: 6px 10px; margin-bottom: 10px; font-size: 10px; } .sig-zone { min-height: 40px; padding: 6px; } .sig-title { font-size: 8px; } .gse-footer { padding: 4px 16px; font-size: 8px; } }" +
       "</style></head><body>" +
       "<div class=\"noprint\"><button onclick=\"window.print()\">🖨️ Imprimer</button><button class=\"sec-btn\" onclick=\"window.close()\">Fermer</button></div>" +
       "<div class=\"page\">" +
@@ -3249,25 +3249,22 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         var pA = d.pctAcompte || 60; var pS = 100 - pA
         var mA = Math.round(Number(d.montantNet) * pA / 100); var mS = Math.round(Number(d.montantNet) * pS / 100)
         return "<div class=\"sec\" style=\"margin-top:20px\">Modalités de paiement</div>" +
-          "<div style=\"background:#f0fdf4;border:1px solid #d1fae5;border-radius:6px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#065f46\">" +
-          "<div style=\"display:flex;justify-content:space-between;margin-bottom:8px\"><span><strong>" + pA + "% à la signature</strong> — acompte</span><span style=\"font-weight:700\">" + mA.toLocaleString("fr-FR") + " FCFA</span></div>" +
-          "<div style=\"display:flex;justify-content:space-between\"><span><strong>" + pS + "% après prestation</strong> — solde</span><span style=\"font-weight:700\">" + mS.toLocaleString("fr-FR") + " FCFA</span></div>" +
+          "<div class=\"pay-grid\" style=\"display:flex;gap:14px;margin-bottom:18px;align-items:stretch\">" +
+          "<div class=\"pay-ech\" style=\"flex:1;min-width:0;background:#f0fdf4;border:1px solid #d1fae5;border-radius:6px;padding:14px 18px;font-size:13px;color:#065f46\">" +
+          "<div style=\"display:flex;justify-content:space-between;margin-bottom:8px\"><span><strong>" + pA + "% à la signature</strong> (acompte)</span><span style=\"font-weight:700\">" + mA.toLocaleString("fr-FR") + " FCFA</span></div>" +
+          "<div style=\"display:flex;justify-content:space-between\"><span><strong>" + pS + "% après prestation</strong> (solde)</span><span style=\"font-weight:700\">" + mS.toLocaleString("fr-FR") + " FCFA</span></div>" +
           (d.conditionsPaiement ? "<div style=\"margin-top:10px;font-size:12px;color:#374151;border-top:1px solid #d1fae5;padding-top:10px\">" + d.conditionsPaiement + "</div>" : "") +
-          "</div>"
-      })() +
-      (function() {
-        var pA2 = d.pctAcompte || 60
-        var mA2 = Math.round(Number(d.montantNet) * pA2 / 100)
-        return "<div class=\"momo-block\" style=\"background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:18px 20px;margin-bottom:18px;\">" +
-          "<div style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.12em;margin-bottom:12px;\">PAIEMENT PAR MOBILE MONEY</div>" +
-          "<div style=\"display:flex;align-items:center;gap:12px;margin-bottom:12px;\">" +
-          "<div style=\"width:40px;height:40px;background:#ffcc00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;\">📱</div>" +
-          "<div><div style=\"font-size:14px;font-weight:700;color:#111;\">MTN MoMo Pay</div>" +
-          "<div style=\"font-size:12px;color:#888;\">Réglez votre acompte de <strong>" + mA2.toLocaleString("fr-FR") + " FCFA</strong> instantanément depuis votre téléphone MTN</div></div></div>" +
-          "<div style=\"background:#fff;border:1.5px solid #ffe082;border-radius:6px;padding:12px 14px;margin-bottom:8px;\">" +
-          "<div style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.1em;margin-bottom:6px;\">CODE USSD — COMPOSEZ :</div>" +
-          "<div style=\"font-size:18px;font-weight:700;color:#111;letter-spacing:0.04em;font-family:monospace;\">*880*41*893118*<span style=\"color:#b45309;\">" + mA2.toLocaleString("fr-FR") + "</span>#</div></div>" +
-          "<div style=\"font-size:11px;color:#888;line-height:1.6;\">Composez ce code depuis votre téléphone MTN, validez le paiement, puis envoyez la capture à GSE pour confirmation.</div>" +
+          "</div>" +
+          "<div class=\"momo-block\" style=\"flex:1;min-width:0;background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:14px 16px;\">" +
+          "<div class=\"mb-t\" style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.12em;margin-bottom:10px;\">PAIEMENT PAR MOBILE MONEY</div>" +
+          "<div class=\"mb-h\" style=\"display:flex;align-items:center;gap:10px;margin-bottom:10px;\">" +
+          "<div class=\"mb-ic\" style=\"width:34px;height:34px;background:#ffcc00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;\">📱</div>" +
+          "<div><div style=\"font-size:13px;font-weight:700;color:#111;\">MTN MoMo Pay</div>" +
+          "<div style=\"font-size:11px;color:#888;\">Acompte de <strong>" + mA.toLocaleString("fr-FR") + " FCFA</strong> depuis votre téléphone MTN</div></div></div>" +
+          "<div class=\"mb-u\" style=\"background:#fff;border:1.5px solid #ffe082;border-radius:6px;padding:10px 12px;\">" +
+          "<div style=\"font-size:9px;color:#b45309;font-weight:700;letter-spacing:0.1em;margin-bottom:5px;\">CODE USSD À COMPOSER :</div>" +
+          "<div class=\"mb-code\" style=\"font-size:15px;font-weight:700;color:#111;letter-spacing:0.02em;font-family:monospace;\">*880*41*893118*<span style=\"color:#b45309;\">" + mA.toLocaleString("fr-FR") + "</span>#</div></div>" +
+          "</div>" +
           "</div>"
       })() +
       "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · contact@phyto-benin.com</div>" +
