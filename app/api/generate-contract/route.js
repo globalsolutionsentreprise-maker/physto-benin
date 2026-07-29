@@ -42,7 +42,14 @@ export async function GET(req) {
     const typeEtabLabel = typeEtablissement || "_______________"
     const prestationLabel = Array.isArray(devis.prestations) && devis.prestations.length > 0
       ? devis.prestations.join(" + ")
-      : devis.prestation || "Désinsectisation + Dératisation"
+      : devis.prestation || "Prestation sanitaire (voir devis)"
+    // Le contrat ne doit décrire QUE les volets réellement vendus : on les dérive
+    // de la prestation du devis (source de vérité), jamais en dur. Un devis
+    // "Désinsectisation" seule ne doit afficher ni dératisation ni stations à rongeurs.
+    const prestNorm = prestationLabel.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    const aDeratisation     = /deratis|rongeur|raticide/.test(prestNorm)
+    const aDesinsectisation = /desinsect|insecticide/.test(prestNorm)
+    const aDesinfection     = /desinfect/.test(prestNorm)
 
     const today  = new Date()
     const annee  = today.getFullYear()
@@ -169,7 +176,7 @@ export async function GET(req) {
       return `${prixTrim.toLocaleString("fr-FR")} FCFA / trimestre`
     }
 
-    const controleRow = controles > 0 ? `
+    const controleRow = (controles > 0 && aDeratisation) ? `
       <tr>
         <td>× ${controles} / an<br><small>(mensuel, inter-passage)</small></td>
         <td>Contrôle des stations à rongeurs</td>
@@ -179,6 +186,15 @@ export async function GET(req) {
           — Rapport succinct transmis au Client
         </td>
       </tr>` : ""
+
+    // Détail de l'intervention principale : uniquement les volets vendus.
+    const detailInterv = [
+      aDesinsectisation ? "— Traitement insecticide rémanent : murs, plinthes, zones d'ombre" : null,
+      aDeratisation     ? "— Dératisation : vérification et rechargement des stations" : null,
+      aDesinfection     ? "— Désinfection : traitement des surfaces et points de contact" : null,
+      "— Inspection visuelle complète",
+      "— Fiche de passage + Attestation GSE à chaque intervention",
+    ].filter(Boolean).join("<br>\n            ")
 
     const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -315,10 +331,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
           <td>× ${passages} / an<br><small>${frequenceLabel()}</small></td>
           <td>${esc(prestationLabel)}</td>
           <td>
-            — Traitement insecticide rémanent : murs, plinthes, zones d'ombre<br>
-            — Dératisation : vérification et rechargement des stations<br>
-            — Inspection visuelle complète<br>
-            — Fiche de passage + Attestation GSE à chaque intervention
+            ${detailInterv}
           </td>
         </tr>
         ${controleRow}
