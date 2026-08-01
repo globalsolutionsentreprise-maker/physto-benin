@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-07-11)
+# Graph Report - gse-site  (2026-08-01)
 
 ## Corpus Check
-- 146 files · ~632,748 words
+- 155 files · ~659,393 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 598 nodes · 556 edges · 90 communities (54 shown, 36 thin omitted)
+- 717 nodes · 744 edges · 95 communities (57 shown, 38 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `62960185`
+- Built from commit: `a30f6257`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -94,34 +94,49 @@
 - [[_COMMUNITY_Community 87|Community 87]]
 - [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
-2. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
-3. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
-4. `Agent WhatsApp IA — Implementation Plan` - 12 edges
-5. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
-6. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
-7. `Pipeline unifié piloté par `etape` — Design` - 11 edges
-8. `/deploy-gse` - 10 edges
-9. `Task 1 Report: Backend — accepter et transmettre l'audio à Gemini` - 10 edges
-10. `Spec — Notes vocales dans les rapports de visite/intervention` - 10 edges
+2. `POST()` - 14 edges
+3. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
+4. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
+5. `Agent WhatsApp IA — Implementation Plan` - 12 edges
+6. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
+7. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
+8. `Pipeline unifié piloté par `etape` — Design` - 11 edges
+9. `Analyse IA de contrat enrichie (rapport de visite + devis réel)` - 11 edges
+10. `/deploy-gse` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- None detected - all connections are within the same source files.
+- `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
+  app/admin/page.js → lib/contrat-analyse.mjs
+- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
+  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
+- `POST()` --calls--> `appliquerContraintes()`  [EXTRACTED]
+  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
+- `POST()` --calls--> `blocRapport()`  [EXTRACTED]
+  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
+- `POST()` --calls--> `construireSocleDevis()`  [EXTRACTED]
+  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 
 ## Import Cycles
 - None detected.
 
-## Communities (90 total, 36 thin omitted)
+## Communities (95 total, 38 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
 Nodes (17): 10. Journal d'avancement, 1. Objectif, 2. Bonne nouvelle : le backend est déjà unifié, 3. Écart fonctionnel à combler (ce que React n'a pas encore), 3bis. Résultats Phase 0 (2026-07-02) — à intégrer, 4. Dépendances techniques, 5. Stratégie : migration incrémentale, `crm.html` reste en ligne jusqu'au bout, 6. Points de risque / vigilance (+9 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (29): dependencies, docx, next, next-sanity, qrcode, react, react-dom, react-qr-code (+21 more)
+Cohesion: 0.06
+Nodes (30): dependencies, docx, next, next-sanity, qrcode, react, react-dom, react-qr-code (+22 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.10
@@ -136,12 +151,12 @@ Cohesion: 0.15
 Nodes (12): env, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, hooks, PreCompact, PreToolUse, SessionStart, Stop, permissions (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.25
-Nodes (10): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs(), lireAudioBase64() (+2 more)
+Cohesion: 0.23
+Nodes (15): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+7 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.09
-Nodes (22): Build Verification (Step 5), Changes Made, Code Quality & Safety, Concerns, File Modified: `app/api/analyze-rapport/route.js`, Files Changed, Functional Verification (Step 6), Git Commit (+14 more)
+Cohesion: 0.11
+Nodes (17): Addendum : correctif ciblé montant à 0 confondu avec absence de valeur (2026-07-19), Après correctif (succès attendu), Auto-relecture, Avant correctif (échec attendu sur les 2 nouveaux tests), Ce qui a été fait, Ce qui a été fait (TDD, périmètre strict), Commit, Commit (+9 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.11
@@ -168,8 +183,8 @@ Cohesion: 0.33
 Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill routing
 
 ### Community 14 - "Community 14"
-Cohesion: 0.60
-Nodes (3): GET(), POST(), verifyAdmin()
+Cohesion: 0.11
+Nodes (39): callGeminiWithRetry(), POST(), GET(), POST(), verifyAdmin(), GET(), appliquerContraintes(), blocRapport() (+31 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -215,6 +230,10 @@ Nodes (3): creerSupabase(), Services(), SERVICES_DEFAUT
 Cohesion: 0.50
 Nodes (3): Entrées, Format, Lessons — Journal d'apprentissage
 
+### Community 32 - "Community 32"
+Cohesion: 0.12
+Nodes (16): (a) Prompt d'analyse declare le plancher a l'IA, (b) Avertissement pointsAttention quand le code releve reellement la frequence, (c) Tests ajoutes/modifies, Commit 1 (critique, seul) : b53ba91, Commit 2 (le reste) : e6209de, (d) Bandeau admin : distinguer "indisponible" de "aucun rapport", (e) demanderQuestionsContrat ne perd plus numero/date/niveau, (f) Phase "questions" : la route ne ment plus quand un rapport existe (+8 more)
+
 ### Community 33 - "Community 33"
 Cohesion: 0.12
 Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue — Remise automatique 10% — Implementation Plan, Partie A — Charger les leads au démarrage, Partie B — Panneau leads en haut de l'interface, Partie C — Pré-remplir remise dans ouvrirEditionDevis, Partie D — Badge remise bienvenue dans la liste des devis, Partie E — generate-contract : remise fallback depuis remise_bienvenue (+8 more)
@@ -252,16 +271,16 @@ Cohesion: 0.10
 Nodes (19): Affichage, Architecture, Bouton d'upload, Composant 1 — Front (`app/admin/page.js`), Composant 2 — Backend (`app/api/analyze-rapport/route.js`), Contexte & problème, Critères de succès, Décisions produit (validées) (+11 more)
 
 ### Community 74 - "Community 74"
-Cohesion: 0.22
-Nodes (8): Build, Changes (app/admin/page.js, composant SectionClientsDevis), Commit, Concerns, Diff final (git show 73f57e6 --stat), Grep de vérification post-édition, Point non modifié (intentionnel, à vérifier en Task 3), Task 2 Report — Helpers lignesFromDevis + état formDevis.lignes
+Cohesion: 0.25
+Nodes (7): Auto-relecture, Ce qui a été fait, Commit, Réserves, Statut, Task 2 — Rapport d'implémentation, Écarts au brief et justification
 
 ### Community 75 - "Community 75"
 Cohesion: 0.29
 Nodes (6): Global Constraints, Notes de fin, Notes vocales dans les rapports — Implementation Plan, Task 1: Backend — accepter et transmettre l'audio à Gemini, Task 2: Front — notes vocales dans le modal rapport de VISITE, Task 3: Front — notes vocales dans le modal rapport d'INTERVENTION
 
 ### Community 80 - "Community 80"
-Cohesion: 0.25
-Nodes (7): Build, Changement, Commit, Concern, Self-review (git show), Task 3 Report — `ouvrirEditionDevis` charge lignes (rétrocompat), Étape 3 du brief (script ponctuel de vérification DB)
+Cohesion: 0.22
+Nodes (8): Auto-relecture, Build (`npx next build`), Ce qui a été fait, Requêtes Supabase sur données réelles, Statut, Task 3 — Rapport d'implémentation, Vérifications, Écarts au brief
 
 ### Community 81 - "Community 81"
 Cohesion: 0.12
@@ -273,39 +292,51 @@ Nodes (10): Devis à lignes multiples (multi-secteurs) — Implementation Plan, 
 
 ### Community 83 - "Community 83"
 Cohesion: 0.20
-Nodes (9): Build result, Commit, Concerns, Exact change, IIFE boundaries (verified before editing), Self-review of diff, Status, Table column confirmation (+1 more)
+Nodes (9): Auto-relecture, Ce qui a été fait, Commit, Note, Rapport Task 6 : Bandeau de provenance dans le modal contrat, Réserves, Statut : DONE, Vérifications (+1 more)
 
 ### Community 84 - "Community 84"
-Cohesion: 0.25
-Nodes (7): Boundaries replaced, Build result, Commit, Concerns, Replacement, Self-review of diff, Task 4 Report — Formulaire devis en lignes (répéteur)
+Cohesion: 0.08
+Nodes (23): 1. `lib/contrat-analyse.mjs`, 2. `lib/contrat-analyse.test.mjs`, 3. `app/api/analyze-contract/route.js`, 4. Nettoyage `nbDevisAntérieurs` (accentué), 5. Écart supplémentaire par rapport au brief : suppression des tirets cadratins, Auto-relecture, Ce qui a été fait, Commande lancée (+15 more)
 
 ### Community 85 - "Community 85"
-Cohesion: 0.25
-Nodes (7): Build result, Commit, Concerns, Self-review of diff, Status: DONE, Steps applied, Task 5 Report — creerDevis enregistre lignes + resume prestation
+Cohesion: 0.17
+Nodes (11): Auto-relecture, Cause identifiée (diagnostic, aucune correction appliquée), Ce qui a été fait, Correctif appliqué (suite, tâche dédiée), npm test, Rapport Task 5 — Phase questions dans la route analyze-contract, Rétrocompatibilité (vérification supplémentaire, hors brief mais utile), Step 2 — build (+3 more)
 
 ### Community 89 - "Community 89"
 Cohesion: 0.17
 Nodes (11): 1. Le parcours (ordre canonique), 2. Migration + backfill, 3. `colUnifiee` (simplifié), 4. Écriture de `etape` — tous les points, 5. Les 4 améliorations UI (`renderVuePipelineUnifie`), 6. Non concerné / conservé, 7. Tests / vérification, Décision d'architecture (+3 more)
 
+### Community 90 - "Community 90"
+Cohesion: 0.13
+Nodes (14): Analyse du point de logique n°1 (condition d'affichage du bouton) — CONCLUSION : faille de conception confirmée, fonctionnalité morte en l'état, Ce qui a changé dans `renderContratModal`, Ce qui a été fait, Commit, Commit, Correctif de la faille de conception (suite), Point de logique n°2 (réponses facultatives), Réserves (+6 more)
+
+### Community 91 - "Community 91"
+Cohesion: 0.14
+Nodes (13): 1. L'IA travaille déjà presque à vide, 1. Socle de données, 2. Le rapport de visite n'est pas exploité, 2. Rapport de visite, 3. Plancher d'infestation (contrainte dure), 4. Phase questions, 5. Modal, 6. Vérification (+5 more)
+
+### Community 92 - "Community 92"
+Cohesion: 0.17
+Nodes (11): Analyse IA de contrat enrichie: plan d'implémentation, Couverture du spec, Global Constraints, Task 1: Socle de données du devis (fonction pure + lanceur de tests), Task 2: Plancher d'infestation et arbitrage des contraintes, Task 3: Chargement du dossier dans la route, Task 4: Prompt d'analyse enrichi, Task 5: Phase questions dans la route (+3 more)
+
 ## Knowledge Gaps
-- **344 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+339 more)
+- **413 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+408 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _344 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _413 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.08235294117647059 - nodes in this community are weakly interconnected._
 - **Should `Community 6` be split into smaller, more focused modules?**
-  _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 7` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._

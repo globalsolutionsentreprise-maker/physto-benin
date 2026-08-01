@@ -2545,9 +2545,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
           (rapportVisiteForm.photos || []).length > 0 ? React.createElement('div', { style: section },
             React.createElement('label', { style: lbl2 }, '📷 Photos (' + (rapportVisiteForm.photos || []).length + ')'),
+            React.createElement('p', { style: { fontSize: '11px', color: '#888', margin: '0 0 8px' } }, 'Cliquez ✕ pour retirer une capture inutilisable avant d\'enregistrer ou d\'imprimer.'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
               (rapportVisiteForm.photos || []).map(function(url, i) {
-                return React.createElement('img', { key: i, src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } })
+                return React.createElement('div', { key: i, style: { position: 'relative' } },
+                  React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                  React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportVisiteForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+                )
               })
             )
           ) : null,
@@ -2861,9 +2865,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
           (rapportIntervForm.photos || []).length > 0 ? React.createElement('div', { style: section },
             React.createElement('label', { style: lbl2 }, '📷 Photos (' + (rapportIntervForm.photos || []).length + ')'),
+            React.createElement('p', { style: { fontSize: '11px', color: '#888', margin: '0 0 8px' } }, 'Cliquez ✕ pour retirer une capture inutilisable avant d\'enregistrer ou d\'imprimer.'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px' } },
               (rapportIntervForm.photos || []).map(function(url, i) {
-                return React.createElement('img', { key: i, src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } })
+                return React.createElement('div', { key: i, style: { position: 'relative' } },
+                  React.createElement('img', { src: url, alt: 'Photo ' + (i+1), style: { width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6' } }),
+                  React.createElement('button', { onClick: function() { supprimerPhotoRapport(url, setRapportIntervForm) }, style: { position: 'absolute', top: '-6px', right: '-6px', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 } }, '×')
+                )
               })
             )
           ) : null,

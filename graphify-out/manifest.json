@@ -1,9 +1,4 @@
 {
-  ".gstack/claude-available.json": {
-    "mtime": 1782665993.0178344,
-    "ast_hash": "99e172c37600f9d10102030afe5e290e",
-    "semantic_hash": ""
-  },
   ".claude/hooks/scripts/hooks.py": {
     "mtime": 1779916234.419612,
     "ast_hash": "b452f5b1eec3f734d80755add3315a85",
@@ -15,13 +10,13 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1783720463.7523377,
-    "ast_hash": "0d7861a4bd5c1af4fd43ee95e34e0c16",
+    "mtime": 1785406316.535706,
+    "ast_hash": "674bd0abc61cfab3d5d70beed66d6269",
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1783773884.2507846,
-    "ast_hash": "c9aa1dfc188a95cbc422e362d3c3b25a",
+    "mtime": 1785604294.693744,
+    "ast_hash": "ea4bb9218d4b54a778e1caae7e261aaf",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -30,8 +25,8 @@
     "semantic_hash": ""
   },
   "app/api/analyze-contract/route.js": {
-    "mtime": 1780324149.813988,
-    "ast_hash": "0e6851499d21973a9de6343885e472dd",
+    "mtime": 1785352119.9779959,
+    "ast_hash": "24345f4d9a8fa197788f09b08b25f286",
     "semantic_hash": ""
   },
   "app/api/analyze-rapport/route.js": {
@@ -50,8 +45,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1783773615.7737775,
-    "ast_hash": "9bba510b87a5d185d0bf3740e484e80f",
+    "mtime": 1784570460.2355926,
+    "ast_hash": "9a5feef93c936c60a76475beef63f798",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
@@ -65,8 +60,8 @@
     "semantic_hash": ""
   },
   "app/api/generate-contract/route.js": {
-    "mtime": 1782075586.6914518,
-    "ast_hash": "eca9b325fb8edaee2a1fc721264cd827",
+    "mtime": 1785352161.70398,
+    "ast_hash": "515b1be34b3a9d5b1d2888d91d0c12ce",
     "semantic_hash": ""
   },
   "app/api/meteo-cotonou/route.js": {
@@ -85,8 +80,8 @@
     "semantic_hash": ""
   },
   "app/api/rh-data/route.js": {
-    "mtime": 1780430865.948666,
-    "ast_hash": "d2cff75c4bdd440c17d9bc0a9d170bc8",
+    "mtime": 1784570460.2361233,
+    "ast_hash": "e7af9c069d66de614e767761c2fe009f",
     "semantic_hash": ""
   },
   "app/api/rh-frame/route.js": {
@@ -190,8 +185,8 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1783642075.7748263,
-    "ast_hash": "8597a5367e2717b3ad5922b0ee82c0eb",
+    "mtime": 1783901464.4938364,
+    "ast_hash": "3ede0bc3f8b766597f7b9b8ae85ca862",
     "semantic_hash": ""
   },
   "app/qui-sommes-nous/page.tsx": {
@@ -250,8 +245,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1783041131.9407198,
-    "ast_hash": "3bebcbce0e63fcf508ee8b99ce854e72",
+    "mtime": 1784454110.621962,
+    "ast_hash": "9b3ea7d226caa9f6da75d51901f8be22",
     "semantic_hash": ""
   },
   "patch-premium.py": {
@@ -605,18 +600,13 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1783772503.351643,
-    "ast_hash": "fd2015ef61d8386c802fda65512fd12e",
+    "mtime": 1785352300.159475,
+    "ast_hash": "98480c26925bd1f862ba699094ca2e54",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
     "mtime": 1783073270.121154,
     "ast_hash": "22842b2ff26b0257d7514926654f086f",
-    "semantic_hash": ""
-  },
-  "gse-worldcup-preview.png": {
-    "mtime": 1780682624.9848013,
-    "ast_hash": "5ed850401078b02a3a512a469db48ad7",
     "semantic_hash": ""
   },
   "public/file.svg": {
@@ -695,8 +685,8 @@
     "semantic_hash": ""
   },
   "app/contrat-conformite/page.tsx": {
-    "mtime": 1783608514.0039778,
-    "ast_hash": "9e9b07301413953f14655da4afe53995",
+    "mtime": 1783901471.0313916,
+    "ast_hash": "c8604c9402d45561f134d25e1165ae52",
     "semantic_hash": ""
   },
   "docs/seo-mots-cles-blog.md": {
@@ -705,8 +695,8 @@
     "semantic_hash": ""
   },
   "docs/note-prospection-audit.md": {
-    "mtime": 1783554114.792726,
-    "ast_hash": "215daac576001c2478e129e687b7b7e4",
+    "mtime": 1783901479.7415538,
+    "ast_hash": "5810abf06647eb310e2e2dba56c27cfd",
     "semantic_hash": ""
   },
   "docs/note-prospection-audit.pdf": {
@@ -715,33 +705,33 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/progress.md": {
-    "mtime": 1783771111.146957,
-    "ast_hash": "9b52b062b1acb6c171c6fc1c40b21a8c",
+    "mtime": 1784454140.3585222,
+    "ast_hash": "b60d0d986750945899809fc029731b5f",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-1-brief.md": {
-    "mtime": 1783770167.166359,
-    "ast_hash": "be739754eeee164207bdec042c1abac4",
+    "mtime": 1784416144.5721183,
+    "ast_hash": "2b25b8472bc813c1ed6e77cc357497cf",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-1-report.md": {
-    "mtime": 1783717326.7029016,
-    "ast_hash": "f3b168f7534631c83e890ecda1be2d7a",
+    "mtime": 1784416666.5879679,
+    "ast_hash": "3a2807ea7cffa941757aecee219c96fe",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-2-brief.md": {
-    "mtime": 1783770286.176857,
-    "ast_hash": "29e9a073bb169fa3003086537008c785",
+    "mtime": 1784416776.081052,
+    "ast_hash": "20b0dca0eb22e9fe1605bd8193da4087",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-2-report.md": {
-    "mtime": 1783770493.9263093,
-    "ast_hash": "175ae233029adf9294caefa5d3c879a0",
+    "mtime": 1784416939.407951,
+    "ast_hash": "5a45e179d43cf30605104997c24c79d6",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-3-brief.md": {
-    "mtime": 1783770543.2264662,
-    "ast_hash": "1e53220af8611e75194eeb1234b99674",
+    "mtime": 1784417120.3169773,
+    "ast_hash": "f25751fb003de54e4a59aebc0e4b841d",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-notes-vocales-rapports.md": {
@@ -755,8 +745,8 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-3-report.md": {
-    "mtime": 1783770627.222689,
-    "ast_hash": "ca606d0e94705ef68511722a3e80be11",
+    "mtime": 1784417292.2003767,
+    "ast_hash": "8a1eb57d8be7c190b861718a2c320471",
     "semantic_hash": ""
   },
   "supabase/migrations/20260711000000_backfill_crm_statut_null.sql": {
@@ -775,33 +765,33 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-4-brief.md": {
-    "mtime": 1783770642.3153865,
-    "ast_hash": "44aced859b4af6c06bc3106c9e0c7471",
+    "mtime": 1784417463.6011848,
+    "ast_hash": "6997816b2b662a68c8d4fe4b66150815",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-4-report.md": {
-    "mtime": 1783770737.8069985,
-    "ast_hash": "3d2db4a783c00c63937210297a35a54c",
+    "mtime": 1784417975.3074298,
+    "ast_hash": "0c395c8106647bd55d45702d38ad7fa3",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-5-brief.md": {
-    "mtime": 1783770760.6516373,
-    "ast_hash": "98913c8681d4416578596b2b47cb2b85",
+    "mtime": 1784418039.1094046,
+    "ast_hash": "98dfaf9686d9d91dbda500db08d1e85e",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-5-report.md": {
-    "mtime": 1783770852.507313,
-    "ast_hash": "e042140bbbd3e6accfcab6101ceff09a",
+    "mtime": 1784418460.1498735,
+    "ast_hash": "d7922c4c55eacf38b114d8e110f23b46",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-6-brief.md": {
-    "mtime": 1783770874.5029318,
-    "ast_hash": "c350962b50f2a2c035a6fdf1c760ffd8",
+    "mtime": 1784418554.7639062,
+    "ast_hash": "981426fcf9d35d0376c36f090a0a07a8",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-6-report.md": {
-    "mtime": 1783770962.3790293,
-    "ast_hash": "3350295bd582f2e41f719f972d8cccce",
+    "mtime": 1784418736.334715,
+    "ast_hash": "2378270b58e276ddd84e87ca4f810f3c",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-devis-lignes-multi-secteurs.md": {
@@ -822,6 +812,56 @@
   "docs/superpowers/specs/2026-07-11-pipeline-etape-unifie-design.md": {
     "mtime": 1783773230.186196,
     "ast_hash": "d328517d8579c07f76e0cdec7a4dfd93",
+    "semantic_hash": ""
+  },
+  "lib/contrat-analyse.mjs": {
+    "mtime": 1785352097.255918,
+    "ast_hash": "0d3e03616893d095df524d78ab8d35b3",
+    "semantic_hash": ""
+  },
+  "lib/contrat-analyse.test.mjs": {
+    "mtime": 1785352195.0638502,
+    "ast_hash": "aef71a815c3108089aaf5a22fc2440e6",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/final-fix-report.md": {
+    "mtime": 1784453872.9082468,
+    "ast_hash": "1e60f7bae0434351254bb73eceac12f6",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/progress-devis-lignes.md": {
+    "mtime": 1784416137.3282657,
+    "ast_hash": "9b52b062b1acb6c171c6fc1c40b21a8c",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-7-brief.md": {
+    "mtime": 1784418907.82983,
+    "ast_hash": "6db4dc5cb6a5c375ad484f9ad8fcb29c",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-7-report.md": {
+    "mtime": 1784419320.0324712,
+    "ast_hash": "6822dda8facd70a074a51411d69f0824",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-8-brief.md": {
+    "mtime": 1784419478.1434307,
+    "ast_hash": "524b9f1620319843fd5f1bad02586b17",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-19-contrat-ia-rapport-visite.md": {
+    "mtime": 1784415979.515572,
+    "ast_hash": "a83a4c8703b49f32e2d284bd47a2d60e",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-19-contrat-ia-rapport-visite-design.md": {
+    "mtime": 1784415461.6922197,
+    "ast_hash": "62d59f0062a2873367a2083fa54d97e5",
+    "semantic_hash": ""
+  },
+  "phyto-audit-gratuit.png": {
+    "mtime": 1783590759.6029105,
+    "ast_hash": "6b9ec6f59d738da743c5a51b26e3520d",
     "semantic_hash": ""
   }
 }
