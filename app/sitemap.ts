@@ -3,6 +3,12 @@ import { createClient } from "@supabase/supabase-js"
 
 const BASE = "https://www.phyto-benin.com"
 
+// Date de dernière modification des pages statiques. Volontairement STABLE
+// (pas `new Date()`, qui changerait à chaque revalidation horaire et produirait
+// un <lastmod> instable que Google finit par ignorer). À bumper lors d'une
+// refonte de contenu du site vitrine.
+const DERNIERE_MODIF = new Date("2026-08-04")
+
 // Revalidation horaire : un nouvel article apparaît dans le sitemap sous 1h
 export const revalidate = 3600
 
@@ -48,7 +54,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .filter((a: any) => a.titre && a.contenu && a.contenu.trim() !== "")
         .map((a: any) => ({
           url: `${BASE}/blog/${slugifier(a.titre)}`,
-          lastModified: a.created_at ? new Date(a.created_at) : new Date(),
+          // On préfère la date de dernière mise à jour si la colonne existe,
+          // sinon la date de création, sinon maintenant (dernier recours).
+          lastModified: a.updated_at ? new Date(a.updated_at)
+            : a.created_at ? new Date(a.created_at)
+            : new Date(),
           changeFrequency: "monthly" as const,
           priority: 0.6,
         }))
@@ -58,5 +68,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("sitemap: erreur chargement articles", e)
   }
 
-  return [...pagesStatiques, ...articles]
+  // Injecte une date de dernière modif sur chaque page statique (les articles
+  // ont déjà la leur, dérivée de la BDD).
+  const statiquesAvecDate = pagesStatiques.map((p) => ({
+    ...p,
+    lastModified: p.lastModified ?? DERNIERE_MODIF,
+  }))
+
+  return [...statiquesAvecDate, ...articles]
 }

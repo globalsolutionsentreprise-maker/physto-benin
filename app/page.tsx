@@ -78,6 +78,27 @@ export default function Accueil() {
     { titre: "Techniciens certifiés", desc: "Nos techniciens sont formés, certifiés et connaissent le terrain béninois.", accent: false },
   ]
 
+  // FAQ page d'accueil : questions générales à forte intention locale (cible les
+  // « People Also Ask » de Google). Le schema FAQPage ci-dessous est construit à
+  // partir de CE MÊME tableau : le balisage correspond donc toujours au contenu
+  // visible, comme l'exige Google (pas de FAQ invisible).
+  const faqAccueil = [
+    { q: "Combien coûte une désinsectisation à Cotonou ?", r: "Le prix dépend de la surface à traiter et du nuisible concerné. On commence toujours par un diagnostic gratuit, puis on vous remet un devis clair, sans engagement. Nos contrats d'entretien démarrent à 25 000 FCFA par mois." },
+    { q: "Intervenez-vous en urgence, la nuit et le week-end ?", r: "Oui, nous sommes disponibles 24h/24 et 7j/7, jours fériés compris, à Cotonou et dans les zones prioritaires (Abomey-Calavi, Sèmè-Kpodji, Porto-Novo)." },
+    { q: "Êtes-vous agréés par l'État béninois ?", r: "Oui, Phyto Bénin (GSE) est agréé par les autorités sanitaires du Bénin (agrément APA/26-025/CNGP-BEN). Un certificat officiel, opposable lors des inspections, est remis après chaque intervention." },
+    { q: "Vos produits sont-ils dangereux pour les enfants et les animaux ?", r: "Non. Nous utilisons uniquement des produits homologués OMS, et nous vous indiquons le délai exact à respecter avant de réoccuper les lieux selon le traitement réalisé." },
+    { q: "Dans quelles villes du Bénin intervenez-vous ?", r: "Cotonou, Abomey-Calavi, Porto-Novo, Ouidah, Sèmè-Kpodji, et partout ailleurs au Bénin sur demande." },
+    { q: "Proposez-vous des contrats pour les hôtels et restaurants ?", r: "Oui, des contrats d'entretien 3D mensuels ou trimestriels, avec certificat de conformité pour vos inspections HACCP. Tout commence par un audit gratuit sur site." },
+  ]
+
+  const schemaFAQAccueil = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqAccueil.map(function(f) {
+      return { "@type": "Question", "name": f.q, "acceptedAnswer": { "@type": "Answer", "text": f.r } }
+    }),
+  }
+
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
@@ -434,6 +455,36 @@ export default function Accueil() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ, questions fréquentes (+ schema FAQPage) */}
+      <section className="section-padding" style={{ backgroundColor: "#f7f7f5", padding: "100px 60px" }}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaFAQAccueil) }} />
+        <div style={{ maxWidth: "820px", margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "56px" }}>
+            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>QUESTIONS FRÉQUENTES</div>
+            <h2 style={{ fontSize: "clamp(26px, 3vw, 40px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em" }}>
+              Vous vous posez
+              <br />
+              <strong style={{ fontWeight: "700" }}>sûrement ces questions.</strong>
+            </h2>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {faqAccueil.map(function(f, i) {
+              return (
+                <div key={i} style={{ backgroundColor: "#ffffff", padding: "24px 28px", borderLeft: "3px solid #d4a920" }}>
+                  <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0a2e1a", marginBottom: "10px" }}>{f.q}</h3>
+                  <p style={{ fontSize: "14px", color: "#555", lineHeight: "1.75", margin: 0 }}>{f.r}</p>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ textAlign: "center", marginTop: "36px" }}>
+            <a href="/blog" style={{ fontSize: "13px", fontWeight: "600", color: "#0a2e1a", textDecoration: "none", borderBottom: "2px solid #d4a920", paddingBottom: "3px" }}>
+              Plus de conseils sur notre blog →
+            </a>
           </div>
         </div>
       </section>

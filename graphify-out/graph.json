@@ -1714,10 +1714,20 @@
       "norm_label": "sitemap.ts"
     },
     {
+      "label": "DERNIERE_MODIF",
+      "file_type": "code",
+      "source_file": "app/sitemap.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "app_sitemap_derniere_modif",
+      "community": 12,
+      "norm_label": "derniere_modif"
+    },
+    {
       "label": "slugifier()",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L9",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "app_sitemap_slugifier",
       "community": 12,
@@ -1727,7 +1737,7 @@
       "label": "pagesStatiques",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L19",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "app_sitemap_pagesstatiques",
       "community": 12,
@@ -1737,7 +1747,7 @@
       "label": "sitemap()",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L36",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "app_sitemap_sitemap",
       "community": 12,
@@ -7855,9 +7865,9 @@
       "source_file": "app/api/analyze-contract/route.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_contract_route",
-      "target": "lib_contrat_analyse_offrescontrat",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_offrescontrat"
     },
     {
       "relation": "imports",
@@ -7877,9 +7887,9 @@
       "source_file": "app/api/analyze-contract/route.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_contract_route",
-      "target": "lib_contrat_analyse_passagespourduree",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_passagespourduree"
     },
     {
       "relation": "imports",
@@ -8345,9 +8355,9 @@
       "source_file": "app/api/generate-contract/route.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "generate_contract_route",
-      "target": "lib_contrat_analyse",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse"
     },
     {
       "relation": "imports",
@@ -8356,9 +8366,9 @@
       "source_file": "app/api/generate-contract/route.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "generate_contract_route",
-      "target": "lib_contrat_analyse_offrescontrat",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_offrescontrat"
     },
     {
       "relation": "calls",
@@ -9556,6 +9566,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/sitemap.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "app_sitemap",
+      "target": "app_sitemap_derniere_modif",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sitemap.ts",
       "source_location": "L19",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -9708,9 +9728,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L228",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_durees_engagement",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_durees_engagement"
     },
     {
       "relation": "contains",
@@ -9788,9 +9808,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L237",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_offrescontrat",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_offrescontrat"
     },
     {
       "relation": "contains",
@@ -9828,9 +9848,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L232",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_passagespourduree",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_passagespourduree"
     },
     {
       "relation": "contains",
@@ -9948,9 +9968,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L226",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_taux_engagement",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_taux_engagement"
     },
     {
       "relation": "contains",
@@ -10112,9 +10132,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_passagespourduree",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_passagespourduree"
     },
     {
       "relation": "imports",
@@ -10123,9 +10143,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_offrescontrat",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_offrescontrat"
     },
     {
       "relation": "imports",
@@ -14772,5 +14792,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a30f6257f7fa39a125fee1c505eb19dfa63055ed"
+  "built_at_commit": "dd97dd6c14c404a4361dd75874b1e335983c750b"
 }
