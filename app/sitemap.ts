@@ -37,6 +37,11 @@ const pagesStatiques: MetadataRoute.Sitemap = [
   { url: `${BASE}/blog`, changeFrequency: "weekly", priority: 0.8 },
   { url: `${BASE}/qui-sommes-nous`, changeFrequency: "monthly", priority: 0.7 },
   { url: `${BASE}/contact`, changeFrequency: "monthly", priority: 0.8 },
+  // Pages locales par ville (SEO local)
+  { url: `${BASE}/zones`, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${BASE}/zones/abomey-calavi`, changeFrequency: "monthly", priority: 0.8 },
+  { url: `${BASE}/zones/porto-novo`, changeFrequency: "monthly", priority: 0.8 },
+  { url: `${BASE}/zones/ouidah`, changeFrequency: "monthly", priority: 0.8 },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

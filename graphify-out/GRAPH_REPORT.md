@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-08-04)
 
 ## Corpus Check
-- 155 files · ~659,976 words
+- 157 files · ~662,871 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 718 nodes · 745 edges · 95 communities (57 shown, 38 thin omitted)
+- 729 nodes · 754 edges · 97 communities (58 shown, 39 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `dd97dd6c`
+- Built from commit: `cc141e85`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -62,6 +62,7 @@
 - [[_COMMUNITY_Community 46|Community 46]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
 - [[_COMMUNITY_Community 51|Community 51]]
 - [[_COMMUNITY_Community 52|Community 52]]
 - [[_COMMUNITY_Community 53|Community 53]]
@@ -100,6 +101,7 @@
 - [[_COMMUNITY_Community 93|Community 93]]
 - [[_COMMUNITY_Community 94|Community 94]]
 - [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -128,7 +130,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (95 total, 38 thin omitted)
+## Communities (97 total, 39 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -242,6 +244,10 @@ Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue �
 Cohesion: 0.22
 Nodes (5): TYPES, COUVERTURE, FAQS, metadata, PALIERS
 
+### Community 50 - "Community 50"
+Cohesion: 0.29
+Nodes (3): Nuisible, Ville, VILLES
+
 ### Community 61 - "Community 61"
 Cohesion: 0.13
 Nodes (14): 1. Bannière globale (`app/layout.tsx`), 2. Section homepage (`app/page.tsx`), 3. Badge sur le formulaire de contact (`app/contact/ContactForm.js`), Backend, Ce qui n'est PAS dans le périmètre, CRM (`crm.html`), Flux complet, Frontend — Ce que le client voit (+6 more)
@@ -319,15 +325,15 @@ Cohesion: 0.17
 Nodes (11): Analyse IA de contrat enrichie: plan d'implémentation, Couverture du spec, Global Constraints, Task 1: Socle de données du devis (fonction pure + lanceur de tests), Task 2: Plancher d'infestation et arbitrage des contraintes, Task 3: Chargement du dossier dans la route, Task 4: Prompt d'analyse enrichi, Task 5: Phase questions dans la route (+3 more)
 
 ## Knowledge Gaps
-- **414 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+409 more)
+- **419 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+414 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _414 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _419 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

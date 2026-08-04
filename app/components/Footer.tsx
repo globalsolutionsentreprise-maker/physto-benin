@@ -14,7 +14,7 @@ export default function Footer() {
   }, [])
   return (
     <footer className="footer-padding" style={{ backgroundColor: "#f9f9f9", padding: "56px 40px 28px" }}>
-      <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
+      <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <img src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE, Hygiène sanitaire et phytosanitaire au Bénin" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
@@ -25,6 +25,13 @@ export default function Footer() {
         <div>
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Nos services</h4>
           {["Désinsectisation","Dératisation","Désinfection","Anti-termites","Reptiles"].map(function(s) { return <a key={s} href="/services" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>{s}</a> })}
+        </div>
+        <div>
+          <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Zones d&apos;intervention</h4>
+          <a href="/zones/abomey-calavi" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Abomey-Calavi</a>
+          <a href="/zones/porto-novo" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Porto-Novo</a>
+          <a href="/zones/ouidah" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Ouidah</a>
+          <a href="/zones" style={{ display: "block", fontSize: "11px", color: "#888", marginBottom: "9px", textDecoration: "none" }}>Toutes nos zones</a>
         </div>
         <div>
           <h4 style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "16px" }}>Entreprise</h4>

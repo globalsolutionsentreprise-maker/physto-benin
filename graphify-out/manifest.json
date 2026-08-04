@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1783642204.212773,
-    "ast_hash": "12fdf7f8029040803eed596947b8da72",
+    "mtime": 1785852414.31029,
+    "ast_hash": "bceee89a2fc44d0d4119de058d68b456",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "app/sitemap.ts": {
-    "mtime": 1785851515.9425733,
-    "ast_hash": "7002c11602a66f614a79513f3cbfac05",
+    "mtime": 1785852401.685292,
+    "ast_hash": "7914b12d9e33a101fe2c10d49c19f054",
     "semantic_hash": ""
   },
   "app/verifier/[token]/page.tsx": {
@@ -862,6 +862,16 @@
   "phyto-audit-gratuit.png": {
     "mtime": 1783590759.6029105,
     "ast_hash": "6b9ec6f59d738da743c5a51b26e3520d",
+    "semantic_hash": ""
+  },
+  "app/zones/[ville]/page.tsx": {
+    "mtime": 1785852364.183303,
+    "ast_hash": "023629a4477878d50794b680f6e675d7",
+    "semantic_hash": ""
+  },
+  "app/zones/page.tsx": {
+    "mtime": 1785852393.8693898,
+    "ast_hash": "7f0b19e49715c7473d0af132cb9af603",
     "semantic_hash": ""
   }
 }
