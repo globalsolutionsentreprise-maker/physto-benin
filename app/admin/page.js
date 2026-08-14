@@ -204,7 +204,7 @@ export default function Admin() {
       try {
         const chk = await fetch("/api/admin-auth")
         const d = await chk.json()
-        if (d.users?.length === 0) { setSetupMode(true); return }
+        if (d.needsSetup) { setSetupMode(true); return }
       } catch(e) {}
       setErreurMdp(true)
       return
@@ -231,9 +231,14 @@ export default function Admin() {
     } catch(e) {}
   }
 
+  async function authHeaders() {
+    const { data: { session } } = await supabase.auth.getSession()
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") }
+  }
+
   async function chargerAdminData() {
     try {
-      const res = await fetch("/api/admin-auth")
+      const res = await fetch("/api/admin-auth", { headers: await authHeaders() })
       const d = await res.json()
       setAdminUsers(d.users || [])
       setJournalEntries(d.journal || [])
@@ -1165,7 +1170,7 @@ export default function Admin() {
                             {u.email !== currentUser?.email && (
                               <button onClick={async function() {
                                 if (!confirm("Désactiver / réactiver cet utilisateur ?")) return
-                                await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "update_user", email: u.email, nom: u.nom, role: u.role, actif: !u.actif }) })
+                                await fetch("/api/admin-auth", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ action: "update_user", email: u.email, nom: u.nom, role: u.role, actif: !u.actif }) })
                                 chargerAdminData()
                               }} style={{ background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>
                                 {u.actif ? "Désactiver" : "Réactiver"}
@@ -1174,7 +1179,7 @@ export default function Admin() {
                             {u.email !== currentUser?.email && (
                               <button onClick={async function() {
                                 if (!confirm("Supprimer définitivement " + u.nom + " ?")) return
-                                await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "delete_user", email: u.email }) })
+                                await fetch("/api/admin-auth", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ action: "delete_user", email: u.email }) })
                                 chargerAdminData()
                               }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>
                                 🗑
@@ -1217,7 +1222,7 @@ export default function Admin() {
                   if (!formAcces.email || !formAcces.nom || !formAcces.password) { setAccesSaveMsg("Tous les champs sont requis."); return }
                   setAccesSaving(true); setAccesSaveMsg("")
                   try {
-                    const res = await fetch("/api/admin-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "create_user", email: formAcces.email, nom: formAcces.nom, password: formAcces.password, role: formAcces.role }) })
+                    const res = await fetch("/api/admin-auth", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ action: "create_user", email: formAcces.email, nom: formAcces.nom, password: formAcces.password, role: formAcces.role }) })
                     const d = await res.json()
                     if (d.ok) {
                       setAccesSaveMsg("Utilisateur ajouté avec succès.")

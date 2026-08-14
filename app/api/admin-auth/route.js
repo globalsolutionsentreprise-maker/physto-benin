@@ -6,8 +6,34 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+// Sans ce contrôle, GET exposait publiquement la liste des admins (emails =
+// identifiants de connexion) et POST permettait à n'importe qui de créer un
+// admin ou de réinitialiser le mot de passe du DG (prise de contrôle totale).
+// Même logique que crm-data : jeton Supabase valide + appartenance à admin_acces.
+async function verifyAdmin(req) {
+  const token = req.headers.get("authorization")?.replace("Bearer ", "")
+  if (!token) return null
+  const anon = createClient(SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const { data: { user } } = await anon.auth.getUser(token)
+  if (!user || !user.email) return null
+  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const { data: acces, error } = await admin
+    .from("admin_acces")
+    .select("email, actif, role")
+    .eq("email", user.email)
+    .maybeSingle()
+  if (error || !acces || acces.actif !== true) return null
+  return acces
+}
+
+export async function GET(req) {
   const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  // Non authentifié : on n'expose QUE le drapeau de première configuration
+  // (table vide), jamais les données admin.
+  if (!await verifyAdmin(req)) {
+    const { count } = await db.from("admin_acces").select("*", { count: "exact", head: true })
+    return NextResponse.json({ users: [], journal: [], needsSetup: (count || 0) === 0 }, { status: 200 })
+  }
   const [{ data: users }, { data: journal }] = await Promise.all([
     db.from("admin_acces").select("*").order("created_at"),
     db.from("admin_journal").select("*").order("created_at", { ascending: false }).limit(100),
@@ -31,6 +57,11 @@ export async function POST(req) {
     await db.from("admin_acces").insert({ email, nom: nom || "Administrateur", role: "admin", actif: true })
     return NextResponse.json({ ok: true })
   }
+
+  // Toute autre action (créer / modifier / supprimer un utilisateur, changer un
+  // mot de passe) exige un admin authentifié.
+  const acces = await verifyAdmin(req)
+  if (!acces || acces.role !== "admin") return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
 
   if (action === "create_user") {
     const { email, password, nom, role } = body
