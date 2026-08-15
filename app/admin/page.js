@@ -1682,6 +1682,41 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
   }
 
+  // Modifie la date et/ou le technicien d'un passage depuis la frise. patch =
+  // { date } et/ou { personnelId }. MAJ optimiste ; en cas d'échec on resynchro
+  // depuis la base (charger) pour ne jamais afficher une date fausse.
+  async function savePassagePlanning(passageId, patch) {
+    if (!passageId) return
+    setInterventionsList(function(prev) {
+      return prev.map(function(x) {
+        if (x.id !== passageId) return x
+        var n = Object.assign({}, x)
+        if (patch.date !== undefined) n.date_intervention = patch.date || null
+        if (patch.personnelId !== undefined) {
+          n.personnel_id = patch.personnelId || null
+          var m = personnelAdmin.find(function(p) { return p.id === patch.personnelId })
+          n.personnel = m ? { id: m.id, nom: m.nom, prenom: "" } : null
+        }
+        return n
+      })
+    })
+    var ok = false
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/rh-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(Object.assign({ action: "set_passage_planning", id: passageId }, patch))
+      })
+      ok = res.ok
+    } catch (e) { ok = false }
+    if (!ok) {
+      charger()
+      alert("Échec de l'enregistrement. Les données ont été rechargées.")
+    }
+  }
+
   // Avance l'étape d'un devis SEULEMENT vers l'avant (jamais reculer), en
   // fusionnant le parcours. Appelé quand un vrai document est créé (certificat,
   // fiche) pour que le pipeline reflète le travail réalisé.
@@ -5292,6 +5327,31 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           r.sansTechnicien > 0 ? e("span", { style: { color: "#92400e", fontWeight: "600" } }, "⚠ " + r.sansTechnicien + " passage(s) sans technicien") : null,
           (r.total === 0 && r.passagesAttendus > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "600" } }, "⚠ aucun passage planifié, " + r.passagesAttendus + " attendus") : null
         ),
+        r.passages.length > 0 ? e("div", { style: { marginTop: "14px", borderTop: "1px solid #eee", paddingTop: "10px" } },
+          e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" } }, "Passages — dates et technicien modifiables"),
+          r.passages.map(function(p, i) {
+            var ctrl = p.type === "controle"
+            var fait = p.statut === "terminee"
+            var retard = !fait && p.date < auj
+            return e("div", { key: p.id || i, style: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", padding: "5px 0", borderBottom: "1px solid #f2f1ee" } },
+              e("span", { style: { fontSize: "12px", width: "104px", flexShrink: 0, color: "#374151" } }, (ctrl ? "🔍 Contrôle" : "🔧 Interv.") + (fait ? " ✅" : (retard ? " ⚠️" : ""))),
+              e("input", {
+                type: "date", value: p.date || "",
+                onChange: function(ev) { var v = ev.target.value; if (v) savePassagePlanning(p.id, { date: v }) },
+                style: { fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" }
+              }),
+              e("select", {
+                value: p.personnelId || "",
+                onChange: function(ev) { var v = ev.target.value; savePassagePlanning(p.id, { personnelId: v || null }) },
+                style: { fontSize: "12px", padding: "4px 6px", border: "1px solid " + (p.personnelId ? "#d1d5db" : "#f59e0b"), borderRadius: "5px", fontFamily: "inherit", color: "#111", flex: "1", minWidth: "120px" }
+              },
+                e("option", { value: "" }, "— technicien —"),
+                personnelAdmin.map(function(m) { return e("option", { key: m.id, value: m.id }, m.nom) })
+              )
+            )
+          })
+        ) : null,
+
         e("div", { style: { marginTop: "12px" } },
           e("button", { onClick: function() { voirDevisClient(cl) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📊 Ouvrir le dossier")
         )

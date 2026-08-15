@@ -150,5 +150,20 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  // Modifier date et/ou technicien d'un passage depuis la frise contrat.
+  // Patch partiel : ne touche QUE les champs fournis (jamais les autres,
+  // contrairement à save_intervention qui réécrit toute la ligne).
+  if (action === "set_passage_planning") {
+    const { id, date, personnelId } = body
+    if (!id) return Response.json({ error: "id requis" }, { status: 400 })
+    const patch = {}
+    if (date !== undefined) patch.date_intervention = date || null
+    if (personnelId !== undefined) patch.personnel_id = personnelId || null
+    if (Object.keys(patch).length === 0) return Response.json({ error: "rien à modifier" }, { status: 400 })
+    const { error } = await supabase.from("interventions").update(patch).eq("id", id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    return Response.json({ ok: true })
+  }
+
   return Response.json({ error: "Action inconnue" }, { status: 400 })
 }
