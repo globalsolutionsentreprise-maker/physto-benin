@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
 import { randomUUID } from "crypto"
 
-// Matières actives par défaut sur le certificat brouillon (ajustables ensuite).
-const MATIERES_DEFAUT = { desinsect: "IMPERA 300 CS", derat: "VERTOX" }
+// Préfixes de numéro par type (alignés sur generate_certificat_numero en base).
+const CERT_PREFIX = { desinsect: "CERT-DES", derat: "CERT-RAT", double: "CERT-DBL" }
 const MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 function dateFr(iso) {
   if (!iso) return ""
@@ -11,11 +11,13 @@ function dateFr(iso) {
   return `${Number(j)} ${MOIS_FR[Number(m) - 1] || ""} ${a}`.trim()
 }
 
-// Prépare (jamais n'envoie) le(s) certificat(s) brouillon quand une INTERVENTION
-// est marquée terminée. Un certificat par volet vendu (derat / desinsect).
-// Idempotent : rien si un certificat existe déjà pour ce passage et ce type.
+// Prépare (jamais n'envoie) UN certificat brouillon quand une INTERVENTION est
+// marquée terminée. On lit la prestation du contrat pour choisir le bon type :
+// deux volets vendus (désinsect + dérat) => un seul certificat 'double' qui les
+// regroupe (comme le formulaire manuel), sinon 'desinsect' ou 'derat'.
+// Idempotent : rien si un certificat existe déjà pour ce passage.
 // Best-effort : une erreur ici ne doit pas bloquer le pointage du passage.
-async function preparerCertificats(supabase, interventionId) {
+async function preparerCertificat(supabase, interventionId) {
   const { data: interv } = await supabase
     .from("interventions")
     .select("id, devis_id, type_passage, date_intervention, client_nom")
@@ -31,42 +33,43 @@ async function preparerCertificats(supabase, interventionId) {
   if (!devis) return
 
   const prestNorm = String(devis.prestation || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-  const types = []
-  if (/deratis|rongeur|raticide/.test(prestNorm)) types.push("derat")
-  if (/desinsect|insecticide/.test(prestNorm)) types.push("desinsect")
-  if (types.length === 0) return
+  const aDerat = /deratis|rongeur|raticide/.test(prestNorm)
+  const aDesinsect = /desinsect|insecticide/.test(prestNorm)
+  if (!aDerat && !aDesinsect) return
+  const type = (aDerat && aDesinsect) ? "double" : (aDesinsect ? "desinsect" : "derat")
+
+  // Un seul certificat par passage (idempotence).
+  const { data: dejaLa } = await supabase
+    .from("certificats")
+    .select("id")
+    .eq("intervention_id", interventionId)
+  if (dejaLa && dejaLa.length > 0) return
 
   const cl = devis.clients || {}
   const dateExec = dateFr(interv.date_intervention)
   const auj = new Date()
-  for (const type of types) {
-    const { data: deja } = await supabase
-      .from("certificats")
-      .select("id")
-      .eq("intervention_id", interventionId)
-      .eq("type", type)
-      .maybeSingle()
-    if (deja) continue
-    const form_data = {
-      client: cl.nom || interv.client_nom || "",
-      entreprise: cl.entreprise || "",
-      adresse: cl.adresse || "",
-      dateDebut: dateExec,
-      dateFin: dateExec,
-      dateJour: String(auj.getDate()),
-      dateMois: String(auj.getMonth() + 1).padStart(2, "0"),
-      matieres: type === "desinsect" ? MATIERES_DEFAUT.desinsect : "",
-      matieresDerat: type === "derat" ? MATIERES_DEFAUT.derat : "",
-    }
-    await supabase.from("certificats").insert({
-      numero_unique: `CERT-${type.toUpperCase()}-${auj.getFullYear()}-${randomUUID().slice(0, 8)}`,
-      devis_id: devis.id,
-      client_id: devis.client_id,
-      intervention_id: interventionId,
-      type,
-      form_data,
-    })
+  // Matières actives par défaut, identiques au formulaire manuel (ajustables).
+  const matieres = (type === "desinsect" || type === "double") ? "IMPERA 300 CS\nROCOGEL" : "VERTOX"
+  const matieresDerat = type === "double" ? "VERTOX" : ""
+  const form_data = {
+    client: cl.nom || interv.client_nom || "",
+    entreprise: cl.entreprise || "",
+    adresse: cl.adresse || "",
+    dateDebut: dateExec,
+    dateFin: dateExec,
+    dateJour: String(auj.getDate()),
+    dateMois: String(auj.getMonth() + 1).padStart(2, "0"),
+    matieres,
+    matieresDerat,
   }
+  await supabase.from("certificats").insert({
+    numero_unique: `${CERT_PREFIX[type]}-${auj.getFullYear()}-${randomUUID().slice(0, 6)}`,
+    devis_id: devis.id,
+    client_id: devis.client_id,
+    intervention_id: interventionId,
+    type,
+    form_data,
+  })
 }
 
 const supabase = createClient(
@@ -218,8 +221,8 @@ export async function POST(req) {
     if (error) return Response.json({ error: error.message }, { status: 500 })
     // Marqué terminé → préparer le(s) certificat(s) brouillon (best-effort).
     if (statut === "terminee") {
-      try { await preparerCertificats(supabase, id) }
-      catch (e) { console.error("preparerCertificats:", e?.message) }
+      try { await preparerCertificat(supabase, id) }
+      catch (e) { console.error("preparerCertificat:", e?.message) }
     }
     return Response.json({ ok: true })
   }
