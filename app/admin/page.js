@@ -1662,9 +1662,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     })
     var ok = false
     try {
+      // authHeaders() vit dans le composant externe, hors scope ici : on prend le
+      // token via db.auth.getSession() comme les autres POST de cette section.
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
       var res = await fetch("/api/rh-data", {
         method: "POST",
-        headers: await authHeaders(),
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
         body: JSON.stringify({ action: "set_passage_statut", id: passageId, statut: nouveau })
       })
       ok = res.ok
