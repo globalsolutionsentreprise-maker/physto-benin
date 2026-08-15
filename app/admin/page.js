@@ -1612,6 +1612,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }).catch(function() {})
   }
 
+  // Génère le PDF du contrat (ouvre un onglet) et recharge la liste : l'insertion
+  // dans `contrats` se fait côté serveur pendant le rendu, donc sans ce reload le
+  // contrat n'apparaissait nulle part tant qu'on ne cliquait pas « Recharger ».
+  // ponytail: délai fixe 3s, largement suffisant pour une insertion d'1 ligne ;
+  // remplacer par un vrai signal serveur seulement si l'insert devient plus lent.
+  function ouvrirContrat(url) {
+    window.open(url, "_blank")
+    setTimeout(function() { charger() }, 3000)
+  }
+
   async function saveParcours(devisId, newParcours) {
     // Si l'étape « Encaissement » vient de basculer, refléter le paiement dans les Finances :
     // encaissement fait → paiements_recus = montant facturé ; annulé → 0.
@@ -1637,6 +1647,34 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         if (!prev) return prev
         return Object.assign({}, prev, { clients: (prev.clients || []).map(function(x) { return x.id === devisId ? Object.assign({}, x, { paiementsRecus: paiementChange }) : x }) })
       })
+    }
+  }
+
+  // Pointe un passage de contrat fait / pas fait. La frise lit `statut === "terminee"`
+  // pour le compteur « X/Y faits » et les retards ; rien d'autre ne bascule ce statut.
+  async function togglePassage(passageId, statutActuel) {
+    if (!passageId) return
+    var nouveau = statutActuel === "terminee" ? "planifiee" : "terminee"
+    // MAJ optimiste, puis on route par l'API (service_role + verifyAdmin) : jamais
+    // db.from direct sur une table RLS depuis page.js (échec silencieux, cf. lessons).
+    setInterventionsList(function(prev) {
+      return prev.map(function(x) { return x.id === passageId ? Object.assign({}, x, { statut: nouveau }) : x })
+    })
+    var ok = false
+    try {
+      var res = await fetch("/api/rh-data", {
+        method: "POST",
+        headers: await authHeaders(),
+        body: JSON.stringify({ action: "set_passage_statut", id: passageId, statut: nouveau })
+      })
+      ok = res.ok
+    } catch (e) { ok = false }
+    if (!ok) {
+      // Échec : on remet l'ancien statut pour ne pas mentir sur l'état réel.
+      setInterventionsList(function(prev) {
+        return prev.map(function(x) { return x.id === passageId ? Object.assign({}, x, { statut: statutActuel }) : x })
+      })
+      alert("Échec de l'enregistrement du passage. Réessaie.")
     }
   }
 
@@ -4830,7 +4868,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 remise: d.remise_bienvenue || 0,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
-              window.open("/api/generate-contract?" + params.toString(), "_blank")
+              ouvrirContrat("/api/generate-contract?" + params.toString())
             },
             style: { width: "100%", backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", marginBottom: "10px" }
           }, "⚡ Générer directement — " + parseInt(contratForm.prixNegocie || 0).toLocaleString("fr-FR") + " FCFA/an"),
@@ -4976,7 +5014,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 remise: a.remiseContrat || d.remise_bienvenue || 0,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
-              window.open("/api/generate-contract?" + params.toString(), "_blank")
+              ouvrirContrat("/api/generate-contract?" + params.toString())
             },
             style: { width: "100%", backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
           }, "📄 Générer le contrat")
@@ -5140,7 +5178,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remise:            p.remisePassed || 0,
       sansNoteDevis:     p.sansNoteDevis ? "1" : "0"
     })
-    window.open("/api/generate-contract?" + params.toString(), "_blank")
+    ouvrirContrat("/api/generate-contract?" + params.toString())
   }
 
   // ── Onglet Contrats : suivi des engagements signés ────────────────────────
@@ -5223,13 +5261,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var retard = !fait && p.date < auj
             return e("div", {
               key: i,
-              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé" : (retard ? "EN RETARD" : "prévu")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
+              onClick: p.id ? function() { togglePassage(p.id, p.statut) } : null,
+              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
               style: {
                 position: "absolute", top: ctrl ? "12px" : "10px", left: "calc(" + pct + "% - 6px)",
                 width: ctrl ? "10px" : "14px", height: ctrl ? "10px" : "14px", borderRadius: "50%",
                 backgroundColor: fait ? "#0a2e1a" : (retard ? "#fee2e2" : "#fff"),
                 border: "2px solid " + (fait ? "#0a2e1a" : (retard ? "#991b1b" : (ctrl ? "#bbb" : "#0a2e1a"))),
-                boxSizing: "border-box", cursor: "help"
+                boxSizing: "border-box", cursor: p.id ? "pointer" : "help"
               }
             })
           })

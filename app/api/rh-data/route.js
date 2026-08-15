@@ -139,5 +139,16 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  // Pointer un passage de contrat fait / pas fait depuis la frise CRM.
+  if (action === "set_passage_statut") {
+    const { id, statut } = body
+    if (!id || (statut !== "planifiee" && statut !== "terminee")) {
+      return Response.json({ error: "id et statut (planifiee|terminee) requis" }, { status: 400 })
+    }
+    const { error } = await supabase.from("interventions").update({ statut }).eq("id", id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
+    return Response.json({ ok: true })
+  }
+
   return Response.json({ error: "Action inconnue" }, { status: 400 })
 }
