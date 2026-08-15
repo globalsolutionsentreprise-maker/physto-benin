@@ -1,4 +1,73 @@
 import { createClient } from "@supabase/supabase-js"
+import { randomUUID } from "crypto"
+
+// Matières actives par défaut sur le certificat brouillon (ajustables ensuite).
+const MATIERES_DEFAUT = { desinsect: "IMPERA 300 CS", derat: "VERTOX" }
+const MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+function dateFr(iso) {
+  if (!iso) return ""
+  const [a, m, j] = String(iso).slice(0, 10).split("-")
+  if (!a || !m || !j) return ""
+  return `${Number(j)} ${MOIS_FR[Number(m) - 1] || ""} ${a}`.trim()
+}
+
+// Prépare (jamais n'envoie) le(s) certificat(s) brouillon quand une INTERVENTION
+// est marquée terminée. Un certificat par volet vendu (derat / desinsect).
+// Idempotent : rien si un certificat existe déjà pour ce passage et ce type.
+// Best-effort : une erreur ici ne doit pas bloquer le pointage du passage.
+async function preparerCertificats(supabase, interventionId) {
+  const { data: interv } = await supabase
+    .from("interventions")
+    .select("id, devis_id, type_passage, date_intervention, client_nom")
+    .eq("id", interventionId)
+    .single()
+  if (!interv || interv.type_passage === "controle" || !interv.devis_id) return
+
+  const { data: devis } = await supabase
+    .from("devis")
+    .select("id, client_id, prestation, clients(nom, entreprise, adresse)")
+    .eq("id", interv.devis_id)
+    .single()
+  if (!devis) return
+
+  const prestNorm = String(devis.prestation || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+  const types = []
+  if (/deratis|rongeur|raticide/.test(prestNorm)) types.push("derat")
+  if (/desinsect|insecticide/.test(prestNorm)) types.push("desinsect")
+  if (types.length === 0) return
+
+  const cl = devis.clients || {}
+  const dateExec = dateFr(interv.date_intervention)
+  const auj = new Date()
+  for (const type of types) {
+    const { data: deja } = await supabase
+      .from("certificats")
+      .select("id")
+      .eq("intervention_id", interventionId)
+      .eq("type", type)
+      .maybeSingle()
+    if (deja) continue
+    const form_data = {
+      client: cl.nom || interv.client_nom || "",
+      entreprise: cl.entreprise || "",
+      adresse: cl.adresse || "",
+      dateDebut: dateExec,
+      dateFin: dateExec,
+      dateJour: String(auj.getDate()),
+      dateMois: String(auj.getMonth() + 1).padStart(2, "0"),
+      matieres: type === "desinsect" ? MATIERES_DEFAUT.desinsect : "",
+      matieresDerat: type === "derat" ? MATIERES_DEFAUT.derat : "",
+    }
+    await supabase.from("certificats").insert({
+      numero_unique: `CERT-${type.toUpperCase()}-${auj.getFullYear()}-${randomUUID().slice(0, 8)}`,
+      devis_id: devis.id,
+      client_id: devis.client_id,
+      intervention_id: interventionId,
+      type,
+      form_data,
+    })
+  }
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -147,18 +216,29 @@ export async function POST(req) {
     }
     const { error } = await supabase.from("interventions").update({ statut }).eq("id", id)
     if (error) return Response.json({ error: error.message }, { status: 500 })
+    // Marqué terminé → préparer le(s) certificat(s) brouillon (best-effort).
+    if (statut === "terminee") {
+      try { await preparerCertificats(supabase, id) }
+      catch (e) { console.error("preparerCertificats:", e?.message) }
+    }
     return Response.json({ ok: true })
   }
 
-  // Modifier date et/ou technicien d'un passage depuis la frise contrat.
+  // Modifier date et/ou technicien(s) d'un passage depuis la frise contrat.
   // Patch partiel : ne touche QUE les champs fournis (jamais les autres,
   // contrairement à save_intervention qui réécrit toute la ligne).
+  // personnel_id reste le technicien PRINCIPAL (planning RH) = 1er de la liste.
   if (action === "set_passage_planning") {
-    const { id, date, personnelId } = body
+    const { id, date, personnelId, personnelIds } = body
     if (!id) return Response.json({ error: "id requis" }, { status: 400 })
     const patch = {}
     if (date !== undefined) patch.date_intervention = date || null
-    if (personnelId !== undefined) patch.personnel_id = personnelId || null
+    if (Array.isArray(personnelIds)) {
+      patch.personnel_ids = personnelIds
+      patch.personnel_id = personnelIds[0] || null
+    } else if (personnelId !== undefined) {
+      patch.personnel_id = personnelId || null
+    }
     if (Object.keys(patch).length === 0) return Response.json({ error: "rien à modifier" }, { status: 400 })
     const { error } = await supabase.from("interventions").update(patch).eq("id", id)
     if (error) return Response.json({ error: error.message }, { status: 500 })

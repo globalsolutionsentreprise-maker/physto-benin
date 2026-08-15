@@ -1697,6 +1697,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           var m = personnelAdmin.find(function(p) { return p.id === patch.personnelId })
           n.personnel = m ? { id: m.id, nom: m.nom, prenom: "" } : null
         }
+        if (patch.personnelIds !== undefined) {
+          n.personnel_ids = patch.personnelIds
+          n.personnel_id = patch.personnelIds[0] || null
+          var m0 = personnelAdmin.find(function(p) { return p.id === n.personnel_id })
+          n.personnel = m0 ? { id: m0.id, nom: m0.nom, prenom: "" } : null
+        }
         return n
       })
     })
@@ -5340,13 +5346,22 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 onChange: function(ev) { var v = ev.target.value; if (v) savePassagePlanning(p.id, { date: v }) },
                 style: { fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" }
               }),
-              e("select", {
-                value: p.personnelId || "",
-                onChange: function(ev) { var v = ev.target.value; savePassagePlanning(p.id, { personnelId: v || null }) },
-                style: { fontSize: "12px", padding: "4px 6px", border: "1px solid " + (p.personnelId ? "#d1d5db" : "#f59e0b"), borderRadius: "5px", fontFamily: "inherit", color: "#111", flex: "1", minWidth: "120px" }
-              },
-                e("option", { value: "" }, "— technicien —"),
-                personnelAdmin.map(function(m) { return e("option", { key: m.id, value: m.id }, m.nom) })
+              e("div", { style: { display: "flex", gap: "4px", flexWrap: "wrap", flex: "1", minWidth: "140px", alignItems: "center" } },
+                (Array.isArray(p.personnelIds) && p.personnelIds.length > 0) ? null
+                  : e("span", { style: { fontSize: "11px", color: "#b45309", fontStyle: "italic" } }, "aucun technicien :"),
+                personnelAdmin.map(function(m) {
+                  var equipe = Array.isArray(p.personnelIds) ? p.personnelIds : []
+                  var sel = equipe.indexOf(m.id) !== -1
+                  return e("button", {
+                    key: m.id,
+                    onClick: function() {
+                      var nouv = sel ? equipe.filter(function(x) { return x !== m.id }) : equipe.concat([m.id])
+                      savePassagePlanning(p.id, { personnelIds: nouv })
+                    },
+                    title: sel ? "Retirer " + m.nom : "Ajouter " + m.nom,
+                    style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (sel ? "#0a2e1a" : "#d1d5db"), backgroundColor: sel ? "#0a2e1a" : "#fff", color: sel ? "#fff" : "#555", fontWeight: sel ? "600" : "400" }
+                  }, (sel ? "✓ " : "") + m.nom)
+                })
               )
             )
           })
