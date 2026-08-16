@@ -111,6 +111,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   const service = serviceAssocie(article.categorie)
 
+  // Liens de partage (intents natifs, aucun script/SDK externe). WhatsApp en 1er : canal n°1 au Bénin.
+  const shareUrl = `${BASE}/blog/${slug}`
+  const enc = encodeURIComponent
+  const partages = [
+    { label: "WhatsApp", bg: "#25D366", href: `https://wa.me/?text=${enc(article.titre + " " + shareUrl)}` },
+    { label: "Facebook", bg: "#1877F2", href: `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}` },
+    { label: "LinkedIn", bg: "#0A66C2", href: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(shareUrl)}` },
+    { label: "X", bg: "#0a0a0a", href: `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(article.titre)}` },
+  ]
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -211,6 +221,19 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
               </div>
             </div>
           )}
+
+          {/* PARTAGE */}
+          <div style={{ marginTop: "48px", paddingTop: "24px", borderTop: "1px solid #eee", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>Partager cet article</span>
+            {partages.map(function(p) {
+              return (
+                <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer" aria-label={"Partager sur " + p.label}
+                  style={{ backgroundColor: p.bg, color: "#ffffff", fontSize: "12px", fontWeight: "600", padding: "8px 16px", borderRadius: "6px", textDecoration: "none" }}>
+                  {p.label}
+                </a>
+              )
+            })}
+          </div>
 
           {/* SERVICE ASSOCIÉ, maillage interne SEO */}
           {service && (
