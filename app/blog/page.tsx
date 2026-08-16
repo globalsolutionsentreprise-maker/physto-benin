@@ -29,7 +29,7 @@ export default function Blog() {
 
   useEffect(function() {
     async function charger() {
-      const { data } = await supabase.from("articles").select("*").order("id")
+      const { data } = await supabase.from("articles").select("*").order("id", { ascending: false })
       if (data && data.length > 0) setArticles(data)
       else setArticles(articlesParDefaut)
     }

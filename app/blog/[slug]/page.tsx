@@ -44,7 +44,7 @@ const getAllArticles = cache(async function (): Promise<any[]> {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    const { data, error } = await supabase.from("articles").select("*").order("id")
+    const { data, error } = await supabase.from("articles").select("*").order("id", { ascending: false })
     if (error || !data) return []
     return data
   } catch (e) {
