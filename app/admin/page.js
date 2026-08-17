@@ -6198,6 +6198,7 @@ function SectionRecrutement() {
   const [data, setData] = useState({ candidatures: [], offres: [] })
   const [loading, setLoading] = useState(true)
   const [showOffre, setShowOffre] = useState(false)
+  const [editId, setEditId] = useState(null)
   const [offreForm, setOffreForm] = useState({ titre: "", description: "", profil: "", contrat: "", lieu: "" })
 
   async function authHeaders() {
@@ -6232,9 +6233,13 @@ function SectionRecrutement() {
     try { await post({ action: "del_candidature", id: id }); setData(function (p) { return Object.assign({}, p, { candidatures: p.candidatures.filter(function (c) { return c.id !== id }) }) }) } catch (e) { alert("Échec de la suppression") }
   }
   function majOffre(champ, val) { setOffreForm(function (p) { const o = Object.assign({}, p); o[champ] = val; return o }) }
-  async function ajouterOffre() {
+  function ouvrirNouvelleOffre() { setEditId(null); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }); setShowOffre(true) }
+  function modifierOffre(o) { setEditId(o.id); setOffreForm({ titre: o.titre || "", description: o.description || "", profil: o.profil || "", contrat: o.contrat || "", lieu: o.lieu || "" }); setShowOffre(true) }
+  function annulerOffre() { setShowOffre(false); setEditId(null); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }) }
+  async function enregistrerOffre() {
     if (!offreForm.titre.trim()) { alert("Le titre est obligatoire."); return }
-    try { await post(Object.assign({ action: "add_offre" }, offreForm)); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }); setShowOffre(false); charger() } catch (e) { alert("Échec : " + (e.error || "")) }
+    const body = editId ? Object.assign({ action: "update_offre", id: editId }, offreForm) : Object.assign({ action: "add_offre" }, offreForm)
+    try { await post(body); annulerOffre(); charger() } catch (e) { alert("Échec : " + (e.error || "")) }
   }
   async function toggleOffre(o) {
     try { await post({ action: "toggle_offre", id: o.id, actif: !o.actif }); charger() } catch (e) { alert("Échec") }
@@ -6261,10 +6266,11 @@ function SectionRecrutement() {
       <div style={{ marginBottom: "36px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
           <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a" }}>Offres d'emploi</h3>
-          <button onClick={function () { setShowOffre(!showOffre) }} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{showOffre ? "Annuler" : "+ Nouvelle offre"}</button>
+          <button onClick={function () { showOffre ? annulerOffre() : ouvrirNouvelleOffre() }} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{showOffre ? "Annuler" : "+ Nouvelle offre"}</button>
         </div>
         {showOffre && (
           <div style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "20px", marginBottom: "16px", display: "grid", gap: "12px" }}>
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "#6b21a8" }}>{editId ? "Modifier l'offre" : "Nouvelle offre"}</div>
             <input placeholder="Titre du poste *" value={offreForm.titre} onChange={function (e) { majOffre("titre", e.target.value) }} style={inp} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
               <input placeholder="Type de contrat" value={offreForm.contrat} onChange={function (e) { majOffre("contrat", e.target.value) }} style={inp} />
@@ -6272,7 +6278,7 @@ function SectionRecrutement() {
             </div>
             <textarea placeholder="Missions" value={offreForm.description} onChange={function (e) { majOffre("description", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
             <textarea placeholder="Profil recherché" value={offreForm.profil} onChange={function (e) { majOffre("profil", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
-            <button onClick={ajouterOffre} style={{ backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "7px", padding: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Publier l'offre</button>
+            <button onClick={enregistrerOffre} style={{ backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "7px", padding: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{editId ? "Enregistrer les modifications" : "Publier l'offre"}</button>
           </div>
         )}
         {data.offres.length === 0 ? <div style={{ fontSize: "13px", color: "#888" }}>Aucune offre.</div> :
@@ -6281,6 +6287,7 @@ function SectionRecrutement() {
               <div key={o.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", marginBottom: "8px" }}>
                 <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: o.actif ? "#0a2e1a" : "#aaa" }}>{o.titre}{o.lieu ? " · " + o.lieu : ""}</span>
                 <span style={{ fontSize: "10px", fontWeight: 700, color: o.actif ? "#065f46" : "#991b1b", backgroundColor: o.actif ? "#ecfdf5" : "#fef2f2", padding: "3px 8px", borderRadius: "20px" }}>{o.actif ? "Active" : "Fermée"}</span>
+                <button onClick={function () { modifierOffre(o) }} style={{ background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>✏️ Modifier</button>
                 <button onClick={function () { toggleOffre(o) }} style={{ background: "none", border: "1px solid #ccc", color: "#555", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>{o.actif ? "Fermer" : "Rouvrir"}</button>
                 <button onClick={function () { supprimerOffre(o.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>
               </div>

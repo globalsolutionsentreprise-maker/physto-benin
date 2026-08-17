@@ -75,6 +75,19 @@ export async function POST(req) {
     return NextResponse.json({ ok: true })
   }
 
+  if (action === "update_offre") {
+    if (!body.id) return NextResponse.json({ error: "id requis" }, { status: 400 })
+    const patch = {}
+    for (const k of ["titre", "description", "profil", "contrat", "lieu"]) {
+      if (body[k] !== undefined) patch[k] = body[k] || null
+    }
+    if (body.actif !== undefined) patch.actif = !!body.actif
+    if (patch.titre !== undefined && !String(patch.titre).trim()) return NextResponse.json({ error: "titre requis" }, { status: 400 })
+    const { error } = await db.from("offres_emploi").update(patch).eq("id", body.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
   if (action === "toggle_offre") {
     if (!body.id) return NextResponse.json({ error: "id requis" }, { status: 400 })
     const { error } = await db.from("offres_emploi").update({ actif: !!body.actif }).eq("id", body.id)
