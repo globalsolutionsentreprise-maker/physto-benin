@@ -535,6 +535,7 @@ export default function Admin() {
     { titre: "Gestion", items: [
       { id: "crm", label: "📊 CRM Pipeline" },
       { id: "rh", label: "👥 Planning & RH" },
+      { id: "recrutement", label: "🧑‍💼 Recrutement" },
       { id: "stock", label: "📦 Stock produits" },
     ] },
     ...(currentUser?.role === "admin" ? [
@@ -1136,6 +1137,8 @@ export default function Admin() {
               />
             </div>
           )}
+
+          {onglet === "recrutement" && (<SectionRecrutement />)}
 
           {onglet === "acces" && currentUser?.role === "admin" && (
             <div>
@@ -6188,4 +6191,136 @@ function buildRapportIntervHtml(form, client, devis) {
     '</div>' +
     gseFooter() +
     '</div></body></html>'
+}
+
+// ---- Onglet Recrutement : candidatures reçues + gestion des offres ----
+function SectionRecrutement() {
+  const [data, setData] = useState({ candidatures: [], offres: [] })
+  const [loading, setLoading] = useState(true)
+  const [showOffre, setShowOffre] = useState(false)
+  const [offreForm, setOffreForm] = useState({ titre: "", description: "", profil: "", contrat: "", lieu: "" })
+
+  async function authHeaders() {
+    const { data: { session } } = await supabase.auth.getSession()
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") }
+  }
+  async function charger() {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/recrutement", { headers: await authHeaders() })
+      const d = await res.json()
+      if (res.ok) setData({ candidatures: d.candidatures || [], offres: d.offres || [] })
+    } catch (e) {}
+    setLoading(false)
+  }
+  useEffect(function () { charger() }, [])
+
+  async function post(body) {
+    const res = await fetch("/api/recrutement", { method: "POST", headers: await authHeaders(), body: JSON.stringify(body) })
+    if (!res.ok) throw await res.json().catch(function () { return {} })
+    return res.json()
+  }
+  async function setStatut(id, statut) {
+    setData(function (p) { return Object.assign({}, p, { candidatures: p.candidatures.map(function (c) { return c.id === id ? Object.assign({}, c, { statut: statut }) : c }) }) })
+    try { await post({ action: "set_candidature_statut", id: id, statut: statut }) } catch (e) { charger() }
+  }
+  async function voirCv(path) {
+    try { const d = await post({ action: "cv_url", path: path }); window.open(d.url, "_blank") } catch (e) { alert("CV indisponible") }
+  }
+  async function supprimerCand(id) {
+    if (!window.confirm("Supprimer cette candidature ?")) return
+    try { await post({ action: "del_candidature", id: id }); setData(function (p) { return Object.assign({}, p, { candidatures: p.candidatures.filter(function (c) { return c.id !== id }) }) }) } catch (e) { alert("Échec de la suppression") }
+  }
+  function majOffre(champ, val) { setOffreForm(function (p) { const o = Object.assign({}, p); o[champ] = val; return o }) }
+  async function ajouterOffre() {
+    if (!offreForm.titre.trim()) { alert("Le titre est obligatoire."); return }
+    try { await post(Object.assign({ action: "add_offre" }, offreForm)); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }); setShowOffre(false); charger() } catch (e) { alert("Échec : " + (e.error || "")) }
+  }
+  async function toggleOffre(o) {
+    try { await post({ action: "toggle_offre", id: o.id, actif: !o.actif }); charger() } catch (e) { alert("Échec") }
+  }
+  async function supprimerOffre(id) {
+    if (!window.confirm("Supprimer cette offre ?")) return
+    try { await post({ action: "del_offre", id: id }); charger() } catch (e) { alert("Échec") }
+  }
+
+  const STATUTS = [["nouveau", "Nouveau"], ["rappeler", "À rappeler"], ["entretien", "Entretien"], ["retenu", "Retenu"], ["ecarte", "Écarté"]]
+  const ST_COLOR = { nouveau: "#1e40af", rappeler: "#92400e", entretien: "#6b21a8", retenu: "#065f46", ecarte: "#991b1b" }
+  function offreTitre(id) { const o = data.offres.find(function (x) { return x.id === id }); return o ? o.titre : "Candidature spontanée" }
+  function waLink(tel) { const n = String(tel || "").replace(/\D/g, ""); return n ? "https://wa.me/" + n : null }
+  function fmtDate(d) { try { return new Date(d).toLocaleDateString("fr-FR") } catch (e) { return "" } }
+  const inp = { width: "100%", padding: "9px 11px", fontSize: "13px", border: "1px solid #d1d5db", borderRadius: "7px", fontFamily: "inherit", boxSizing: "border-box" }
+
+  if (loading) return <div style={{ padding: "40px", color: "#888" }}>Chargement…</div>
+
+  return (
+    <div>
+      <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#0a2e1a", marginBottom: "4px" }}>Recrutement</h2>
+      <p style={{ fontSize: "13px", color: "#888", marginBottom: "24px" }}>{data.candidatures.length} candidature(s) · {data.offres.filter(function (o) { return o.actif }).length} offre(s) active(s)</p>
+
+      <div style={{ marginBottom: "36px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a" }}>Offres d'emploi</h3>
+          <button onClick={function () { setShowOffre(!showOffre) }} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{showOffre ? "Annuler" : "+ Nouvelle offre"}</button>
+        </div>
+        {showOffre && (
+          <div style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "20px", marginBottom: "16px", display: "grid", gap: "12px" }}>
+            <input placeholder="Titre du poste *" value={offreForm.titre} onChange={function (e) { majOffre("titre", e.target.value) }} style={inp} />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <input placeholder="Type de contrat" value={offreForm.contrat} onChange={function (e) { majOffre("contrat", e.target.value) }} style={inp} />
+              <input placeholder="Lieu" value={offreForm.lieu} onChange={function (e) { majOffre("lieu", e.target.value) }} style={inp} />
+            </div>
+            <textarea placeholder="Missions" value={offreForm.description} onChange={function (e) { majOffre("description", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
+            <textarea placeholder="Profil recherché" value={offreForm.profil} onChange={function (e) { majOffre("profil", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
+            <button onClick={ajouterOffre} style={{ backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "7px", padding: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Publier l'offre</button>
+          </div>
+        )}
+        {data.offres.length === 0 ? <div style={{ fontSize: "13px", color: "#888" }}>Aucune offre.</div> :
+          data.offres.map(function (o) {
+            return (
+              <div key={o.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", marginBottom: "8px" }}>
+                <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: o.actif ? "#0a2e1a" : "#aaa" }}>{o.titre}{o.lieu ? " · " + o.lieu : ""}</span>
+                <span style={{ fontSize: "10px", fontWeight: 700, color: o.actif ? "#065f46" : "#991b1b", backgroundColor: o.actif ? "#ecfdf5" : "#fef2f2", padding: "3px 8px", borderRadius: "20px" }}>{o.actif ? "Active" : "Fermée"}</span>
+                <button onClick={function () { toggleOffre(o) }} style={{ background: "none", border: "1px solid #ccc", color: "#555", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>{o.actif ? "Fermer" : "Rouvrir"}</button>
+                <button onClick={function () { supprimerOffre(o.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>
+              </div>
+            )
+          })
+        }
+      </div>
+
+      <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a", marginBottom: "12px" }}>Candidatures</h3>
+      {data.candidatures.length === 0 ? <div style={{ fontSize: "13px", color: "#888" }}>Aucune candidature pour le moment.</div> :
+        <div style={{ display: "grid", gap: "12px" }}>
+          {data.candidatures.map(function (c) {
+            const wa = waLink(c.telephone)
+            return (
+              <div key={c.id} style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderLeft: "3px solid " + (ST_COLOR[c.statut] || "#ccc"), borderRadius: "10px", padding: "16px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "8px" }}>
+                  <div>
+                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a" }}>{c.nom}</div>
+                    <div style={{ fontSize: "11px", color: "#888" }}>{offreTitre(c.offre_id)} · {fmtDate(c.created_at)}</div>
+                  </div>
+                  <select value={c.statut} onChange={function (e) { setStatut(c.id, e.target.value) }} style={Object.assign({}, inp, { width: "auto", fontWeight: 700, color: ST_COLOR[c.statut] || "#333" })}>
+                    {STATUTS.map(function (s) { return <option key={s[0]} value={s[0]}>{s[1]}</option> })}
+                  </select>
+                </div>
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "12px", color: "#444", marginBottom: c.motivation ? "8px" : 0 }}>
+                  {wa ? <a href={wa} target="_blank" rel="noopener noreferrer" style={{ color: "#065f46", fontWeight: 700, textDecoration: "none" }}>📱 {c.telephone} (WhatsApp)</a> : <span>📱 {c.telephone || "-"}</span>}
+                  {c.email && <span>✉️ {c.email}</span>}
+                  {c.ville && <span>📍 {c.ville}</span>}
+                  {c.experience && <span>💼 {c.experience}</span>}
+                </div>
+                {c.motivation && <div style={{ fontSize: "13px", color: "#333", lineHeight: 1.6, backgroundColor: "#faf9f6", borderRadius: "6px", padding: "10px 12px", marginBottom: "8px" }}>{c.motivation}</div>}
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {c.cv_path && <button onClick={function () { voirCv(c.cv_path) }} style={{ background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>📄 Voir le CV</button>}
+                  <button onClick={function () { supprimerCand(c.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑 Supprimer</button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      }
+    </div>
+  )
 }
