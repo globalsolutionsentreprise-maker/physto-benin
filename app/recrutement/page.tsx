@@ -27,7 +27,7 @@ async function getOffres() {
     )
     const { data } = await sb
       .from("offres_emploi")
-      .select("id, titre, description, profil, contrat, lieu")
+      .select("id, titre, description, profil, contrat, lieu, pourquoi_postuler, futur_employeur, avantages, deplacements, temps_travail, salaire_min, salaire_max, salaire_devise, salaire_periode, salaire_visible, est_stage, stage_duree, stage_gratifie, stage_montant, stage_profil")
       .eq("actif", true)
       .order("created_at", { ascending: false })
     return data || []
