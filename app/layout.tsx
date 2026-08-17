@@ -188,6 +188,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 { label: "Contrat conformité", href: "/contrat-conformite" },
                 { label: "Qui sommes-nous", href: "/qui-sommes-nous" },
                 { label: "Blog", href: "/blog" },
+                { label: "Recrutement", href: "/recrutement" },
                 { label: "Contact", href: "/contact" },
               ].map((l) => (
                 <a key={l.href} href={l.href} style={{ fontSize: "12px", color: "#444", textDecoration: "none", fontWeight: "500" }}>
