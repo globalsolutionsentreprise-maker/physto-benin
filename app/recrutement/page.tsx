@@ -36,6 +36,46 @@ async function getOffres() {
   }
 }
 
+// Rend un texte multi-lignes : lignes en -,*,• => puces, sinon paragraphes.
+function renderTexte(txt?: string) {
+  if (!txt) return null
+  return String(txt).split("\n").map((l, i) => {
+    const t = l.trim()
+    if (!t) return null
+    if (/^[-*•]\s?/.test(t)) return (
+      <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "6px" }}>
+        <span style={{ color: "#d4a920", flexShrink: 0 }}>•</span>
+        <span style={{ fontSize: "14px", color: "#333", lineHeight: 1.7 }}>{t.replace(/^[-*•]\s?/, "")}</span>
+      </div>
+    )
+    return <p key={i} style={{ fontSize: "14px", color: "#333", lineHeight: 1.8, marginBottom: "10px" }}>{t}</p>
+  })
+}
+
+function fmtRemuneration(o: any): string {
+  if (o.salaire_visible === false) return "Rémunération selon profil"
+  const dev = o.salaire_devise || "FCFA"
+  const per = o.salaire_periode || "mois"
+  const f = (n: number) => Number(n).toLocaleString("fr-FR")
+  if (o.salaire_min && o.salaire_max) return `${f(o.salaire_min)} à ${f(o.salaire_max)} ${dev}/${per}`
+  if (o.salaire_min) return `À partir de ${f(o.salaire_min)} ${dev}/${per}`
+  if (o.salaire_max) return `Jusqu'à ${f(o.salaire_max)} ${dev}/${per}`
+  return "Rémunération selon profil"
+}
+
+function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: "22px" }}>
+      <h4 style={{ fontSize: "13px", fontWeight: 700, color: "#0a2e1a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px", borderLeft: "3px solid #d4a920", paddingLeft: "10px" }}>{titre}</h4>
+      {children}
+    </div>
+  )
+}
+
+function RLigne({ children }: { children: React.ReactNode }) {
+  return <div style={{ display: "flex", gap: "8px", fontSize: "14px", color: "#333", lineHeight: 1.6 }}><span style={{ color: "#d4a920", flexShrink: 0 }}>•</span><span>{children}</span></div>
+}
+
 export default async function Page() {
   const offres = await getOffres()
   const shareUrl = `${BASE}/recrutement`
@@ -76,18 +116,35 @@ export default async function Page() {
               Aucune offre ouverte pour le moment. Vous pouvez tout de même nous envoyer une candidature spontanée ci-dessous.
             </div>
           ) : (
-            <div style={{ display: "grid", gap: "18px" }}>
+            <div style={{ display: "grid", gap: "24px" }}>
               {offres.map((o: any) => (
-                <div key={o.id} style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderLeft: "3px solid #d4a920", borderRadius: "10px", padding: "24px 28px" }}>
-                  <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#0a2e1a", marginBottom: "8px" }}>{o.titre}</h3>
-                  <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", fontSize: "12px", color: "#888", marginBottom: "14px" }}>
+                <article key={o.id} style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "28px 30px" }}>
+                  <h3 style={{ fontSize: "22px", fontWeight: 700, color: "#0a2e1a", marginBottom: "6px" }}>{o.titre}</h3>
+                  <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", fontSize: "12px", color: "#888", marginBottom: "20px" }}>
                     {o.contrat && <span>📄 {o.contrat}</span>}
                     {o.lieu && <span>📍 {o.lieu}</span>}
+                    {o.est_stage && <span>🎓 Stage</span>}
                   </div>
-                  {o.description && <p style={{ fontSize: "14px", color: "#333", lineHeight: 1.8, marginBottom: o.profil ? "12px" : 0 }}><strong>Missions : </strong>{o.description}</p>}
-                  {o.profil && <p style={{ fontSize: "14px", color: "#333", lineHeight: 1.8 }}><strong>Profil recherché : </strong>{o.profil}</p>}
-                  <a href="#postuler" style={{ display: "inline-block", marginTop: "16px", backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: 700, fontSize: "13px", padding: "10px 20px", borderRadius: "6px", textDecoration: "none" }}>Postuler à cette offre →</a>
-                </div>
+
+                  {o.pourquoi_postuler && <Section titre="Pourquoi postuler">{renderTexte(o.pourquoi_postuler)}</Section>}
+                  {o.description && <Section titre="Vos missions">{renderTexte(o.description)}</Section>}
+                  {o.profil && <Section titre="Votre profil">{renderTexte(o.profil)}</Section>}
+                  {o.futur_employeur && <Section titre="Votre futur employeur">{renderTexte(o.futur_employeur)}</Section>}
+
+                  <Section titre="En résumé">
+                    <div style={{ display: "grid", gap: "6px" }}>
+                      {(o.contrat || o.temps_travail) && <RLigne>{[o.contrat, o.temps_travail].filter(Boolean).join(", ")}</RLigne>}
+                      {o.est_stage && <RLigne>Stage{o.stage_duree ? ` de ${o.stage_duree}` : ""}{o.stage_gratifie ? `, gratifié${o.stage_montant ? ` (${Number(o.stage_montant).toLocaleString("fr-FR")} FCFA)` : ""}` : (o.stage_gratifie === false ? ", non gratifié" : "")}</RLigne>}
+                      {o.est_stage && o.stage_profil && <RLigne>Profil recherché : {o.stage_profil}</RLigne>}
+                      {o.lieu && <RLigne>Basé à {o.lieu}</RLigne>}
+                      <RLigne>{fmtRemuneration(o)}</RLigne>
+                      {o.avantages && <RLigne>Avantages : {o.avantages}</RLigne>}
+                      {o.deplacements && <RLigne>Déplacements : {o.deplacements}</RLigne>}
+                    </div>
+                  </Section>
+
+                  <a href="#postuler" style={{ display: "inline-block", marginTop: "6px", backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: 700, fontSize: "13px", padding: "12px 24px", borderRadius: "6px", textDecoration: "none" }}>Postuler à cette offre →</a>
+                </article>
               ))}
             </div>
           )}

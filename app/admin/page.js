@@ -6194,12 +6194,18 @@ function buildRapportIntervHtml(form, client, devis) {
 }
 
 // ---- Onglet Recrutement : candidatures reçues + gestion des offres ----
+const OFFRE_VIDE = {
+  titre: "", pourquoi_postuler: "", description: "", profil: "", futur_employeur: "",
+  contrat: "", temps_travail: "", lieu: "", avantages: "", deplacements: "",
+  salaire_min: "", salaire_max: "", salaire_devise: "FCFA", salaire_periode: "mois", salaire_visible: true,
+  est_stage: false, stage_duree: "", stage_gratifie: false, stage_montant: "", stage_profil: "",
+}
 function SectionRecrutement() {
   const [data, setData] = useState({ candidatures: [], offres: [] })
   const [loading, setLoading] = useState(true)
   const [showOffre, setShowOffre] = useState(false)
   const [editId, setEditId] = useState(null)
-  const [offreForm, setOffreForm] = useState({ titre: "", description: "", profil: "", contrat: "", lieu: "" })
+  const [offreForm, setOffreForm] = useState(OFFRE_VIDE)
 
   async function authHeaders() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -6233,9 +6239,19 @@ function SectionRecrutement() {
     try { await post({ action: "del_candidature", id: id }); setData(function (p) { return Object.assign({}, p, { candidatures: p.candidatures.filter(function (c) { return c.id !== id }) }) }) } catch (e) { alert("Échec de la suppression") }
   }
   function majOffre(champ, val) { setOffreForm(function (p) { const o = Object.assign({}, p); o[champ] = val; return o }) }
-  function ouvrirNouvelleOffre() { setEditId(null); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }); setShowOffre(true) }
-  function modifierOffre(o) { setEditId(o.id); setOffreForm({ titre: o.titre || "", description: o.description || "", profil: o.profil || "", contrat: o.contrat || "", lieu: o.lieu || "" }); setShowOffre(true) }
-  function annulerOffre() { setShowOffre(false); setEditId(null); setOffreForm({ titre: "", description: "", profil: "", contrat: "", lieu: "" }) }
+  function ouvrirNouvelleOffre() { setEditId(null); setOffreForm(OFFRE_VIDE); setShowOffre(true) }
+  function modifierOffre(o) {
+    setEditId(o.id)
+    setOffreForm({
+      titre: o.titre || "", pourquoi_postuler: o.pourquoi_postuler || "", description: o.description || "", profil: o.profil || "", futur_employeur: o.futur_employeur || "",
+      contrat: o.contrat || "", temps_travail: o.temps_travail || "", lieu: o.lieu || "", avantages: o.avantages || "", deplacements: o.deplacements || "",
+      salaire_min: o.salaire_min == null ? "" : o.salaire_min, salaire_max: o.salaire_max == null ? "" : o.salaire_max,
+      salaire_devise: o.salaire_devise || "FCFA", salaire_periode: o.salaire_periode || "mois", salaire_visible: o.salaire_visible !== false,
+      est_stage: !!o.est_stage, stage_duree: o.stage_duree || "", stage_gratifie: !!o.stage_gratifie, stage_montant: o.stage_montant == null ? "" : o.stage_montant, stage_profil: o.stage_profil || "",
+    })
+    setShowOffre(true)
+  }
+  function annulerOffre() { setShowOffre(false); setEditId(null); setOffreForm(OFFRE_VIDE) }
   async function enregistrerOffre() {
     if (!offreForm.titre.trim()) { alert("Le titre est obligatoire."); return }
     const body = editId ? Object.assign({ action: "update_offre", id: editId }, offreForm) : Object.assign({ action: "add_offre" }, offreForm)
@@ -6255,6 +6271,8 @@ function SectionRecrutement() {
   function waLink(tel) { const n = String(tel || "").replace(/\D/g, ""); return n ? "https://wa.me/" + n : null }
   function fmtDate(d) { try { return new Date(d).toLocaleDateString("fr-FR") } catch (e) { return "" } }
   const inp = { width: "100%", padding: "9px 11px", fontSize: "13px", border: "1px solid #d1d5db", borderRadius: "7px", fontFamily: "inherit", boxSizing: "border-box" }
+  const lbl = { fontSize: "11px", fontWeight: 700, color: "#555", marginBottom: "4px" }
+  const ta = Object.assign({}, inp, { resize: "vertical" })
 
   if (loading) return <div style={{ padding: "40px", color: "#888" }}>Chargement…</div>
 
@@ -6270,14 +6288,51 @@ function SectionRecrutement() {
         </div>
         {showOffre && (
           <div style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "20px", marginBottom: "16px", display: "grid", gap: "12px" }}>
-            <div style={{ fontSize: "12px", fontWeight: 700, color: "#6b21a8" }}>{editId ? "Modifier l'offre" : "Nouvelle offre"}</div>
-            <input placeholder="Titre du poste *" value={offreForm.titre} onChange={function (e) { majOffre("titre", e.target.value) }} style={inp} />
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "#6b21a8" }}>{editId ? "Modifier l'offre" : "Nouvelle offre"}</div>
+
+            <div><div style={lbl}>Titre du poste *</div><input value={offreForm.titre} onChange={function (e) { majOffre("titre", e.target.value) }} style={inp} /></div>
+            <div><div style={lbl}>1. Pourquoi postuler (une accroche par ligne)</div><textarea value={offreForm.pourquoi_postuler} onChange={function (e) { majOffre("pourquoi_postuler", e.target.value) }} rows={4} style={ta} /></div>
+            <div><div style={lbl}>2. Vos missions (intro puis une mission par ligne ; commencez une ligne par « - » pour une puce)</div><textarea value={offreForm.description} onChange={function (e) { majOffre("description", e.target.value) }} rows={5} style={ta} /></div>
+            <div><div style={lbl}>3. Votre profil</div><textarea value={offreForm.profil} onChange={function (e) { majOffre("profil", e.target.value) }} rows={4} style={ta} /></div>
+            <div><div style={lbl}>4. Votre futur employeur</div><textarea value={offreForm.futur_employeur} onChange={function (e) { majOffre("futur_employeur", e.target.value) }} rows={4} style={ta} /></div>
+
+            <div style={{ fontSize: "12px", fontWeight: 700, color: "#0a2e1a", borderTop: "1px solid #eee", paddingTop: "10px" }}>5. En résumé</div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <input placeholder="Type de contrat" value={offreForm.contrat} onChange={function (e) { majOffre("contrat", e.target.value) }} style={inp} />
-              <input placeholder="Lieu" value={offreForm.lieu} onChange={function (e) { majOffre("lieu", e.target.value) }} style={inp} />
+              <div><div style={lbl}>Contrat (ex : CDI)</div><input value={offreForm.contrat} onChange={function (e) { majOffre("contrat", e.target.value) }} style={inp} /></div>
+              <div><div style={lbl}>Temps de travail</div><input placeholder="Ex : Temps plein" value={offreForm.temps_travail} onChange={function (e) { majOffre("temps_travail", e.target.value) }} style={inp} /></div>
             </div>
-            <textarea placeholder="Missions" value={offreForm.description} onChange={function (e) { majOffre("description", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
-            <textarea placeholder="Profil recherché" value={offreForm.profil} onChange={function (e) { majOffre("profil", e.target.value) }} rows={2} style={Object.assign({}, inp, { resize: "vertical" })} />
+            <div><div style={lbl}>Lieu</div><input value={offreForm.lieu} onChange={function (e) { majOffre("lieu", e.target.value) }} style={inp} /></div>
+            <div>
+              <div style={lbl}>Rémunération (laisser vide si « selon profil »)</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 90px 90px", gap: "8px" }}>
+                <input type="number" placeholder="Min" value={offreForm.salaire_min} onChange={function (e) { majOffre("salaire_min", e.target.value) }} style={inp} />
+                <input type="number" placeholder="Max" value={offreForm.salaire_max} onChange={function (e) { majOffre("salaire_max", e.target.value) }} style={inp} />
+                <select value={offreForm.salaire_devise} onChange={function (e) { majOffre("salaire_devise", e.target.value) }} style={inp}><option>FCFA</option><option>EUR</option><option>USD</option></select>
+                <select value={offreForm.salaire_periode} onChange={function (e) { majOffre("salaire_periode", e.target.value) }} style={inp}><option value="mois">/mois</option><option value="an">/an</option></select>
+              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#555", marginTop: "8px" }}>
+                <input type="checkbox" checked={offreForm.salaire_visible === false} onChange={function (e) { majOffre("salaire_visible", !e.target.checked) }} /> Masquer le salaire (afficher « selon profil »)
+              </label>
+            </div>
+            <div><div style={lbl}>Avantages</div><input placeholder="Ex : véhicule, téléphone, prime" value={offreForm.avantages} onChange={function (e) { majOffre("avantages", e.target.value) }} style={inp} /></div>
+            <div><div style={lbl}>Déplacements</div><input placeholder="Ex : Cotonou et environs" value={offreForm.deplacements} onChange={function (e) { majOffre("deplacements", e.target.value) }} style={inp} /></div>
+
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "#0a2e1a", fontWeight: 600 }}>
+              <input type="checkbox" checked={offreForm.est_stage} onChange={function (e) { majOffre("est_stage", e.target.checked) }} /> C'est un stage
+            </label>
+            {offreForm.est_stage && (
+              <div style={{ display: "grid", gap: "10px", paddingLeft: "12px", borderLeft: "2px solid #e9d5ff" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div><div style={lbl}>Durée du stage</div><input placeholder="Ex : 3 mois" value={offreForm.stage_duree} onChange={function (e) { majOffre("stage_duree", e.target.value) }} style={inp} /></div>
+                  <div><div style={lbl}>Montant gratification (FCFA)</div><input type="number" value={offreForm.stage_montant} onChange={function (e) { majOffre("stage_montant", e.target.value) }} style={inp} /></div>
+                </div>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#555" }}>
+                  <input type="checkbox" checked={offreForm.stage_gratifie} onChange={function (e) { majOffre("stage_gratifie", e.target.checked) }} /> Stage gratifié
+                </label>
+                <div><div style={lbl}>Profil recherché (stage)</div><input value={offreForm.stage_profil} onChange={function (e) { majOffre("stage_profil", e.target.value) }} style={inp} /></div>
+              </div>
+            )}
+
             <button onClick={enregistrerOffre} style={{ backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "7px", padding: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{editId ? "Enregistrer les modifications" : "Publier l'offre"}</button>
           </div>
         )}
