@@ -25,6 +25,7 @@ export default function FormCandidature({ offres }: { offres: Offre[] }) {
   async function envoyer() {
     setMsg(null)
     if (!form.nom.trim() || !form.telephone.trim()) { setMsg({ ok: false, texte: "Le nom et le téléphone sont obligatoires." }); return }
+    if (!cvData) { setMsg({ ok: false, texte: "Le CV (PDF) est obligatoire pour postuler." }); return }
     setEnvoi(true)
     try {
       const res = await fetch("/api/candidature", {
@@ -52,7 +53,7 @@ export default function FormCandidature({ offres }: { offres: Offre[] }) {
   return (
     <div id="postuler" style={{ maxWidth: "620px", margin: "0 auto", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "12px", padding: "32px" }}>
       <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#0a2e1a", marginBottom: "6px" }}>Postuler</h2>
-      <p style={{ fontSize: "13px", color: "#666", marginBottom: "22px" }}>Remplissez le formulaire. Le CV est facultatif.</p>
+      <p style={{ fontSize: "13px", color: "#666", marginBottom: "22px" }}>Remplissez le formulaire. Le CV (PDF) est obligatoire.</p>
 
       <div style={{ display: "grid", gap: "16px" }}>
         <div>
@@ -77,7 +78,7 @@ export default function FormCandidature({ offres }: { offres: Offre[] }) {
         <div><label style={label}>Expérience (années, secteur)</label><input value={form.experience} onChange={(e) => maj("experience", e.target.value)} placeholder="Ex : 2 ans en vente terrain" style={inp} /></div>
         <div><label style={label}>Motivation</label><textarea value={form.motivation} onChange={(e) => maj("motivation", e.target.value)} rows={4} style={{ ...inp, resize: "vertical" }} /></div>
         <div>
-          <label style={label}>CV (PDF, facultatif, max 3 Mo)</label>
+          <label style={label}>CV (PDF, obligatoire, max 3 Mo) *</label>
           <input type="file" accept="application/pdf" onChange={choisirCv} style={{ fontSize: "13px", color: "#444" }} />
           {cvNom && <div style={{ fontSize: "12px", color: "#065f46", marginTop: "6px" }}>✓ {cvNom}</div>}
         </div>

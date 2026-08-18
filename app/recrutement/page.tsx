@@ -7,7 +7,7 @@ const BASE = "https://www.phyto-benin.com"
 
 export const metadata: Metadata = {
   title: "Recrutement | Phyto Bénin by GSE",
-  description: "GSE Phyto-Bénin recrute au Bénin. Découvrez nos offres d'emploi et postulez en ligne, CV facultatif.",
+  description: "GSE Phyto-Bénin recrute au Bénin. Découvrez nos offres d'emploi et postulez en ligne avec votre CV.",
   alternates: { canonical: `${BASE}/recrutement` },
   openGraph: {
     title: "GSE Phyto-Bénin recrute",

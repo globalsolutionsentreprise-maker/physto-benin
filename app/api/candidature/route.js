@@ -20,6 +20,9 @@ export async function POST(req) {
     if (!nom || !String(nom).trim() || !telephone || !String(telephone).trim()) {
       return NextResponse.json({ error: "Nom et téléphone sont obligatoires." }, { status: 400 })
     }
+    if (!cvBase64) {
+      return NextResponse.json({ error: "Le CV (PDF) est obligatoire pour postuler." }, { status: 400 })
+    }
 
     const sb = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
