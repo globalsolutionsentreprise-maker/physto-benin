@@ -187,6 +187,9 @@ export async function POST(req) {
     if (idx >= 6) parcours.intervention = { done: true }
     if (idx >= 8) parcours.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
     const updateData = { etape, crm_statut: CRM[etape] || "contact", parcours }
+    // Perdu : on enregistre le motif de perte ; toute autre étape efface un motif
+    // résiduel (un prospect ré-ouvert ne doit pas garder « perdu pour X »).
+    updateData.motif_echec = etape === "perdu" ? (body.motif || "Non précisé") : null
     // Deal gagné (converti+) : initialiser le montant facturé ; encaissement (clôturé)
     // → paiements_recus = facturé (cohérence Finances) ; sinon 0.
     if (idx >= 3) {

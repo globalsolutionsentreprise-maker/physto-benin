@@ -1390,6 +1390,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [certModal, setCertModal] = React.useState(null)
   const [certForm, setCertForm] = React.useState({})
   const [certSaving, setCertSaving] = React.useState(false)
+  const [perduModal, setPerduModal] = React.useState(null)
+  const [perduMotif, setPerduMotif] = React.useState("")
   const [ficheModal, setFicheModal] = React.useState(null)
   const [ficheForm, setFicheForm] = React.useState({})
   const [savingFiche, setSavingFiche] = React.useState(false)
@@ -1542,6 +1544,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   ETAPES.concat([ETAPE_PERDU]).forEach(function(e) { ETAPE_LABEL[e.id] = e.label })
   var ETAPE_CRM = { prospect: "contact", devis: "devis", relance: "relance", converti: "converti", visite: "converti", intervention: "converti", certificat: "converti", encaissement: "converti", cloture: "converti", perdu: "echec" }
   var PROCHAINE_ETAPE = { prospect: "devis", devis: "converti", relance: "converti", converti: "visite", visite: "intervention", intervention: "certificat", certificat: "encaissement", encaissement: "cloture" }
+  // Motifs de perte d'un prospect (choix rapide au passage en « Perdu »).
+  var MOTIFS_PERTE = ["Pas de retour du client", "Prix trop élevé", "Choix d'un concurrent", "Budget insuffisant / reporté", "Besoin annulé", "Client injoignable", "Hors zone / non desservi", "Autre"]
 
   // Filet : étape par défaut d'un devis sans `etape` stocké (rétrocompat).
   function etapeParDefaut(crmStatut) {
@@ -3567,11 +3571,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   // ── Déplacement unifié : une carte = une `etape` (source de vérité) ────────
   // Écrit `etape` + parcours cohérent (voir action "move" API). Avancer pose les
   // coches d'exécution ; reculer les retire → plus de déplacement « sans effet ».
-  async function deplacerCarte(devisId, newEtape) {
+  async function deplacerCarte(devisId, newEtape, motif) {
     if (!newEtape) return
     var idx = ETAPE_IDS.indexOf(newEtape)
     var crm = ETAPE_CRM[newEtape] || "contact"
     var parcours = idx >= 0 ? parcoursForEtape(newEtape) : {}
+    var motifVal = newEtape === "perdu" ? (motif || "Non précisé") : "—"
     // Optimiste : colUnifiee lit devisMap[c.id].etape → MAJ devisList d'abord.
     setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { etape: newEtape, parcours: parcours }) : d }) })
     setFinData(function(prev) {
@@ -3579,15 +3584,58 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) {
         if (c.id !== devisId) return c
         var pr = idx >= 8 ? (c.montantFacture || c.montantDevis || 0) : (idx >= 3 ? c.paiementsRecus : 0)
-        return Object.assign({}, c, { statut: crm, paiementsRecus: pr })
+        return Object.assign({}, c, { statut: crm, paiementsRecus: pr, motifEchec: motifVal })
       }) })
     })
-    setMsg("Déplacé : " + (ETAPE_LABEL[newEtape] || newEtape))
+    setMsg("Déplacé : " + (ETAPE_LABEL[newEtape] || newEtape) + (newEtape === "perdu" ? " (" + motifVal + ")" : ""))
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, etape: newEtape }) })
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, etape: newEtape, motif: motif || null }) })
     } catch (e) { setMsg("Erreur déplacement") }
+  }
+  // Passage en « Perdu » : demander le motif avant de déplacer.
+  function demanderMotifPerte(devisId, clientNom) {
+    setPerduMotif(MOTIFS_PERTE[0])
+    setPerduModal({ id: devisId, client: clientNom || "" })
+  }
+  function confirmerPerte() {
+    if (!perduModal) return
+    var m = (perduMotif || "").trim() || "Non précisé"
+    deplacerCarte(perduModal.id, "perdu", m)
+    setPerduModal(null)
+  }
+  function renderPerduModal() {
+    if (!perduModal) return null
+    var e = React.createElement
+    var inpS = { width: "100%", padding: "9px 11px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+    return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setPerduModal(null) } },
+      e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "420px", maxWidth: "92vw" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "❌ Marquer comme perdu"),
+          e("button", { onClick: function() { setPerduModal(null) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
+        ),
+        perduModal.client ? e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "14px" } }, perduModal.client) : null,
+        e("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" } }, "Motif de la perte"),
+        (function() {
+          var predef = MOTIFS_PERTE.slice(0, -1)            // motifs fixes (sans « Autre »)
+          var estAutre = predef.indexOf(perduMotif) === -1  // mode libre (vide ou saisi)
+          return e("div", { style: { marginBottom: "14px" } },
+            e("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } },
+              MOTIFS_PERTE.map(function(m) {
+                var sel = m === "Autre" ? estAutre : perduMotif === m
+                return e("button", { key: m, onClick: function() { setPerduMotif(m === "Autre" ? "" : m) }, style: { textAlign: "left", padding: "9px 12px", borderRadius: "8px", border: "1.5px solid " + (sel ? "#991b1b" : "#e0ddd6"), background: sel ? "#fef2f2" : "#fff", color: sel ? "#991b1b" : "#444", fontSize: "13px", fontWeight: sel ? "700" : "400", cursor: "pointer", fontFamily: "inherit" } }, m)
+              })
+            ),
+            estAutre ? e("input", { autoFocus: true, placeholder: "Préciser le motif…", value: perduMotif, onChange: function(ev) { setPerduMotif(ev.target.value) }, style: Object.assign({}, inpS, { marginTop: "8px" }) }) : null
+          )
+        })(),
+        e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
+          e("button", { onClick: function() { setPerduModal(null) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
+          e("button", { onClick: confirmerPerte, style: { padding: "9px 18px", border: "none", background: "#991b1b", color: "#fff", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Confirmer la perte")
+        )
+      )
+    )
   }
   function ouvrirDossierCommercial(devisId) {
     var d = devisList.find(function(x) { return x.id === devisId })
@@ -4147,15 +4195,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           }, contratCarte ? "🖨️ Réimprimer le contrat" : "📄 Proposer un contrat")
         : null
       // Mini-stepper : où en est le client dans le parcours (barres = étapes).
+      var motifPerte = estPerdu && c.motifEchec && c.motifEchec !== "—" ? c.motifEchec : null
       var stepper = estPerdu
-        ? e("div", { style: { fontSize: "10px", color: "#991b1b", fontWeight: "700", marginBottom: "6px" } }, "❌ Perdu")
+        ? e("div", { style: { marginBottom: "6px" } },
+            e("span", { style: { display: "inline-block", fontSize: "10px", color: "#fff", background: "#991b1b", fontWeight: "700", borderRadius: "10px", padding: "1px 8px" } }, "❌ Perdu"),
+            motifPerte ? e("div", { style: { fontSize: "11px", color: "#991b1b", fontWeight: "600", marginTop: "4px" } }, "Motif : " + motifPerte) : null
+          )
         : e("div", { style: { display: "flex", gap: "2px", marginBottom: "7px" }, title: "Étape : " + (ETAPE_LABEL[colId] || colId) },
             ETAPE_IDS.map(function(id, i) {
               var bg = i < etapeIdx ? "#0a2e1a" : (i === etapeIdx ? "#d4a920" : "#e6e3dc")
               return e("div", { key: id, style: { flex: 1, height: "4px", borderRadius: "2px", background: bg } })
             })
           )
-      return e("div", { key: c.id, style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+      return e("div", { key: c.id, style: { background: estPerdu ? "#fdfaf9" : "#fff", border: "1px solid " + (estPerdu ? "#f0d5d5" : "#e8e6e0"), borderLeft: estPerdu ? "3px solid #991b1b" : "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
         stepper,
         e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
         e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
@@ -4166,7 +4218,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Avancer → " + (ETAPE_LABEL[prochaine] || prochaine)) : null,
         boutonContrat,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
-          e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
+          e("select", { value: "", onChange: function(ev) { var v = ev.target.value; if (v === "perdu") { demanderMotifPerte(c.id, c.client) } else { deplacerCarte(c.id, v) } }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
             [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(ETAPES.concat([ETAPE_PERDU]).map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
           ),
           e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (documents, rapports)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
@@ -5695,6 +5747,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   return React.createElement("div", null,
     certModal ? renderCertModal() : null,
+    perduModal ? renderPerduModal() : null,
     ficheModal ? renderFicheModal() : null,
     rapportVisiteModal ? renderRapportVisiteModal() : null,
     rapportIntervModal ? renderRapportIntervModal() : null,
