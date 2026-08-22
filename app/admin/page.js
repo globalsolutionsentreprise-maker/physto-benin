@@ -4252,18 +4252,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var laneRow = { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" }
     var laneTitle = { fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#888", margin: "4px 0 8px" }
     function colsDe(ids) { return COLS.filter(function(x) { return ids.indexOf(x.id) > -1 }) }
-    var colsCommercial = colsDe(["prospect", "devis", "relance", "converti"])
+    var colsCommercial = colsDe(["prospect", "devis", "relance", "converti", "perdu"])
     var colsExecution = colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
-    var colsPerdu = colsDe(["perdu"])
 
     return e("div", null,
       e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "16px" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
       e("div", { style: laneTitle }, "◆ Commercial"),
       e("div", { style: laneRow }, colsCommercial.map(renderColonne)),
       e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Exécution"),
-      e("div", { style: laneRow }, colsExecution.map(renderColonne)),
-      e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Perdu"),
-      e("div", { style: laneRow }, colsPerdu.map(renderColonne))
+      e("div", { style: laneRow }, colsExecution.map(renderColonne))
     )
   }
 

@@ -7,7 +7,7 @@ tools: Bash, Read
 You are the QA agent for GSE Phyto-Bénin admin interface.
 
 ## Test targets
-- Admin: http://localhost:3000/admin (or physto-benin.vercel.app/admin in production)
+- Admin: http://localhost:3000/admin (or www.phyto-benin.com/admin in production)
 - Login credentials: from NEXT_PUBLIC_ADMIN_PASSWORD in .env.local
 
 ## QA checklist for RH module (rh.html)

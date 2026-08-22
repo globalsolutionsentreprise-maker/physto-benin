@@ -76,9 +76,9 @@ Vercel se déploie automatiquement depuis GitHub. Attendre ~90 secondes.
 Vérifier que le site répond correctement :
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" https://physto-benin.vercel.app/
-curl -s -o /dev/null -w "%{http_code}" https://physto-benin.vercel.app/admin
-curl -s -o /dev/null -w "%{http_code}" https://physto-benin.vercel.app/api/crm-data
+curl -s -o /dev/null -w "%{http_code}" https://www.phyto-benin.com/
+curl -s -o /dev/null -w "%{http_code}" https://www.phyto-benin.com/admin
+curl -s -o /dev/null -w "%{http_code}" https://www.phyto-benin.com/api/crm-data
 ```
 
 Résultats attendus :
@@ -94,7 +94,7 @@ Si autre code → STOPPER et analyser.
 
 Ouvrir le site et vérifier la fonctionnalité qui vient d'être modifiée :
 
-1. Naviguer vers `https://physto-benin.vercel.app/admin`
+1. Naviguer vers `https://www.phyto-benin.com/admin`
 2. Se connecter avec les credentials admin
 3. Tester le flux lié au changement déployé
 4. Prendre un screenshot de preuve
@@ -110,7 +110,7 @@ Afficher un résumé :
 ```
 ✅ DÉPLOYÉ avec succès
    Commit  : <sha> — <message>
-   Prod    : https://physto-benin.vercel.app
+   Prod    : https://www.phyto-benin.com
    Build   : OK
    Supabase: OK / non nécessaire
    QA      : ✅ <ce qui a été testé>
