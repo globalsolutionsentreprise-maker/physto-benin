@@ -4207,7 +4207,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               return e("div", { key: id, style: { flex: 1, height: "4px", borderRadius: "2px", background: bg } })
             })
           )
-      return e("div", { key: c.id, style: { background: estPerdu ? "#fdfaf9" : "#fff", border: "1px solid " + (estPerdu ? "#f0d5d5" : "#e8e6e0"), borderLeft: estPerdu ? "3px solid #991b1b" : "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
+      return e("div", { key: c.id, style: { background: estPerdu ? "#fdfaf9" : "#fff", border: "1px solid " + (estPerdu ? "#f0d5d5" : "#e8e6e0"), borderLeft: estPerdu ? "3px solid #991b1b" : "1px solid #e8e6e0", borderRadius: "8px", padding: "9px", marginBottom: "6px" } },
         stepper,
         e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
         e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
@@ -4241,11 +4241,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
         )
       })
+      var nb = cards.length + colLeads.length
       return e("div", { key: col.id, style: { minWidth: "225px", width: "225px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
-        e("div", { style: { background: col.bg, color: col.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, col.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
+        // En-tête figé : nom + compteur (toujours visible même colonne pleine).
+        e("div", { style: { background: col.bg, color: col.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, col.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, nb)),
         tot > 0 ? e("div", { style: { fontSize: "11px", color: col.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
-        leadEls,
-        (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
+        // Zone des cartes : défile à l'intérieur de la colonne (hauteur bornée),
+        // pour que le board tienne à l'écran au lieu de faire défiler la page.
+        e("div", { style: { maxHeight: "58vh", overflowY: nb > 0 ? "auto" : "visible", paddingRight: nb > 0 ? "3px" : "0" } },
+          leadEls,
+          (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
+        )
       )
     }
 
