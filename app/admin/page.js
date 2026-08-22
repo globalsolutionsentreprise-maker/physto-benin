@@ -1978,24 +1978,51 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     await charger()
   }
 
+  // Référence suivante = compteur global par année, dérivé des certificats déjà
+  // enregistrés (certsList) : plus besoin de se rappeler la précédente. Un
+  // certificat 'double' consomme deux numéros consécutifs (NNN-MMM/YY).
+  function nextCertRef(type) {
+    var yy = String(new Date().getFullYear()).slice(-2)
+    var max = 0
+    certsList.forEach(function(c) {
+      var r = c && c.form_data && c.form_data.ref
+      if (!r) return
+      var m = String(r).match(/\/(\d{2})\s*$/)
+      if (!m || m[1] !== yy) return
+      String(r).replace(/\/\d{2}\s*$/, '').split(/[^\d]+/).forEach(function(p) {
+        var n = parseInt(p, 10)
+        if (!isNaN(n) && n > max) max = n
+      })
+    })
+    var pad = function(n) { return String(n).padStart(3, '0') }
+    var next = max + 1
+    return type === 'double' ? pad(next) + '-' + pad(next + 1) + '/' + yy : pad(next) + '/' + yy
+  }
+
   function openCertModal(type, d) {
     var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
     var now = new Date()
     var jour = String(now.getDate()).padStart(2, '0')
     var mois = String(now.getMonth() + 1).padStart(2, '0')
+    // Contrat = un devis : on reprend les infos du certificat précédent du même
+    // dossier. Seules les dates d'exécution changent d'un passage à l'autre.
+    var prev = certsList.find(function(c) { return c.devis_id === d.id })
+    var prevT = certsList.find(function(c) { return c.devis_id === d.id && c.type === type })
+    var pf = (prev && prev.form_data) || {}
+    var pft = (prevT && prevT.form_data) || {}
     setCertForm({
-      ref: type === 'desinsect' ? '001/26' : type === 'double' ? '001-002/26' : '002/26',
+      ref: nextCertRef(type),
       dateJour: jour,
       dateMois: mois,
-      entreprise: (cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' '),
-      ifu: '',
-      rccm: '',
-      locaux: d.description || '',
-      situation: (d.lieu_intervention) || (cl && cl.adresse) || '',
+      entreprise: pf.entreprise || ((cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' ')),
+      ifu: pf.ifu || '',
+      rccm: pf.rccm || '',
+      locaux: pf.locaux || d.description || '',
+      situation: pf.situation || (d.lieu_intervention) || (cl && cl.adresse) || '',
       dateDebut: '',
       dateFin: '',
-      matieres: (type === 'desinsect' || type === 'double') ? 'IMPERA 300 CS\nROCOGEL' : 'VERTOX',
-      matieresDerat: type === 'double' ? 'VERTOX' : '',
+      matieres: pft.matieres || ((type === 'desinsect' || type === 'double') ? 'IMPERA 300 CS\nROCOGEL' : 'VERTOX'),
+      matieresDerat: pft.matieresDerat || (type === 'double' ? 'VERTOX' : ''),
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
