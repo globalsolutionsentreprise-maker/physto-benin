@@ -1392,6 +1392,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [certSaving, setCertSaving] = React.useState(false)
   const [perduModal, setPerduModal] = React.useState(null)
   const [perduMotif, setPerduMotif] = React.useState("")
+  const [pipeCompact, setPipeCompact] = React.useState(false)
+  const [pipeOpen, setPipeOpen] = React.useState({})
   const [ficheModal, setFicheModal] = React.useState(null)
   const [ficheForm, setFicheForm] = React.useState({})
   const [savingFiche, setSavingFiche] = React.useState(false)
@@ -4172,6 +4174,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var etapeIdx = ETAPE_IDS.indexOf(colId)
       var estPerdu = colId === "perdu"
       var prochaine = PROCHAINE_ETAPE[colId]
+      // Mode compact : carte repliée = nom + montant, dépliable au clic. On voit
+      // beaucoup plus de dossiers par colonne sans dérouler.
+      var replie = pipeCompact && !pipeOpen[c.id]
+      if (replie) {
+        return e("div", { key: c.id, onClick: function() { setPipeOpen(function(p) { var n = Object.assign({}, p); n[c.id] = true; return n }) },
+          title: "Cliquer pour déplier",
+          style: { background: estPerdu ? "#fdfaf9" : "#fff", border: "1px solid " + (estPerdu ? "#f0d5d5" : "#e8e6e0"), borderLeft: estPerdu ? "3px solid #991b1b" : "3px solid #d4a920", borderRadius: "6px", padding: "6px 8px", marginBottom: "5px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "6px" } },
+          e("span", { style: { fontWeight: "600", fontSize: "12px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, (niSoon ? "⚠ " : "") + (estPerdu ? "❌ " : "") + c.client),
+          e("span", { style: { fontSize: "11px", fontWeight: "700", color: "#0a2e1a", flexShrink: 0 } }, finFmt(c.montantDevis))
+        )
+      }
       // Contrat d'entretien : la question se pose dès que l'affaire est convertie.
       // Le modal existait déjà mais n'était accessible que depuis le tableau de bord
       // client (renderVueDevisClient), une vue qu'on ne traverse pas en travaillant
@@ -4208,6 +4221,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             })
           )
       return e("div", { key: c.id, style: { background: estPerdu ? "#fdfaf9" : "#fff", border: "1px solid " + (estPerdu ? "#f0d5d5" : "#e8e6e0"), borderLeft: estPerdu ? "3px solid #991b1b" : "1px solid #e8e6e0", borderRadius: "8px", padding: "9px", marginBottom: "6px" } },
+        pipeCompact ? e("div", { onClick: function() { setPipeOpen(function(p) { var n = Object.assign({}, p); delete n[c.id]; return n }) }, style: { textAlign: "right", fontSize: "10px", color: "#999", cursor: "pointer", marginBottom: "4px" } }, "▲ Réduire") : null,
         stepper,
         e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
         e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
@@ -4262,7 +4276,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var colsExecution = colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
 
     return e("div", null,
-      e("div", { style: { fontSize: "12px", color: "#888", marginBottom: "16px" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px" } },
+        e("div", { style: { fontSize: "12px", color: "#888" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
+        e("button", { onClick: function() { setPipeCompact(function(v) { return !v }); setPipeOpen({}) }, title: pipeCompact ? "Afficher les cartes détaillées" : "Réduire les cartes pour tout voir d'un coup",
+          style: { flexShrink: 0, background: pipeCompact ? "#0a2e1a" : "#fff", color: pipeCompact ? "#d4a920" : "#555", border: "1px solid " + (pipeCompact ? "#0a2e1a" : "#e0ddd6"), borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
+          pipeCompact ? "🔎 Vue détaillée" : "☰ Vue compacte")
+      ),
       e("div", { style: laneTitle }, "◆ Commercial"),
       e("div", { style: laneRow }, colsCommercial.map(renderColonne)),
       e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Exécution"),
