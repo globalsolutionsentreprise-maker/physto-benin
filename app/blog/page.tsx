@@ -38,8 +38,11 @@ export default function Blog() {
 
   const categories = ["Tous les articles", ...Array.from(new Set(articles.map(function(a) { return a.categorie })))]
   const articlesFiltres = categorieActive === "Tous les articles" ? articles : articles.filter(function(a) { return a.categorie === categorieActive })
-  const vedette = articlesFiltres.find(function(a) { return a.vedette })
-  const autres = articlesFiltres.filter(function(a) { return !a.vedette })
+  // Jusqu'à 2 articles à la une. Au-delà, l'excédent bascule dans la grille pour
+  // ne jamais rendre un article invisible (cf. tasks/lessons.md).
+  const vedettes = articlesFiltres.filter(function(a) { return a.vedette }).slice(0, 2)
+  const vedetteIds = vedettes.map(function(a) { return a.id })
+  const autres = articlesFiltres.filter(function(a) { return vedetteIds.indexOf(a.id) === -1 })
 
   async function handleNewsletterSubmit() {
     if (!newsletterEmail) return
@@ -100,12 +103,14 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* ARTICLE VEDETTE */}
-      {vedette && (
+      {/* ARTICLES VEDETTES (jusqu'à 2 à la une) */}
+      {vedettes.length > 0 && (
         <section style={{ backgroundColor: "#f7f7f5", padding: "48px 60px 0" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <a href={"/blog/" + slugifier(vedette.titre)} style={{ textDecoration: "none", display: "block" }}>
-              <div style={{ backgroundColor: "#0a2e1a", padding: "64px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center", cursor: "pointer" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: vedettes.length > 1 ? "1fr 1fr" : "1fr", gap: "3px" }}>
+            {vedettes.map(function(vedette) {
+              return (
+            <a key={vedette.id} href={"/blog/" + slugifier(vedette.titre)} style={{ textDecoration: "none", display: "block" }}>
+              <div style={{ backgroundColor: "#0a2e1a", padding: "48px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", cursor: "pointer" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
                     <span style={{ fontSize: "10px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", backgroundColor: "rgba(212,169,32,0.1)", padding: "5px 12px", borderRadius: "4px" }}>
@@ -113,30 +118,23 @@ export default function Blog() {
                     </span>
                     <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>À LA UNE</span>
                   </div>
-                  <h2 style={{ fontSize: "clamp(20px, 2.5vw, 30px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.3", marginBottom: "20px" }}>
+                  <h2 style={{ fontSize: "clamp(20px, 2.2vw, 27px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.3", marginBottom: "20px" }}>
                     {vedette.titre}
                   </h2>
                   <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", lineHeight: "1.85", marginBottom: "32px" }}>
                     {vedette.resume}
                   </p>
-                  <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
                     <span style={{ display: "inline-block", backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "13px", padding: "12px 24px", borderRadius: "6px" }}>
                       Lire l'article →
                     </span>
                     <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>{vedette.date} · {vedette.lecture} de lecture</span>
                   </div>
                 </div>
-                <div style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", padding: "40px", minHeight: "200px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <div style={{ fontSize: "64px", color: "rgba(212,169,32,0.15)", fontFamily: "Georgia, serif", lineHeight: 1, marginBottom: "16px" }}>"</div>
-                  <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.5)", lineHeight: "1.85", fontStyle: "italic" }}>
-                    Un traitement efficace commence par un diagnostic rigoureux. C'est ce qui fait la différence entre une solution temporaire et une élimination définitive.
-                  </p>
-                  <div style={{ marginTop: "20px", fontSize: "11px", color: "rgba(255,255,255,0.3)", fontWeight: "700", letterSpacing: "0.08em" }}>
-                    L'ÉQUIPE PHYTO BÉNIN
-                  </div>
-                </div>
               </div>
             </a>
+              )
+            })}
           </div>
         </section>
       )}
@@ -144,7 +142,7 @@ export default function Blog() {
       {/* GRILLE ARTICLES */}
       <section style={{ backgroundColor: "#f7f7f5", padding: "48px 60px 80px" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          {autres.length === 0 && !vedette && (
+          {autres.length === 0 && vedettes.length === 0 && (
             <div style={{ textAlign: "center", padding: "60px", color: "#888" }}>
               Aucun article dans cette catégorie pour le moment.
             </div>
