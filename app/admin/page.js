@@ -1124,7 +1124,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="devis" />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="pipeline" />
             </div>
           )}
 
@@ -4414,7 +4414,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["devis", "Devis"], ["clients", "Clients"], ["pipeline", "Pipeline"], ["finances", "Finances"], ["contrats", "Contrats"], ["analyse", "Analyse"], ["documents", "Documents"]].map(function(t) {
+      [["pipeline", "Pipeline"], ["clients", "Clients"], ["contrats", "Contrats"], ["devis", "Devis"], ["analyse", "Analyse"], ["documents", "Documents"], ["finances", "Finances"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
