@@ -55,7 +55,7 @@ export default function Admin() {
   const [formAcces, setFormAcces] = useState({ email: "", nom: "", role: "lecture", password: "" })
   const [accesSaving, setAccesSaving] = useState(false)
   const [accesSaveMsg, setAccesSaveMsg] = useState("")
-  const [onglet, setOnglet] = useState("chiffres")
+  const [onglet, setOnglet] = useState("crm")
   const [sousTexte, setSousTexte] = useState("accueil")
   const [chargement, setChargement] = useState(false)
   const [message, setMessage] = useState("")
@@ -522,6 +522,12 @@ export default function Admin() {
   const btnSauvegarder = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "12px", padding: "10px 16px", borderRadius: "6px", border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }
 
   const menuGroupes = [
+    { titre: "Gestion", items: [
+      { id: "crm", label: "📊 CRM Pipeline" },
+      { id: "rh", label: "👥 Planning & RH" },
+      { id: "recrutement", label: "🧑‍💼 Recrutement" },
+      { id: "stock", label: "📦 Stock produits" },
+    ] },
     { titre: "Site web", items: [
       { id: "chiffres", label: "Chiffres cles" },
       { id: "parametres", label: "Coordonnees" },
@@ -531,12 +537,6 @@ export default function Admin() {
       { id: "services", label: "Nos Services" },
       { id: "realisations", label: "Realisations" },
       { id: "equipe", label: "Équipe (site web)" },
-    ] },
-    { titre: "Gestion", items: [
-      { id: "crm", label: "📊 CRM Pipeline" },
-      { id: "rh", label: "👥 Planning & RH" },
-      { id: "recrutement", label: "🧑‍💼 Recrutement" },
-      { id: "stock", label: "📦 Stock produits" },
     ] },
     ...(currentUser?.role === "admin" ? [
       { titre: "Admin", items: [
@@ -1400,6 +1400,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [certsList, setCertsList] = React.useState([])
   const [fichesList, setFichesList] = React.useState([])
   const [contratsList, setContratsList] = React.useState([])
+  const [contratOuvert, setContratOuvert] = React.useState({})
+  const [contratFiltreStatut, setContratFiltreStatut] = React.useState("tous")
   const [rapportsVisite, setRapportsVisite] = React.useState([])
   const [rapportsInterv, setRapportsInterv] = React.useState([])
   const [rapportVisiteModal, setRapportVisiteModal] = React.useState(null)
@@ -5463,19 +5465,25 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var span = (t0 && t1 && t1 > t0) ? (t1 - t0) : null
       var pctAuj = span ? Math.min(100, Math.max(0, (new Date(auj + "T00:00:00").getTime() - t0) / span * 100)) : null
 
-      return e("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "18px 20px", marginBottom: "14px" } },
-        e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "4px" } },
-          e("div", null,
-            e("div", { style: { fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, (cl && cl.nom) || "Client inconnu"),
+      var ouvert = !!contratOuvert[d.id]
+      var nomAff = ((cl && cl.nom) || "Client inconnu") + (d.etablissement_nom ? " — " + d.etablissement_nom : "")
+      var nbRetard = (r.enRetard && r.enRetard.length) || 0
+      var resumeLigne = r.faits + "/" + r.total + " passages" + (r.prochain ? " · prochain " + fmtJ(r.prochain.date) : "") + (nbRetard > 0 ? " · ⚠ " + nbRetard + " en retard" : "")
+      return e("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: ouvert ? "18px 20px" : "12px 16px", marginBottom: "10px" } },
+        // En-tête cliquable : replie/déplie la carte (compact par défaut).
+        e("div", { onClick: function() { setContratOuvert(function(p) { var n = Object.assign({}, p); n[d.id] = !p[d.id]; return n }) }, style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", cursor: "pointer" } },
+          e("div", { style: { minWidth: 0 } },
+            e("div", { style: { fontSize: "14px", fontWeight: "700", color: "#0a2e1a" } }, (ouvert ? "▾ " : "▸ ") + nomAff),
             e("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } },
-              d.numero + " · " + (d.frequence_intervention || "trimestrielle") + " · " + Number(d.montant_net || 0).toLocaleString("fr-FR") + " FCFA")
+              d.numero + " · " + (d.frequence_intervention || "trimestrielle") + " · " + Number(d.montant_net || 0).toLocaleString("fr-FR") + " FCFA"),
+            !ouvert ? e("div", { style: { fontSize: "11px", color: nbRetard > 0 ? "#991b1b" : "#555", marginTop: "3px" } }, resumeLigne) : null
           ),
           e("span", { style: { flexShrink: 0, backgroundColor: st.bg, color: st.tc, border: "1px solid " + st.bord, borderRadius: "20px", padding: "3px 12px", fontSize: "11px", fontWeight: "700" } }, st.libelle)
         ),
-        e("div", { style: { fontSize: "12px", color: "#555", marginBottom: "14px" } }, d.prestation || ""),
+        ouvert ? e("div", { style: { fontSize: "12px", color: "#555", margin: "10px 0 14px" } }, d.prestation || "") : null,
 
         // Frise : barre de durée + jalons de passage
-        span ? e("div", { style: { position: "relative", height: "38px", marginBottom: "10px" } },
+        (ouvert && span) ? e("div", { style: { position: "relative", height: "38px", marginBottom: "10px" } },
           e("div", { style: { position: "absolute", top: "16px", left: 0, right: 0, height: "4px", backgroundColor: "#e8e6e0", borderRadius: "2px" } }),
           pctAuj != null ? e("div", { style: { position: "absolute", top: "16px", left: 0, width: pctAuj + "%", height: "4px", backgroundColor: "#0a2e1a", borderRadius: "2px" } }) : null,
           r.passages.map(function(p, i) {
@@ -5498,12 +5506,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         ) : null,
 
-        e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#888", marginBottom: "10px" } },
+        ouvert ? e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#888", marginBottom: "10px" } },
           e("span", null, r.debut ? fmtJ(r.debut) : "début non renseigné"),
           e("span", null, r.fin ? "→ " + fmtJ(r.fin) : "")
-        ),
+        ) : null,
 
-        e("div", { style: { display: "flex", gap: "14px", flexWrap: "wrap", fontSize: "12px", alignItems: "center" } },
+        ouvert ? e("div", { style: { display: "flex", gap: "14px", flexWrap: "wrap", fontSize: "12px", alignItems: "center" } },
           e("span", { style: { color: "#555" } }, "● intervention   ○ contrôle"),
           e("span", { style: { color: "#0a2e1a", fontWeight: "600" } }, r.faits + " / " + r.total + " passages faits"),
           (r.enRetard && r.enRetard.length > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "700" } },
@@ -5511,8 +5519,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           r.prochain ? e("span", { style: { color: "#1e40af" } }, "→ prochain : " + fmtJ(r.prochain.date) + " " + (r.prochain.type === "controle" ? "contrôle" : "intervention")) : null,
           r.sansTechnicien > 0 ? e("span", { style: { color: "#92400e", fontWeight: "600" } }, "⚠ " + r.sansTechnicien + " passage(s) sans technicien") : null,
           (r.total === 0 && r.passagesAttendus > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "600" } }, "⚠ aucun passage planifié, " + r.passagesAttendus + " attendus") : null
-        ),
-        r.passages.length > 0 ? e("div", { style: { marginTop: "14px", borderTop: "1px solid #eee", paddingTop: "10px" } },
+        ) : null,
+        (ouvert && r.passages.length > 0) ? e("div", { style: { marginTop: "14px", borderTop: "1px solid #eee", paddingTop: "10px" } },
           e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" } }, "Passages — dates et technicien modifiables"),
           r.passages.map(function(p, i) {
             var ctrl = p.type === "controle"
@@ -5546,9 +5554,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         ) : null,
 
-        e("div", { style: { marginTop: "12px" } },
+        ouvert ? e("div", { style: { marginTop: "12px" } },
           e("button", { onClick: function() { voirDevisClient(cl) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📊 Ouvrir le dossier")
-        )
+        ) : null
       )
     }
 
@@ -5588,22 +5596,35 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       )
     }
 
-    var actifs = signes.filter(function(d) {
-      var st = resumeContrat({ devis: d, interventions: interventionsList }, auj).statut
-      return st === "actif" || st === "a_renouveler" || st === "a_venir"
-    })
+    var statutParContrat = {}
+    signes.forEach(function(d) { statutParContrat[d.id] = resumeContrat({ devis: d, interventions: interventionsList }, auj).statut })
+    var actifs = signes.filter(function(d) { var st = statutParContrat[d.id]; return st === "actif" || st === "a_renouveler" || st === "a_venir" })
     var totalActif = actifs.reduce(function(s, d) { return s + Number(d.montant_net || 0) }, 0)
+    var FILTRES_CONTRAT = [["tous", "Tous"], ["actif", "Actifs"], ["a_renouveler", "À renouveler"], ["a_venir", "À venir"], ["sans_date", "Sans date"], ["termine", "Terminés"]]
+    var signesFiltres = contratFiltreStatut === "tous" ? signes : signes.filter(function(d) { return statutParContrat[d.id] === contratFiltreStatut })
+    var tousOuverts = signesFiltres.length > 0 && signesFiltres.every(function(d) { return contratOuvert[d.id] })
 
     return e("div", null,
-      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" } },
         e("strong", { style: { fontSize: "15px", color: "#111" } }, "Contrats signés"),
-        e("span", { style: { fontSize: "12px", color: "#888" } },
-          actifs.length + " en cours · " + totalActif.toLocaleString("fr-FR") + " FCFA")
+        e("div", { style: { display: "flex", alignItems: "center", gap: "12px" } },
+          e("span", { style: { fontSize: "12px", color: "#888" } }, actifs.length + " en cours · " + totalActif.toLocaleString("fr-FR") + " FCFA"),
+          signes.length > 0 ? e("button", { onClick: function() { var v = !tousOuverts; setContratOuvert(function() { var n = {}; signesFiltres.forEach(function(d) { n[d.id] = v }); return n }) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, tousOuverts ? "▸ Tout replier" : "▾ Tout déplier") : null
+        )
       ),
+      signes.length > 0 ? e("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" } },
+        FILTRES_CONTRAT.map(function(f) {
+          var actif = contratFiltreStatut === f[0]
+          var n = f[0] === "tous" ? signes.length : signes.filter(function(d) { return statutParContrat[d.id] === f[0] }).length
+          return e("button", { key: f[0], onClick: function() { setContratFiltreStatut(f[0]) }, style: { padding: "5px 12px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: actif ? "#0a2e1a" : "#f0ede6", color: actif ? "#fff" : "#444", fontWeight: actif ? "700" : "400" } }, f[1] + " (" + n + ")")
+        })
+      ) : null,
       signes.length === 0
         ? e("div", { style: { textAlign: "center", padding: "36px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888", fontSize: "13px" } },
             "Aucun contrat signé. Marquez un contrat généré comme signé ci-dessous pour le suivre ici.")
-        : e("div", null, signes.map(renderFrise)),
+        : signesFiltres.length === 0
+          ? e("div", { style: { textAlign: "center", padding: "24px", color: "#999", fontSize: "12px" } }, "Aucun contrat dans ce statut.")
+          : e("div", null, signesFiltres.map(renderFrise)),
 
       aSigner.length > 0 ? e("div", { style: { marginTop: "26px" } },
         e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
