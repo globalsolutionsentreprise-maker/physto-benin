@@ -5655,7 +5655,36 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "10px" } },
           "Un PDF généré ne vaut pas signature. Renseignez la date de début pour lancer le suivi et planifier les passages."),
         aSigner.map(renderASigner)
-      ) : null
+      ) : null,
+
+      // Contrats perdus (motif visible + relance), sans quitter l'onglet Contrats.
+      (function() {
+        var pdfIds = {}
+        ;(contratsList || []).forEach(function(c) { if (c.devis_id) pdfIds[c.devis_id] = true })
+        var perdus = devisList.filter(function(d) { return estPerduD(d) && (d.type_crm === "contrat" || pdfIds[d.id]) })
+        if (perdus.length === 0) return null
+        return e("div", { style: { marginTop: "26px" } },
+          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+            e("strong", { style: { fontSize: "13px", color: "#991b1b" } }, "❌ Contrats perdus"),
+            e("span", { style: { fontSize: "12px", color: "#888" } }, perdus.length)
+          ),
+          perdus.map(function(d) {
+            var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
+            var ctr = (contratsList || []).find(function(c) { return c.devis_id === d.id })
+            return e("div", { key: d.id, style: { backgroundColor: "#fdfaf9", border: "1px solid #f0d5d5", borderLeft: "3px solid #991b1b", borderRadius: "10px", padding: "12px 16px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" } },
+              e("div", { style: { minWidth: 0 } },
+                e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, ((cl && cl.nom) || "Client") + (d.etablissement_nom ? " — " + d.etablissement_nom : "")),
+                e("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, d.numero + (ctr ? " · " + ctr.reference : "")),
+                e("div", { style: { fontSize: "12px", color: "#991b1b", fontWeight: "600", marginTop: "3px" } }, "Motif : " + (d.motif_echec || "—"))
+              ),
+              e("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap" } },
+                ctr ? e("button", { onClick: function() { ouvrirContratExistant(ctr) }, style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📄 Voir le contrat") : null,
+                e("button", { onClick: function() { deplacerCarte(d.id, "relance") }, title: "Remettre en relance (efface le motif de perte)", style: { background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" } }, "↩ Relancer")
+              )
+            )
+          })
+        )
+      })()
     )
   }
 
