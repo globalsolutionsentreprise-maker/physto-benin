@@ -30,6 +30,43 @@ function mapStatut(statut) {
   return { brouillon: "contact", envoye: "devis", accepte: "attente", modification_demandee: "relance", en_cours: "attente", termine: "converti", annule: "echec" }[statut] || "contact"
 }
 
+// Durée de validité d'un devis / d'une proposition de contrat non signée.
+// Passé ce délai sans conversion ni signature, l'affaire passe automatiquement
+// en « Perdu » (motif « Dépassement du délai ») : elle sort du pipeline actif,
+// reste dans la colonne Perdu et l'Analyse, et peut être relancée (la remettre
+// sur une étape commerciale efface le motif). Exécuté au chargement du CRM.
+const VALIDITE_JOURS = 30
+async function expirerDevisEnRetard(supabase) {
+  try {
+    const cutoff = new Date(Date.now() - VALIDITE_JOURS * 864e5).toISOString()
+    const { data: cands } = await supabase
+      .from("devis")
+      .select("id, etape, crm_statut, date_envoi, created_at, date_debut_contrat")
+    if (!cands || cands.length === 0) return 0
+    const { data: cts } = await supabase.from("contrats").select("devis_id")
+    const hasPdf = {}
+    for (const c of (cts || [])) { if (c.devis_id) hasPdf[c.devis_id] = true }
+    const EXEC = ["perdu", "visite", "intervention", "certificat", "encaissement", "cloture"]
+    const COMM_ETAPE = ["prospect", "devis", "relance"]
+    const COMM_CRM = ["contact", "devis", "relance", "attente"]
+    const toExpire = cands.filter(d => {
+      if (d.date_debut_contrat) return false          // contrat signé / actif
+      if (d.crm_statut === "echec") return false        // déjà perdu
+      if (EXEC.includes(d.etape)) return false          // exécution démarrée ou déjà perdu
+      const ref = d.date_envoi || d.created_at
+      if (!ref || ref >= cutoff) return false           // encore dans le délai
+      const commercial = COMM_ETAPE.includes(d.etape) || COMM_CRM.includes(d.crm_statut) || !d.etape
+      return commercial || hasPdf[d.id]                 // devis commercial OU proposition de contrat
+    })
+    for (const d of toExpire) {
+      await supabase.from("devis").update({ etape: "perdu", crm_statut: "echec", motif_echec: "Dépassement du délai" }).eq("id", d.id)
+    }
+    return toExpire.length
+  } catch (e) {
+    return 0
+  }
+}
+
 export async function GET(req) {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
@@ -75,6 +112,10 @@ export async function GET(req) {
     }))
     return Response.json({ affected })
   }
+
+  // Expiration automatique AVANT de lire les devis, pour que le pipeline et
+  // l'analyse reflètent immédiatement les affaires dont le délai est dépassé.
+  await expirerDevisEnRetard(supabase)
 
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
