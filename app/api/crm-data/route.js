@@ -43,9 +43,15 @@ async function expirerDevisEnRetard(supabase) {
       .from("devis")
       .select("id, etape, crm_statut, date_envoi, created_at, date_debut_contrat")
     if (!cands || cands.length === 0) return 0
-    const { data: cts } = await supabase.from("contrats").select("devis_id")
-    const hasPdf = {}
-    for (const c of (cts || [])) { if (c.devis_id) hasPdf[c.devis_id] = true }
+    // Date de la dernière proposition de contrat par devis (validité du contrat
+    // = à partir de sa génération, pas de la date du devis).
+    const { data: cts } = await supabase.from("contrats").select("devis_id, date_generation, created_at")
+    const pdfDate = {}
+    for (const c of (cts || [])) {
+      if (!c.devis_id) continue
+      const dt = c.date_generation || c.created_at
+      if (dt && (!pdfDate[c.devis_id] || dt > pdfDate[c.devis_id])) pdfDate[c.devis_id] = dt
+    }
     const EXEC = ["perdu", "visite", "intervention", "certificat", "encaissement", "cloture"]
     const COMM_ETAPE = ["prospect", "devis", "relance"]
     const COMM_CRM = ["contact", "devis", "relance", "attente"]
@@ -53,10 +59,12 @@ async function expirerDevisEnRetard(supabase) {
       if (d.date_debut_contrat) return false          // contrat signé / actif
       if (d.crm_statut === "echec") return false        // déjà perdu
       if (EXEC.includes(d.etape)) return false          // exécution démarrée ou déjà perdu
-      const ref = d.date_envoi || d.created_at
-      if (!ref || ref >= cutoff) return false           // encore dans le délai
+      const hasPdf = !!pdfDate[d.id]
       const commercial = COMM_ETAPE.includes(d.etape) || COMM_CRM.includes(d.crm_statut) || !d.etape
-      return commercial || hasPdf[d.id]                 // devis commercial OU proposition de contrat
+      if (!commercial && !hasPdf) return false          // ni devis commercial ni proposition de contrat
+      // Réf : contrat => sa génération ; sinon l'envoi du devis.
+      const ref = hasPdf ? (pdfDate[d.id] || d.date_envoi || d.created_at) : (d.date_envoi || d.created_at)
+      return ref && ref < cutoff                        // délai dépassé
     })
     for (const d of toExpire) {
       await supabase.from("devis").update({ etape: "perdu", crm_statut: "echec", motif_echec: "Dépassement du délai" }).eq("id", d.id)
