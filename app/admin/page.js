@@ -1586,7 +1586,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const inp = { width: "100%", padding: "10px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "14px", fontFamily: "inherit", boxSizing: "border-box" }
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
-  React.useEffect(function() { charger() }, [])
+  // Au montage : on déclenche d'abord l'expiration serveur (get_clients la lance),
+  // puis on charge les listes — ainsi devisList reflète les affaires expirées.
+  React.useEffect(function() {
+    (async function() {
+      try {
+        var s = await db.auth.getSession()
+        var t = (s.data.session && s.data.session.access_token) || ""
+        await fetch("/api/crm-data?action=get_clients", { headers: { "Authorization": "Bearer " + t } })
+      } catch (e) {}
+      charger()
+    })()
+  }, [])
 
   async function charger() {
     setLoading(true)

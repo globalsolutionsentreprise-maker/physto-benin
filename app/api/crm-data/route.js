@@ -52,19 +52,28 @@ async function expirerDevisEnRetard(supabase) {
       const dt = c.date_generation || c.created_at
       if (dt && (!pdfDate[c.devis_id] || dt > pdfDate[c.devis_id])) pdfDate[c.devis_id] = dt
     }
-    const EXEC = ["perdu", "visite", "intervention", "certificat", "encaissement", "cloture"]
+    // Exécution RÉELLE d'un travail (≠ simple visite d'évaluation avant contrat) :
+    // ne s'expire pas. Une visite d'éval, elle, ne vaut pas signature.
+    const EXEC_REELLE = ["intervention", "certificat", "encaissement", "cloture"]
     const COMM_ETAPE = ["prospect", "devis", "relance"]
     const COMM_CRM = ["contact", "devis", "relance", "attente"]
     const toExpire = cands.filter(d => {
       if (d.date_debut_contrat) return false          // contrat signé / actif
       if (d.crm_statut === "echec") return false        // déjà perdu
-      if (EXEC.includes(d.etape)) return false          // exécution démarrée ou déjà perdu
+      if (d.etape === "perdu") return false             // déjà perdu
       const hasPdf = !!pdfDate[d.id]
+      if (hasPdf) {
+        // Proposition de contrat NON signée : validité depuis sa génération, quelle
+        // que soit l'étape commerciale (visite d'éval incluse). On n'expire pas si
+        // un vrai travail a démarré (intervention/certificat/…).
+        if (EXEC_REELLE.includes(d.etape)) return false
+        return pdfDate[d.id] && pdfDate[d.id] < cutoff
+      }
+      // Devis simple sans contrat : uniquement en étape commerciale.
       const commercial = COMM_ETAPE.includes(d.etape) || COMM_CRM.includes(d.crm_statut) || !d.etape
-      if (!commercial && !hasPdf) return false          // ni devis commercial ni proposition de contrat
-      // Réf : contrat => sa génération ; sinon l'envoi du devis.
-      const ref = hasPdf ? (pdfDate[d.id] || d.date_envoi || d.created_at) : (d.date_envoi || d.created_at)
-      return ref && ref < cutoff                        // délai dépassé
+      if (!commercial || EXEC_REELLE.includes(d.etape) || d.etape === "visite") return false
+      const ref = d.date_envoi || d.created_at
+      return ref && ref < cutoff
     })
     for (const d of toExpire) {
       await supabase.from("devis").update({ etape: "perdu", crm_statut: "echec", motif_echec: "Dépassement du délai" }).eq("id", d.id)
@@ -102,6 +111,7 @@ export async function GET(req) {
   }
 
   if (action === "get_clients") {
+    await expirerDevisEnRetard(supabase)
     const { data: clients } = await supabase.from("clients").select("*").order("nom")
     return Response.json({ clients: clients || [] })
   }
