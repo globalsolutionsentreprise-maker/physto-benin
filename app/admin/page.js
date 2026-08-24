@@ -4243,7 +4243,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       // en Intervention doit rester éligible.
       var devisCarte = devisMap[c.id]
       var contratCarte = contratsList.find(function(ct) { return ct.devis_id === c.id })
-      var boutonContrat = (!estPerdu && devisCarte && etapeIdx >= ETAPE_IDS.indexOf("converti"))
+      // Un contrat déjà généré (PDF tracé) est visible sur la carte QUELLE QUE SOIT
+      // l'étape : sinon un devis passé en contrat mais resté en étape commerciale
+      // n'affichait aucun document. « Proposer un contrat » (création) reste réservé
+      // aux affaires converties.
+      var peutProposer = !estPerdu && devisCarte && etapeIdx >= ETAPE_IDS.indexOf("converti")
+      var boutonContrat = (contratCarte || peutProposer)
         ? e("button", {
             onClick: function() {
               if (contratCarte) { ouvrirContratExistant(contratCarte); return }
@@ -4253,9 +4258,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               setContratRapport(null); setContratQuestions(null); setContratReponses({}); setOffreChoisie(null)
               setContratForm({ typeEtablissement: "", demandeClient: "trimestriel sur un an", notes: "", prixNegocie: "", inclureNoteDevis: false })
             },
-            title: contratCarte ? "Réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
+            title: contratCarte ? "Ouvrir / réimprimer le contrat " + contratCarte.reference : "Préparer un contrat d'entretien à partir de ce devis",
             style: { width: "100%", marginTop: "6px", background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
-          }, contratCarte ? "🖨️ Réimprimer le contrat" : "📄 Proposer un contrat")
+          }, contratCarte ? "📄 Voir le contrat" : "📄 Proposer un contrat")
         : null
       // Mini-stepper : où en est le client dans le parcours (barres = étapes).
       var motifPerte = estPerdu && c.motifEchec && c.motifEchec !== "—" ? c.motifEchec : null
