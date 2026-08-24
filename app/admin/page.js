@@ -1459,7 +1459,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [showNouveauDevis, setShowNouveauDevis] = React.useState(false)
   const [nouveauDevisPresta, setNouveauDevisPresta] = React.useState([])
   const COND_PAIEMENT_DEFAUT = "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention."
-  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
+  const [formDevis, setFormDevis] = React.useState({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", etabNom: "", etabIfu: "", etabRccm: "", etabAdresse: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
   const [showFormClient, setShowFormClient] = React.useState(false)
   const [editingClient, setEditingClient] = React.useState(null)
   const [submittingClient, setSubmittingClient] = React.useState(false)
@@ -1589,7 +1589,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   async function charger() {
     setLoading(true)
     const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
-      db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone)").order("created_at", { ascending: false }),
+      db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm, adresse)").order("created_at", { ascending: false }),
       Promise.resolve({ data: [] }),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
       db.from("fiches_passage").select("*").order("created_at", { ascending: false }),
@@ -1843,6 +1843,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       email: cl ? cl.email : "",
       telephone: cl ? (cl.telephone || "") : "",
       entreprise: cl ? (cl.entreprise || "") : "",
+      etabNom: d.etablissement_nom || "",
+      etabIfu: d.etablissement_ifu || "",
+      etabRccm: d.etablissement_rccm || "",
+      etabAdresse: d.etablissement_adresse || "",
       prestation: d.prestation || "",
       prestations: d.prestation ? d.prestation.split(" + ").map(function(p) { return p.trim() }).filter(function(p) { return PRESTATIONS.includes(p) }) : [],
       lignes: lignesD,
@@ -1885,6 +1889,43 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
   }
 
+  // Ajouter un établissement (site) à un client entreprise : crée un nouveau
+  // devis/contrat sous le même client, pré-rempli depuis son dernier contrat
+  // (prestations, secteurs, prix/m², remise). On ne saisit que les surfaces du
+  // nouveau site + ses infos propres (nom, IFU, RCCM, adresse). Générique :
+  // marche sur n'importe quelle fiche client.
+  async function ajouterEtablissement(cl) {
+    try {
+      var dsClient = devisList.filter(function(d) { return d.client_id === cl.id })
+      var src = dsClient.find(function(d) { return d.type_crm === "contrat" }) || dsClient[0] || null
+      var prestas = (src && src.prestation) ? src.prestation.split(" + ").map(function(p) { return p.trim() }).filter(function(p) { return PRESTATIONS.includes(p) }) : []
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_devis", clientId: cl.id, prestations: prestas }) })
+      var data = await res.json()
+      if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "création de l'établissement impossible")); return }
+      await charger()
+      ouvrirEditionDevis(data.devis)
+      if (src) {
+        var lignesSrc = lignesFromDevis(src)
+        var baseSrc = totalLignes(lignesSrc)
+        setFormDevis(function(prev) {
+          return Object.assign({}, prev, {
+            prestations: prestas,
+            prestation: src.prestation || prev.prestation,
+            lignes: lignesSrc.length ? lignesSrc.map(function(l) { return Object.assign({}, l) }) : prev.lignes,
+            montantBrut: baseSrc > 0 ? String(baseSrc) : prev.montantBrut,
+            remise: src.remise_bienvenue ? String(src.remise_bienvenue) : prev.remise,
+            etabNom: "", etabIfu: "", etabRccm: "", etabAdresse: ""
+          })
+        })
+      }
+      setMsg("Nouvel établissement pré-rempli depuis le dernier contrat du client. Ajuste les surfaces et renseigne le nom, l'IFU et l'adresse du site.")
+    } catch (e) {
+      setMsg("Erreur réseau : " + e.message)
+    }
+  }
+
   async function creerDevis() {
     var lignesClean = (formDevis.lignes || [])
       .filter(function(l) { return l.prestation })
@@ -1916,7 +1957,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
 
     var viderForm = function() {
-      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
+      setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", etabNom: "", etabIfu: "", etabRccm: "", etabAdresse: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." })
     }
 
     if (editingDevis) {
@@ -1936,6 +1977,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         lignes: lignesClean,
         prix_par_prestation: null,
         superficie_par_prestation: null,
+        // Infos propres au site (établissement). Vides => on lira celles du client.
+        etablissement_nom: (formDevis.etabNom || "").trim() || null,
+        etablissement_ifu: (formDevis.etabIfu || "").trim() || null,
+        etablissement_rccm: (formDevis.etabRccm || "").trim() || null,
+        etablissement_adresse: (formDevis.etabAdresse || "").trim() || null,
         // Enregistrer/renvoyer un devis = étape « Devis envoyé », sans jamais faire
         // reculer une carte déjà convertie/en exécution.
         etape: (!editingDevis.etape || editingDevis.etape === "prospect") ? "devis" : editingDevis.etape
@@ -2016,15 +2062,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var prevT = certsList.find(function(c) { return c.devis_id === d.id && c.type === type })
     var pf = (prev && prev.form_data) || {}
     var pft = (prevT && prevT.form_data) || {}
+    // Site (établissement) : ses infos priment sur celles du client. Nom composé
+    // « Client — Nom du site » quand le devis porte un établissement.
+    var baseEnt = (cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' ')
+    var entSite = d.etablissement_nom ? (baseEnt ? baseEnt + ' — ' + d.etablissement_nom : d.etablissement_nom) : baseEnt
     setCertForm({
       ref: nextCertRef(type),
       dateJour: jour,
       dateMois: mois,
-      entreprise: pf.entreprise || ((cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' ')),
-      ifu: pf.ifu || '',
-      rccm: pf.rccm || '',
+      entreprise: pf.entreprise || entSite,
+      ifu: d.etablissement_ifu || pf.ifu || (cl && cl.ifu) || '',
+      rccm: d.etablissement_rccm || pf.rccm || (cl && cl.rccm) || '',
       locaux: pf.locaux || d.description || '',
-      situation: pf.situation || (d.lieu_intervention) || (cl && cl.adresse) || '',
+      situation: d.etablissement_adresse || pf.situation || (d.lieu_intervention) || (cl && cl.adresse) || '',
       dateDebut: '',
       dateFin: '',
       matieres: pft.matieres || ((type === 'desinsect' || type === 'double') ? 'IMPERA 300 CS\nROCOGEL' : 'VERTOX'),
@@ -4376,6 +4426,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!editingDevis) return null
     return React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "24px" } },
       React.createElement("h4", { style: { margin: "0 0 16px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, "Modifier " + editingDevis.numero),
+      (function() {
+        var setF = function(champ, val) { setFormDevis(function(prev) { return Object.assign({}, prev, (function(){ var o={}; o[champ]=val; return o })()) }) }
+        var inpE = { width: "100%", padding: "8px 10px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+        return React.createElement("div", { style: { backgroundColor: "#f4f7f4", border: "1px solid #dfe7df", borderRadius: "8px", padding: "14px", marginBottom: "16px" } },
+          React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#1a6b38", marginBottom: "10px", textTransform: "uppercase" } }, "🏢 Établissement / site (facultatif — vide = infos du client)"),
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" } },
+            React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Nom du site (ex. Annexe Hèvié Houinmè)"), React.createElement("input", { value: formDevis.etabNom || "", onChange: function(e) { setF("etabNom", e.target.value) }, style: inpE })),
+            React.createElement("div", null, React.createElement("label", { style: lbl }, "N° IFU du site"), React.createElement("input", { value: formDevis.etabIfu || "", onChange: function(e) { setF("etabIfu", e.target.value) }, style: inpE })),
+            React.createElement("div", null, React.createElement("label", { style: lbl }, "RCCM du site"), React.createElement("input", { value: formDevis.etabRccm || "", onChange: function(e) { setF("etabRccm", e.target.value) }, style: inpE })),
+            React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Adresse / situation du site"), React.createElement("input", { value: formDevis.etabAdresse || "", onChange: function(e) { setF("etabAdresse", e.target.value) }, style: inpE }))
+          )
+        )
+      })(),
       React.createElement("div", { style: { marginBottom: "14px" } },
         React.createElement("label", { style: lbl }, "Lignes du devis * — une ligne par secteur/zone"),
         React.createElement("div", { style: { border: "1.5px solid #e0ddd6", borderRadius: "8px", overflow: "hidden" } },
@@ -4773,10 +4836,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' } },
         React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a' } }, devisClient.length + ' dossier(s)'),
-        React.createElement('button', {
-          onClick: function() { setShowNouveauDevis(function(v) { return !v }); setNouveauDevisPresta([]) },
-          style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
-        }, showNouveauDevis ? '× Annuler' : '+ Nouveau devis')
+        React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+          devisClient.length > 0 && React.createElement('button', {
+            onClick: function() { ajouterEtablissement(cl) },
+            title: "Créer un nouveau site (établissement) sous ce client, pré-rempli depuis son dernier contrat",
+            style: { backgroundColor: '#f4f7f4', color: '#1a6b38', border: '1.5px solid #bcd6c3', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+          }, '🏢 + Ajouter un établissement'),
+          React.createElement('button', {
+            onClick: function() { setShowNouveauDevis(function(v) { return !v }); setNouveauDevisPresta([]) },
+            style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+          }, showNouveauDevis ? '× Annuler' : '+ Nouveau devis')
+        )
       ),
       showNouveauDevis && React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '2px solid #0a2e1a', borderRadius: '10px', padding: '20px', marginBottom: '20px' } },
         React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a', marginBottom: '12px' } }, 'Sélectionnez les prestations pour ce devis'),

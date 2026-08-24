@@ -35,8 +35,12 @@ export async function GET(req) {
 
     const client     = devis.clients || {}
     const nomClient  = [client.prenom, client.nom].filter(Boolean).join(" ")
-    const entreprise = client.entreprise || nomClient
-    const adresse    = client.adresse || "Cotonou, Bénin"
+    // Établissement (site) : ses infos priment sur celles du client. Un contrat
+    // par site => dénomination « Client — Site », adresse et IFU propres au site.
+    const baseEnt    = client.entreprise || nomClient
+    const entreprise = devis.etablissement_nom ? (baseEnt ? `${baseEnt} — ${devis.etablissement_nom}` : devis.etablissement_nom) : baseEnt
+    const adresse    = devis.etablissement_adresse || client.adresse || "Cotonou, Bénin"
+    const ifu        = devis.etablissement_ifu || client.ifu || ""
     const telephone  = client.telephone || "_______________"
     const superficie = devis.superficie ? devis.superficie.toLocaleString("fr-FR") + " m²" : "_______________"
     const montant    = (devis.montant_total || devis.montant || 0).toLocaleString("fr-FR")
@@ -316,6 +320,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         <div class="party-row"><span class="party-key">Dénomination :</span><span class="party-val">${esc(entreprise)}</span></div>
         <div class="party-row"><span class="party-key">Représentant :</span><span class="party-val">${esc(nomClient)}</span></div>
         <div class="party-row"><span class="party-key">Adresse :</span><span class="party-val">${esc(adresse)}</span></div>
+        ${ifu ? `<div class="party-row"><span class="party-key">IFU :</span><span class="party-val">${esc(ifu)}</span></div>` : ""}
         <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">${esc(telephone)}</span></div>
         <div class="party-row"><span class="party-key">Type d'établ. :</span><span class="party-val">${esc(typeEtabLabel)}</span></div>
         <div class="party-row"><span class="party-key">Superficie :</span><span class="party-val">${esc(superficie)}</span></div>
