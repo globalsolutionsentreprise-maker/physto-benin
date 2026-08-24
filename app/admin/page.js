@@ -5441,11 +5441,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderVueContrats() {
     var e = React.createElement
     var auj = new Date().toISOString().slice(0, 10)
-    var signes = devisList.filter(function(d) { return d.type_crm === "contrat" || d.date_debut_contrat })
+    // Un devis marqué perdu (etape perdu / crm echec) n'est plus un contrat : il
+    // sort des deux sections et part au pipeline Perdu + compté dans l'Analyse.
+    var estPerduD = function(d) { return !!d && (d.etape === "perdu" || d.crm_statut === "echec") }
+    var perduIds = {}
+    devisList.forEach(function(d) { if (estPerduD(d)) perduIds[d.id] = true })
+    var signes = devisList.filter(function(d) { return (d.type_crm === "contrat" || d.date_debut_contrat) && !estPerduD(d) })
     // PDF générés dont le devis n'est pas marqué signé : ils ne sont pas des contrats.
     var idsSignes = {}
     signes.forEach(function(d) { idsSignes[d.id] = true })
-    var aSigner = (contratsList || []).filter(function(c) { return !idsSignes[c.devis_id] })
+    var aSigner = (contratsList || []).filter(function(c) { return !idsSignes[c.devis_id] && !perduIds[c.devis_id] })
 
     var ST_CONTRAT = {
       actif:        { libelle: "Actif",         bg: "#f0fdf4", tc: "#065f46", bord: "#bbf7d0" },
@@ -5590,7 +5595,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               onClick: function() { marquerContratSigne(c.devis_id) },
               disabled: signEnCours === c.devis_id,
               style: { backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
-            }, signEnCours === c.devis_id ? "..." : "Marquer signé")
+            }, signEnCours === c.devis_id ? "..." : "Marquer signé"),
+            e("button", {
+              onClick: function() { demanderMotifPerte(c.devis_id, (cl && cl.nom) || "") },
+              title: "Marquer ce contrat comme perdu (avec motif)",
+              style: { backgroundColor: "#fff", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "6px", padding: "8px 12px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+            }, "❌ Perdu")
           )
         )
       )
