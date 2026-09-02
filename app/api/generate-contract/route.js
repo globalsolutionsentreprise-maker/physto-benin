@@ -21,6 +21,7 @@ export async function GET(req) {
     const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
     const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
     const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
+    const remiseGlobale    = Math.min(90, Math.max(0, parseFloat(url.searchParams.get("remiseGlobale") || "0")))
     const sansNoteDevis    = url.searchParams.get("sansNoteDevis") === "1"
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
@@ -62,7 +63,19 @@ export async function GET(req) {
       devis.montant_net != null ? devis.montant_net
       : (devis.montant_total != null ? devis.montant_total : (devis.montant || 0))
     )
-    const { offres: offresEngagement, plancherPassage } = offresContrat({ prixPonctuel, passagesAnnuels: passages })
+    let { offres: offresEngagement, plancherPassage } = offresContrat({ prixPonctuel, passagesAnnuels: passages })
+    // Remise commerciale saisie après la proposition de l'IA : appliquée à toute
+    // la grille (Article 4) pour rester cohérente avec le prix retenu déjà remisé
+    // côté front (prixAnnuel/prixTrim).
+    if (remiseGlobale > 0) {
+      const f = 1 - remiseGlobale / 100
+      offresEngagement = offresEngagement.map(function(o) {
+        return Object.assign({}, o, {
+          prixTotal:   Math.round(o.prixTotal * f),
+          prixPassage: Math.round(o.prixPassage * f),
+        })
+      })
+    }
 
     const today  = new Date()
     const annee  = today.getFullYear()
@@ -108,7 +121,7 @@ export async function GET(req) {
         date_generation: today.toISOString().slice(0, 10),
         params: {
           prixAnnuel, prixTrim, formule, passages, controles,
-          duree, paiement, typeEtablissement, remisePassed, sansNoteDevis
+          duree, paiement, typeEtablissement, remisePassed, remiseGlobale, sansNoteDevis
         }
       })
     }

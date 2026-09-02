@@ -5005,7 +5005,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var offreSelectionnee = offresContrat.filter(function(o) { return Number(o.dureeMois) === Number(dureeSelectionnee) })[0] || null
     var prixRetenu = offreSelectionnee ? Number(offreSelectionnee.prixTotal) : Number(a && a.prixSuggere) || 0
     var passagesSurDuree = Math.max(1, Math.round((Number(a && a.frequencePassages) || 4) * Number(dureeSelectionnee) / 12))
-    var prixParPeriode = Math.round(prixRetenu / passagesSurDuree)
+    // Remise commerciale appliquée APRÈS la proposition de l'IA, sur toutes les
+    // formules à la fois (le contrat reste cohérent : Article 4 + paiement).
+    var remiseGlobale = Math.min(90, Math.max(0, parseFloat(contratForm.remiseGlobale) || 0))
+    var prixRetenuNet = Math.round(prixRetenu * (1 - remiseGlobale / 100))
+    var prixParPeriode = Math.round(prixRetenuNet / passagesSurDuree)
     // La réponse de l'API (après analyse) fait autorité ; avant tout appel, on
     // retombe sur la source locale calculée depuis rapportsVisite (déjà chargé).
     var rapportAffiche = contratRapport || rapportLocalPourDevis(d)
@@ -5186,10 +5190,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             offreSelectionnee && offreSelectionnee.argumentaire ? React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "8px", fontStyle: "italic" } }, offreSelectionnee.argumentaire) : null
           ),
 
+          // Remise commerciale (facultative) appliquée sur la proposition de l'IA
+          React.createElement("div", { style: { marginBottom: "14px", backgroundColor: "#faf5ff", borderRadius: "8px", padding: "12px 14px", border: "1px solid #e9d5ff", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" } },
+            React.createElement("label", { style: { fontSize: "11px", fontWeight: "700", color: "#6b21a8", textTransform: "uppercase" } }, "Remise (%)"),
+            React.createElement("input", { type: "number", min: "0", max: "90", value: contratForm.remiseGlobale || "", onChange: function(e) { setContratForm(Object.assign({}, contratForm, { remiseGlobale: e.target.value })) }, placeholder: "Ex : 10", style: { width: "90px", padding: "8px 11px", border: "1.5px solid #e9d5ff", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit" } }),
+            remiseGlobale > 0 ? React.createElement("span", { style: { fontSize: "12px", color: "#6b21a8" } }, "− " + (Number(prixRetenu) - prixRetenuNet).toLocaleString("fr-FR") + " FCFA sur " + Number(prixRetenu).toLocaleString("fr-FR")) : React.createElement("span", { style: { fontSize: "11px", color: "#a78bda" } }, "Laisser vide = prix proposé par l'IA")
+          ),
+
           // Grille prix / structure
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "16px" } },
             React.createElement("div", { style: { backgroundColor: "#0a2e1a", borderRadius: "8px", padding: "14px", textAlign: "center" } },
-              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#d4a920" } }, Number(prixRetenu).toLocaleString("fr-FR")),
+              React.createElement("div", { style: { fontSize: "22px", fontWeight: "300", color: "#d4a920" } }, Number(prixRetenuNet).toLocaleString("fr-FR")),
               React.createElement("div", { style: { fontSize: "9px", color: "#aaa", textTransform: "uppercase", marginTop: "4px" } }, "FCFA / " + dureeSelectionnee + " mois")
             ),
             React.createElement("div", { style: { backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "14px", textAlign: "center" } },
@@ -5240,7 +5251,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             onClick: function() {
               var params = new URLSearchParams({
                 devisId: d.id,
-                prixAnnuel: prixRetenu,
+                prixAnnuel: prixRetenuNet,
                 prixTrimestre: prixParPeriode,
                 formule: a.formuleRecommandee,
                 passages: a.frequencePassages,
@@ -5249,6 +5260,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 paiement: a.paiementRecommande || "trimestriel_avance",
                 typeEtablissement: contratForm.typeEtablissement,
                 remise: a.remiseContrat || d.remise_bienvenue || 0,
+                remiseGlobale: remiseGlobale,
                 sansNoteDevis: contratForm.inclureNoteDevis ? "0" : "1"
               })
               ouvrirContrat("/api/generate-contract?" + params.toString())
