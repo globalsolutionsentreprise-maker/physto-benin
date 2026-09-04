@@ -4231,6 +4231,54 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     COLS.forEach(function(col) { byCol[col.id] = [] })
     cls.forEach(function(c) { var k = colUnifiee(c); if (byCol[k]) byCol[k].push(c) })
 
+    // Export PDF de la liste des prospects (colonne Prospect + leads du formulaire
+    // web) pour Fabrice — suit le prospect au lieu de dérouler le kanban. Réutilise
+    // le pipeline d'impression des devis/certificats (blob → window.print → PDF).
+    function imprimerProspects() {
+      function esc(v) { return String(v == null ? "" : v).replace(/[&<>]/g, function(ch) { return ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : "&gt;" }) }
+      var td = 'style="border:1px solid #ddd;padding:6px 8px;vertical-align:top;font-size:12px"'
+      var rows = (byCol.prospect || []).map(function(c, i) {
+        return "<tr>" +
+          "<td " + td + ">" + (i + 1) + "</td>" +
+          "<td " + td + "><strong>" + esc(c.client) + "</strong>" + (c.entreprise ? "<br><span style='color:#888'>" + esc(c.entreprise) + "</span>" : "") + "</td>" +
+          "<td " + td + ">" + esc(c.telephone || "—") + (c.email ? "<br><span style='color:#888'>" + esc(c.email) + "</span>" : "") + "</td>" +
+          "<td " + td + ">" + esc(c.provenance || "—") + "</td>" +
+          "<td " + td + ">" + esc(c.categorie || "—") + (c.typePrestation && c.typePrestation !== "—" ? "<br><span style='color:#888'>" + esc(c.typePrestation) + "</span>" : "") + "</td>" +
+          "<td " + td + ">" + esc(c.zone || "—") + "</td>" +
+          "<td " + td + ">" + finFmtD(c.dateContact) + "</td>" +
+          "<td " + td + ">" + esc(c.commentaire || "") + "</td>" +
+          "</tr>"
+      })
+      var rowsLeads = (leads || []).map(function(lead, i) {
+        return "<tr style='background:#fffdf7'>" +
+          "<td " + td + ">" + ((byCol.prospect || []).length + i + 1) + "</td>" +
+          "<td " + td + "><strong>" + esc(lead.nom) + "</strong> <span style='font-size:10px;color:#8a6d1a'>🌱 lead</span></td>" +
+          "<td " + td + ">" + esc(lead.telephone || "—") + "</td>" +
+          "<td " + td + ">Formulaire web</td>" +
+          "<td " + td + ">" + esc(lead.nuisible || "—") + "</td>" +
+          "<td " + td + ">" + esc(lead.ville || "—") + "</td>" +
+          "<td " + td + ">" + (lead.created_at ? finFmtD(lead.created_at.split("T")[0]) : "—") + "</td>" +
+          "<td " + td + "></td>" +
+          "</tr>"
+      })
+      var total = (byCol.prospect || []).length + (leads || []).length
+      if (total === 0) { setMsg("Aucun prospect à exporter"); return }
+      var th = 'style="border:1px solid #0a2e1a;padding:7px 8px;background:#0a2e1a;color:#fff;font-size:11px;text-align:left;text-transform:uppercase;letter-spacing:0.04em"'
+      var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc("Prospects_GSE", new Date().toISOString().slice(0, 10)) + '</title>' +
+        GSE_DOC_STYLES + '</head><body>' +
+        '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+        '<div class="page">' +
+        gseHeader("LISTE DES PROSPECTS", new Date().toLocaleDateString("fr-FR")) +
+        '<div class="body">' +
+        '<div style="font-size:12px;color:#555;margin-bottom:14px">' + total + ' prospect' + (total > 1 ? 's' : '') + ' à suivre — édité le ' + new Date().toLocaleDateString("fr-FR") + '</div>' +
+        '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr>' +
+        '<th ' + th + '>N°</th><th ' + th + '>Prospect</th><th ' + th + '>Contact</th><th ' + th + '>Source</th><th ' + th + '>Catégorie / Prestation</th><th ' + th + '>Zone</th><th ' + th + '>1er contact</th><th ' + th + '>Commentaire</th>' +
+        '</tr></thead><tbody>' + rows.join("") + rowsLeads.join("") + '</tbody></table>' +
+        '</div>' + gseFooter() + '</div></body></html>'
+      ouvrirDocImprimable(html, 1100, 800)
+    }
+
     function renderCard(c, colId) {
       var ni = finNextIntervention(c)
       var niSoon = ni && (new Date(ni + "T00:00:00") - new Date()) < 30 * 864e5
@@ -4346,9 +4394,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return e("div", null,
       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px" } },
         e("div", { style: { fontSize: "12px", color: "#888" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
-        e("button", { onClick: function() { setPipeCompact(function(v) { return !v }); setPipeOpen({}) }, title: pipeCompact ? "Afficher les cartes détaillées" : "Réduire les cartes pour tout voir d'un coup",
-          style: { flexShrink: 0, background: pipeCompact ? "#0a2e1a" : "#fff", color: pipeCompact ? "#d4a920" : "#555", border: "1px solid " + (pipeCompact ? "#0a2e1a" : "#e0ddd6"), borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
-          pipeCompact ? "🔎 Vue détaillée" : "☰ Vue compacte")
+        e("div", { style: { display: "flex", gap: "8px", flexShrink: 0 } },
+          e("button", { onClick: imprimerProspects, title: "Exporter la liste des prospects en PDF (à transmettre)",
+            style: { background: "#fff", color: "#555", border: "1px solid #e0ddd6", borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
+            "📄 Prospects PDF"),
+          e("button", { onClick: function() { setPipeCompact(function(v) { return !v }); setPipeOpen({}) }, title: pipeCompact ? "Afficher les cartes détaillées" : "Réduire les cartes pour tout voir d'un coup",
+            style: { background: pipeCompact ? "#0a2e1a" : "#fff", color: pipeCompact ? "#d4a920" : "#555", border: "1px solid " + (pipeCompact ? "#0a2e1a" : "#e0ddd6"), borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
+            pipeCompact ? "🔎 Vue détaillée" : "☰ Vue compacte")
+        )
       ),
       e("div", { style: laneTitle }, "◆ Commercial"),
       e("div", { style: laneRow }, colsCommercial.map(renderColonne)),
