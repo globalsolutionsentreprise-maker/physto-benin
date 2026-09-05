@@ -4265,7 +4265,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       if (total === 0) { setMsg("Aucun prospect à exporter"); return }
       var th = 'style="border:1px solid #0a2e1a;padding:7px 8px;background:#0a2e1a;color:#fff;font-size:11px;text-align:left;text-transform:uppercase;letter-spacing:0.04em"'
       var html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc("Prospects_GSE", new Date().toISOString().slice(0, 10)) + '</title>' +
-        GSE_DOC_STYLES + '</head><body>' +
+        GSE_DOC_STYLES + '</style></head><body>' +
         '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
         '<div class="page">' +
         gseHeader("LISTE DES PROSPECTS", new Date().toLocaleDateString("fr-FR")) +
