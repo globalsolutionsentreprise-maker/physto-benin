@@ -139,9 +139,53 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     ...(article.created_at ? { datePublished: article.created_at } : {}),
   }
 
+  // FAQPage : vraies paires Q/R curées, par id d'article (les articles FAQ ont un
+  // corps expositif, pas des questions dans leurs sous-titres : on ne scrape pas).
+  // Ajouter une entrée ici quand un nouvel article FAQ est publié.
+  const faqById: Record<number, { q: string; a: string }[]> = {
+    124: [
+      { q: "Les produits anti-nuisibles sont-ils dangereux pour les enfants et les animaux ?", a: "Utilisés par un professionnel, dans les règles, ils sont sûrs. Il suffit de tenir enfants et animaux à l'écart des zones traitées le temps indiqué et de ranger les aliments. Le risque vient surtout d'un mauvais usage de produits achetés sans conseil." },
+      { q: "Faut-il des précautions particulières pour les femmes enceintes ?", a: "Oui. Il faut le signaler au professionnel, qui adapte son approche et peut conseiller de s'absenter des pièces traitées pendant un temps donné." },
+      { q: "Pourquoi confier le traitement à un professionnel plutôt que le faire soi-même ?", a: "Un applicateur formé choisit le produit et le dosage adaptés, place les dispositifs hors de portée et indique les précautions. Cela écarte les erreurs fréquentes des produits en libre accès, comme le surdosage ou le poison à portée d'enfant." },
+    ],
+    125: [
+      { q: "Faut-il quitter son logement pendant un traitement anti-nuisibles ?", a: "Pas toujours. Une pose d'appâts ou un traitement ciblé par gel ne nécessite généralement pas de s'absenter. Une pulvérisation large ou une nébulisation demande souvent de laisser agir quelques heures sans présence." },
+      { q: "Combien de temps faut-il s'absenter ?", a: "Quand une absence est recommandée, elle correspond au temps que le produit se dépose et que les pièces s'aèrent, souvent quelques heures, précisé par le professionnel." },
+      { q: "Que faire des enfants et des animaux pendant l'intervention ?", a: "Les tenir hors des pièces traitées pendant la durée indiquée. Les animaux sensibles comme les poissons d'aquarium ou les oiseaux doivent parfois être protégés ou éloignés." },
+    ],
+    126: [
+      { q: "Une maison propre est-elle à l'abri des punaises de lit ?", a: "Non. Les punaises voyagent dans les bagages et les meubles et s'installent dans un logement impeccable comme négligé." },
+      { q: "Un cafard vu seul est-il sans gravité ?", a: "Non. Les cafards se cachent et sortent la nuit ; en voir un, surtout de jour, signale souvent une population déjà installée." },
+      { q: "Un chat suffit-il à régler une infestation de rats ?", a: "Non. Un chat peut dissuader quelques souris mais ne vient pas à bout d'une colonie de rats qui se reproduit vite." },
+      { q: "Les répulsifs à ultrasons font-ils fuir les nuisibles ?", a: "Leur efficacité est très discutée : les rongeurs s'y habituent et les ondes ne traversent pas les murs." },
+      { q: "Les produits naturels suffisent-ils toujours ?", a: "Non. Ils aident en prévention et sur une présence légère, mais pas sur une infestation installée." },
+      { q: "Un seul passage suffit-il toujours ?", a: "Non. Punaises et cafards exigent souvent un second passage pour éliminer les insectes issus des œufs éclos après le premier." },
+      { q: "Les nuisibles disparaissent-ils en hiver ?", a: "Non, surtout sous le climat béninois : les saisons modifient leur activité sans l'arrêter, les rongeurs se rapprochent même des maisons en saison sèche." },
+      { q: "Traiter soi-même revient-il toujours moins cher ?", a: "Pas à l'usage : un traitement domestique incomplet oblige souvent à recommencer, produit après produit, pour un résultat partiel." },
+      { q: "Écraser les insectes règle-t-il le problème ?", a: "Non. Cela n'atteint ni le nid ni les œufs ; sans traiter la source, la population se reconstitue." },
+      { q: "Une fois traité, est-ce réglé pour toujours ?", a: "Non. Sans prévention, les conditions qui ont attiré les nuisibles peuvent les faire revenir ; l'entretien prolonge le résultat." },
+    ],
+    127: [
+      { q: "Pourquoi les nuisibles reviennent-ils après un traitement ?", a: "Le plus souvent parce que le traitement était incomplet (un passage au lieu de deux, cachettes oubliées, œufs éclos ensuite), ou parce qu'aucune prévention n'a suivi." },
+      { q: "Un retour rapide après le traitement signifie-t-il un échec ?", a: "Pas forcément. Beaucoup d'insectes pondent des œufs résistants qui éclosent après le premier passage, d'où le second passage prévu pour certaines espèces." },
+      { q: "Comment éviter que les nuisibles reviennent ?", a: "Corriger ce qui les attire (nourriture accessible, humidité, accès non colmatés), respecter le protocole complet, et pour les cas récurrents opter pour un contrat d'entretien." },
+    ],
+  }
+  const faq = faqById[article.id as number]
+  const faqLd = faq ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map((f) => ({
+      "@type": "Question",
+      "name": f.q,
+      "acceptedAnswer": { "@type": "Answer", "text": f.a },
+    })),
+  } : null
+
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <style>{`
         .article-pad { padding: 60px 60px 48px; }
