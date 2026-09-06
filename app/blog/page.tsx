@@ -40,7 +40,8 @@ export default function Blog() {
   const articlesFiltres = categorieActive === "Tous les articles" ? articles : articles.filter(function(a) { return a.categorie === categorieActive })
   // Jusqu'à 2 articles à la une. Au-delà, l'excédent bascule dans la grille pour
   // ne jamais rendre un article invisible (cf. tasks/lessons.md).
-  const vedettes = articlesFiltres.filter(function(a) { return a.vedette }).slice(0, 2)
+  const vedettes = articlesFiltres.filter(function(a) { return a.vedette }).slice(0, 4)
+  const many = vedettes.length >= 3
   const vedetteIds = vedettes.map(function(a) { return a.id })
   const autres = articlesFiltres.filter(function(a) { return vedetteIds.indexOf(a.id) === -1 })
 
@@ -103,14 +104,14 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* ARTICLES VEDETTES (jusqu'à 2 à la une) */}
+      {/* ARTICLES VEDETTES (rangée À la une, jusqu'à 4) */}
       {vedettes.length > 0 && (
         <section style={{ backgroundColor: "#f7f7f5", padding: "48px 60px 0" }}>
-          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: vedettes.length > 1 ? "1fr 1fr" : "1fr", gap: "3px" }}>
+          <div className="grid-3" style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(" + vedettes.length + ", 1fr)", gap: "3px" }}>
             {vedettes.map(function(vedette) {
               return (
             <a key={vedette.id} href={"/blog/" + slugifier(vedette.titre)} style={{ textDecoration: "none", display: "block" }}>
-              <div style={{ backgroundColor: "#0a2e1a", padding: "48px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", cursor: "pointer" }}>
+              <div style={{ backgroundColor: "#0a2e1a", padding: many ? "36px 30px" : "48px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", cursor: "pointer" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
                     <span style={{ fontSize: "10px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", backgroundColor: "rgba(212,169,32,0.1)", padding: "5px 12px", borderRadius: "4px" }}>
@@ -118,10 +119,10 @@ export default function Blog() {
                     </span>
                     <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>À LA UNE</span>
                   </div>
-                  <h2 style={{ fontSize: "clamp(20px, 2.2vw, 27px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.3", marginBottom: "20px" }}>
+                  <h2 style={{ fontSize: many ? "clamp(17px, 1.5vw, 20px)" : "clamp(20px, 2.2vw, 27px)", fontWeight: "700", color: "#ffffff", lineHeight: "1.3", marginBottom: many ? "14px" : "20px" }}>
                     {vedette.titre}
                   </h2>
-                  <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)", lineHeight: "1.85", marginBottom: "32px" }}>
+                  <p style={{ fontSize: many ? "13px" : "14px", color: "rgba(255,255,255,0.6)", lineHeight: "1.75", marginBottom: many ? "24px" : "32px", ...(many ? { display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" } : {}) }}>
                     {vedette.resume}
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
