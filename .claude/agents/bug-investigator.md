@@ -1,5 +1,6 @@
 ---
 name: bug-investigator
+model: sonnet
 description: PROACTIVELY investigate when the user reports something broken, a page not loading, an API returning an error, or unexpected behavior in the admin or CRM. Use this agent to dig into root causes before making any changes.
 tools: Read, Bash, Grep
 ---

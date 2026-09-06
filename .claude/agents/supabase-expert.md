@@ -1,5 +1,6 @@
 ---
 name: supabase-expert
+model: sonnet
 description: PROACTIVELY assist when adding new database tables, modifying schema, writing Supabase queries, or debugging data issues. Trigger when the user mentions a new table, migration, or Supabase error.
 tools: Bash, Read, Write
 ---

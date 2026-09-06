@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+model: sonnet
 description: PROACTIVELY review code changes before a git commit or deploy. Trigger when the user says "commite", "déploie", or after implementing a significant feature. Check for bugs, security issues, and regressions.
 tools: Read, Bash, Grep
 ---

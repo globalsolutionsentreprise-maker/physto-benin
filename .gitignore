@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .gstack/
+
+# graphify: cache régénérable (npx graphify update), pollue git status
+graphify-out/cache/

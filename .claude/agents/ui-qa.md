@@ -1,5 +1,6 @@
 ---
 name: ui-qa
+model: sonnet
 description: PROACTIVELY run QA checks after implementing a UI feature in rh.html or crm.html. Trigger when the user says "vérifie que ça marche" or after any change to the admin interface. Test golden paths and edge cases.
 tools: Bash, Read
 ---

@@ -1,5 +1,6 @@
 ---
 name: deploy-helper
+model: sonnet
 description: PROACTIVELY assist when the user asks to deploy, ship, or push to production. Run pre-deploy checks, commit staged changes, and deploy to Vercel. Also handle Supabase migration pushes when schema changes are involved.
 tools: Bash, Read
 ---
