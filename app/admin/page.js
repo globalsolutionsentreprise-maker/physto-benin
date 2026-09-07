@@ -1468,6 +1468,25 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [submittingClient, setSubmittingClient] = React.useState(false)
   const [clientDetail, setClientDetail] = React.useState(null)
   const [formClient, setFormClient] = React.useState({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "" })
+  // Historique (journal Phase 2) des devis du client ouvert : chargé à l'ouverture
+  // de la fiche, affiché par dossier dans renderDossier.
+  const [journalDossier, setJournalDossier] = React.useState([])
+  React.useEffect(function() {
+    if (!clientDetail) { setJournalDossier([]); return }
+    var ids = devisList.filter(function(d) { return d.client_id === clientDetail.id }).map(function(d) { return d.id })
+    if (!ids.length) { setJournalDossier([]); return }
+    var annule = false
+    ;(async function() {
+      try {
+        var sess = await db.auth.getSession()
+        var token = (sess.data.session && sess.data.session.access_token) || ""
+        var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "get_journal", devisIds: ids }) })
+        var j = await res.json()
+        if (!annule) setJournalDossier((j && j.entries) || [])
+      } catch (e) {}
+    })()
+    return function() { annule = true }
+  }, [clientDetail && clientDetail.id])
   const [pipelineExpanded, setPipelineExpanded] = React.useState(null)
   const [leads, setLeads] = React.useState([])
   const [leadsTraites, setLeadsTraites] = React.useState([])
@@ -4660,6 +4679,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!clientDetail) return null
     var cl = clientDetail
     var devisClient = devisList.filter(function(d) { return d.client_id === cl.id })
+    // Synthèse financière 360 du client (somme sur ses dossiers). finData peut être
+    // en cours de chargement → tuiles à 0 en attendant.
+    var devisIds360 = devisClient.map(function(d) { return d.id })
+    var fcRows360 = ((finData && finData.clients) || []).filter(function(fc) { return devisIds360.indexOf(fc.id) > -1 })
+    var totDevis360 = fcRows360.reduce(function(s, fc) { return s + (fc.montantDevis || 0) }, 0)
+    var totFacture360 = fcRows360.reduce(function(s, fc) { return s + (fc.montantFacture || 0) }, 0)
+    var totEncaisse360 = fcRows360.reduce(function(s, fc) { return s + (fc.paiementsRecus || 0) }, 0)
+    var solde360 = totFacture360 - totEncaisse360
 
     var ETAPES_DB = [
       { id: 'contact',              label: 'Contact',              icon: '📞', auto: true },
@@ -4709,6 +4736,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var contratDevis  = contratsList.find(function(ct) { return ct.devis_id === d.id })
       var rapVisiteDevis = rapportsVisite.filter(function(r) { return r.devis_id === d.id })
       var rapIntervDevis = rapportsInterv.filter(function(r) { return r.devis_id === d.id })
+      var intervDevis   = interventionsList.filter(function(i) { return i.devis_id === d.id }).sort(function(a, b) { return (a.date_intervention || "").localeCompare(b.date_intervention || "") })
+      var histoDevis    = journalDossier.filter(function(h) { return h.devis_id === d.id })
       var p = d.parcours || {}
 
       return React.createElement('div', { key: d.id, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', marginBottom: '16px', overflow: 'hidden' } },
@@ -4819,6 +4848,34 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
           ),
 
+          intervDevis.length > 0 && React.createElement('div', { style: { marginBottom: '14px' } },
+            React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Interventions'),
+            React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
+              intervDevis.map(function(iv) {
+                var m = ({ planifiee: { l: 'Planifiée', c: '#0C447C', bg: '#E6F1FB' }, terminee: { l: 'Terminée', c: '#166534', bg: '#DCFCE7' }, annulee: { l: 'Annulée', c: '#991b1b', bg: '#fef2f2' } })[iv.statut] || { l: iv.statut || '—', c: '#555', bg: '#f0ede6' }
+                return React.createElement('div', { key: iv.id, style: { display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '8px 12px' } },
+                  React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', flexShrink: 0 } }, iv.date_intervention ? new Date(iv.date_intervention + 'T00:00:00').toLocaleDateString('fr-FR') : '—'),
+                  React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: m.c, backgroundColor: m.bg, borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, m.l),
+                  React.createElement('span', { style: { fontSize: '11px', color: '#777', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, [iv.adresse, iv.notes].filter(Boolean).join(' · '))
+                )
+              })
+            )
+          ),
+
+          histoDevis.length > 0 && React.createElement('div', { style: { marginBottom: '14px' } },
+            React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Historique'),
+            React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
+              histoDevis.map(function(h) {
+                var dt = new Date(h.created_at)
+                return React.createElement('div', { key: h.id, style: { display: 'flex', gap: '10px', alignItems: 'baseline', fontSize: '11px' } },
+                  React.createElement('span', { style: { color: '#aaa', flexShrink: 0, minWidth: '92px' } }, dt.toLocaleDateString('fr-FR') + ' ' + dt.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })),
+                  React.createElement('span', { style: { color: '#555', flex: 1 } }, h.details || h.action),
+                  React.createElement('span', { style: { color: '#1a6b38', flexShrink: 0 } }, h.user_nom || h.user_email)
+                )
+              })
+            )
+          ),
+
           React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', paddingTop: '12px', borderTop: '1px solid #f0ede8' } },
             d.statut === 'en_cours' && React.createElement('button', { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' } }, validating === d.id ? '...' : '✓ Valider livraison'),
             React.createElement('button', { onClick: function() { ouvrirEditionDevis(d) }, style: { background: 'none', border: '1px solid #d1d5db', color: '#374151', borderRadius: '6px', padding: '7px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit' } }, '✏️ Modifier devis'),
@@ -4847,6 +4904,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             cl.adresse ? React.createElement('span', null, '📍 ' + cl.adresse) : null
           )
         )
+      ),
+      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '18px' } },
+        [
+          { l: 'CA (devis)', v: totDevis360, c: '#0a2e1a' },
+          { l: 'Facturé', v: totFacture360, c: '#0C447C' },
+          { l: 'Encaissé', v: totEncaisse360, c: '#166534' },
+          { l: 'Solde dû', v: solde360, c: solde360 > 0 ? '#991b1b' : '#166534' }
+        ].map(function(t) {
+          return React.createElement('div', { key: t.l, style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', padding: '12px 14px' } },
+            React.createElement('div', { style: { fontSize: '10px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '5px' } }, t.l),
+            React.createElement('div', { style: { fontSize: '16px', fontWeight: '700', color: t.c } }, finFmt(t.v) + ' F')
+          )
+        })
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' } },
         React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: '#0a2e1a' } }, devisClient.length + ' dossier(s)'),

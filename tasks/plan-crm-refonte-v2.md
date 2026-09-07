@@ -70,3 +70,10 @@ On garde 4 chantiers à réelle valeur, faible risque :
   no-op ; `verifyAdmin` renvoie désormais l'user pour l'attribution. Onglet « Journal
   activité » existant : `pipeline_move` rendu « 🔄 Changement d'étape ». Reste : `db push`
   + déploiement + QA prod.
+- 2026-09-07 — **Phase 2 déployée** (commit `c6e436b`, migration `db push` OK), prod saine.
+- 2026-09-07 — **Phase 3 ✅ (build vert, à déployer).** Fiche client 360 enrichie
+  (`renderVueDevisClient` / `renderDossier`) : synthèse financière du client (4 tuiles CA
+  devis / Facturé / Encaissé / Solde dû), bloc **Interventions** par dossier (date + statut +
+  lieu, invisible jusqu'ici), bloc **Historique** par dossier (journal Phase 2 lu par
+  `devis_id` via nouvelle action `get_journal`, chargé à l'ouverture de la fiche). Aucune
+  migration. **Les 4 chantiers du plan sont livrés.** Reste : QA prod.

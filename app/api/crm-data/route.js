@@ -282,6 +282,19 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  if (action === "get_journal") {
+    // Historique par dossier : entrées de journal liées aux devis fournis.
+    const ids = Array.isArray(body.devisIds) ? body.devisIds.filter(Boolean) : []
+    if (!ids.length) return Response.json({ entries: [] })
+    const { data } = await supabase
+      .from("admin_journal")
+      .select("id, action, details, user_email, user_nom, created_at, devis_id")
+      .in("devis_id", ids)
+      .order("created_at", { ascending: false })
+      .limit(50)
+    return Response.json({ entries: data || [] })
+  }
+
   if (action === "set_lead_traite") {
     await supabase.from("leads").update({ traite: !!body.traite }).eq("id", body.id)
     return Response.json({ ok: true })
