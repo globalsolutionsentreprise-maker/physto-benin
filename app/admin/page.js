@@ -1571,7 +1571,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   // Libellé du bouton principal = verbe métier de l'action suivante (ChatGPT §20).
   var ACTION_LABEL = { prospect: "→ Faire le devis", devis: "✓ Marquer gagné", relance: "✓ Marquer gagné", converti: "📅 Planifier la visite", visite: "🔧 Démarrer l'intervention", intervention: "📋 Générer le certificat", certificat: "💳 Encaisser", encaissement: "🏁 Clôturer" }
   // Motifs de perte d'un prospect (choix rapide au passage en « Perdu »).
-  var MOTIFS_PERTE = ["Pas de retour du client", "Prix trop élevé", "Choix d'un concurrent", "Budget insuffisant / reporté", "Besoin annulé", "Client injoignable", "Hors zone / non desservi", "Autre"]
+  var MOTIFS_PERTE = ["Pas de retour du client", "Client injoignable", "Prix jugé trop élevé", "Choix d'un concurrent", "Le client s'en est chargé lui-même", "Budget insuffisant / reporté", "Besoin annulé", "Hors zone / non desservie", "Autre"]
 
   // Filet : étape par défaut d'un devis sans `etape` stocké (rétrocompat).
   function etapeParDefaut(crmStatut) {
@@ -3682,15 +3682,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     } catch (e) { setMsg("Erreur déplacement") }
   }
   // Passage en « Perdu » : demander le motif avant de déplacer.
-  function demanderMotifPerte(devisId, clientNom) {
+  function demanderMotifPerte(devisId, clientNom, type) {
     setPerduMotif(MOTIFS_PERTE[0])
-    setPerduModal({ id: devisId, client: clientNom || "" })
+    setPerduModal({ id: devisId, client: clientNom || "", type: type || "devis" })
   }
   function confirmerPerte() {
     if (!perduModal) return
     var m = (perduMotif || "").trim() || "Non précisé"
-    deplacerCarte(perduModal.id, "perdu", m)
+    if (perduModal.type === "lead") { marquerLeadPerdu(perduModal.id, m) }
+    else { deplacerCarte(perduModal.id, "perdu", m) }
     setPerduModal(null)
+  }
+  // Lead (formulaire web) marqué perdu : sort de la colonne Prospect (traité) en
+  // conservant le motif — visible ensuite dans « Voir les leads traités ».
+  async function marquerLeadPerdu(leadId, motif) {
+    setLeads(function(prev) { return prev.filter(function(l) { return l.id !== leadId }) })
+    setMsg("Lead marqué perdu : " + (motif || "Non précisé"))
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "set_lead_traite", id: leadId, traite: true, motif: motif || "Non précisé" }) })
+    } catch (e) { setMsg("Erreur") }
   }
   function renderPerduModal() {
     if (!perduModal) return null
@@ -4396,7 +4408,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           ),
           e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
           lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
-          e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
+          e("div", { style: { display: "flex", gap: "6px" } },
+            e("button", { onClick: function() { convertirLead(lead) }, style: { flex: 1, background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →"),
+            e("button", { onClick: function() { demanderMotifPerte(lead.id, lead.nom, "lead") }, title: "Marquer ce lead comme perdu (avec motif)", style: { flexShrink: 0, background: "#fff", color: "#991b1b", border: "1px solid #f0d5d5", borderRadius: "6px", padding: "6px 10px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "❌ Perdu")
+          )
         )
       })
       var nb = cards.length + colLeads.length
@@ -5823,7 +5838,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   React.createElement("div", null,
                     React.createElement("div", { style: { fontSize: "13px", fontWeight: "600", color: "#555" } }, lead.nom),
                     React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
-                    lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0aca3", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null
+                    lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0aca3", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null,
+                    lead.motif ? React.createElement("div", { style: { fontSize: "11px", color: "#991b1b", marginTop: "3px", fontWeight: "600" } }, "❌ Perdu : " + lead.motif) : null
                   ),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
                     React.createElement("button", {

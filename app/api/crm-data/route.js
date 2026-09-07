@@ -103,7 +103,7 @@ export async function GET(req) {
   if (action === "get_leads_traites") {
     const { data: leads } = await supabase
       .from("leads")
-      .select("id, nom, telephone, email, nuisible, ville, created_at")
+      .select("id, nom, telephone, email, nuisible, ville, motif, created_at")
       .eq("traite", true)
       .order("created_at", { ascending: false })
       .limit(50)
@@ -296,7 +296,11 @@ export async function POST(req) {
   }
 
   if (action === "set_lead_traite") {
-    await supabase.from("leads").update({ traite: !!body.traite }).eq("id", body.id)
+    // motif : renseigné quand on marque un lead « perdu » ; effacé à la restauration.
+    const patch = { traite: !!body.traite }
+    if (body.traite) { if (body.motif !== undefined) patch.motif = body.motif || null }
+    else { patch.motif = null }
+    await supabase.from("leads").update(patch).eq("id", body.id)
     return Response.json({ ok: true })
   }
 
