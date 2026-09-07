@@ -1265,6 +1265,7 @@ export default function Admin() {
                     var date = new Date(entry.created_at)
                     var dateStr = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
                     var heureStr = date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+                    var actLabel = { pipeline_move: "🔄 Changement d'étape" }[entry.action] || entry.action
                     return (
                       <div key={entry.id} style={{ backgroundColor: "#fff", border: "1px solid #f0ede6", borderRadius: "8px", padding: "12px 16px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
                         <div style={{ flexShrink: 0, textAlign: "right", minWidth: "80px" }}>
@@ -1272,7 +1273,7 @@ export default function Admin() {
                           <div style={{ fontSize: "11px", color: "#aaa" }}>{heureStr}</div>
                         </div>
                         <div style={{ flex: 1, borderLeft: "2px solid #e8e6e0", paddingLeft: "14px" }}>
-                          <div style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "2px" }}>{entry.action}</div>
+                          <div style={{ fontSize: "12px", fontWeight: "700", color: "#111", marginBottom: "2px" }}>{actLabel}</div>
                           {entry.details && <div style={{ fontSize: "12px", color: "#666" }}>{entry.details}</div>}
                         </div>
                         <div style={{ flexShrink: 0 }}>

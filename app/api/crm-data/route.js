@@ -228,7 +228,8 @@ export async function GET(req) {
 
 export async function POST(req) {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
+  const adminUser = await verifyAdmin(req)
+  if (!adminUser) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const body = await req.json()
   const { action } = body
 
@@ -245,22 +246,39 @@ export async function POST(req) {
     if (idx >= 5) parcours.facture = { done: true }
     if (idx >= 6) parcours.intervention = { done: true }
     if (idx >= 8) parcours.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
+    const ETIQ = { prospect: "Prospect", devis: "Devis envoyé", relance: "Relance", converti: "Converti", visite: "Visite", intervention: "Intervention", certificat: "Certificat", encaissement: "Encaissement", cloture: "Clôturé", perdu: "Perdu" }
     const updateData = { etape, crm_statut: CRM[etape] || "contact", parcours }
     // Perdu : on enregistre le motif de perte ; toute autre étape efface un motif
     // résiduel (un prospect ré-ouvert ne doit pas garder « perdu pour X »).
     updateData.motif_echec = etape === "perdu" ? (body.motif || "Non précisé") : null
+    // Lecture de l'état courant (ancienne étape + client) : sert au calcul du montant
+    // ET à la ligne de journal ci-dessous.
+    const { data: cur } = await supabase.from("devis").select("etape, montant_net, montant_facture_crm, clients(nom, entreprise)").eq("id", body.id).single()
     // Deal gagné (converti+) : initialiser le montant facturé ; encaissement (clôturé)
     // → paiements_recus = facturé (cohérence Finances) ; sinon 0.
     if (idx >= 3) {
-      const { data: row } = await supabase.from("devis").select("montant_net, montant_facture_crm").eq("id", body.id).single()
-      if (row) {
-        if (!row.montant_facture_crm) updateData.montant_facture_crm = row.montant_net || 0
-        updateData.paiements_recus = (idx >= 8) ? (row.montant_facture_crm || row.montant_net || 0) : 0
+      if (cur) {
+        if (!cur.montant_facture_crm) updateData.montant_facture_crm = cur.montant_net || 0
+        updateData.paiements_recus = (idx >= 8) ? (cur.montant_facture_crm || cur.montant_net || 0) : 0
       }
     } else {
       updateData.paiements_recus = 0
     }
     await supabase.from("devis").update(updateData).eq("id", body.id)
+    // Journal : tracer le changement d'étape (qui / quand / de → vers), hors no-op.
+    const ancienne = cur && cur.etape
+    if (ancienne !== etape) {
+      const cl = cur && cur.clients
+      const nomClient = (cl && (cl.entreprise || cl.nom)) || "Dossier"
+      const suffixe = etape === "perdu" && updateData.motif_echec ? " (" + updateData.motif_echec + ")" : ""
+      await supabase.from("admin_journal").insert({
+        user_email: adminUser.email,
+        user_nom: adminUser.email,
+        action: "pipeline_move",
+        details: nomClient + " : " + (ETIQ[ancienne] || ancienne || "—") + " → " + (ETIQ[etape] || etape) + suffixe,
+        devis_id: body.id
+      })
+    }
     return Response.json({ ok: true })
   }
 

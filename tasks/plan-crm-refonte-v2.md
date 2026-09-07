@@ -44,10 +44,11 @@ On garde 4 chantiers à réelle valeur, faible risque :
   - `ACTION_LABEL` : verbe par étape sur le bouton principal.
   - Suppression du code mort `renderVueCommercial` (jamais appelé).
 - **Phase 2 — Journal** : insert `admin_journal` dans l'action `move` (crm-data route),
-  colonne `devis_id` (migration légère) pour l'historique par dossier ; petit encart
-  « Historique » dans la fiche.
+  colonne `devis_id` (migration légère). Affichage global via l'onglet « Journal activité »
+  existant. L'historique PAR DOSSIER est déplacé en Phase 3 (emplacement = la fiche 360).
 - **Phase 3 — Fiche client 360** : enrichir `renderVueDevisClient`/`renderDossier` (contrats,
-  interventions, certificats, solde) + l'historique de Phase 2.
+  interventions, certificats, solde) + encart « Historique » du dossier (lit `admin_journal`
+  par `devis_id`).
 
 ## Journal d'avancement
 
@@ -60,3 +61,12 @@ On garde 4 chantiers à réelle valeur, faible risque :
   scopé à la lane (`movesForLane`). Bascule converti→visite via « Planifier la visite ».
   Supprimé 2 fonctions mortes (`renderVueCommercial`, ancien `renderVuePipeline`).
   Reste : QA prod, puis Phase 2 (journal) + Phase 3 (fiche 360).
+- 2026-09-07 — **Phase 1 déployée** (commit `812aa75`), prod saine (/ 200, /admin 200,
+  /api/crm-data 401).
+- 2026-09-07 — **Phase 2 ✅ (build vert, à déployer).** Migration
+  `20260907000000_admin_journal_devis_id.sql` (colonne `devis_id` nullable + index).
+  Action `move` (crm-data route) : lit l'ancienne étape + le client, écrit une entrée
+  `admin_journal` (`pipeline_move`, « Client : Ancienne → Nouvelle », `devis_id`), hors
+  no-op ; `verifyAdmin` renvoie désormais l'user pour l'attribution. Onglet « Journal
+  activité » existant : `pipeline_move` rendu « 🔄 Changement d'étape ». Reste : `db push`
+  + déploiement + QA prod.
