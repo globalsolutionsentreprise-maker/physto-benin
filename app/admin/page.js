@@ -1124,7 +1124,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="pipeline" />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="prospection" />
             </div>
           )}
 
@@ -1448,7 +1448,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [objInput, setObjInput] = React.useState("")
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
-    if ((vue === "finances" || vue === "analyse" || vue === "pipeline") && !finData && !finLoading) chargerFinances()
+    if ((vue === "finances" || vue === "analyse" || vue === "prospection" || vue === "execution") && !finData && !finLoading) chargerFinances()
   }, [vue])
   React.useEffect(function() {
     db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
@@ -1548,6 +1548,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   ETAPES.concat([ETAPE_PERDU]).forEach(function(e) { ETAPE_LABEL[e.id] = e.label })
   var ETAPE_CRM = { prospect: "contact", devis: "devis", relance: "relance", converti: "converti", visite: "converti", intervention: "converti", certificat: "converti", encaissement: "converti", cloture: "converti", perdu: "echec" }
   var PROCHAINE_ETAPE = { prospect: "devis", devis: "converti", relance: "converti", converti: "visite", visite: "intervention", intervention: "certificat", certificat: "encaissement", encaissement: "cloture" }
+  // Libellé du bouton principal = verbe métier de l'action suivante (ChatGPT §20).
+  var ACTION_LABEL = { prospect: "→ Faire le devis", devis: "✓ Marquer gagné", relance: "✓ Marquer gagné", converti: "📅 Planifier la visite", visite: "🔧 Démarrer l'intervention", intervention: "📋 Générer le certificat", certificat: "💳 Encaisser", encaissement: "🏁 Clôturer" }
   // Motifs de perte d'un prospect (choix rapide au passage en « Perdu »).
   var MOTIFS_PERTE = ["Pas de retour du client", "Prix trop élevé", "Choix d'un concurrent", "Budget insuffisant / reporté", "Besoin annulé", "Client injoignable", "Hors zone / non desservi", "Autre"]
 
@@ -4192,9 +4194,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   // ── Pipeline UNIFIÉ (vente + exécution en un seul kanban) ───────────────────
-  function renderVuePipelineUnifie() {
+  function renderVuePipeline(lane) {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline…")
+    var estCommercial = lane !== "execution"
+    // Options « Déplacer vers » restreintes à la lane courante (+ Perdu côté commercial),
+    // pour éviter les sauts incohérents. La bascule converti→visite passe par « Avancer ».
+    var movesForLane = estCommercial
+      ? ETAPES.filter(function(x) { return x.lane === "commercial" }).concat([ETAPE_PERDU])
+      : ETAPES.filter(function(x) { return x.lane === "execution" })
     var cls = finData.clients || []
     var devisMap = {}
     devisList.forEach(function(d) { devisMap[d.id] = d })
@@ -4345,11 +4353,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
         ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
         c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
-        prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Avancer → " + (ETAPE_LABEL[prochaine] || prochaine)) : null,
+        prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, ACTION_LABEL[colId] || ("Avancer → " + (ETAPE_LABEL[prochaine] || prochaine))) : null,
         boutonContrat,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
           e("select", { value: "", onChange: function(ev) { var v = ev.target.value; if (v === "perdu") { demanderMotifPerte(c.id, c.client) } else { deplacerCarte(c.id, v) } }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
-            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(ETAPES.concat([ETAPE_PERDU]).map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
+            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(movesForLane.map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
           ),
           e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (documents, rapports)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
         )
@@ -4386,101 +4394,35 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
 
     var laneRow = { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" }
-    var laneTitle = { fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#888", margin: "4px 0 8px" }
     function colsDe(ids) { return COLS.filter(function(x) { return ids.indexOf(x.id) > -1 }) }
-    var colsCommercial = colsDe(["prospect", "devis", "relance", "converti", "perdu"])
-    var colsExecution = colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
+    var colsAffichees = estCommercial
+      ? colsDe(["prospect", "devis", "relance", "converti", "perdu"])
+      : colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
+    var intro = estCommercial
+      ? "Suivi commercial : du premier contact à l'affaire gagnée. « Marquer gagné » puis « Planifier la visite » fait passer le dossier en Exécution."
+      : "Suivi opérationnel des affaires gagnées : visite, intervention, certificat, encaissement, clôture."
 
     return e("div", null,
       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px" } },
-        e("div", { style: { fontSize: "12px", color: "#888" } }, "Parcours client de gauche à droite. « Avancer → » passe à l'étape suivante ; « Déplacer vers » permet un saut ; le Dossier gère documents et rapports."),
+        e("div", { style: { fontSize: "12px", color: "#888" } }, intro),
         e("div", { style: { display: "flex", gap: "8px", flexShrink: 0 } },
-          e("button", { onClick: imprimerProspects, title: "Exporter la liste des prospects en PDF (à transmettre)",
+          estCommercial ? e("button", { onClick: imprimerProspects, title: "Exporter la liste des prospects en PDF (à transmettre)",
             style: { background: "#fff", color: "#555", border: "1px solid #e0ddd6", borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
-            "📄 Prospects PDF"),
+            "📄 Prospects PDF") : null,
           e("button", { onClick: function() { setPipeCompact(function(v) { return !v }); setPipeOpen({}) }, title: pipeCompact ? "Afficher les cartes détaillées" : "Réduire les cartes pour tout voir d'un coup",
             style: { background: pipeCompact ? "#0a2e1a" : "#fff", color: pipeCompact ? "#d4a920" : "#555", border: "1px solid " + (pipeCompact ? "#0a2e1a" : "#e0ddd6"), borderRadius: "20px", padding: "6px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" } },
             pipeCompact ? "🔎 Vue détaillée" : "☰ Vue compacte")
         )
       ),
-      e("div", { style: laneTitle }, "◆ Commercial"),
-      e("div", { style: laneRow }, colsCommercial.map(renderColonne)),
-      e("div", { style: Object.assign({}, laneTitle, { marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "14px" }) }, "◆ Exécution"),
-      e("div", { style: laneRow }, colsExecution.map(renderColonne))
+      e("div", { style: laneRow }, colsAffichees.map(renderColonne))
     )
   }
 
-  // ── G5 : Vue Commercial — kanban par statut (remplacé par le pipeline unifié) ─
-  function renderVueCommercial() {
-    var e = React.createElement
-    if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement du pipeline commercial…")
-    var cls = finData.clients || []
-    var cols = ["contact", "devis", "attente", "relance", "converti", "echec"]
-    var nbContrats = cls.filter(function(c) { return c.typeContrat === "contrat" && c.statut !== "echec" }).length
-    var nbPonctuels = cls.filter(function(c) { return c.typeContrat !== "contrat" && c.statut !== "echec" }).length
-    var totMission = (nbContrats + nbPonctuels) || 1
-    var pctC = Math.round(nbContrats / totMission * 100)
-    var pctP = 100 - pctC
-
-    function renderCard(c) {
-      var meta = ST_META[c.statut] || ST_META.contact
-      var ni = finNextIntervention(c)
-      var niSoon = ni && (new Date(ni + "T00:00:00") - new Date()) < 30 * 864e5
-      return e("div", { key: c.id, style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
-        e("div", { style: { fontWeight: "600", fontSize: "13px", marginBottom: "3px" } }, c.client),
-        e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "4px" } }, "📍 " + c.provenance + " · " + finFmtD(c.dateDevis)),
-        e("div", { style: { fontSize: "13px", fontWeight: "700", color: meta.tc } }, finFmt(c.montantDevis) + " FCFA" + (c.typeContrat === "contrat" ? " / " + (c.dureeContratMois || 12) + "m" : "")),
-        c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
-        ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
-        c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
-        e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
-          e("select", { value: "", onChange: function(ev) { deplacerCarte(c.id, ev.target.value) }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
-            [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(cols.filter(function(k) { return k !== c.statut }).map(function(k) { return e("option", { key: k, value: k }, (ST_META[k] || {}).label) }))
-          ),
-          e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
-        )
-      )
-    }
-
-    return e("div", null,
-      e("div", { style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
-        e("span", { style: { fontSize: "11px", color: "#888" } }, "Type de mission :"),
-        e("span", { style: { background: "#EEF2FF", color: "#4338CA", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: "600" } }, "🔁 " + nbContrats + " contrat" + (nbContrats > 1 ? "s" : "") + " (" + pctC + "%)"),
-        e("span", { style: { color: "#ccc" } }, "·"),
-        e("span", { style: { background: "#F0FDF4", color: "#166534", borderRadius: "20px", padding: "3px 10px", fontSize: "11px", fontWeight: "600" } }, "⚡ " + nbPonctuels + " ponctuel" + (nbPonctuels > 1 ? "s" : "") + " (" + pctP + "%)")
-      ),
-      e("div", { style: { display: "flex", gap: "12px", overflowX: "auto", paddingBottom: "8px" } },
-        cols.map(function(key) {
-          var meta = ST_META[key] || {}
-          var cards = cls.filter(function(c) { return c.statut === key })
-          var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
-          var colLeads = key === "contact" ? leads : []
-          var leadEls = colLeads.map(function(lead) {
-            return e("div", { key: "lead-" + lead.id, style: { background: "#fffdf7", border: "1px dashed #d4a920", borderRadius: "8px", padding: "10px", marginBottom: "8px" } },
-              e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px", gap: "6px" } },
-                e("div", { style: { fontWeight: "600", fontSize: "13px" } }, lead.nom),
-                e("span", { style: { fontSize: "9px", fontWeight: "700", background: "#fdf6e3", color: "#8a6d1a", border: "1px solid #ecd9a0", borderRadius: "10px", padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" } }, "🌱 LEAD")
-              ),
-              e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
-              lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
-              e("button", { onClick: function() { convertirLead(lead) }, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →")
-            )
-          })
-          return e("div", { key: key, style: { minWidth: "230px", width: "230px", flexShrink: 0, background: "#faf9f6", borderRadius: "10px", padding: "8px" } },
-            e("div", { style: { background: meta.bg, color: meta.tc, borderRadius: "6px", padding: "6px 10px", fontSize: "12px", fontWeight: "700", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" } }, e("span", null, meta.label), e("span", { style: { background: "rgba(255,255,255,0.5)", borderRadius: "10px", padding: "0 7px", fontSize: "11px" } }, cards.length + colLeads.length)),
-            tot > 0 ? e("div", { style: { fontSize: "11px", color: meta.tc, fontWeight: "600", marginBottom: "8px", paddingLeft: "2px" } }, finFmt(tot) + " FCFA") : null,
-            leadEls,
-            (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "Aucun") : cards.map(renderCard)
-          )
-        })
-      )
-    )
-  }
 
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
-      [["pipeline", "Pipeline"], ["clients", "Clients"], ["contrats", "Contrats"], ["devis", "Devis"], ["analyse", "Analyse"], ["documents", "Documents"], ["finances", "Finances"]].map(function(t) {
+      [["prospection", "🎯 Prospection"], ["execution", "🔧 Exécution"], ["clients", "Clients"], ["contrats", "Contrats"], ["devis", "Devis"], ["analyse", "Analyse"], ["documents", "Documents"], ["finances", "Finances"]].map(function(t) {
         var active = vue === t[0] || (vue === "devis-client" && t[0] === "clients")
         var badge = t[0] === "documents" && docsEnAttente > 0
           ? React.createElement("span", { style: { marginLeft: "6px", background: "#e65c00", color: "#fff", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: "700" } }, docsEnAttente)
@@ -5325,145 +5267,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  function renderVuePipeline() {
-    var COLONNES = [
-      { id: 'contact',      label: '📞 Contact',        color: '#0ea5e9' },
-      { id: 'visite',       label: '🔍 Visite',        color: '#7c3aed' },
-      { id: 'facture',      label: '💰 Facture',        color: '#0f766e' },
-      { id: 'intervention', label: '🔧 Intervention',   color: '#1e40af' },
-      { id: 'certificat',   label: '📋 Certificat',     color: '#b45309' },
-      { id: 'encaissement', label: '💳 Encaissement',   color: '#0a2e1a' },
-      { id: 'cloture',      label: '✅ Clôturé',        color: '#16a34a' },
-    ]
-
-    var ETAPES = [
-      { id: 'contact',             label: 'Contact initial',       auto: true },
-      { id: 'visite',              label: 'Visite de site',        auto: false },
-      { id: 'rapport_visite',      label: 'Rapport de synthèse',   auto: false },
-      { id: 'devis',               label: 'Devis',                 auto: true },
-      { id: 'facture',             label: 'Facture',               auto: false },
-      { id: 'intervention',        label: 'Intervention',          auto: false },
-      { id: 'fiche',               label: 'Fiche de passage',      auto: true },
-      { id: 'rapport_intervention',label: "Rapport d'intervention", auto: false },
-      { id: 'certificat',          label: 'Certificat GSE',        auto: true },
-      { id: 'encaissement',        label: 'Encaissement vérifié',  auto: false },
-    ]
-
-    function isEtapeDone(d, etapeId) {
-      var p = d.parcours || {}
-      if (p[etapeId] && p[etapeId].override !== undefined) return p[etapeId].override
-      var hasFiche = fichesList.some(function(f) { return f.devis_id === d.id })
-      var hasCert = certsList.some(function(c) { return c.devis_id === d.id })
-      if (etapeId === 'contact') return true
-      if (etapeId === 'devis') return true
-      if (etapeId === 'fiche') return hasFiche
-      if (etapeId === 'certificat') return hasCert
-      return !!(p[etapeId] && p[etapeId].done)
-    }
-
-    function getColonne(d) {
-      var p = d.parcours || {}
-      var hasFiche = fichesList.some(function(f) { return f.devis_id === d.id })
-      var hasCert = certsList.some(function(c) { return c.devis_id === d.id })
-      if (hasCert && p.encaissement && p.encaissement.done) return 'cloture'
-      if (hasCert) return 'encaissement'
-      if ((p.intervention && p.intervention.done) || hasFiche) return 'certificat'
-      if (p.facture && p.facture.done) return 'intervention'
-      if (p.visite && p.visite.done) return 'facture'
-      if (d.statut === 'brouillon') return 'contact'
-      return 'visite'
-    }
-
-    function getProgress(d) {
-      var done = ETAPES.filter(function(e) { return isEtapeDone(d, e.id) }).length
-      return Math.round((done / ETAPES.length) * 100)
-    }
-
-    function toggleEtape(d, etapeId, currentDone) {
-      var p = Object.assign({}, d.parcours || {})
-      var isAuto = ETAPES.find(function(e) { return e.id === etapeId && e.auto })
-      if (isAuto) {
-        p[etapeId] = { override: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
-      } else {
-        p[etapeId] = { done: !currentDone, date: !currentDone ? new Date().toISOString().split('T')[0] : null }
-      }
-      saveParcours(d.id, p)
-    }
-
-    function getNomClient(d) {
-      var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
-      if (!cl) return 'Client inconnu'
-      return cl.entreprise || [cl.prenom, cl.nom].filter(Boolean).join(' ')
-    }
-
-    function renderChecklist(d) {
-      return React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '6px', padding: '10px', marginTop: '10px' } },
-        React.createElement('div', { style: { fontSize: '10px', fontWeight: '700', color: '#888', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.05em' } }, 'Parcours complet'),
-        ETAPES.map(function(etape) {
-          var done = isEtapeDone(d, etape.id)
-          var p = d.parcours || {}
-          var isManualOverride = etape.auto && p[etape.id] && p[etape.id].override !== undefined
-          var date = p[etape.id] && p[etape.id].date ? p[etape.id].date : null
-          return React.createElement('div', { key: etape.id, style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', borderBottom: '1px solid #eee' } },
-            React.createElement('button', {
-              onClick: function() { toggleEtape(d, etape.id, done) },
-              title: done ? 'Marquer non fait' : 'Marquer fait',
-              style: { background: 'none', border: 'none', fontSize: '13px', cursor: 'pointer', padding: 0, flexShrink: 0 }
-            }, done ? '✅' : '⬜'),
-            React.createElement('span', { style: { fontSize: '11px', color: done ? '#0a2e1a' : '#888', flex: 1, fontWeight: done ? '600' : '400' } }, etape.label),
-            isManualOverride
-              ? React.createElement('span', { style: { fontSize: '9px', color: '#d4a920', fontWeight: '700', backgroundColor: '#fffbeb', borderRadius: '3px', padding: '1px 4px' } }, 'manuel')
-              : etape.auto
-                ? React.createElement('span', { style: { fontSize: '9px', color: '#bbb', backgroundColor: '#e8e6e0', borderRadius: '3px', padding: '1px 4px' } }, 'auto')
-                : date ? React.createElement('span', { style: { fontSize: '9px', color: '#aaa' } }, date) : null
-          )
-        })
-      )
-    }
-
-    function renderCard(d) {
-      var progress = getProgress(d)
-      var nomClient = getNomClient(d)
-      var montant = d.montant_total ? Number(d.montant_total).toLocaleString('fr-FR') + ' F' : ''
-      var clientObj = d.clients || clients.find(function(c) { return c.id === d.client_id })
-      return React.createElement('div', { key: d.id,
-        onClick: function() { if (clientObj) { setClientDetail(clientObj); setVue('devis-client') } },
-        title: 'Ouvrir le tableau de bord',
-        style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.15s' }
-      },
-        React.createElement('div', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '2px' } }, nomClient),
-        d.numero ? React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginBottom: '4px' } }, d.numero) : null,
-        montant ? React.createElement('div', { style: { fontSize: '11px', color: '#1e40af', fontWeight: '600', marginBottom: '6px' } }, montant) : null,
-        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
-          React.createElement('div', { style: { flex: 1, height: '3px', backgroundColor: '#e8e6e0', borderRadius: '2px' } },
-            React.createElement('div', { style: { width: progress + '%', height: '100%', backgroundColor: progress === 100 ? '#16a34a' : '#0a2e1a', borderRadius: '2px' } })
-          ),
-          React.createElement('span', { style: { fontSize: '10px', color: progress === 100 ? '#16a34a' : '#888', fontWeight: '700', flexShrink: 0 } }, progress + '%')
-        )
-      )
-    }
-
-    return React.createElement('div', null,
-      React.createElement('div', { style: { fontSize: '13px', color: '#888', marginBottom: '20px' } }, 'Suivi du parcours client — de la visite jusqu\'à l\'encaissement.'),
-      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(190px, 1fr))', gap: '10px', overflowX: 'auto', paddingBottom: '12px' } },
-        COLONNES.map(function(col) {
-          var devisColonne = devisList.filter(function(d) { return getColonne(d) === col.id })
-          return React.createElement('div', { key: col.id },
-            React.createElement('div', { style: { backgroundColor: col.color, color: '#fff', borderRadius: '8px 8px 0 0', padding: '10px 12px', fontSize: '12px', fontWeight: '700', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-              col.label,
-              React.createElement('span', { style: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: '10px', padding: '1px 8px', fontSize: '11px' } }, devisColonne.length)
-            ),
-            React.createElement('div', { style: { backgroundColor: '#f2f0ec', borderRadius: '0 0 8px 8px', padding: '8px', minHeight: '180px' } },
-              devisColonne.length === 0
-                ? React.createElement('div', { style: { textAlign: 'center', color: '#ccc', fontSize: '11px', paddingTop: '24px' } }, '—')
-                : devisColonne.map(function(d) { return renderCard(d) })
-            )
-          )
-        })
-      )
-    )
-  }
-
   function ouvrirContratExistant(contrat) {
     if (!contrat.params) return
     var p = contrat.params
@@ -5994,7 +5797,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
     vue === "devis" ? renderVueDevis() : null,
-    vue === "pipeline" ? renderVuePipelineUnifie() : null,
+    vue === "prospection" ? renderVuePipeline("commercial") : null,
+    vue === "execution" ? renderVuePipeline("execution") : null,
     vue === "finances" ? renderVueFinances() : null,
     vue === "analyse" ? renderVueAnalyse() : null,
     vue === "contrats" ? renderVueContrats() : null,
