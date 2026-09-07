@@ -1450,6 +1450,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
     if ((vue === "finances" || vue === "analyse" || vue === "prospection" || vue === "execution") && !finData && !finLoading) chargerFinances()
+    if (vue === "analyse") chargerLeadsTraites()   // pour l'encart « Leads perdus »
   }, [vue])
   React.useEffect(function() {
     db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
@@ -4019,6 +4020,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var maxCount = Math.max.apply(null, stCounts.map(function(s) { return s.count }).concat([1]))
     var byMotif = {}
     echecs.forEach(function(c) { var k = c.motifEchec || "—"; if (!byMotif[k]) byMotif[k] = 0; byMotif[k]++ })
+    // Leads perdus (formulaire web) : objet distinct des devis, compté à part pour
+    // ne pas fausser le taux de conversion. Un lead perdu = traité avec un motif.
+    var leadsPerdus = (leadsTraites || []).filter(function(l) { return l.motif })
+    var byMotifLead = {}
+    leadsPerdus.forEach(function(l) { var k = l.motif || "—"; byMotifLead[k] = (byMotifLead[k] || 0) + 1 })
     var depCatTotals = { transport: 0, produits: 0, materiels: 0, autre: 0 }
     cls.forEach(function(c) { (c.depensesItems || []).forEach(function(i) { var k = i.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += i.montant || 0 }) })
     depGlob.forEach(function(d) { var k = d.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += d.montant || 0 })
@@ -4180,6 +4186,21 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               e("div", { style: { borderTop: "1px solid #e8e6e0", paddingTop: "10px" } }, echecs.map(function(c) { return e("div", { key: c.id || c.client, style: { display: "flex", justifyContent: "space-between", padding: "4px 0" } }, e("span", { style: { fontSize: "12px", fontWeight: "500" } }, c.client), e("span", { style: { fontSize: "11px", color: "#777" } }, finFmt(c.montantDevis) + " FCFA · " + finFmtD(c.dateDevis))) }))
             )
         )
+      ),
+      // Leads perdus (formulaire web) — distinct des devis, ne compte pas dans le funnel
+      e("div", { style: secLblS }, "Leads perdus (formulaire web)"),
+      e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px", marginBottom: "24px" } },
+        leadsPerdus.length === 0
+          ? e("div", { style: { color: "#999", fontSize: "12px", textAlign: "center", padding: "24px 0" } }, "🙂 Aucun lead perdu à ce jour.")
+          : e("div", null,
+              e("div", { style: { fontSize: "12px", color: "#777", marginBottom: "12px" } }, leadsPerdus.length + " lead" + (leadsPerdus.length > 1 ? "s" : "") + " perdu" + (leadsPerdus.length > 1 ? "s" : "") + " (contacts web non transformés, hors taux de conversion des devis)"),
+              Object.entries(byMotifLead).sort(function(a, b) { return b[1] - a[1] }).map(function(entry) {
+                return e("div", { key: entry[0], style: { display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #f0efe9" } },
+                  e("span", { style: { fontSize: "12px" } }, entry[0]),
+                  e("span", { style: { fontSize: "12px", fontWeight: "600", color: "#E24B4A" } }, entry[1] + " cas")
+                )
+              })
+            )
       ),
       // Dépenses par catégorie
       e("div", { style: secLblS }, "Répartition des dépenses par catégorie"),
