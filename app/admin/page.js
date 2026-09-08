@@ -4020,6 +4020,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var maxCount = Math.max.apply(null, stCounts.map(function(s) { return s.count }).concat([1]))
     var byMotif = {}
     echecs.forEach(function(c) { var k = c.motifEchec || "—"; if (!byMotif[k]) byMotif[k] = 0; byMotif[k]++ })
+    // Perdues APRÈS visite/intervention : coûteuses (déplacement, temps technicien
+    // engagés pour rien). Dérivé de la présence d'un artefact terrain (rapport de
+    // visite, fiche de passage, intervention planifiée, certificat) lié au devis —
+    // ces lignes survivent au passage en « perdu » (tables séparées).
+    function aEuVisite(c) {
+      return (rapportsVisite || []).some(function(r) { return r.devis_id === c.id }) ||
+             (fichesList || []).some(function(f) { return f.devis_id === c.id }) ||
+             (interventionsList || []).some(function(i) { return i.devis_id === c.id }) ||
+             (certsList || []).some(function(k) { return k.devis_id === c.id })
+    }
+    var echecsApresVisite = echecs.filter(aEuVisite)
+    var montantApresVisite = echecsApresVisite.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
     // Leads perdus (formulaire web) : objet distinct des devis, compté à part pour
     // ne pas fausser le taux de conversion. Un lead perdu = traité avec un motif.
     var leadsPerdus = (leadsTraites || []).filter(function(l) { return l.motif })
@@ -4182,8 +4194,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         anCard("Analyse des échecs & motifs", echecs.length === 0
           ? e("div", { style: { color: "#999", fontSize: "12px", textAlign: "center", padding: "24px 0" } }, "🙂 Aucun dossier perdu à ce jour.")
           : e("div", null,
+              echecsApresVisite.length > 0 ? e("div", { style: { background: "#FEF2F2", border: "1px solid #fecaca", borderRadius: "8px", padding: "10px 12px", marginBottom: "12px" } },
+                e("div", { style: { fontSize: "12px", fontWeight: "700", color: "#991b1b" } }, "🔻 " + echecsApresVisite.length + " perdue" + (echecsApresVisite.length > 1 ? "s" : "") + " APRÈS visite/intervention"),
+                e("div", { style: { fontSize: "11px", color: "#b45252", marginTop: "2px" } }, finFmt(montantApresVisite) + " FCFA de devis + visites non rentabilisées (déplacement et temps engagés). À suivre de près : ce sont les pertes les plus coûteuses.")
+              ) : null,
               e("div", { style: { marginBottom: "12px" } }, Object.entries(byMotif).map(function(entry) { return e("div", { key: entry[0], style: { display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #f0efe9" } }, e("span", { style: { fontSize: "12px" } }, entry[0]), e("span", { style: { fontSize: "12px", fontWeight: "600", color: "#E24B4A" } }, entry[1] + " cas")) })),
-              e("div", { style: { borderTop: "1px solid #e8e6e0", paddingTop: "10px" } }, echecs.map(function(c) { return e("div", { key: c.id || c.client, style: { display: "flex", justifyContent: "space-between", padding: "4px 0" } }, e("span", { style: { fontSize: "12px", fontWeight: "500" } }, c.client), e("span", { style: { fontSize: "11px", color: "#777" } }, finFmt(c.montantDevis) + " FCFA · " + finFmtD(c.dateDevis))) }))
+              e("div", { style: { borderTop: "1px solid #e8e6e0", paddingTop: "10px" } }, echecs.map(function(c) { var av = aEuVisite(c); return e("div", { key: c.id || c.client, style: { display: "flex", justifyContent: "space-between", padding: "4px 0" } }, e("span", { style: { fontSize: "12px", fontWeight: "500" } }, (av ? "🔻 " : "") + c.client), e("span", { style: { fontSize: "11px", color: "#777" } }, finFmt(c.montantDevis) + " FCFA · " + finFmtD(c.dateDevis))) }))
             )
         )
       ),
@@ -4255,7 +4271,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     // pour éviter les sauts incohérents. La bascule converti→visite passe par « Avancer ».
     var movesForLane = estCommercial
       ? ETAPES.filter(function(x) { return x.lane === "commercial" }).concat([ETAPE_PERDU])
-      : ETAPES.filter(function(x) { return x.lane === "execution" })
+      : ETAPES.filter(function(x) { return x.lane === "execution" }).concat([ETAPE_PERDU])
     var cls = finData.clients || []
     var devisMap = {}
     devisList.forEach(function(d) { devisMap[d.id] = d })

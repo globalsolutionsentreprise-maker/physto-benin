@@ -77,3 +77,9 @@ On garde 4 chantiers à réelle valeur, faible risque :
   lieu, invisible jusqu'ici), bloc **Historique** par dossier (journal Phase 2 lu par
   `devis_id` via nouvelle action `get_journal`, chargé à l'ouverture de la fiche). Aucune
   migration. **Les 4 chantiers du plan sont livrés.** Reste : QA prod.
+- 2026-09-08 — **Perte depuis l'Exécution + Analyse.** « Déplacer vers → ❌ Perdu »
+  désormais aussi sur la lane Exécution (movesForLane execution + ETAPE_PERDU) : une
+  affaire visitée puis abandonnée peut être marquée perdue avec motif. Analyse : nouveau
+  bloc « perdues APRÈS visite/intervention » (dérivé de la présence d'un rapport de visite /
+  fiche de passage / intervention / certificat lié au devis, tables qui survivent au passage
+  en perdu) — bannière rouge + montant + marquage 🔻 par dossier. Frontend seul, aucune migration.
