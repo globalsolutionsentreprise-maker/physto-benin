@@ -4294,6 +4294,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var rd = devisMap[c.id] || {}
       return rd.etape || etapeParDefaut(c.statut)
     }
+    // Une affaire perdue est « après visite » si un artefact terrain existe (rapport
+    // visite / fiche de passage / intervention / certificat) : sert à ranger les pertes
+    // dans la bonne colonne Perdu (Exécution = après visite ; Prospection = à froid).
+    function aEuVisite(c) {
+      return (rapportsVisite || []).some(function(r) { return r.devis_id === c.id }) ||
+             (fichesList || []).some(function(f) { return f.devis_id === c.id }) ||
+             (interventionsList || []).some(function(i) { return i.devis_id === c.id }) ||
+             (certsList || []).some(function(k) { return k.devis_id === c.id })
+    }
 
     function marquerEncaisse(c) {
       var rd = devisMap[c.id]
@@ -4435,6 +4444,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
     function renderColonne(col) {
       var cards = byCol[col.id] || []
+      // Perdu réparti : Exécution montre les pertes APRÈS visite, Prospection les
+      // pertes à froid. Chaque affaire perdue n'apparaît que sur une seule page.
+      if (col.id === "perdu") cards = cards.filter(function(c) { return estCommercial ? !aEuVisite(c) : aEuVisite(c) })
       var tot = cards.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
       var colLeads = col.id === "prospect" ? leads : []
       var leadEls = colLeads.map(function(lead) {
@@ -4469,7 +4481,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     function colsDe(ids) { return COLS.filter(function(x) { return ids.indexOf(x.id) > -1 }) }
     var colsAffichees = estCommercial
       ? colsDe(["prospect", "devis", "relance", "converti", "perdu"])
-      : colsDe(["visite", "intervention", "certificat", "encaissement", "cloture"])
+      : colsDe(["visite", "intervention", "certificat", "encaissement", "cloture", "perdu"])
     var intro = estCommercial
       ? "Suivi commercial : du premier contact à l'affaire gagnée. « Marquer gagné » puis « Planifier la visite » fait passer le dossier en Exécution."
       : "Suivi opérationnel des affaires gagnées : visite, intervention, certificat, encaissement, clôture."
