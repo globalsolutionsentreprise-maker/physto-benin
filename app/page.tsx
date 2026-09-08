@@ -148,18 +148,6 @@ export default function Accueil() {
             </a>
           </div>
 
-          {/* CHIFFRES DYNAMIQUES */}
-          <div className="hero-stats" style={{ display: "flex", marginTop: "64px", paddingTop: "32px", borderTop: "1px solid rgba(255,255,255,0.08)", maxWidth: "600px" }}>
-            {chiffres.map(function(s, i) {
-              return (
-                <div key={s.id || i} style={{ flex: 1, textAlign: "center", borderRight: i < chiffres.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none", padding: "0 20px" }}>
-                  <div style={{ fontSize: "28px", fontWeight: "700", color: "#d4a920" }}>{s.valeur}</div>
-                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.45)", marginTop: "6px", letterSpacing: "0.06em" }}>{s.label.toUpperCase()}</div>
-                </div>
-              )
-            })}
-          </div>
-
         </div>
       </section>
 
