@@ -126,7 +126,7 @@ export default function QuiSommesNous() {
       {/* MISSION */}
       <section className="section-pad" style={{ backgroundColor: "#ffffff" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div className="grid-2-mob" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+          <div className="grid-2-mob" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "80px", alignItems: "center", maxWidth: "760px" }}>
             <div>
               <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE MISSION</div>
               <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em", marginBottom: "24px" }}>
@@ -148,19 +148,6 @@ export default function QuiSommesNous() {
               </div>
             </div>
 
-            <div>
-              <div className="chiffres-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px", marginBottom: "3px" }}>
-                {chiffres.map(function(c, i) {
-                  return (
-                    <div key={c.id} style={{ backgroundColor: i === 0 ? "#0a2e1a" : "#f7f7f5", padding: "32px 24px", textAlign: "center" }}>
-                      <div style={{ fontSize: "32px", fontWeight: "700", color: i === 0 ? "#d4a920" : "#0a2e1a", marginBottom: "8px" }}>{c.valeur}</div>
-                      <div style={{ fontSize: "11px", color: i === 0 ? "rgba(255,255,255,0.6)" : "#999", letterSpacing: "0.06em" }}>{c.label.toUpperCase()}</div>
-                    </div>
-                  )
-                })}
-              </div>
-
-            </div>
           </div>
         </div>
       </section>
