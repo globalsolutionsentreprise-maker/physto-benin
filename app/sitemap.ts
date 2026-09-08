@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { createClient } from "@supabase/supabase-js"
+import { NUISIBLE_SLUGS } from "./nuisibles/data"
 
 const BASE = "https://www.phyto-benin.com"
 
@@ -43,6 +44,9 @@ const pagesStatiques: MetadataRoute.Sitemap = [
   { url: `${BASE}/zones/abomey-calavi`, changeFrequency: "monthly", priority: 0.8 },
   { url: `${BASE}/zones/porto-novo`, changeFrequency: "monthly", priority: 0.8 },
   { url: `${BASE}/zones/ouidah`, changeFrequency: "monthly", priority: 0.8 },
+  // Hub Nuisibles (une page par cible, SEO)
+  { url: `${BASE}/nuisibles`, changeFrequency: "monthly", priority: 0.8 },
+  ...NUISIBLE_SLUGS.map((slug) => ({ url: `${BASE}/nuisibles/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
