@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import Footer from "./components/Footer"
 import ScrollReveal from "./components/ScrollReveal"
+import WhatsAppFloat from "./components/WhatsAppFloat"
 
 export const metadata: Metadata = {
   title: "Phyto Bénin - Désinsectisation Cotonou | 24h/24",
@@ -238,6 +239,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
 
         <Footer />
+        <WhatsAppFloat />
       </body>
     </html>
   )
