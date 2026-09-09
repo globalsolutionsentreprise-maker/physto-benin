@@ -21,20 +21,21 @@ export default function ContactForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     setStatut("envoi")
+    // Backup fire-and-forget vers Formspree : ne doit JAMAIS bloquer l'enregistrement du lead
+    fetch(FORMSPREE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(formulaire),
+    }).catch(function() {})
+    // Source de vérité : Supabase (DB + e-mail de notification GSE), indépendant de Formspree
     try {
-      const res = await fetch(FORMSPREE_URL, {
+      const res = await fetch("/api/register-lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formulaire),
       })
       if (res.ok) {
         setStatut("succes")
-        // Fire-and-forget : enregistre le lead dans Supabase pour l'offre bienvenue
-        fetch("/api/register-lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formulaire),
-        }).catch(function() {})
         setFormulaire({ nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false })
       } else { setStatut("erreur") }
     } catch(err) { setStatut("erreur") }
