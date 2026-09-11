@@ -325,7 +325,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         <div class="party-row"><span class="party-key">RCCM :</span><span class="party-val">RB/COT/24 B 38910</span></div>
         <div class="party-row"><span class="party-key">IFU :</span><span class="party-val">3202420126111</span></div>
         <div class="party-row"><span class="party-key">Adresse :</span><span class="party-val">Ilot 3535, Cotonou, Bénin</span></div>
-        <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">+229 53 04 79 50</span></div>
+        <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">+229 01 53 04 79 50</span></div>
         <div class="party-row"><span class="party-key">Email :</span><span class="party-val">contact@phyto-benin.com</span></div>
       </div>
       <div class="party-box">

@@ -89,7 +89,7 @@ export default function ContratConformite() {
       "@type": "LocalBusiness",
       "name": "Phyto Bénin by GSE",
       "url": BASE,
-      "telephone": "+22901530 47950",
+      "telephone": "+2290153047950",
       "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" },
     },
     "areaServed": { "@type": "Country", "name": "Bénin" },

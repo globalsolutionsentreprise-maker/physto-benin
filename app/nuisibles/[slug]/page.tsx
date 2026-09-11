@@ -42,7 +42,7 @@ export default async function NuisiblePage({ params }: { params: Promise<{ slug:
   const schemaService = {
     "@context": "https://schema.org", "@type": "Service",
     "name": `Traitement ${n.nom.toLowerCase()} au Bénin`, "description": n.intro,
-    "provider": { "@type": "LocalBusiness", "name": "Phyto Bénin by GSE", "url": BASE, "telephone": "+22901530 47950", "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" } },
+    "provider": { "@type": "LocalBusiness", "name": "Phyto Bénin by GSE", "url": BASE, "telephone": "+2290153047950", "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" } },
     "areaServed": { "@type": "Country", "name": "Bénin" }, "url": `${BASE}/nuisibles/${slug}`,
   }
 

@@ -208,7 +208,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       "@type": "LocalBusiness",
       "name": "Phyto Bénin by GSE",
       "url": "https://www.phyto-benin.com",
-      "telephone": "+22901530 47950",
+      "telephone": "+2290153047950",
       "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" }
     },
     "areaServed": { "@type": "Country", "name": "Bénin" },
@@ -365,7 +365,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             {s.urgence && (
               <div style={{ backgroundColor: "#991b1b", padding: "20px 24px", marginTop: "16px" }}>
                 <div style={{ fontSize: "11px", color: "#fca5a5", fontWeight: "700", marginBottom: "8px" }}>URGENCE 24H/24</div>
-                <a href="tel:+22901530 47950" style={{ display: "block", textAlign: "center", backgroundColor: "#fff", color: "#991b1b", fontWeight: "700", fontSize: "14px", padding: "12px", borderRadius: "4px", textDecoration: "none" }}>
+                <a href="tel:+2290153047950" style={{ display: "block", textAlign: "center", backgroundColor: "#fff", color: "#991b1b", fontWeight: "700", fontSize: "14px", padding: "12px", borderRadius: "4px", textDecoration: "none" }}>
                   Appeler maintenant
                 </a>
               </div>

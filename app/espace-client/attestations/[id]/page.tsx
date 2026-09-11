@@ -233,8 +233,7 @@ export default function AttestationPage() {
                   <div style={{ fontSize: "7px", color: "#1a237e", lineHeight: "1.55" }}>
                     <div><strong>N° RCCM</strong> : RB/COT/24 B 38910</div>
                     <div><strong>N° IFU</strong> : 3202420126111</div>
-                    <div>✆ : +33 06 68 82 52 85</div>
-                    <div>CEL : +229 53 04 78 50</div>
+                    <div>Tél : +229 01 53 04 79 50</div>
                   </div>
                 </div>
 

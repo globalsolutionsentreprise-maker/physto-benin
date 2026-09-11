@@ -152,7 +152,7 @@ export default async function ZonePage({ params }: { params: Promise<{ ville: st
       "@type": "LocalBusiness",
       "name": "Phyto Bénin by GSE",
       "url": "https://www.phyto-benin.com",
-      "telephone": "+22901530 47950",
+      "telephone": "+2290153047950",
       "address": { "@type": "PostalAddress", "addressLocality": "Cotonou", "addressCountry": "BJ" },
     },
     "areaServed": { "@type": "City", "name": v.nom },
@@ -213,7 +213,7 @@ export default async function ZonePage({ params }: { params: Promise<{ ville: st
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>
               Devis gratuit à {v.nom}
             </a>
-            <a href="tel:+22901530 47950" style={{ backgroundColor: "transparent", color: "#fff", fontWeight: "600", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
+            <a href="tel:+2290153047950" style={{ backgroundColor: "transparent", color: "#fff", fontWeight: "600", fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none", border: "1px solid rgba(255,255,255,0.3)" }}>
               Appeler, urgence 24h/24
             </a>
           </div>

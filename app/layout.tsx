@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "url": "https://www.phyto-benin.com",
           "logo": "https://www.phyto-benin.com/logo-gse.jpeg",
           "image": "https://www.phyto-benin.com/images/hero-bg.jpg",
-          "telephone": "+22901530 47950",
+          "telephone": "+2290153047950",
           "email": "contact@phyto-benin.com",
           "address": {
             "@type": "PostalAddress",
