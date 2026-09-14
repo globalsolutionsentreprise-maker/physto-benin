@@ -69,4 +69,6 @@ Format : `[YYYY-MM-DD] | ce qui s'est mal passé | règle à suivre la prochaine
 
 ## Journal récent
 
-(vide — les 51 entrées historiques sont dans `tasks/lessons-archive.md`)
+[2026-09-14] | Carrousel LinkedIn, slide « Vision 2026 » : inventé une « 3ᵉ solution GSE lancée au Bénin » qui n'existe pas, dans un livrable publié | Règle 53 déjà active : pour tout contenu métier destiné à la publication (slides, annonces, objectifs), ne mettre QUE du réel ou un gabarit explicite « [à compléter] ». Jamais une ambition/produit inventé présenté comme un projet réel, même dans une slide « vision ».
+
+[2026-09-14] | Prospection froide injectée dans la table `leads` (leads entrants du site, seul état = booléen `traite`) : pas pilotable, pas de pipeline/relance/canal. Utilisateur a jugé « pas fonctionnel ». | Le démarchage sortant a sa table dédiée `prospects` (module /admin/prospection : statut a_contacter→…→gagne/perdu, canal, prochaine_relance, campagne ; actions 1 clic wa.me/tel/email ; convert_to_devis = bascule en exécution). Ne JAMAIS mélanger prospection froide et leads entrants. NB : l'onglet CRM « 🎯 Prospection » est le pipeline kanban des DEVIS (lane commerciale), pas les prospects froids.
