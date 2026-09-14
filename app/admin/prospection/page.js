@@ -38,6 +38,55 @@ function waLink(tel, segment) {
 }
 const today = () => new Date().toISOString().split("T")[0]
 
+// Prestations vendables (aligné sur le CRM) — choix à la conversion en devis.
+const TYPES_PRESTA = ["Désinsectisation", "Dératisation", "Désinfection", "Fumigation", "Traitement phytosanitaire espaces verts"]
+
+// Dérivation segment à partir de la catégorie (import CSV sans colonne Segment).
+const SEG_MAP = {
+  "Hôtels": "Hôtels & Restaurants", "Hotels": "Hôtels & Restaurants", "Restaurants": "Hôtels & Restaurants",
+  "Supermarchés": "Supermarchés · Entrepôts · Agro", "Supermarches": "Supermarchés · Entrepôts · Agro",
+  "Entrepôts / Logistique": "Supermarchés · Entrepôts · Agro", "Agro-industries": "Supermarchés · Entrepôts · Agro",
+  "Cliniques": "Cliniques & Écoles", "Écoles": "Cliniques & Écoles", "Ecoles": "Cliniques & Écoles",
+  "Sièges d'entreprise": "Sièges & Entreprises", "Sieges d'entreprise": "Sièges & Entreprises",
+}
+
+// Parseur CSV minimal (gère les champs entre guillemets).
+function parseCSV(txt) {
+  const rows = []; let i = 0, field = "", row = [], inq = false
+  while (i < txt.length) {
+    const c = txt[i]
+    if (inq) { if (c === '"') { if (txt[i + 1] === '"') { field += '"'; i++ } else inq = false } else field += c }
+    else { if (c === '"') inq = true; else if (c === ",") { row.push(field); field = "" }
+      else if (c === "\n") { row.push(field); rows.push(row); row = []; field = "" }
+      else if (c === "\r") {} else field += c }
+    i++
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row) }
+  return rows
+}
+function pick(obj, keys) { for (const k of keys) { if (obj[k] != null && obj[k] !== "") return obj[k] } return "" }
+function csvToRows(text, campagneDefaut) {
+  const rows = parseCSV(text).filter(r => r.length > 1 && r.some(c => c.trim()))
+  if (!rows.length) return []
+  const header = rows.shift().map(h => h.trim().toLowerCase())
+  return rows.map(r => {
+    const o = {}
+    header.forEach((h, i) => { o[h] = (r[i] || "").trim() })
+    const categorie = pick(o, ["catégorie", "categorie", "catégories"])
+    const segment = pick(o, ["segment"]) || SEG_MAP[categorie] || null
+    return {
+      nom: pick(o, ["nom", "établissement", "etablissement", "name"]),
+      categorie: categorie || null,
+      segment,
+      telephone: pick(o, ["téléphone", "telephone", "tel", "phone"]) || null,
+      email: pick(o, ["email", "e-mail", "mail"]) || null,
+      adresse: pick(o, ["zone / adresse", "adresse", "zone", "address"]) || null,
+      campagne: pick(o, ["campagne"]) || campagneDefaut || null,
+      source: "import",
+    }
+  }).filter(x => x.nom)
+}
+
 export default function ProspectionPage() {
   const [ready, setReady] = useState(false)
   const [token, setToken] = useState("")
@@ -54,6 +103,15 @@ export default function ProspectionPage() {
   const [msg, setMsg] = useState("")
   const [dragId, setDragId] = useState(null)
   const [overCol, setOverCol] = useState(null)
+  // Slice 3 : ajout manuel, import CSV, conversion avec choix de prestation.
+  const [showAdd, setShowAdd] = useState(false)
+  const [addForm, setAddForm] = useState({ nom: "", categorie: "", segment: "", telephone: "", email: "", adresse: "", campagne: "" })
+  const [showImport, setShowImport] = useState(false)
+  const [importRows, setImportRows] = useState([])
+  const [importCampagne, setImportCampagne] = useState("")
+  const [importInfo, setImportInfo] = useState("")
+  const [convertFor, setConvertFor] = useState(null)
+  const [convertPresta, setConvertPresta] = useState(["Désinsectisation", "Dératisation", "Désinfection"])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -109,10 +167,36 @@ export default function ProspectionPage() {
     charger()
   }
   async function relanceJ3(p) { await post({ action: "set_relance", id: p.id, jours: 3 }); setMsg("Relance J+3 programmée pour " + p.nom); charger() }
-  async function convertir(p) {
-    if (!window.confirm("Convertir « " + p.nom + " » en client + devis ? Il bascule en exécution dans le CRM.")) return
-    const data = await post({ action: "convert_to_devis", id: p.id })
+  function convertir(p) { setConvertPresta(["Désinsectisation", "Dératisation", "Désinfection"]); setConvertFor(p) }
+  async function doConvert() {
+    const p = convertFor
+    if (!p) return
+    const data = await post({ action: "convert_to_devis", id: p.id, prestations: convertPresta })
+    setConvertFor(null)
     if (data && data.ok) { setMsg("« " + p.nom + " » converti en devis. Ouvre le CRM pour continuer."); charger() }
+  }
+  async function addProspect() {
+    if (!addForm.nom.trim()) { setMsg("Nom requis"); return }
+    const data = await post({ action: "add_prospect", prospect: addForm })
+    if (data && data.ok) { setShowAdd(false); setAddForm({ nom: "", categorie: "", segment: "", telephone: "", email: "", adresse: "", campagne: "" }); charger() }
+  }
+  async function onImportFile(e) {
+    const file = e.target.files && e.target.files[0]
+    if (!file) return
+    const text = await file.text()
+    const rows = csvToRows(text, importCampagne)
+    setImportRows(rows)
+    setImportInfo(rows.length + " ligne(s) détectée(s)")
+  }
+  async function doImport() {
+    if (!importRows.length) { setImportInfo("Aucune ligne à importer"); return }
+    const rowsC = importCampagne ? importRows.map(r => ({ ...r, campagne: r.campagne || importCampagne })) : importRows
+    const data = await post({ action: "bulk_import", rows: rowsC })
+    if (data && data.ok) {
+      setImportInfo(data.inserted + " importé(s), " + data.skipped + " ignoré(s) (doublons/sans nom)")
+      setImportRows([])
+      charger()
+    }
   }
   async function supprimer(p) {
     if (!window.confirm("Supprimer « " + p.nom + " » ?")) return
@@ -167,7 +251,11 @@ export default function ProspectionPage() {
             <h1 style={S.h1}>Prospection</h1>
             <p style={S.sub}>{counts.total || 0} prospects · {counts.relances_du_jour || 0} relance(s) du jour</p>
           </div>
-          <a href="/admin" style={S.backLink}>← Retour CRM</a>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <button onClick={() => setShowAdd(true)} style={{ ...S.btn, background: "#e0b32a", color: "#123420", fontWeight: 700 }}>＋ Prospect</button>
+            <button onClick={() => { setShowImport(true); setImportInfo("") }} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>⬆ Importer CSV</button>
+            <a href="/admin" style={S.backLink}>← Retour CRM</a>
+          </div>
         </header>
 
         {msg ? <div style={S.msg} onClick={() => setMsg("")}>{msg} <span style={{ opacity: .6 }}>(fermer)</span></div> : null}
@@ -262,6 +350,66 @@ export default function ProspectionPage() {
           </div>
         )}
       </div>
+
+      {showAdd ? (
+        <div style={S.overlay} onClick={() => setShowAdd(false)}>
+          <div style={S.modal} onClick={e => e.stopPropagation()}>
+            <h3 style={S.modalTitle}>Nouveau prospect</h3>
+            <input placeholder="Nom *" value={addForm.nom} onChange={e => setAddForm(f => ({ ...f, nom: e.target.value }))} style={S.field} />
+            <input placeholder="Téléphone (+229 …)" value={addForm.telephone} onChange={e => setAddForm(f => ({ ...f, telephone: e.target.value }))} style={S.field} />
+            <input placeholder="E-mail" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} style={S.field} />
+            <input placeholder="Catégorie (ex. Hôtels)" value={addForm.categorie} onChange={e => setAddForm(f => ({ ...f, categorie: e.target.value, segment: SEG_MAP[e.target.value] || f.segment }))} style={S.field} />
+            <select value={addForm.segment} onChange={e => setAddForm(f => ({ ...f, segment: e.target.value }))} style={S.field}>
+              <option value="">Segment (facultatif)</option>
+              {SEGMENTS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <input placeholder="Adresse / zone" value={addForm.adresse} onChange={e => setAddForm(f => ({ ...f, adresse: e.target.value }))} style={S.field} />
+            <input placeholder="Campagne" value={addForm.campagne} onChange={e => setAddForm(f => ({ ...f, campagne: e.target.value }))} style={S.field} />
+            <div style={S.modalActions}>
+              <button onClick={() => setShowAdd(false)} style={{ ...S.btn, background: "transparent", color: "#9db69d", border: "1px solid #2a4d38" }}>Annuler</button>
+              <button onClick={addProspect} style={{ ...S.btn, background: "#e0b32a", color: "#123420", fontWeight: 700 }}>Ajouter</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showImport ? (
+        <div style={S.overlay} onClick={() => setShowImport(false)}>
+          <div style={S.modal} onClick={e => e.stopPropagation()}>
+            <h3 style={S.modalTitle}>Importer un CSV</h3>
+            <p style={{ color: "#9db69d", fontSize: 13, margin: "0 0 10px" }}>Colonnes reconnues : Nom, Téléphone, Email, Catégorie, Segment, Zone / Adresse, Campagne. Dédoublonnage sur le téléphone.</p>
+            <input placeholder="Nom de campagne (si absent du CSV)" value={importCampagne} onChange={e => setImportCampagne(e.target.value)} style={S.field} />
+            <input type="file" accept=".csv,text/csv" onChange={onImportFile} style={{ ...S.field, padding: 8 }} />
+            {importInfo ? <p style={{ color: "#e0b32a", fontSize: 13, margin: "4px 0" }}>{importInfo}</p> : null}
+            <div style={S.modalActions}>
+              <button onClick={() => setShowImport(false)} style={{ ...S.btn, background: "transparent", color: "#9db69d", border: "1px solid #2a4d38" }}>Fermer</button>
+              <button onClick={doImport} disabled={!importRows.length} style={{ ...S.btn, background: importRows.length ? "#e0b32a" : "#3f5a48", color: "#123420", fontWeight: 700 }}>Importer {importRows.length ? "(" + importRows.length + ")" : ""}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {convertFor ? (
+        <div style={S.overlay} onClick={() => setConvertFor(null)}>
+          <div style={S.modal} onClick={e => e.stopPropagation()}>
+            <h3 style={S.modalTitle}>Convertir en devis</h3>
+            <p style={{ color: "#9db69d", fontSize: 13, margin: "0 0 12px" }}>« {convertFor.nom} » devient un client + un devis dans le pipeline CRM (bascule en exécution). Prestations à inscrire :</p>
+            {TYPES_PRESTA.map(t => {
+              const on = convertPresta.includes(t)
+              return (
+                <label key={t} style={S.check}>
+                  <input type="checkbox" checked={on} onChange={() => setConvertPresta(prev => on ? prev.filter(x => x !== t) : [...prev, t])} />
+                  <span>{t}</span>
+                </label>
+              )
+            })}
+            <div style={S.modalActions}>
+              <button onClick={() => setConvertFor(null)} style={{ ...S.btn, background: "transparent", color: "#9db69d", border: "1px solid #2a4d38" }}>Annuler</button>
+              <button onClick={doConvert} disabled={!convertPresta.length} style={{ ...S.btn, background: convertPresta.length ? "#33c06a" : "#3f5a48", color: "#04310f", fontWeight: 700 }}>Convertir → CRM</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -320,4 +468,12 @@ const S = {
   actions: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 14, alignItems: "center" },
   btn: { border: "none", borderRadius: 9, padding: "8px 13px", fontSize: 13, fontWeight: 600, cursor: "pointer", textDecoration: "none", display: "inline-block" },
   statutSelect: { background: "#1f3a2a", color: "#eef3ec", border: "1px solid #2a4d38", borderRadius: 9, padding: "8px 10px", fontSize: 13, cursor: "pointer" },
+
+  // Modales
+  overlay: { position: "fixed", inset: 0, background: "rgba(4,20,12,.7)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, zIndex: 50 },
+  modal: { background: "#12331f", border: "1px solid #2a4d38", borderRadius: 14, padding: 20, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto" },
+  modalTitle: { fontSize: 18, fontWeight: 800, margin: "0 0 14px" },
+  field: { width: "100%", boxSizing: "border-box", background: "#0e2a19", color: "#eef3ec", border: "1px solid #2a4d38", borderRadius: 8, padding: "9px 11px", fontSize: 14, marginBottom: 9 },
+  modalActions: { display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 },
+  check: { display: "flex", alignItems: "center", gap: 9, padding: "7px 0", fontSize: 14, cursor: "pointer" },
 }

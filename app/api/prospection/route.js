@@ -165,11 +165,16 @@ export async function POST(req) {
     }).select().single()
     if (errC || !newClient) return Response.json({ error: "Erreur création client: " + (errC && errC.message) }, { status: 500 })
 
+    // Prestation choisie à la conversion (sinon offre 3D par défaut).
+    let prestation = PRESTATION_DEFAUT
+    if (Array.isArray(body.prestations) && body.prestations.length) prestation = body.prestations.join(", ")
+    else if (typeof body.prestation === "string" && body.prestation.trim()) prestation = body.prestation.trim()
+
     const numero = "DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase()
     const { data: newDevis, error: errD } = await supabase.from("devis").insert({
       client_id: newClient.id,
       numero,
-      prestation: PRESTATION_DEFAUT,
+      prestation,
       montant_net: 0,
       montant_total: 0,
       statut: "brouillon",
