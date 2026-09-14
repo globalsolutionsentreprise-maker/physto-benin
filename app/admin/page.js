@@ -4515,7 +4515,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           t[1], badge
         )
       }),
-      React.createElement("button", { key: "export-csv", onClick: exporterCSV, title: "Exporter le pipeline en CSV", style: { marginLeft: "auto", marginBottom: "6px", background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center" } }, "⬇ Export CSV")
+      React.createElement("a", { key: "demarchage", href: "/admin/prospection", title: "Prospects froids (démarchage) : liste, WhatsApp/appel 1 clic, relances", style: { marginLeft: "auto", marginBottom: "6px", background: "#0a2e1a", border: "1px solid #0a2e1a", color: "#fff", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center", textDecoration: "none", fontWeight: "600" } }, "🌱 Démarchage"),
+      React.createElement("button", { key: "export-csv", onClick: exporterCSV, title: "Exporter le pipeline en CSV", style: { marginLeft: "10px", marginBottom: "6px", background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center" } }, "⬇ Export CSV")
     )
   }
 
