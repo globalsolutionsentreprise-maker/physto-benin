@@ -5574,8 +5574,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           })
         ) : null,
 
-        ouvert ? e("div", { style: { marginTop: "12px" } },
-          e("button", { onClick: function() { voirDevisClient(cl) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📊 Ouvrir le dossier")
+        ouvert ? e("div", { style: { marginTop: "12px", display: "flex", gap: "6px", flexWrap: "wrap" } },
+          e("button", { onClick: function() { voirDevisClient(cl) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📊 Ouvrir le dossier"),
+          (function() { var ctr = (contratsList || []).find(function(x) { return x.devis_id === d.id }); return ctr ? e("button", { onClick: function() { ouvrirContratExistant(ctr) }, title: "Régénère et imprime le PDF du contrat daté d'aujourd'hui", style: { background: "#fffbeb", border: "1px solid #fde68a", color: "#92400e", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "🔁 Rééditer (aujourd'hui)") : null })()
         ) : null
       )
     }
@@ -5606,6 +5607,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             e("select", { value: f.frequence || "trimestrielle", onChange: function(ev) { maj("frequence", ev.target.value) }, style: inp2 },
               ["mensuelle", "bimestrielle", "trimestrielle", "semestrielle", "annuelle"].map(function(x) { return e("option", { key: x, value: x }, x) })
             ),
+            e("button", {
+              onClick: function() { ouvrirContratExistant(c) },
+              title: "Régénère et imprime le PDF du contrat daté d'aujourd'hui",
+              style: { backgroundColor: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "8px 12px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+            }, "🔁 Rééditer (aujourd'hui)"),
             e("button", {
               onClick: function() { marquerContratSigne(c.devis_id) },
               disabled: signEnCours === c.devis_id,
