@@ -60,6 +60,8 @@ si une règle ci-dessous est ambiguë ou pour retrouver le contexte d'un bug.
 - Helpers : vérifier dans QUEL composant ils sont définis avant de les appeler (`app/admin/page.js` a deux composants qui ne partagent pas leur scope ; dans `SectionClientsDevis`, prendre le token via `db.auth.getSession()`, pas `authHeaders()`). Un `try/catch` qui retombe sur un message générique masque une ReferenceError : logguer `e` avant de conclure à une erreur réseau.
 - « Page blanche » : faire préciser QUELLE surface (page de l'app / fenêtre ouverte / fichier téléchargé / aperçu) AVANT de coder un correctif.
 
+[2026-09-22] | Dépôt de PDF dans un dossier client local dont le nom finit par un ESPACE (« Harvest Fields ») : chemin construit sans « / » final → fichiers créés À CÔTÉ dans le parent (nommés « Harvest Fields <fichier>.pdf ») au lieu de dedans. La vérif `ls fichier` passait quand même (chemin concaténé identique), masquant l'erreur. | Pour toute écriture de fichier dans un dossier : toujours terminer le chemin du dossier par « / » explicite, et vérifier avec `ls "<dossier>/"` (le dossier), pas `ls "<dossier><fichier>"`. Les dossiers de `~/Documents/ACTIVITE PHYTO- BENIN GSE ` ont souvent des espaces finaux (dossier parent inclus).
+
 ## Format d'ajout
 
 Nouvelle correction de l'utilisateur → ajouter une entrée datée en bas de « Journal récent ».

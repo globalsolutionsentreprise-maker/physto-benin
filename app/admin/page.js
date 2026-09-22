@@ -1505,9 +1505,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
   const PRESTATIONS = ["Désinsectisation", "Dératisation", "Désinfection", "Anti-termites", "Anti-moustiques", "Punaises de lit", "Reptiles et Serpents", "Contrat d'entretien"]
 
-  function ligneVide() { return { prestation: "", secteur: "", superficie: "", prixM2: "" } }
+  function ligneVide() { return { prestation: "", secteur: "", superficie: "", prixM2: "", forfait: "" } }
 
+  // Montant d'une ligne : un forfait saisi prime sur le calcul surface × prix/m².
   function montantLigne(l) {
+    var f = parseFloat(l.forfait) || 0
+    if (f > 0) return Math.round(f)
     var s = parseFloat(l.superficie) || 0
     var p = parseFloat(l.prixM2) || 0
     return (s && p) ? Math.round(s * p) : 0
@@ -1518,7 +1521,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function lignesFromDevis(d) {
     if (Array.isArray(d.lignes) && d.lignes.length > 0) {
       return d.lignes.map(function(l) {
-        return { prestation: l.prestation || "", secteur: l.secteur || "", superficie: l.superficie != null ? String(l.superficie) : "", prixM2: l.prix_m2 != null ? String(l.prix_m2) : "" }
+        return { prestation: l.prestation || "", secteur: l.secteur || "", superficie: l.superficie != null ? String(l.superficie) : "", prixM2: l.prix_m2 != null ? String(l.prix_m2) : "", forfait: l.forfait != null && l.forfait !== 0 ? String(l.forfait) : "" }
       })
     }
     var ppp = d.prix_par_prestation || d.prixParPrestation || {}
@@ -1964,9 +1967,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   async function creerDevis() {
     var lignesClean = (formDevis.lignes || [])
-      .filter(function(l) { return l.prestation })
-      .map(function(l) { return { prestation: l.prestation, secteur: (l.secteur || "").trim(), superficie: parseFloat(l.superficie) || 0, prix_m2: parseFloat(l.prixM2) || 0, montant: montantLigne(l) } })
-    var prestationStr = resumePrestations(lignesClean)
+      .filter(function(l) { return l.prestation || (parseFloat(l.forfait) || 0) > 0 })
+      .map(function(l) { return { prestation: l.prestation, secteur: (l.secteur || "").trim(), superficie: parseFloat(l.superficie) || 0, prix_m2: parseFloat(l.prixM2) || 0, forfait: parseFloat(l.forfait) || 0, montant: montantLigne(l) } })
+    var prestationStr = resumePrestations(lignesClean) || "Prestation forfaitaire"
     if ((!formDevis.clientId && !formDevis.nom) || !prestationStr || !formDevis.montantBrut) {
       setMsg("Remplissez tous les champs obligatoires."); return
     }
@@ -3433,14 +3436,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           return "<div class=\"pbox\"><div class=\"pname\">" + (d.prestation || "Prestation") + "</div>" + (d.description ? "<div class=\"pdesc\">" + d.description + "</div>" : "") + "</div>"
         }
         var rows = lignes.map(function(l) {
+          var isForfait = (parseFloat(l.forfait) || 0) > 0
           var pm2 = parseFloat(l.prixM2) || 0
           var sup = parseFloat(l.superficie) || 0
           var montP = montantLigne(l)
           return "<tr>" +
-            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600\">" + (l.prestation || "") + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600\">" + (l.prestation || (isForfait ? "Forfait" : "")) + "</td>" +
             "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#555\">" + (l.secteur ? l.secteur : "—") + "</td>" +
-            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (sup ? sup.toLocaleString("fr-FR") + " m²" : "—") + "</td>" +
-            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right\">" + pm2.toLocaleString("fr-FR") + " FCFA/m²</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (isForfait ? "—" : (sup ? sup.toLocaleString("fr-FR") + " m²" : "—")) + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right\">" + (isForfait ? "Forfait" : pm2.toLocaleString("fr-FR") + " FCFA/m²") + "</td>" +
             "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right\">" + montP.toLocaleString("fr-FR") + " FCFA</td>" +
             "</tr>"
         }).join("")
@@ -4538,13 +4542,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       })(),
       React.createElement("div", { style: { marginBottom: "14px" } },
-        React.createElement("label", { style: lbl }, "Lignes du devis * — une ligne par secteur/zone"),
+        React.createElement("label", { style: lbl }, "Lignes du devis * — une ligne par secteur/zone (renseigne Surface + Prix/m², OU un Forfait)"),
         React.createElement("div", { style: { border: "1.5px solid #e0ddd6", borderRadius: "8px", overflow: "hidden" } },
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.4fr 1.4fr 0.8fr 0.9fr 1fr 32px", gap: "6px", padding: "8px 10px", backgroundColor: "#0a2e1a", fontSize: "10px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.06em" } },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", backgroundColor: "#0a2e1a", fontSize: "10px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.06em" } },
             React.createElement("span", null, "Prestation"),
-            React.createElement("span", null, "Secteur / zone"),
+            React.createElement("span", null, "Secteur / description"),
             React.createElement("span", { style: { textAlign: "right" } }, "Surface"),
             React.createElement("span", { style: { textAlign: "right" } }, "Prix/m²"),
+            React.createElement("span", { style: { textAlign: "right" } }, "Forfait"),
             React.createElement("span", { style: { textAlign: "right" } }, "Montant"),
             React.createElement("span", null, "")
           ),
@@ -4557,14 +4562,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 return Object.assign({}, prev, { lignes: arr, montantBrut: total > 0 ? String(total) : prev.montantBrut })
               })
             }
-            return React.createElement("div", { key: idx, style: { display: "grid", gridTemplateColumns: "1.4fr 1.4fr 0.8fr 0.9fr 1fr 32px", gap: "6px", padding: "8px 10px", alignItems: "center", borderTop: "1px solid #f0ede8", backgroundColor: "#fff" } },
+            var estForfait = (parseFloat(l.forfait) || 0) > 0
+            return React.createElement("div", { key: idx, style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", alignItems: "center", borderTop: "1px solid #f0ede8", backgroundColor: "#fff" } },
               React.createElement("select", { value: l.prestation || "", onChange: function(e) { setLigne("prestation", e.target.value) }, style: Object.assign({}, inp, { padding: "7px 8px" }) },
                 React.createElement("option", { value: "" }, "— choisir —"),
                 PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) })
               ),
-              React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Ex: Bloc A", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
-              React.createElement("input", { type: "number", value: l.superficie || "", onChange: function(e) { setLigne("superficie", e.target.value) }, placeholder: "m²", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
-              React.createElement("input", { type: "number", value: l.prixM2 || "", onChange: function(e) { setLigne("prixM2", e.target.value) }, placeholder: "FCFA", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
+              React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Ex: Magasin, dératisation…", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
+              React.createElement("input", { type: "number", value: l.superficie || "", disabled: estForfait, onChange: function(e) { setLigne("superficie", e.target.value) }, placeholder: "m²", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
+              React.createElement("input", { type: "number", value: l.prixM2 || "", disabled: estForfait, onChange: function(e) { setLigne("prixM2", e.target.value) }, placeholder: "FCFA", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
+              React.createElement("input", { type: "number", value: l.forfait || "", onChange: function(e) { setLigne("forfait", e.target.value) }, placeholder: "FCFA", title: "Montant forfaitaire (prime sur surface × prix)", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
               React.createElement("span", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", textAlign: "right" } }, m > 0 ? m.toLocaleString("fr-FR") : "—"),
               React.createElement("button", { type: "button", title: "Supprimer la ligne", onClick: function() {
                 setFormDevis(function(prev) {
