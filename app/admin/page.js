@@ -5417,7 +5417,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       paiement:          p.paiement   || "trimestriel_avance",
       typeEtablissement: p.typeEtablissement || "",
       remise:            p.remisePassed || 0,
-      sansNoteDevis:     p.sansNoteDevis ? "1" : "0"
+      // Un contrat réédité prend le dessus sur le devis : jamais la note
+      // « intervention initiale facturée séparément » (double facturation, la
+      // grille du contrat est déjà dérivée du devis). Opt-in réservé à la
+      // 1re proposition via la case du modal.
+      sansNoteDevis:     "1"
     })
     ouvrirContrat("/api/generate-contract?" + params.toString())
   }
