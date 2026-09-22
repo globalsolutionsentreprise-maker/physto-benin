@@ -3630,8 +3630,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     } catch (e) { setFinData({ clients: [], depenses: [] }) }
     setFinLoading(false)
   }
+  // Barème prime terrain (accepté par Fabrice) selon la taille de l'affaire.
+  function primeBareme(m) {
+    m = Number(m) || 0
+    if (m < 75000) return 8000
+    if (m <= 200000) return 12000
+    return 15000
+  }
   function openDepModal() {
-    setDepForm({ categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10) })
+    setDepForm({ categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10), devisId: "" })
     setDepModal(true)
   }
   async function ajouterDepense() {
@@ -3642,10 +3649,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }) })
+      var body = depForm.devisId
+        ? { action: "add_dep_client", devisId: depForm.devisId, libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
+        : { action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(body) })
       setDepModal(false)
       await chargerFinances()
-      setMsg("Dépense enregistrée")
+      setMsg(depForm.devisId ? "Dépense rattachée à l'affaire enregistrée." : "Dépense enregistrée.")
     } catch (e) { setMsg("Erreur enregistrement dépense") }
     setDepSaving(false)
   }
@@ -3792,7 +3802,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setDepModal(false) } },
       e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "440px", maxWidth: "92vw" } },
         e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
-          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Nouvelle dépense générale"),
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Nouvelle dépense"),
           e("button", { onClick: function() { setDepModal(false) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
         ),
         e("div", { style: { marginBottom: "12px" } },
@@ -3801,6 +3811,25 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             DEP_CATS.map(function(c) { return e("option", { key: c.key, value: c.key }, c.label) })
           )
         ),
+        e("div", { style: { marginBottom: "12px" } },
+          e("label", { style: lblS }, "Affaire liée (optionnel — rattache la dépense à un devis)"),
+          e("select", { value: depForm.devisId || "", onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { devisId: v }) }) }, style: Object.assign({}, inpS, { cursor: "pointer" }) },
+            e("option", { value: "" }, "— Dépense générale (non rattachée) —"),
+            (finData.clients || []).map(function(c) { return e("option", { key: c.id, value: c.id }, c.client + " — " + finFmt(c.montantDevis) + " FCFA") })
+          )
+        ),
+        depForm.categorie === "prestataire" ? (function() {
+          var aff = (finData.clients || []).find(function(c) { return c.id === depForm.devisId })
+          var suggestion = aff ? primeBareme(aff.montantDevis) : null
+          return e("div", { style: { marginBottom: "12px", padding: "10px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
+            e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" } }, "Barème prime terrain"),
+            e("div", { style: { fontSize: "11px", color: "#065f46", lineHeight: "1.5" } }, "< 75 000 → 8 000  ·  75 000 à 200 000 → 12 000  ·  > 200 000 → 15 000"),
+            suggestion ? e("div", { style: { display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", flexWrap: "wrap" } },
+              e("span", { style: { fontSize: "12px", color: "#065f46", fontWeight: "600" } }, "Suggéré pour cette affaire : " + finFmt(suggestion) + " FCFA"),
+              e("button", { onClick: function() { setDepForm(function(p) { return Object.assign({}, p, { montant: String(suggestion), libelle: (p.libelle || "").trim() || "Prestation (prime terrain)" }) }) }, style: { background: "#065f46", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Appliquer")
+            ) : e("div", { style: { fontSize: "11px", color: "#7a8a80", marginTop: "6px", fontStyle: "italic" } }, "Choisis une affaire ci-dessus pour obtenir le montant suggéré.")
+          )
+        })() : null,
         e("div", { style: { marginBottom: "12px" } },
           e("label", { style: lblS }, "Libellé"),
           e("input", { type: "text", value: depForm.libelle, placeholder: "Ex: Carburant Cotonou, Perméthrine 5L…", onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { libelle: v }) }) }, style: inpS })
