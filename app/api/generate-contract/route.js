@@ -242,7 +242,7 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; 
 .hdr-right .ref { color: #d4a920; font-size: 12px; margin-top: 4px; }
 .agr { background: #d4a920; padding: 5px 12px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }
 .body { padding: 24px 32px; }
-.ref-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.ref-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
 .ref-cell { background: #f5f5f0; border-radius: 6px; padding: 10px 12px; text-align: center; }
 .ref-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
 .ref-value { font-size: 13px; font-weight: 700; color: #0a2e1a; }
@@ -313,7 +313,6 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     <div class="ref-grid">
       <div class="ref-cell"><div class="ref-label">Réf. contrat</div><div class="ref-value">${esc(contratRef)}</div></div>
       <div class="ref-cell"><div class="ref-label">Date de signature</div><div class="ref-value">${esc(dateJour)}</div></div>
-      <div class="ref-cell"><div class="ref-label">Durée</div><div class="ref-value">${duree} mois</div></div>
     </div>
 
     ${artTitle("Article 1 — Parties contractantes")}
