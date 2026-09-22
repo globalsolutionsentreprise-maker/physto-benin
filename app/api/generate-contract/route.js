@@ -12,8 +12,8 @@ export async function GET(req) {
   try {
     const url              = new URL(req.url)
     const devisId          = url.searchParams.get("devisId")
-    const prixAnnuel       = parseInt(url.searchParams.get("prixAnnuel") || "200000")
-    const prixTrim         = parseInt(url.searchParams.get("prixTrimestre") || "50000")
+    let   prixAnnuel       = parseInt(url.searchParams.get("prixAnnuel") || "200000")
+    let   prixTrim         = parseInt(url.searchParams.get("prixTrimestre") || "50000")
     const formule          = url.searchParams.get("formule") || "Formule Intégrale"
     const passages         = parseInt(url.searchParams.get("passages") || "4")
     const controles        = parseInt(url.searchParams.get("controles") || "8")
@@ -23,6 +23,15 @@ export async function GET(req) {
     const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
     const remiseGlobale    = Math.min(90, Math.max(0, parseFloat(url.searchParams.get("remiseGlobale") || "0")))
     const sansNoteDevis    = url.searchParams.get("sansNoteDevis") === "1"
+    // Paramétrage manuel : l'utilisateur fixe lui-même les montants (mise en
+    // place + prix par entretien) au lieu de laisser le code/l'IA les calculer.
+    const manuel           = url.searchParams.get("manuel") === "1"
+    const misePlace        = parseInt(url.searchParams.get("misePlace") || "0")
+    const prixEntretien    = parseInt(url.searchParams.get("prixEntretien") || "0")
+    if (manuel && misePlace > 0) {
+      prixAnnuel = misePlace + Math.max(0, passages - 1) * prixEntretien
+      prixTrim   = Math.round(prixAnnuel / Math.max(1, passages))
+    }
 
     if (!devisId) return NextResponse.json({ error: "devisId requis" }, { status: 400 })
 
@@ -371,6 +380,37 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </tbody>
     </table>
 
+    ${manuel ? `
+    ${artTitle("Article 4 — Formule d'engagement")}
+    <p class="art-text">Le présent contrat porte sur <strong>${passages} passage${passages > 1 ? "s" : ""}</strong> sur une durée de <strong>${duree} mois</strong>, selon le détail ci-dessous.</p>
+    <table class="finances">
+      <thead>
+        <tr>
+          <th>Prestation</th>
+          <th style="width:20%;text-align:right">Quantité</th>
+          <th style="width:26%;text-align:right">Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mise en place complète (1ᵉʳ passage)</td>
+          <td style="text-align:right">1</td>
+          <td style="text-align:right">${misePlace.toLocaleString("fr-FR")} FCFA</td>
+        </tr>
+        ${passages > 1 ? `<tr>
+          <td>Passage d'entretien ${frequenceLabel()}</td>
+          <td style="text-align:right">× ${passages - 1}</td>
+          <td style="text-align:right">${prixEntretien.toLocaleString("fr-FR")} FCFA / passage</td>
+        </tr>` : ""}
+        <tr class="total">
+          <td>Total pour ${duree} mois</td>
+          <td style="text-align:right"></td>
+          <td style="text-align:right">${prixAnnuel.toLocaleString("fr-FR")} FCFA</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
+    ` : `
     ${artTitle("Article 4 — Formule d'engagement (à cocher par le Client)")}
     <p class="art-text">Le Client choisit la durée de son engagement en cochant <strong>une seule</strong> case ci-dessous. Le tarif par passage diminue à mesure que l'engagement s'allonge. Prix de référence d'un passage ponctuel : <strong>${prixPonctuel.toLocaleString("fr-FR")} FCFA</strong>.</p>
     <table class="finances">
@@ -396,6 +436,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </tbody>
     </table>
     <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
+    `}
 
     ${artTitle("Article 5 — Modalités de paiement")}
     ${paiementArticle()}

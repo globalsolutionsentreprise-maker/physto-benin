@@ -5245,6 +5245,50 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             },
             style: { width: "100%", backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", marginBottom: "10px" }
           }, "⚡ Générer directement — " + parseInt(contratForm.prixNegocie || 0).toLocaleString("fr-FR") + " FCFA/an"),
+          (function() {
+            var inpS = { width: "100%", padding: "8px 10px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+            var setF = function(k, v) { setContratForm(Object.assign({}, contratForm, (function() { var o = {}; o[k] = v; return o })())) }
+            var field = function(label, key, ph) {
+              return React.createElement("div", null,
+                React.createElement("label", { style: { display: "block", fontSize: "10px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", marginBottom: "3px" } }, label),
+                React.createElement("input", { type: "number", value: contratForm[key] || "", onChange: function(e) { setF(key, e.target.value) }, placeholder: ph, style: inpS })
+              )
+            }
+            var passages = parseInt(contratForm.manPassages) || 4
+            var mep = parseInt(contratForm.manMisePlace) || 0
+            var ent = parseInt(contratForm.manEntretien) || 0
+            var annuel = mep + Math.max(0, passages - 1) * ent
+            return React.createElement("div", { style: { marginBottom: "16px", padding: "14px 16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
+              React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" } }, "Paramétrage manuel (sans IA) — j'ai déjà les montants"),
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" } },
+                field("Nb passages / an", "manPassages", "4"),
+                field("Durée (mois)", "manDuree", "12")
+              ),
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" } },
+                field("Prix mise en place (FCFA)", "manMisePlace", "1200000"),
+                field("Prix par entretien (FCFA)", "manEntretien", "850000")
+              ),
+              React.createElement("div", { style: { marginBottom: "10px" } },
+                React.createElement("label", { style: { display: "block", fontSize: "10px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", marginBottom: "3px" } }, "Périodicité de paiement"),
+                React.createElement("select", { value: contratForm.manPaiement || "trimestriel_avance", onChange: function(e) { setF("manPaiement", e.target.value) }, style: inpS },
+                  React.createElement("option", { value: "trimestriel_avance" }, "Trimestriel"),
+                  React.createElement("option", { value: "mensuel" }, "Mensuel"),
+                  React.createElement("option", { value: "semestriel" }, "Semestriel"),
+                  React.createElement("option", { value: "annuel" }, "Annuel (règlement unique)")
+                )
+              ),
+              React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#065f46", margin: "2px 0 10px" } }, "Total contrat : " + annuel.toLocaleString("fr-FR") + " FCFA (" + passages + " passage" + (passages > 1 ? "s" : "") + ")"),
+              React.createElement("button", {
+                onClick: function() {
+                  if (mep <= 0) { setMsg("Paramétrage manuel : renseigne au moins le prix de mise en place."); return }
+                  var duree = parseInt(contratForm.manDuree) || 12
+                  var params = new URLSearchParams({ devisId: d.id, manuel: "1", misePlace: mep, prixEntretien: ent, prixAnnuel: annuel, passages: passages, duree: duree, paiement: contratForm.manPaiement || "trimestriel_avance", formule: "Formule sur mesure", controles: 0, typeEtablissement: contratForm.typeEtablissement || "", sansNoteDevis: "1" })
+                  ouvrirContrat("/api/generate-contract?" + params.toString())
+                },
+                style: { width: "100%", backgroundColor: "#065f46", color: "#fff", border: "none", borderRadius: "8px", padding: "13px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
+              }, "📄 Générer le contrat (montants manuels)")
+            )
+          })(),
           contratQuestions && contratQuestions.length > 0 ? React.createElement("div", {
             style: { marginBottom: "16px", padding: "14px 16px", backgroundColor: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px" }
           },
