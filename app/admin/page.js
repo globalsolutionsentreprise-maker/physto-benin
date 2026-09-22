@@ -1443,6 +1443,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [finLoading, setFinLoading] = React.useState(false)
   const [depModal, setDepModal] = React.useState(false)
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
+  const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "" })
   const [depSaving, setDepSaving] = React.useState(false)
   const [objectifCA, setObjectifCA] = React.useState(0)
   const [objModal, setObjModal] = React.useState(false)
@@ -3626,8 +3627,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var token = (sess.data.session && sess.data.session.access_token) || ""
       var r = await fetch("/api/crm-data", { headers: { "Authorization": "Bearer " + token } })
       var data = await r.json()
-      setFinData({ clients: data.clients || [], depenses: data.depenses || [] })
-    } catch (e) { setFinData({ clients: [], depenses: [] }) }
+      setFinData({ clients: data.clients || [], depenses: data.depenses || [], chargesFixes: data.chargesFixes || [], chargesFixesMensuel: data.chargesFixesMensuel || 0, chargesFixesCumul: data.chargesFixesCumul || 0 })
+    } catch (e) { setFinData({ clients: [], depenses: [], chargesFixes: [], chargesFixesMensuel: 0, chargesFixesCumul: 0 }) }
     setFinLoading(false)
   }
   // Barème prime terrain (accepté par Fabrice) selon la taille de l'affaire.
@@ -3667,6 +3668,29 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_depense", id: id }) })
       await chargerFinances()
       setMsg("Dépense supprimée")
+    } catch (e) { setMsg("Erreur suppression") }
+  }
+  async function ajouterChargeFixe() {
+    var libelle = (chargeForm.libelle || "").trim()
+    var montant = parseFloat(chargeForm.montant) || 0
+    if (!libelle || !montant) { setMsg("Charge fixe : libellé et montant mensuel requis."); return }
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_charge_fixe", libelle: libelle, montant_mensuel: montant, date_debut: chargeForm.dateDebut || null }) })
+      setChargeForm({ libelle: "", montant: "", dateDebut: "" })
+      await chargerFinances()
+      setMsg("Charge fixe ajoutée.")
+    } catch (e) { setMsg("Erreur ajout charge fixe") }
+  }
+  async function supprimerChargeFixe(id) {
+    if (!confirm("Supprimer cette charge fixe ?")) return
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_charge_fixe", id: id }) })
+      await chargerFinances()
+      setMsg("Charge fixe supprimée.")
     } catch (e) { setMsg("Erreur suppression") }
   }
 
@@ -3861,7 +3885,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var tdc = cls.reduce(function(s, c) { return s + (c.depenses || 0) }, 0)
     var tdp = cls.reduce(function(s, c) { return s + (c.depensesPrestataires || 0) }, 0)
     var tdg = depGlob.reduce(function(s, d) { return s + (d.montant || 0) }, 0)
-    var td = tdc + tdp + tdg
+    var cf = finData.chargesFixes || []
+    var cfMensuel = finData.chargesFixesMensuel || 0
+    var cfCumul = finData.chargesFixesCumul || 0
+    var td = tdc + tdp + tdg + cfCumul
     var tf = cls.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
     var tfa = cls.reduce(function(s, c) { return s + (c.montantFacture || 0) }, 0)
     var r = tp - td // Résultat net = encaissé (réellement reçu) − dépenses, pour que les 3 KPIs se réconcilient (facturé ≠ encaissé)
@@ -3972,6 +3999,34 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#bbb" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
             )
           }))
+        )
+      ),
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+        e("div", { style: Object.assign({}, secS, { margin: 0 }) }, "Charges fixes (mensuelles)"),
+        e("span", { style: { fontSize: "12px", color: "#888" } }, finFmt(cfMensuel) + " FCFA / mois · cumul comptabilisé " + finFmt(cfCumul) + " FCFA")
+      ),
+      e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
+        e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+          e("thead", null, e("tr", null, ["Libellé", "Montant / mois", "Depuis", "Mois", "Cumul", ""].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
+          e("tbody", null,
+            cf.map(function(c) {
+              return e("tr", { key: c.id, style: c.actif ? null : { opacity: 0.5 } },
+                e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal", fontWeight: "500" }) }, c.libelle),
+                e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "500" }) }, finFmt(c.montantMensuel) + " FCFA"),
+                e("td", { style: tdS }, finFmtD(c.dateDebut)),
+                e("td", { style: tdS }, c.mois),
+                e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "600" }) }, finFmt(c.cumul) + " FCFA"),
+                e("td", { style: tdS }, e("button", { onClick: function() { supprimerChargeFixe(c.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑"))
+              )
+            }),
+            cf.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 6 }, "Aucune charge fixe. Ajoute par exemple le salaire de Fabrice (50 000 / mois).")) : null,
+            e("tr", { style: { background: "#faf9f6" } },
+              e("td", { style: tdS }, e("input", { type: "text", value: chargeForm.libelle, placeholder: "Ex : Salaire Fabrice", onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { libelle: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
+              e("td", { style: tdS }, e("input", { type: "number", value: chargeForm.montant, placeholder: "50000", onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { montant: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
+              e("td", { style: Object.assign({}, tdS, {}), colSpan: 2 }, e("input", { type: "date", value: chargeForm.dateDebut, onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { dateDebut: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
+              e("td", { style: tdS, colSpan: 2 }, e("button", { onClick: ajouterChargeFixe, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "7px 10px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter"))
+            )
+          )
         )
       ),
       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },

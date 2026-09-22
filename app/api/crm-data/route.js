@@ -135,13 +135,33 @@ export async function GET(req) {
   // l'analyse reflètent immédiatement les affaires dont le délai est dépassé.
   await expirerDevisEnRetard(supabase)
 
-  const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }] = await Promise.all([
+  const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }, { data: chargesFixesRaw }] = await Promise.all([
     supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
     supabase.from("depenses_devis").select("*").order("created_at"),
     supabase.from("personnel").select("id, nom, prenom, poste").order("nom"),
+    supabase.from("charges_fixes").select("*").order("created_at"),
   ])
+
+  // Charges fixes récurrentes : cumul = montant mensuel × mois écoulés depuis la
+  // date de début (mois de début inclus), pour les charges actives uniquement.
+  const nowRef = new Date()
+  const moisEcoules = (dateDebut) => {
+    if (!dateDebut) return 0
+    const d = new Date(dateDebut)
+    if (isNaN(d.getTime())) return 0
+    const m = (nowRef.getFullYear() - d.getFullYear()) * 12 + (nowRef.getMonth() - d.getMonth()) + 1
+    return Math.max(0, m)
+  }
+  const chargesFixes = (chargesFixesRaw || []).map(c => {
+    const mensuel = Number(c.montant_mensuel) || 0
+    const actif = c.actif !== false
+    const mois = moisEcoules(c.date_debut)
+    return { id: c.id, libelle: c.libelle, montantMensuel: mensuel, dateDebut: c.date_debut, actif, mois, cumul: actif ? mensuel * mois : 0 }
+  })
+  const chargesFixesMensuel = chargesFixes.filter(c => c.actif).reduce((s, c) => s + c.montantMensuel, 0)
+  const chargesFixesCumul = chargesFixes.reduce((s, c) => s + c.cumul, 0)
 
   // Somme des coûts prestataires par devis
   const prestByDevis = {}
@@ -223,7 +243,7 @@ export async function GET(req) {
     poste: p.poste || "",
   }))
 
-  return Response.json({ clients, depenses: dep, membres })
+  return Response.json({ clients, depenses: dep, membres, chargesFixes, chargesFixesMensuel, chargesFixesCumul })
 }
 
 export async function POST(req) {
@@ -429,6 +449,24 @@ export async function POST(req) {
 
   if (action === "del_depense") {
     await supabase.from("depenses_globales").delete().eq("id", body.id)
+    return Response.json({ ok: true })
+  }
+
+  if (action === "add_charge_fixe") {
+    const { libelle, montant_mensuel, date_debut } = body
+    const { data: c } = await supabase.from("charges_fixes").insert({
+      libelle, montant_mensuel: montant_mensuel || 0, date_debut: date_debut || null,
+    }).select().single()
+    return Response.json({ ok: true, charge: c })
+  }
+
+  if (action === "del_charge_fixe") {
+    await supabase.from("charges_fixes").delete().eq("id", body.id)
+    return Response.json({ ok: true })
+  }
+
+  if (action === "toggle_charge_fixe") {
+    await supabase.from("charges_fixes").update({ actif: body.actif }).eq("id", body.id)
     return Response.json({ ok: true })
   }
 
