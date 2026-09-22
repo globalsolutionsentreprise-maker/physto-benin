@@ -1443,7 +1443,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [finLoading, setFinLoading] = React.useState(false)
   const [depModal, setDepModal] = React.useState(false)
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
-  const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "" })
+  const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
   const [depSaving, setDepSaving] = React.useState(false)
   const [objectifCA, setObjectifCA] = React.useState(0)
   const [objModal, setObjModal] = React.useState(false)
@@ -3677,8 +3677,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_charge_fixe", libelle: libelle, montant_mensuel: montant, date_debut: chargeForm.dateDebut || null }) })
-      setChargeForm({ libelle: "", montant: "", dateDebut: "" })
+      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_charge_fixe", libelle: libelle, montant_mensuel: montant, date_debut: chargeForm.dateDebut || null, date_fin: chargeForm.dateFin || null }) })
+      setChargeForm({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
       await chargerFinances()
       setMsg("Charge fixe ajoutée.")
     } catch (e) { setMsg("Erreur ajout charge fixe") }
@@ -4007,24 +4007,26 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ),
       e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
         e("table", { style: { width: "100%", borderCollapse: "collapse" } },
-          e("thead", null, e("tr", null, ["Libellé", "Montant / mois", "Depuis", "Mois", "Cumul", ""].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
+          e("thead", null, e("tr", null, ["Libellé", "Montant / mois", "Depuis", "Jusqu'à", "Mois", "Cumul", ""].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
           e("tbody", null,
             cf.map(function(c) {
               return e("tr", { key: c.id, style: c.actif ? null : { opacity: 0.5 } },
                 e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal", fontWeight: "500" }) }, c.libelle),
                 e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "500" }) }, finFmt(c.montantMensuel) + " FCFA"),
                 e("td", { style: tdS }, finFmtD(c.dateDebut)),
+                e("td", { style: tdS }, c.dateFin ? finFmtD(c.dateFin) : "en cours"),
                 e("td", { style: tdS }, c.mois),
                 e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "600" }) }, finFmt(c.cumul) + " FCFA"),
                 e("td", { style: tdS }, e("button", { onClick: function() { supprimerChargeFixe(c.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑"))
               )
             }),
-            cf.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 6 }, "Aucune charge fixe. Ajoute par exemple le salaire de Fabrice (50 000 / mois).")) : null,
+            cf.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 7 }, "Aucune charge fixe. Ajoute par exemple le salaire de Fabrice (50 000 / mois).")) : null,
             e("tr", { style: { background: "#faf9f6" } },
               e("td", { style: tdS }, e("input", { type: "text", value: chargeForm.libelle, placeholder: "Ex : Salaire Fabrice", onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { libelle: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
               e("td", { style: tdS }, e("input", { type: "number", value: chargeForm.montant, placeholder: "50000", onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { montant: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
-              e("td", { style: Object.assign({}, tdS, {}), colSpan: 2 }, e("input", { type: "date", value: chargeForm.dateDebut, onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { dateDebut: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
-              e("td", { style: tdS, colSpan: 2 }, e("button", { onClick: ajouterChargeFixe, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "7px 10px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter"))
+              e("td", { style: tdS }, e("input", { type: "date", title: "Date de début", value: chargeForm.dateDebut, onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { dateDebut: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
+              e("td", { style: tdS }, e("input", { type: "date", title: "Date de fin (laisser vide si en cours)", value: chargeForm.dateFin, onChange: function(ev) { var v = ev.target.value; setChargeForm(function(p) { return Object.assign({}, p, { dateFin: v }) }) }, style: { width: "100%", padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "5px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } })),
+              e("td", { style: tdS, colSpan: 3 }, e("button", { onClick: ajouterChargeFixe, style: { width: "100%", background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "7px 10px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter"))
             )
           )
         )

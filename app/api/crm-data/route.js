@@ -147,18 +147,23 @@ export async function GET(req) {
   // Charges fixes récurrentes : cumul = montant mensuel × mois écoulés depuis la
   // date de début (mois de début inclus), pour les charges actives uniquement.
   const nowRef = new Date()
-  const moisEcoules = (dateDebut) => {
+  const moisEcoules = (dateDebut, dateFin) => {
     if (!dateDebut) return 0
     const d = new Date(dateDebut)
     if (isNaN(d.getTime())) return 0
-    const m = (nowRef.getFullYear() - d.getFullYear()) * 12 + (nowRef.getMonth() - d.getMonth()) + 1
+    let end = nowRef
+    if (dateFin) {
+      const f = new Date(dateFin)
+      if (!isNaN(f.getTime()) && f.getTime() < nowRef.getTime()) end = f
+    }
+    const m = (end.getFullYear() - d.getFullYear()) * 12 + (end.getMonth() - d.getMonth()) + 1
     return Math.max(0, m)
   }
   const chargesFixes = (chargesFixesRaw || []).map(c => {
     const mensuel = Number(c.montant_mensuel) || 0
     const actif = c.actif !== false
-    const mois = moisEcoules(c.date_debut)
-    return { id: c.id, libelle: c.libelle, montantMensuel: mensuel, dateDebut: c.date_debut, actif, mois, cumul: actif ? mensuel * mois : 0 }
+    const mois = moisEcoules(c.date_debut, c.date_fin)
+    return { id: c.id, libelle: c.libelle, montantMensuel: mensuel, dateDebut: c.date_debut, dateFin: c.date_fin || null, actif, mois, cumul: actif ? mensuel * mois : 0 }
   })
   const chargesFixesMensuel = chargesFixes.filter(c => c.actif).reduce((s, c) => s + c.montantMensuel, 0)
   const chargesFixesCumul = chargesFixes.reduce((s, c) => s + c.cumul, 0)
@@ -453,9 +458,9 @@ export async function POST(req) {
   }
 
   if (action === "add_charge_fixe") {
-    const { libelle, montant_mensuel, date_debut } = body
+    const { libelle, montant_mensuel, date_debut, date_fin } = body
     const { data: c } = await supabase.from("charges_fixes").insert({
-      libelle, montant_mensuel: montant_mensuel || 0, date_debut: date_debut || null,
+      libelle, montant_mensuel: montant_mensuel || 0, date_debut: date_debut || null, date_fin: date_fin || null,
     }).select().single()
     return Response.json({ ok: true, charge: c })
   }
