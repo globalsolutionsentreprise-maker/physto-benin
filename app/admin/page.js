@@ -5208,12 +5208,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("input", { value: contratForm.prixNegocie, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { prixNegocie: e.target.value })) }, placeholder: "Ex : 200000 — laisser vide pour laisser l'IA proposer", type: "number", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } }),
             React.createElement("div", { style: { fontSize: "11px", color: "#065f46", marginTop: "5px" } }, "Si renseigné, un bouton de génération directe apparaîtra — sans passer par l'IA.")
           ),
-          React.createElement("div", { style: { marginBottom: "16px" } },
-            React.createElement("label", { style: { display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#555", cursor: "pointer" } },
-              React.createElement("input", { type: "checkbox", checked: !!contratForm.inclureNoteDevis, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { inclureNoteDevis: e.target.checked })) }, style: { width: "15px", height: "15px", cursor: "pointer" } }),
-              "Inclure la note sur le devis initial (montant facturé séparément)"
-            )
-          ),
           contratErreur && React.createElement("div", { style: { backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px", padding: "12px 14px", marginBottom: "12px", fontSize: "13px", color: "#92400e", display: "flex", justifyContent: "space-between", alignItems: "center" } },
             contratErreur,
             React.createElement("span", { onClick: function() { setContratErreur(null) }, style: { cursor: "pointer", opacity: 0.5, marginLeft: "8px" } }, "×")
