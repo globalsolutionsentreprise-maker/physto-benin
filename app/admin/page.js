@@ -3582,6 +3582,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     { key: "transport", label: "🚗 Transport" },
     { key: "produits", label: "🧪 Produits" },
     { key: "materiels", label: "🔧 Matériels" },
+    { key: "investissement", label: "🏗️ Investissement (durable)" },
     { key: "autre", label: "📌 Autre" },
   ]
   var ST_META = {
@@ -3882,9 +3883,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var cls = finData.clients || []
     var depGlob = finData.depenses || []
     var tp = cls.reduce(function(s, c) { return s + (c.paiementsRecus || 0) }, 0)
-    var tdc = cls.reduce(function(s, c) { return s + (c.depenses || 0) }, 0)
+    // Investissement (matériel durable) : suivi à part, HORS résultat d'exploitation.
+    var investOf = function(c) { return (c.depensesItems || []).reduce(function(s, i) { return s + (i.categorie === "investissement" ? (i.montant || 0) : 0) }, 0) }
+    var tdInvestAff = cls.reduce(function(s, c) { return s + investOf(c) }, 0)
+    var tdgInvest = depGlob.reduce(function(s, d) { return s + (d.categorie === "investissement" ? (d.montant || 0) : 0) }, 0)
+    var totalInvest = tdInvestAff + tdgInvest
+    var investRows = []
+    cls.forEach(function(c) { (c.depensesItems || []).forEach(function(i) { if (i.categorie === "investissement") investRows.push({ client: c.client, libelle: i.libelle, montant: i.montant || 0, date: i.date }) }) })
+    depGlob.forEach(function(d) { if (d.categorie === "investissement") investRows.push({ client: "— (général)", libelle: d.libelle, montant: d.montant || 0, date: d.date }) })
+    var tdc = cls.reduce(function(s, c) { return s + (c.depenses || 0) }, 0) - tdInvestAff
     var tdp = cls.reduce(function(s, c) { return s + (c.depensesPrestataires || 0) }, 0)
-    var tdg = depGlob.reduce(function(s, d) { return s + (d.montant || 0) }, 0)
+    var tdg = depGlob.reduce(function(s, d) { return s + (d.montant || 0) }, 0) - tdgInvest
     var cf = finData.chargesFixes || []
     var cfMensuel = finData.chargesFixesMensuel || 0
     var cfCumul = finData.chargesFixesCumul || 0
@@ -3975,10 +3984,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     return e("div", null,
       renderDepModal(),
       renderObjModal(),
-      e("div", { style: { display: "flex", gap: "12px", marginBottom: "24px" } },
-        kpiCard("Encaissements clients", finFmt(tp) + " FCFA", "#1D9E75"),
-        kpiCard("Total dépenses", finFmt(td) + " FCFA", "#E24B4A"),
-        kpiCard("Résultat net", (r >= 0 ? "+" : "") + finFmt(r) + " FCFA", r >= 0 ? "#1D9E75" : "#E24B4A")
+      e("div", { style: { display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" } },
+        kpiCard("Encaissements", finFmt(tp) + " FCFA", "#1D9E75"),
+        kpiCard("Dépenses d'exploitation", finFmt(td) + " FCFA", "#E24B4A"),
+        kpiCard("Résultat net (exploitation)", (r >= 0 ? "+" : "") + finFmt(r) + " FCFA", r >= 0 ? "#1D9E75" : "#E24B4A"),
+        kpiCard("Investissements (durable)", finFmt(totalInvest) + " FCFA", "#185FA5")
       ),
       objCard,
       e("div", { style: secS }, "Suivi financier par client"),
@@ -3987,7 +3997,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("thead", null, e("tr", null, ["Client", "Statut", "Devis", "Facturé", "Reçu", "Dépenses", "Résultat"].map(function(hh) { return e("th", { key: hh, style: thS }, hh) }))),
           e("tbody", null, cls.map(function(c) {
             var meta = ST_META[c.statut] || ST_META.contact
-            var depTotal = (c.depenses || 0) + (c.depensesPrestataires || 0)
+            var depTotal = ((c.depenses || 0) - investOf(c)) + (c.depensesPrestataires || 0)
             var res = (c.paiementsRecus || 0) - depTotal
             return e("tr", { key: c.id || c.client },
               e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, c.client),
@@ -3999,6 +4009,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#bbb" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
             )
           }))
+        )
+      ),
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
+        e("div", { style: Object.assign({}, secS, { margin: 0 }) }, "Investissements (matériel durable)"),
+        e("span", { style: { fontSize: "12px", color: "#888" } }, "Hors résultat d'exploitation · total " + finFmt(totalInvest) + " FCFA")
+      ),
+      e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
+        e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+          e("thead", null, e("tr", null, ["Affaire / origine", "Libellé", "Date", "Montant"].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
+          e("tbody", null,
+            investRows.map(function(iv, i) {
+              return e("tr", { key: i },
+                e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, iv.client),
+                e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal" }) }, iv.libelle),
+                e("td", { style: tdS }, finFmtD(iv.date)),
+                e("td", { style: Object.assign({}, tdS, { color: "#185FA5", fontWeight: "600" }) }, finFmt(iv.montant) + " FCFA")
+              )
+            }),
+            investRows.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 4 }, "Aucun investissement. Catégorise en « Investissement (durable) » le matériel réutilisable (pulvérisateur, postes d'appâtage…).")) : null,
+            investRows.length > 0 ? e("tr", { style: { fontWeight: "600" } }, e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }), colSpan: 3 }, "Total investissements"), e("td", { style: Object.assign({}, tdS, { color: "#185FA5", fontWeight: "700" }) }, finFmt(totalInvest) + " FCFA")) : null
+          )
         )
       ),
       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
