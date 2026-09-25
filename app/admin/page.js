@@ -1772,6 +1772,33 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
   }
 
+  // Encaissement d'un passage : dû, payé (cumulé), facturé le, payé le.
+  // Maj optimiste de interventionsList ; recharge les Finances (paiements_recus
+  // recalculé côté serveur pour un contrat).
+  async function savePassageFinances(passageId, patch) {
+    if (!passageId) return
+    setInterventionsList(function(prev) {
+      return prev.map(function(x) {
+        if (x.id !== passageId) return x
+        var n = Object.assign({}, x)
+        if (patch.montantDu !== undefined) n.montant_du = patch.montantDu
+        if (patch.montantPaye !== undefined) n.montant_paye = patch.montantPaye
+        if (patch.dateFacture !== undefined) n.date_facture = patch.dateFacture || null
+        if (patch.datePaiement !== undefined) n.date_paiement = patch.datePaiement || null
+        return n
+      })
+    })
+    var ok = false
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/rh-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(Object.assign({ action: "set_passage_finances", id: passageId }, patch)) })
+      ok = res.ok
+    } catch (e) { ok = false }
+    if (!ok) { charger(); alert("Échec de l'enregistrement. Les données ont été rechargées.") }
+    else if (typeof chargerFinances === "function") { chargerFinances() }
+  }
+
   // Avance l'étape d'un devis SEULEMENT vers l'avant (jamais reculer), en
   // fusionnant le parcours. Appelé quand un vrai document est créé (certificat,
   // fiche) pour que le pipeline reflète le travail réalisé.
@@ -5649,6 +5676,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
       var r = resumeContrat({ devis: d, interventions: interventionsList }, auj)
       var st = ST_CONTRAT[r.statut] || ST_CONTRAT.actif
+      var COUL_PAIE = { inclus: "#9ca3af", a_venir: "#9ca3af", facture: "#2563eb", partiel: "#d4a920", regle: "#16a34a", alerte: "#dc2626" }
+      var fmtM = function(n) { return Number(n || 0).toLocaleString("fr-FR") }
       var t0 = r.debut ? new Date(r.debut + "T00:00:00").getTime() : null
       var t1 = r.fin ? new Date(r.fin + "T00:00:00").getTime() : null
       var span = (t0 && t1 && t1 > t0) ? (t1 - t0) : null
@@ -5683,16 +5712,24 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             return e("div", {
               key: i,
               onClick: p.id ? function() { togglePassage(p.id, p.statut) } : null,
-              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
+              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + (ctrl ? "" : " · dû " + fmtM(p.montantDu) + " / payé " + fmtM(p.montantPaye) + (p.dateFacture ? " · facturé le " + fmtJ(p.dateFacture) : " · non facturé")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
               style: {
                 position: "absolute", top: ctrl ? "12px" : "10px", left: "calc(" + pct + "% - 6px)",
                 width: ctrl ? "10px" : "14px", height: ctrl ? "10px" : "14px", borderRadius: "50%",
-                backgroundColor: fait ? "#0a2e1a" : (retard ? "#fee2e2" : "#fff"),
+                backgroundColor: COUL_PAIE[p.statutPaiement] || "#9ca3af",
                 border: "2px solid " + (fait ? "#0a2e1a" : (retard ? "#991b1b" : (ctrl ? "#bbb" : "#0a2e1a"))),
                 boxSizing: "border-box", cursor: p.id ? "pointer" : "help"
               }
             })
           })
+        ) : null,
+
+        ouvert ? e("div", { style: { margin: "8px 0 4px", display: "flex", justifyContent: "space-between", fontSize: "12px" } },
+          e("span", { style: { color: "#555" } }, "Encaissé " + fmtM(r.encaisse) + " / " + fmtM(r.duTotal) + " FCFA" + (r.duTotal > 0 ? " (" + Math.round(r.encaisse / r.duTotal * 100) + "%)" : "")),
+          r.prochain ? e("span", { style: { color: "#888" } }, "prochain dû : " + fmtJ(r.prochain.date)) : null
+        ) : null,
+        ouvert ? e("div", { style: { height: "6px", backgroundColor: "#e8e6e0", borderRadius: "3px", marginBottom: "10px" } },
+          e("div", { style: { width: (r.duTotal > 0 ? Math.min(100, Math.round(r.encaisse / r.duTotal * 100)) : 0) + "%", height: "100%", backgroundColor: "#16a34a", borderRadius: "3px" } })
         ) : null,
 
         ouvert ? e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#888", marginBottom: "10px" } },
@@ -5738,6 +5775,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                     style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (sel ? "#0a2e1a" : "#d1d5db"), backgroundColor: sel ? "#0a2e1a" : "#fff", color: sel ? "#fff" : "#555", fontWeight: sel ? "600" : "400" }
                   }, (sel ? "✓ " : "") + m.nom)
                 })
+              ),
+              ctrl ? null : e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
+                e("span", { style: { fontSize: "11px", color: "#6b7280" } }, "dû"),
+                e("input", { type: "number", defaultValue: p.montantDu || 0, onBlur: function(ev) { savePassageFinances(p.id, { montantDu: parseInt(ev.target.value, 10) || 0 }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
+                e("span", { style: { fontSize: "11px", color: "#6b7280" } }, "payé"),
+                e("input", { type: "number", defaultValue: p.montantPaye || 0, onBlur: function(ev) { var v = parseInt(ev.target.value, 10) || 0; savePassageFinances(p.id, { montantPaye: v, datePaiement: v > 0 ? auj : null }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
+                e("button", { onClick: function() { savePassageFinances(p.id, { dateFacture: p.dateFacture ? null : auj }) }, title: p.dateFacture ? "Facturé le " + fmtJ(p.dateFacture) + " — clic pour annuler" : "Marquer facturé", style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (p.dateFacture ? "#2563eb" : "#d1d5db"), backgroundColor: p.dateFacture ? "#2563eb" : "#fff", color: p.dateFacture ? "#fff" : "#555", fontWeight: "600" } }, p.dateFacture ? "✓ facturé" : "facturer"),
+                e("span", { style: { fontSize: "13px" }, title: p.statutPaiement }, ({ inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" })[p.statutPaiement] || "")
               )
             )
           })
