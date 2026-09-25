@@ -269,8 +269,9 @@ export async function POST(req) {
       const estContrat = dv && (dv.type_crm === "contrat" || dv.date_debut_contrat)
       if (estContrat) {
         const { data: rows } = await supabase.from("interventions")
-          .select("montant_paye").eq("devis_id", passage.devis_id)
-        const total = (rows || []).reduce((s, r) => s + (Number(r.montant_paye) || 0), 0)
+          .select("montant_du, montant_paye").eq("devis_id", passage.devis_id)
+        // Passages payants uniquement (montant_du > 0), cohérent avec l'encaissé de la frise.
+        const total = (rows || []).reduce((s, r) => s + ((Number(r.montant_du) || 0) > 0 ? (Number(r.montant_paye) || 0) : 0), 0)
         await supabase.from("devis").update({ paiements_recus: total }).eq("id", passage.devis_id)
       }
     }

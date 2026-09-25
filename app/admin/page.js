@@ -5028,7 +5028,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var EMO = { inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" }
             var fj = function(x) { return x ? new Date(x + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
             var fm = function(n) { return Number(n || 0).toLocaleString("fr-FR") }
-            var pct = rc.duTotal > 0 ? Math.round(rc.encaisse / rc.duTotal * 100) : 0
+            var pct = rc.duTotal > 0 ? Math.min(100, Math.round(rc.encaisse / rc.duTotal * 100)) : 0
             return React.createElement('div', { style: { marginBottom: '16px' } },
               React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '5px' } },
                 React.createElement('span', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' } }, 'Encaissement du contrat'),
@@ -5767,7 +5767,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ) : null,
 
         ouvert ? e("div", { style: { margin: "8px 0 4px", display: "flex", justifyContent: "space-between", fontSize: "12px" } },
-          e("span", { style: { color: "#555" } }, "Encaissé " + fmtM(r.encaisse) + " / " + fmtM(r.duTotal) + " FCFA" + (r.duTotal > 0 ? " (" + Math.round(r.encaisse / r.duTotal * 100) + "%)" : "")),
+          e("span", { style: { color: "#555" } }, "Encaissé " + fmtM(r.encaisse) + " / " + fmtM(r.duTotal) + " FCFA" + (r.duTotal > 0 ? " (" + Math.min(100, Math.round(r.encaisse / r.duTotal * 100)) + "%)" : "")),
           r.prochain ? e("span", { style: { color: "#888" } }, "prochain dû : " + fmtJ(r.prochain.date)) : null
         ) : null,
         ouvert ? e("div", { style: { height: "6px", backgroundColor: "#e8e6e0", borderRadius: "3px", marginBottom: "10px" } },
