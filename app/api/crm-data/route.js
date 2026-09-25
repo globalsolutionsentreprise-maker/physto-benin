@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { datesPassages, montantDuPassage } from "@/lib/contrat-analyse.mjs"
+import { datesPassages, montantDuPassage, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -289,6 +289,12 @@ export async function POST(req) {
     } else {
       updateData.paiements_recus = 0
     }
+    // Garde-fou : un contrat suivi par passages (frise) possède un paiements_recus
+    // dérivé de la somme des passages ; l'étape encaissement ne doit pas l'écraser.
+    const { data: ivsParcours } = await supabase.from("interventions").select("montant_du, montant_paye").eq("devis_id", body.id)
+    if (paiementsParPassages(ivsParcours)) {
+      updateData.paiements_recus = (ivsParcours || []).reduce((s, r) => s + (Number(r.montant_paye) || 0), 0)
+    }
     await supabase.from("devis").update(updateData).eq("id", body.id)
     // Journal : tracer le changement d'étape (qui / quand / de → vers), hors no-op.
     const ancienne = cur && cur.etape
@@ -337,8 +343,13 @@ export async function POST(req) {
   if (action === "sync_encaissements") {
     // Backfill : pour les devis encaissés (parcours) mais paiements_recus < facturé, aligner paiements_recus sur le facturé
     const { data: devis } = await supabase.from("devis").select("id, montant_net, montant_facture_crm, paiements_recus, parcours")
+    // Contrats suivis par passages : leur paiements_recus appartient aux passages, exclus du backfill.
+    const { data: ivsAll } = await supabase.from("interventions").select("devis_id, montant_du")
+    const suiviParPassages = {}
+    for (const i of (ivsAll || [])) { if ((Number(i.montant_du) || 0) > 0 && i.devis_id) suiviParPassages[i.devis_id] = true }
     let count = 0
     for (const d of (devis || [])) {
+      if (suiviParPassages[d.id]) continue
       const enc = d.parcours && d.parcours.encaissement && d.parcours.encaissement.done
       const facture = d.montant_facture_crm || d.montant_net || 0
       if (enc && facture > 0 && (d.paiements_recus || 0) < facture) {

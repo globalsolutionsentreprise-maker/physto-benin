@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { resumeContrat, dateFinContrat } from "@/lib/contrat-analyse.mjs"
+import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -1681,8 +1681,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     // Parcours vidé en contexte Dossier = retour à « converti » (exécution démarrée).
     var etapeDerivee = etapeFromParcours(newParcours) || "converti"
     var update = { parcours: newParcours, etape: etapeDerivee }
+    // Contrat suivi par passages (frise) : paiements_recus appartient aux passages,
+    // l'étape encaissement ne l'écrase pas (garde-fou aligné sur le serveur).
+    var suiviPassages = paiementsParPassages((interventionsList || []).filter(function(i) { return i.devis_id === devisId }))
     var paiementChange
-    if (nowEncaisse !== wasEncaisse) {
+    if (nowEncaisse !== wasEncaisse && !suiviPassages) {
       paiementChange = nowEncaisse ? (d.montant_facture_crm || d.montant_net || 0) : 0
       update.paiements_recus = paiementChange
     }
