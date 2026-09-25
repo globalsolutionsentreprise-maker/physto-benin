@@ -72,14 +72,19 @@ Les états de paiement ne sont **pas stockés**, ils sont **dérivés** (section
   `round(montant_net / nbInterventions)` (nbInterventions = passages de type
   intervention). Reprend la logique de `finMontantParInter`.
 
-L'utilisateur peut **écraser `montant_du` de n'importe quel passage** (entente,
-ex. démarrage plein + entretiens réduits). La valeur saisie n'est jamais
-recalculée automatiquement.
+Le `montant_net` du devis EST le prix négocié du contrat (calculé de façon
+déterministe dans `contrat-analyse.mjs`, jamais par l'IA). L'auto est donc bien
+**en fonction du contrat** : on répartit ce montant négocié sur les passages
+payants, on ne réinvente aucun tarif.
 
-> Décision ouverte (à confirmer à la revue) : garder la **répartition égale**
-> comme auto par défaut (aucun champ nouveau, YAGNI), ou introduire un barème
-> « P1 mise en place au plein tarif + entretiens réduits de X% ». Recommandation :
-> répartition égale maintenant, barème plus tard si besoin réel.
+L'utilisateur peut **écraser `montant_du` de n'importe quel passage** (entente,
+ex. démarrage plein réglé en deux fois + entretiens ajustés). La valeur saisie
+n'est jamais recalculée automatiquement.
+
+> Décision validée avec l'utilisateur : auto = répartition du `montant_net` du
+> contrat sur ses passages d'intervention (contrôles à 0), modifiable à la main.
+> Pas de barème « plein / entretien » séparé pour l'instant (le démarrage se
+> règle par saisie manuelle). Seuil d'alerte validé à 7 jours.
 
 ## 5. Statut de paiement dérivé (par passage)
 
