@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-08-04)
+# Graph Report - gse-site  (2026-09-25)
 
 ## Corpus Check
-- 157 files · ~662,871 words
+- 179 files · ~710,215 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 729 nodes · 754 edges · 97 communities (58 shown, 39 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
+- 808 nodes · 843 edges · 102 communities (66 shown, 36 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cc141e85`
+- Built from commit: `6d4dcabd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -46,6 +46,7 @@
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
 - [[_COMMUNITY_Community 32|Community 32]]
 - [[_COMMUNITY_Community 33|Community 33]]
 - [[_COMMUNITY_Community 34|Community 34]]
@@ -102,6 +103,10 @@
 - [[_COMMUNITY_Community 94|Community 94]]
 - [[_COMMUNITY_Community 95|Community 95]]
 - [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 98|Community 98]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 101|Community 101]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -118,19 +123,19 @@
 ## Surprising Connections (you probably didn't know these)
 - `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
-- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
-  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `appliquerContraintes()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `blocRapport()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `construireSocleDevis()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
+- `POST()` --calls--> `divergencePrestations()`  [EXTRACTED]
+  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 
 ## Import Cycles
 - None detected.
 
-## Communities (97 total, 39 thin omitted)
+## Communities (102 total, 36 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -145,16 +150,16 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+11 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (15): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), STATUT_LABELS, STATUT_LABELS, supabase (+7 more)
+Cohesion: 0.07
+Nodes (16): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), WA_MSG, STATUT_LABELS, STATUT_LABELS (+8 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
 Nodes (12): env, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, hooks, PreCompact, PreToolUse, SessionStart, Stop, permissions (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.23
-Nodes (15): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+7 more)
+Cohesion: 0.21
+Nodes (16): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+8 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -180,13 +185,17 @@ Nodes (6): Correctness, Output format, Regressions, Security, Style, What to che
 Cohesion: 0.33
 Nodes (5): Commit, Deploy, Post-deploy, Pre-deploy checklist, Supabase migrations
 
+### Community 12 - "Community 12"
+Cohesion: 0.16
+Nodes (7): DERNIERE_MODIF, pagesStatiques, Nuisible, NUISIBLE_SLUGS, NUISIBLES, titreArticle(), metadata
+
 ### Community 13 - "Community 13"
 Cohesion: 0.33
 Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill routing
 
 ### Community 14 - "Community 14"
-Cohesion: 0.11
-Nodes (39): callGeminiWithRetry(), POST(), GET(), POST(), verifyAdmin(), GET(), appliquerContraintes(), blocRapport() (+31 more)
+Cohesion: 0.10
+Nodes (42): callGeminiWithRetry(), POST(), esc(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin() (+34 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -205,8 +214,8 @@ Cohesion: 0.70
 Nodes (4): buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST()
 
 ### Community 22 - "Community 22"
-Cohesion: 0.60
-Nodes (4): GET(), POST(), supabase, verifyAdmin()
+Cohesion: 0.33
+Nodes (8): CERT_PREFIX, dateFr(), GET(), MOIS_FR, POST(), preparerCertificat(), supabase, verifyAdmin()
 
 ### Community 23 - "Community 23"
 Cohesion: 0.40
@@ -229,8 +238,12 @@ Cohesion: 0.67
 Nodes (3): creerSupabase(), Services(), SERVICES_DEFAUT
 
 ### Community 30 - "Community 30"
-Cohesion: 0.50
-Nodes (3): Entrées, Format, Lessons — Journal d'apprentissage
+Cohesion: 0.15
+Nodes (12): Devis / CRM / Pipeline, Documents imprimables (devis, certificats, fiches, rapports, contrats), Format d'ajout, IA (Gemini, prompts), Journal récent, Lessons — Règles actives, Next.js 16, RÈGLES ACTIVES (non négociables) (+4 more)
+
+### Community 31 - "Community 31"
+Cohesion: 0.83
+Nodes (3): GET(), POST(), verifyAdmin()
 
 ### Community 32 - "Community 32"
 Cohesion: 0.12
@@ -261,8 +274,16 @@ Cohesion: 0.18
 Nodes (10): /deploy-gse, Règles de sécurité absolues, ÉTAPE 0 — Lire les leçons, ÉTAPE 1 — Pré-checks, ÉTAPE 2 — Migrations Supabase (si nécessaire), ÉTAPE 3 — Commit Git, ÉTAPE 4 — Push vers GitHub (déclenche Vercel), ÉTAPE 5 — Vérification production (+2 more)
 
 ### Community 64 - "Community 64"
-Cohesion: 0.38
-Nodes (8): callGemini(), createLead(), db(), GEMINI_MODELS, loadConversation(), POST(), saveConversation(), sendWhatsApp()
+Cohesion: 0.50
+Nodes (3): Claude Code — resume checkpoint, Plan (from TodoWrite state), To resume
+
+### Community 65 - "Community 65"
+Cohesion: 0.20
+Nodes (4): Offre, getOffres(), metadata, Page()
+
+### Community 68 - "Community 68"
+Cohesion: 0.36
+Nodes (8): champsOffre(), GET(), OFFRE_BOOL, OFFRE_NUM, OFFRE_TXT, POST(), sb(), verifyAdmin()
 
 ### Community 71 - "Community 71"
 Cohesion: 0.22
@@ -324,16 +345,34 @@ Nodes (13): 1. L'IA travaille déjà presque à vide, 1. Socle de données, 2. L
 Cohesion: 0.17
 Nodes (11): Analyse IA de contrat enrichie: plan d'implémentation, Couverture du spec, Global Constraints, Task 1: Socle de données du devis (fonction pure + lanceur de tests), Task 2: Plancher d'infestation et arbitrage des contraintes, Task 3: Chargement du dossier dans la route, Task 4: Prompt d'analyse enrichi, Task 5: Phase questions dans la route (+3 more)
 
+### Community 98 - "Community 98"
+Cohesion: 0.33
+Nodes (5): Contraintes (RÈGLES ACTIVES), Décision (validée avec Kabir), Journal d'avancement, Phases (chacune déployée + QA avant la suivante), Plan — Refonte CRM v2 (séparation Prospection/Exécution + 3 améliorations)
+
+### Community 99 - "Community 99"
+Cohesion: 0.50
+Nodes (3): Entrées, Format, Lessons — Journal d'apprentissage
+
+### Community 100 - "Community 100"
+Cohesion: 0.12
+Nodes (16): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(), ProspectionPage(), S (+8 more)
+
+### Community 101 - "Community 101"
+Cohesion: 0.60
+Nodes (4): GET(), POST(), STATUTS, verifyAdmin()
+
 ## Knowledge Gaps
-- **419 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+414 more)
+- **454 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+449 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `SectionRecrutement()` connect `Community 100` to `Community 5`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _419 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _454 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -341,8 +380,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.08235294117647059 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07396870554765292 - nodes in this community are weakly interconnected._
 - **Should `Community 6` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
-- **Should `Community 7` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._

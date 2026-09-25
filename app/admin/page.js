@@ -3654,7 +3654,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var body = depForm.devisId
         ? { action: "add_dep_client", devisId: depForm.devisId, libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
         : { action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(body) })
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(body) })
+      var out = {}
+      try { out = await res.json() } catch (e) {}
+      if (!res.ok) { setMsg("Erreur : " + (out.error || "enregistrement dépense")); setDepSaving(false); return }
       setDepModal(false)
       await chargerFinances()
       setMsg(depForm.devisId ? "Dépense rattachée à l'affaire enregistrée." : "Dépense enregistrée.")

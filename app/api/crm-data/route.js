@@ -477,9 +477,14 @@ export async function POST(req) {
 
   if (action === "add_dep_client") {
     const { devisId, libelle, montant, categorie, date } = body
-    const { data: dep } = await supabase.from("depenses_devis").insert({
+    const { data: dep, error } = await supabase.from("depenses_devis").insert({
       devis_id: devisId, libelle, montant: montant || 0, categorie: categorie || "autre", date: date || null,
     }).select().single()
+    if (error) {
+      // 23505 = violation de l'index unique depenses_devis_uniq (dépense déjà saisie sur l'affaire)
+      if (error.code === "23505") return Response.json({ error: "Cette dépense est déjà saisie sur cette affaire." }, { status: 409 })
+      return Response.json({ error: error.message }, { status: 400 })
+    }
     return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, categorie: dep.categorie || "autre", date: dep.date || dep.created_at?.split("T")[0] || "" } })
   }
 

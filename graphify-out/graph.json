@@ -257,7 +257,7 @@
       "label": "SectionClientsDevis()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L1372",
+      "source_location": "L1381",
       "_origin": "ast",
       "id": "admin_page_sectionclientsdevis",
       "community": 5,
@@ -267,7 +267,7 @@
       "label": "nomFichierDoc()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5621",
+      "source_location": "L6176",
       "_origin": "ast",
       "id": "admin_page_nomfichierdoc",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5648",
+      "source_location": "L6203",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5654",
+      "source_location": "L6209",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5671",
+      "source_location": "L6226",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5680",
+      "source_location": "L6235",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5687",
+      "source_location": "L6242",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5691",
+      "source_location": "L6246",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -337,7 +337,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5770",
+      "source_location": "L6325",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -347,7 +347,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L5972",
+      "source_location": "L6527",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -357,11 +357,211 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6026",
+      "source_location": "L6581",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
       "norm_label": "buildrapportintervhtml()"
+    },
+    {
+      "label": "OFFRE_VIDE",
+      "file_type": "code",
+      "source_file": "app/admin/page.js",
+      "source_location": "L6626",
+      "_origin": "ast",
+      "id": "admin_page_offre_vide",
+      "community": 5,
+      "norm_label": "offre_vide"
+    },
+    {
+      "label": "SectionRecrutement()",
+      "file_type": "code",
+      "source_file": "app/admin/page.js",
+      "source_location": "L6632",
+      "_origin": "ast",
+      "id": "admin_page_sectionrecrutement",
+      "community": 100,
+      "norm_label": "sectionrecrutement()"
+    },
+    {
+      "label": "page.js",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "prospection_page",
+      "community": 100,
+      "norm_label": "page.js"
+    },
+    {
+      "label": "supabase",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "prospection_page_supabase",
+      "community": 100,
+      "norm_label": "supabase"
+    },
+    {
+      "label": "STATUTS",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "prospection_page_statuts",
+      "community": 100,
+      "norm_label": "statuts"
+    },
+    {
+      "label": "LABEL",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "prospection_page_label",
+      "community": 100,
+      "norm_label": "label"
+    },
+    {
+      "label": "COLOR",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "prospection_page_color",
+      "community": 100,
+      "norm_label": "color"
+    },
+    {
+      "label": "SEGMENTS",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "prospection_page_segments",
+      "community": 100,
+      "norm_label": "segments"
+    },
+    {
+      "label": "WA",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "prospection_page_wa",
+      "community": 100,
+      "norm_label": "wa"
+    },
+    {
+      "label": "waLink()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "prospection_page_walink",
+      "community": 100,
+      "norm_label": "walink()"
+    },
+    {
+      "label": "today()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "prospection_page_today",
+      "community": 100,
+      "norm_label": "today()"
+    },
+    {
+      "label": "TYPES_PRESTA",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "prospection_page_types_presta",
+      "community": 100,
+      "norm_label": "types_presta"
+    },
+    {
+      "label": "SEG_MAP",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "prospection_page_seg_map",
+      "community": 100,
+      "norm_label": "seg_map"
+    },
+    {
+      "label": "parseCSV()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L54",
+      "_origin": "ast",
+      "id": "prospection_page_parsecsv",
+      "community": 100,
+      "norm_label": "parsecsv()"
+    },
+    {
+      "label": "pick()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "prospection_page_pick",
+      "community": 100,
+      "norm_label": "pick()"
+    },
+    {
+      "label": "csvToRows()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L68",
+      "_origin": "ast",
+      "id": "prospection_page_csvtorows",
+      "community": 100,
+      "norm_label": "csvtorows()"
+    },
+    {
+      "label": "ProspectionPage()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L90",
+      "_origin": "ast",
+      "id": "prospection_page_prospectionpage",
+      "community": 100,
+      "norm_label": "prospectionpage()"
+    },
+    {
+      "label": "chip()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L417",
+      "_origin": "ast",
+      "id": "prospection_page_chip",
+      "community": 100,
+      "norm_label": "chip()"
+    },
+    {
+      "label": "toggleBtn()",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L425",
+      "_origin": "ast",
+      "id": "prospection_page_togglebtn",
+      "community": 100,
+      "norm_label": "togglebtn()"
+    },
+    {
+      "label": "S",
+      "file_type": "code",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L429",
+      "_origin": "ast",
+      "id": "prospection_page_s",
+      "community": 100,
+      "norm_label": "s"
     },
     {
       "label": "route.js",
@@ -374,10 +574,20 @@
       "norm_label": "route.js"
     },
     {
+      "label": "verifyAdmin()",
+      "file_type": "code",
+      "source_file": "app/api/admin-auth/route.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "admin_auth_route_verifyadmin",
+      "community": 31,
+      "norm_label": "verifyadmin()"
+    },
+    {
       "label": "GET()",
       "file_type": "code",
       "source_file": "app/api/admin-auth/route.js",
-      "source_location": "L9",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "admin_auth_route_get",
       "community": 31,
@@ -387,7 +597,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/admin-auth/route.js",
-      "source_location": "L18",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "admin_auth_route_post",
       "community": 31,
@@ -476,6 +686,36 @@
     {
       "label": "route.js",
       "file_type": "code",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "candidature_route",
+      "community": 14,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "esc()",
+      "file_type": "code",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "candidature_route_esc",
+      "community": 14,
+      "norm_label": "esc()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "candidature_route_post",
+      "community": 14,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
       "source_file": "app/api/create-client/route.js",
       "source_location": "L1",
       "_origin": "ast",
@@ -554,10 +794,20 @@
       "norm_label": "mapstatut()"
     },
     {
+      "label": "expirerDevisEnRetard()",
+      "file_type": "code",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "crm_data_route_expirerdevisenretard",
+      "community": 14,
+      "norm_label": "expirerdevisenretard()"
+    },
+    {
       "label": "GET()",
       "file_type": "code",
       "source_file": "app/api/crm-data/route.js",
-      "source_location": "L33",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "crm_data_route_get",
       "community": 14,
@@ -567,7 +817,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/crm-data/route.js",
-      "source_location": "L170",
+      "source_location": "L254",
       "_origin": "ast",
       "id": "crm_data_route_post",
       "community": 14,
@@ -716,6 +966,166 @@
     {
       "label": "route.js",
       "file_type": "code",
+      "source_file": "app/api/offres/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "offres_route",
+      "community": 97,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/api/offres/route.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "offres_route_get",
+      "community": 97,
+      "norm_label": "get()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "prospection_route",
+      "community": 101,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "verifyAdmin()",
+      "file_type": "code",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "prospection_route_verifyadmin",
+      "community": 101,
+      "norm_label": "verifyadmin()"
+    },
+    {
+      "label": "STATUTS",
+      "file_type": "code",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "prospection_route_statuts",
+      "community": 101,
+      "norm_label": "statuts"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "prospection_route_get",
+      "community": 101,
+      "norm_label": "get()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "prospection_route_post",
+      "community": 101,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "recrutement_route",
+      "community": 68,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "verifyAdmin()",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "recrutement_route_verifyadmin",
+      "community": 68,
+      "norm_label": "verifyadmin()"
+    },
+    {
+      "label": "sb()",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "recrutement_route_sb",
+      "community": 68,
+      "norm_label": "sb()"
+    },
+    {
+      "label": "OFFRE_TXT",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "recrutement_route_offre_txt",
+      "community": 68,
+      "norm_label": "offre_txt"
+    },
+    {
+      "label": "OFFRE_NUM",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "recrutement_route_offre_num",
+      "community": 68,
+      "norm_label": "offre_num"
+    },
+    {
+      "label": "OFFRE_BOOL",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "recrutement_route_offre_bool",
+      "community": 68,
+      "norm_label": "offre_bool"
+    },
+    {
+      "label": "champsOffre()",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "recrutement_route_champsoffre",
+      "community": 68,
+      "norm_label": "champsoffre()"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "recrutement_route_get",
+      "community": 68,
+      "norm_label": "get()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "recrutement_route_post",
+      "community": 68,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
       "source_file": "app/api/register-lead/route.js",
       "source_location": "L1",
       "_origin": "ast",
@@ -744,10 +1154,50 @@
       "norm_label": "route.js"
     },
     {
+      "label": "CERT_PREFIX",
+      "file_type": "code",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "rh_data_route_cert_prefix",
+      "community": 22,
+      "norm_label": "cert_prefix"
+    },
+    {
+      "label": "MOIS_FR",
+      "file_type": "code",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "rh_data_route_mois_fr",
+      "community": 22,
+      "norm_label": "mois_fr"
+    },
+    {
+      "label": "dateFr()",
+      "file_type": "code",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "rh_data_route_datefr",
+      "community": 22,
+      "norm_label": "datefr()"
+    },
+    {
+      "label": "preparerCertificat()",
+      "file_type": "code",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "rh_data_route_preparercertificat",
+      "community": 22,
+      "norm_label": "preparercertificat()"
+    },
+    {
       "label": "supabase",
       "file_type": "code",
       "source_file": "app/api/rh-data/route.js",
-      "source_location": "L3",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "rh_data_route_supabase",
       "community": 22,
@@ -757,7 +1207,7 @@
       "label": "verifyAdmin()",
       "file_type": "code",
       "source_file": "app/api/rh-data/route.js",
-      "source_location": "L15",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "rh_data_route_verifyadmin",
       "community": 22,
@@ -767,7 +1217,7 @@
       "label": "GET()",
       "file_type": "code",
       "source_file": "app/api/rh-data/route.js",
-      "source_location": "L33",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "rh_data_route_get",
       "community": 22,
@@ -777,7 +1227,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/rh-data/route.js",
-      "source_location": "L82",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "rh_data_route_post",
       "community": 22,
@@ -822,136 +1272,6 @@
       "id": "send_devis_route_post",
       "community": 58,
       "norm_label": "post()"
-    },
-    {
-      "label": "route.js",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "whatsapp_healthcheck_route",
-      "community": 65,
-      "norm_label": "route.js"
-    },
-    {
-      "label": "notify()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L9",
-      "_origin": "ast",
-      "id": "whatsapp_healthcheck_route_notify",
-      "community": 65,
-      "norm_label": "notify()"
-    },
-    {
-      "label": "GET()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L18",
-      "_origin": "ast",
-      "id": "whatsapp_healthcheck_route_get",
-      "community": 65,
-      "norm_label": "get()"
-    },
-    {
-      "label": "route.js",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route",
-      "community": 64,
-      "norm_label": "route.js"
-    },
-    {
-      "label": "GET()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L35",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_get",
-      "community": 64,
-      "norm_label": "get()"
-    },
-    {
-      "label": "POST()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L48",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_post",
-      "community": 64,
-      "norm_label": "post()"
-    },
-    {
-      "label": "db()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L131",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_db",
-      "community": 64,
-      "norm_label": "db()"
-    },
-    {
-      "label": "loadConversation()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L135",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_loadconversation",
-      "community": 64,
-      "norm_label": "loadconversation()"
-    },
-    {
-      "label": "saveConversation()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L146",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_saveconversation",
-      "community": 64,
-      "norm_label": "saveconversation()"
-    },
-    {
-      "label": "GEMINI_MODELS",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L157",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_gemini_models",
-      "community": 64,
-      "norm_label": "gemini_models"
-    },
-    {
-      "label": "callGemini()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L159",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_callgemini",
-      "community": 64,
-      "norm_label": "callgemini()"
-    },
-    {
-      "label": "sendWhatsApp()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L188",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_sendwhatsapp",
-      "community": 64,
-      "norm_label": "sendwhatsapp()"
-    },
-    {
-      "label": "createLead()",
-      "file_type": "code",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L205",
-      "_origin": "ast",
-      "id": "whatsapp_webhook_route_createlead",
-      "community": 64,
-      "norm_label": "createlead()"
     },
     {
       "label": "page.tsx",
@@ -1132,6 +1452,36 @@
       "id": "components_scrollreveal_scrollreveal",
       "community": 3,
       "norm_label": "scrollreveal()"
+    },
+    {
+      "label": "WhatsAppFloat.tsx",
+      "file_type": "code",
+      "source_file": "app/components/WhatsAppFloat.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_whatsappfloat",
+      "community": 3,
+      "norm_label": "whatsappfloat.tsx"
+    },
+    {
+      "label": "WA_MSG",
+      "file_type": "code",
+      "source_file": "app/components/WhatsAppFloat.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "components_whatsappfloat_wa_msg",
+      "community": 3,
+      "norm_label": "wa_msg"
+    },
+    {
+      "label": "WhatsAppFloat()",
+      "file_type": "code",
+      "source_file": "app/components/WhatsAppFloat.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "components_whatsappfloat_whatsappfloat",
+      "community": 3,
+      "norm_label": "whatsappfloat()"
     },
     {
       "label": "ContactForm.js",
@@ -1387,7 +1737,7 @@
       "label": "metadata",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "app_layout_metadata",
       "community": 3,
@@ -1397,7 +1747,7 @@
       "label": "RootLayout()",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
       "community": 3,
@@ -1502,6 +1852,126 @@
       "id": "not_found_page_notfound",
       "community": 55,
       "norm_label": "notfound()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_nuisibles_slug_page_tsx_slug_page",
+      "community": 12,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "generateStaticParams()",
+      "file_type": "code",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "app_nuisibles_slug_page_tsx_slug_page_generatestaticparams",
+      "community": 12,
+      "norm_label": "generatestaticparams()"
+    },
+    {
+      "label": "generateMetadata()",
+      "file_type": "code",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "app_nuisibles_slug_page_tsx_slug_page_generatemetadata",
+      "community": 12,
+      "norm_label": "generatemetadata()"
+    },
+    {
+      "label": "NuisiblePage()",
+      "file_type": "code",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "slug_page_nuisiblepage",
+      "community": 12,
+      "norm_label": "nuisiblepage()"
+    },
+    {
+      "label": "data.ts",
+      "file_type": "code",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "nuisibles_data",
+      "community": 12,
+      "norm_label": "data.ts"
+    },
+    {
+      "label": "Nuisible",
+      "file_type": "code",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "nuisibles_data_nuisible",
+      "community": 12,
+      "norm_label": "nuisible"
+    },
+    {
+      "label": "NUISIBLES",
+      "file_type": "code",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "nuisibles_data_nuisibles",
+      "community": 12,
+      "norm_label": "nuisibles"
+    },
+    {
+      "label": "NUISIBLE_SLUGS",
+      "file_type": "code",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L191",
+      "_origin": "ast",
+      "id": "nuisibles_data_nuisible_slugs",
+      "community": 12,
+      "norm_label": "nuisible_slugs"
+    },
+    {
+      "label": "titreArticle()",
+      "file_type": "code",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L194",
+      "_origin": "ast",
+      "id": "nuisibles_data_titrearticle",
+      "community": 12,
+      "norm_label": "titrearticle()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "nuisibles_page",
+      "community": 12,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "nuisibles_page_metadata",
+      "community": 12,
+      "norm_label": "metadata"
+    },
+    {
+      "label": "NuisiblesIndex()",
+      "file_type": "code",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "nuisibles_page_nuisiblesindex",
+      "community": 12,
+      "norm_label": "nuisiblesindex()"
     },
     {
       "label": "opengraph-image.tsx",
@@ -1614,6 +2084,116 @@
       "norm_label": "quisommesnous()"
     },
     {
+      "label": "FormCandidature.tsx",
+      "file_type": "code",
+      "source_file": "app/recrutement/FormCandidature.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "recrutement_formcandidature",
+      "community": 65,
+      "norm_label": "formcandidature.tsx"
+    },
+    {
+      "label": "Offre",
+      "file_type": "code",
+      "source_file": "app/recrutement/FormCandidature.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "recrutement_formcandidature_offre",
+      "community": 65,
+      "norm_label": "offre"
+    },
+    {
+      "label": "FormCandidature()",
+      "file_type": "code",
+      "source_file": "app/recrutement/FormCandidature.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "recrutement_formcandidature_formcandidature",
+      "community": 65,
+      "norm_label": "formcandidature()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "recrutement_page",
+      "community": 65,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "recrutement_page_metadata",
+      "community": 65,
+      "norm_label": "metadata"
+    },
+    {
+      "label": "getOffres()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "recrutement_page_getoffres",
+      "community": 65,
+      "norm_label": "getoffres()"
+    },
+    {
+      "label": "renderTexte()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "recrutement_page_rendertexte",
+      "community": 65,
+      "norm_label": "rendertexte()"
+    },
+    {
+      "label": "fmtRemuneration()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "recrutement_page_fmtremuneration",
+      "community": 65,
+      "norm_label": "fmtremuneration()"
+    },
+    {
+      "label": "Section()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "recrutement_page_section",
+      "community": 65,
+      "norm_label": "section()"
+    },
+    {
+      "label": "RLigne()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "recrutement_page_rligne",
+      "community": 65,
+      "norm_label": "rligne()"
+    },
+    {
+      "label": "Page()",
+      "file_type": "code",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L79",
+      "_origin": "ast",
+      "id": "recrutement_page_page",
+      "community": 65,
+      "norm_label": "page()"
+    },
+    {
       "label": "page.tsx",
       "file_type": "code",
       "source_file": "app/services/[slug]/page.tsx",
@@ -1717,7 +2297,7 @@
       "label": "DERNIERE_MODIF",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "app_sitemap_derniere_modif",
       "community": 12,
@@ -1727,7 +2307,7 @@
       "label": "slugifier()",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "app_sitemap_slugifier",
       "community": 12,
@@ -1737,7 +2317,7 @@
       "label": "pagesStatiques",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "app_sitemap_pagesstatiques",
       "community": 12,
@@ -1747,7 +2327,7 @@
       "label": "sitemap()",
       "file_type": "code",
       "source_file": "app/sitemap.ts",
-      "source_location": "L47",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "app_sitemap_sitemap",
       "community": 12,
@@ -2283,7 +2863,7 @@
       "label": "NUISIBLE_VERS_PRESTATION",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L521",
+      "source_location": "L527",
       "_origin": "ast",
       "id": "lib_contrat_analyse_nuisible_vers_prestation",
       "community": 14,
@@ -2293,7 +2873,7 @@
       "label": "prestationsDepuisNuisibles()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L527",
+      "source_location": "L533",
       "_origin": "ast",
       "id": "lib_contrat_analyse_prestationsdepuisnuisibles",
       "community": 14,
@@ -2303,7 +2883,7 @@
       "label": "divergencePrestations()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L545",
+      "source_location": "L551",
       "_origin": "ast",
       "id": "lib_contrat_analyse_divergenceprestations",
       "community": 14,
@@ -3080,24 +3660,44 @@
       "norm_label": "exclude"
     },
     {
-      "label": "vercel.json",
-      "file_type": "code",
-      "source_file": "vercel.json",
+      "label": "RESUME.md",
+      "file_type": "document",
+      "source_file": ".claude/RESUME.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "vercel",
-      "community": 68,
-      "norm_label": "vercel.json"
+      "id": "claude_resume",
+      "community": 64,
+      "norm_label": "resume.md"
     },
     {
-      "label": "crons",
-      "file_type": "code",
-      "source_file": "vercel.json",
-      "source_location": "L2",
+      "label": "Claude Code \u2014 resume checkpoint",
+      "file_type": "document",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L1",
       "_origin": "ast",
-      "id": "vercel_crons",
-      "community": 68,
-      "norm_label": "crons"
+      "id": "claude_resume_claude_code_resume_checkpoint",
+      "community": 64,
+      "norm_label": "claude code \u2014 resume checkpoint"
+    },
+    {
+      "label": "To resume",
+      "file_type": "document",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "claude_resume_to_resume",
+      "community": 64,
+      "norm_label": "to resume"
+    },
+    {
+      "label": "Plan (from TodoWrite state)",
+      "file_type": "document",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "claude_resume_plan_from_todowrite_state",
+      "community": 64,
+      "norm_label": "plan (from todowrite state)"
     },
     {
       "label": "bug-investigator.md",
@@ -3323,7 +3923,7 @@
       "label": "Test targets",
       "file_type": "document",
       "source_file": ".claude/agents/ui-qa.md",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "agents_ui_qa_test_targets",
       "community": 18,
@@ -3333,7 +3933,7 @@
       "label": "QA checklist for RH module (rh.html)",
       "file_type": "document",
       "source_file": ".claude/agents/ui-qa.md",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "agents_ui_qa_qa_checklist_for_rh_module_rh_html",
       "community": 18,
@@ -3343,7 +3943,7 @@
       "label": "QA checklist for CRM module (crm.html)",
       "file_type": "document",
       "source_file": ".claude/agents/ui-qa.md",
-      "source_location": "L21",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "agents_ui_qa_qa_checklist_for_crm_module_crm_html",
       "community": 18,
@@ -3353,7 +3953,7 @@
       "label": "Reporting",
       "file_type": "document",
       "source_file": ".claude/agents/ui-qa.md",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "agents_ui_qa_reporting",
       "community": 18,
@@ -5023,7 +5623,7 @@
       "label": "Contraintes",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L31",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "claude_contraintes",
       "community": 13,
@@ -5033,7 +5633,7 @@
       "label": "graphify",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L37",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "claude_graphify",
       "community": 13,
@@ -7090,6 +7690,46 @@
       "norm_label": "6. verification"
     },
     {
+      "label": "lessons-archive.md",
+      "file_type": "document",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_lessons_archive",
+      "community": 99,
+      "norm_label": "lessons-archive.md"
+    },
+    {
+      "label": "Lessons \u2014 Journal d'apprentissage",
+      "file_type": "document",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_lessons_archive_lessons_journal_d_apprentissage",
+      "community": 99,
+      "norm_label": "lessons \u2014 journal d'apprentissage"
+    },
+    {
+      "label": "Format",
+      "file_type": "document",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "tasks_lessons_archive_format",
+      "community": 99,
+      "norm_label": "format"
+    },
+    {
+      "label": "Entr\u00e9es",
+      "file_type": "document",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "tasks_lessons_archive_entr\u00e9es",
+      "community": 99,
+      "norm_label": "entrees"
+    },
+    {
       "label": "lessons.md",
       "file_type": "document",
       "source_file": "tasks/lessons.md",
@@ -7100,34 +7740,184 @@
       "norm_label": "lessons.md"
     },
     {
-      "label": "Lessons \u2014 Journal d'apprentissage",
+      "label": "Lessons \u2014 R\u00e8gles actives",
       "file_type": "document",
       "source_file": "tasks/lessons.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "tasks_lessons_lessons_journal_d_apprentissage",
+      "id": "tasks_lessons_lessons_r\u00e8gles_actives",
       "community": 30,
-      "norm_label": "lessons \u2014 journal d'apprentissage"
+      "norm_label": "lessons \u2014 regles actives"
     },
     {
-      "label": "Format",
+      "label": "R\u00c8GLES ACTIVES (non n\u00e9gociables)",
       "file_type": "document",
       "source_file": "tasks/lessons.md",
-      "source_location": "L5",
+      "source_location": "L8",
       "_origin": "ast",
-      "id": "tasks_lessons_format",
+      "id": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
       "community": 30,
-      "norm_label": "format"
+      "norm_label": "regles actives (non negociables)"
     },
     {
-      "label": "Entr\u00e9es",
+      "label": "Supabase / RLS / API",
       "file_type": "document",
       "source_file": "tasks/lessons.md",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
-      "id": "tasks_lessons_entr\u00e9es",
+      "id": "tasks_lessons_supabase_rls_api",
       "community": 30,
-      "norm_label": "entrees"
+      "norm_label": "supabase / rls / api"
+    },
+    {
+      "label": "Devis / CRM / Pipeline",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "tasks_lessons_devis_crm_pipeline",
+      "community": 30,
+      "norm_label": "devis / crm / pipeline"
+    },
+    {
+      "label": "Documents imprimables (devis, certificats, fiches, rapports, contrats)",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "tasks_lessons_documents_imprimables_devis_certificats_fiches_rapports_contrats",
+      "community": 30,
+      "norm_label": "documents imprimables (devis, certificats, fiches, rapports, contrats)"
+    },
+    {
+      "label": "IA (Gemini, prompts)",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "tasks_lessons_ia_gemini_prompts",
+      "community": 30,
+      "norm_label": "ia (gemini, prompts)"
+    },
+    {
+      "label": "S\u00e9curit\u00e9 / secrets",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "tasks_lessons_s\u00e9curit\u00e9_secrets",
+      "community": 30,
+      "norm_label": "securite / secrets"
+    },
+    {
+      "label": "Next.js 16",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L47",
+      "_origin": "ast",
+      "id": "tasks_lessons_next_js_16",
+      "community": 30,
+      "norm_label": "next.js 16"
+    },
+    {
+      "label": "Style / livrables (IMP\u00c9RATIF)",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "tasks_lessons_style_livrables_imp\u00e9ratif",
+      "community": 30,
+      "norm_label": "style / livrables (imperatif)"
+    },
+    {
+      "label": "Workflow / QA",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "tasks_lessons_workflow_qa",
+      "community": 30,
+      "norm_label": "workflow / qa"
+    },
+    {
+      "label": "Format d'ajout",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L65",
+      "_origin": "ast",
+      "id": "tasks_lessons_format_d_ajout",
+      "community": 30,
+      "norm_label": "format d'ajout"
+    },
+    {
+      "label": "Journal r\u00e9cent",
+      "file_type": "document",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "tasks_lessons_journal_r\u00e9cent",
+      "community": 30,
+      "norm_label": "journal recent"
+    },
+    {
+      "label": "plan-crm-refonte-v2.md",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2",
+      "community": 98,
+      "norm_label": "plan-crm-refonte-v2.md"
+    },
+    {
+      "label": "Plan \u2014 Refonte CRM v2 (s\u00e9paration Prospection/Ex\u00e9cution + 3 am\u00e9liorations)",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations",
+      "community": 98,
+      "norm_label": "plan \u2014 refonte crm v2 (separation prospection/execution + 3 ameliorations)"
+    },
+    {
+      "label": "D\u00e9cision (valid\u00e9e avec Kabir)",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2_d\u00e9cision_valid\u00e9e_avec_kabir",
+      "community": 98,
+      "norm_label": "decision (validee avec kabir)"
+    },
+    {
+      "label": "Contraintes (R\u00c8GLES ACTIVES)",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2_contraintes_r\u00e8gles_actives",
+      "community": 98,
+      "norm_label": "contraintes (regles actives)"
+    },
+    {
+      "label": "Phases (chacune d\u00e9ploy\u00e9e + QA avant la suivante)",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2_phases_chacune_d\u00e9ploy\u00e9e_qa_avant_la_suivante",
+      "community": 98,
+      "norm_label": "phases (chacune deployee + qa avant la suivante)"
+    },
+    {
+      "label": "Journal d'avancement",
+      "file_type": "document",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "tasks_plan_crm_refonte_v2_journal_d_avancement",
+      "community": 98,
+      "norm_label": "journal d'avancement"
     },
     {
       "label": "plan-crm-unification.md",
@@ -7616,6 +8406,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.js",
+      "source_location": "L6197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_page",
+      "target": "admin_page_offre_vide"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
       "source_location": "L5649",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -7631,6 +8431,16 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "admin_page_sectionclientsdevis"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L6197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_page",
+      "target": "admin_page_sectionrecrutement"
     },
     {
       "relation": "contains",
@@ -7852,6 +8662,220 @@
       "target": "admin_page_gsefooter"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/admin/page.js",
+      "source_location": "L6612",
+      "weight": 1.0,
+      "source": "admin_page_sectionrecrutement",
+      "target": "prospection_page_walink"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L199",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_chip"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_color"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L68",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_csvtorows"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_label"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L54",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_parsecsv"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_pick"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_prospectionpage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L208",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_s"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_seg_map"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_segments"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_statuts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_supabase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_today"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L425",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_togglebtn"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_types_presta"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_wa"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page",
+      "target": "prospection_page_walink"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page_csvtorows",
+      "target": "prospection_page_parsecsv"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L133",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page_prospectionpage",
+      "target": "prospection_page_chip"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/prospection/page.js",
+      "source_location": "L219",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_page_prospectionpage",
+      "target": "prospection_page_togglebtn"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/admin-auth/route.js",
@@ -7870,6 +8894,38 @@
       "confidence_score": 1.0,
       "source": "admin_auth_route",
       "target": "admin_auth_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/admin-auth/route.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_auth_route",
+      "target": "admin_auth_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/admin-auth/route.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_auth_route_get",
+      "target": "admin_auth_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/admin-auth/route.js",
+      "source_location": "L63",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "admin_auth_route_post",
+      "target": "admin_auth_route_verifyadmin"
     },
     {
       "relation": "contains",
@@ -8253,6 +9309,48 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "candidature_route",
+      "target": "candidature_route_esc"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "candidature_route",
+      "target": "candidature_route_post"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/candidature/route.js",
+      "source_location": "L60",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "candidature_route_post",
+      "target": "candidature_route_esc"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L212",
+      "weight": 1.0,
+      "source": "generate_contract_route_get",
+      "target": "candidature_route_esc"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/api/create-client/route.js",
       "source_location": "L6",
       "weight": 1.0,
@@ -8290,6 +9388,16 @@
       "confidence_score": 1.0,
       "source": "create_payment_route",
       "target": "create_payment_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "crm_data_route",
+      "target": "crm_data_route_expirerdevisenretard"
     },
     {
       "relation": "contains",
@@ -8374,6 +9482,17 @@
       "confidence_score": 1.0,
       "source": "crm_data_route_post",
       "target": "crm_data_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "crm_data_route_get",
+      "target": "crm_data_route_expirerdevisenretard"
     },
     {
       "relation": "calls",
@@ -8534,12 +9653,239 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/api/offres/route.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "offres_route",
+      "target": "offres_route_get"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route",
+      "target": "prospection_route_get"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route",
+      "target": "prospection_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route",
+      "target": "prospection_route_statuts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route",
+      "target": "prospection_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route_get",
+      "target": "prospection_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/prospection/route.js",
+      "source_location": "L72",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "prospection_route_post",
+      "target": "prospection_route_verifyadmin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_champsoffre"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_get"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_offre_bool"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_offre_num"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_offre_txt"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_sb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route",
+      "target": "recrutement_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route_get",
+      "target": "recrutement_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route_post",
+      "target": "recrutement_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route_get",
+      "target": "recrutement_route_sb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route_post",
+      "target": "recrutement_route_sb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/recrutement/route.js",
+      "source_location": "L77",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_route_post",
+      "target": "recrutement_route_champsoffre"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/api/register-lead/route.js",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "register_lead_route",
       "target": "register_lead_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route",
+      "target": "rh_data_route_cert_prefix"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route",
+      "target": "rh_data_route_datefr"
     },
     {
       "relation": "contains",
@@ -8555,11 +9901,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/rh-data/route.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route",
+      "target": "rh_data_route_mois_fr"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
       "source_location": "L67",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "rh_data_route",
       "target": "rh_data_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route",
+      "target": "rh_data_route_preparercertificat"
     },
     {
       "relation": "contains",
@@ -8580,6 +9946,28 @@
       "confidence_score": 1.0,
       "source": "rh_data_route",
       "target": "rh_data_route_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route_preparercertificat",
+      "target": "rh_data_route_datefr"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/rh-data/route.js",
+      "source_location": "L224",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rh_data_route_post",
+      "target": "rh_data_route_preparercertificat"
     },
     {
       "relation": "calls",
@@ -8622,215 +10010,6 @@
       "confidence_score": 1.0,
       "source": "send_devis_route",
       "target": "send_devis_route_post"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L18",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_healthcheck_route",
-      "target": "whatsapp_healthcheck_route_get"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_healthcheck_route",
-      "target": "whatsapp_healthcheck_route_notify"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-healthcheck/route.js",
-      "source_location": "L58",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_healthcheck_route_get",
-      "target": "whatsapp_healthcheck_route_notify"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L155",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_callgemini"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L201",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_createlead"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L127",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_db"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L153",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_gemini_models"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L35",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_get"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L131",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_loadconversation"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L48",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_post"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L142",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_saveconversation"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L184",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route",
-      "target": "whatsapp_webhook_route_sendwhatsapp"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L94",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_post",
-      "target": "whatsapp_webhook_route_callgemini"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L111",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_post",
-      "target": "whatsapp_webhook_route_createlead"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L82",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_post",
-      "target": "whatsapp_webhook_route_loadconversation"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L119",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_post",
-      "target": "whatsapp_webhook_route_saveconversation"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L74",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_post",
-      "target": "whatsapp_webhook_route_sendwhatsapp"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L132",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_loadconversation",
-      "target": "whatsapp_webhook_route_db"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L143",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_saveconversation",
-      "target": "whatsapp_webhook_route_db"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "app/api/whatsapp-webhook/route.js",
-      "source_location": "L227",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "whatsapp_webhook_route_createlead",
-      "target": "whatsapp_webhook_route_sendwhatsapp"
     },
     {
       "relation": "contains",
@@ -9115,6 +10294,37 @@
       "confidence_score": 1.0,
       "source": "components_scrollreveal",
       "target": "components_scrollreveal_scrollreveal"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "components_whatsappfloat"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/components/WhatsAppFloat.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_whatsappfloat",
+      "target": "components_whatsappfloat_wa_msg"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/components/WhatsAppFloat.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_whatsappfloat",
+      "target": "components_whatsappfloat_whatsappfloat"
     },
     {
       "relation": "contains",
@@ -9513,6 +10723,195 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "app_nuisibles_slug_page_tsx_slug_page_generatemetadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "app_nuisibles_slug_page_tsx_slug_page_generatestaticparams"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "nuisibles_data"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "nuisibles_data_nuisible_slugs"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "nuisibles_data_nuisibles"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "nuisibles_data_titrearticle"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/[slug]/page.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_nuisibles_slug_page_tsx_slug_page",
+      "target": "slug_page_nuisiblepage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sitemap.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_sitemap",
+      "target": "nuisibles_data"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_data",
+      "target": "nuisibles_data_nuisible"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L191",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_data",
+      "target": "nuisibles_data_nuisible_slugs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_data",
+      "target": "nuisibles_data_nuisibles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/data.ts",
+      "source_location": "L194",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_data",
+      "target": "nuisibles_data_titrearticle"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_page",
+      "target": "nuisibles_data"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_page",
+      "target": "nuisibles_data_nuisibles"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/sitemap.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_sitemap",
+      "target": "nuisibles_data_nuisible_slugs"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_page",
+      "target": "nuisibles_data_nuisible_slugs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_page",
+      "target": "nuisibles_page_metadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/nuisibles/page.tsx",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nuisibles_page",
+      "target": "nuisibles_page_nuisiblesindex"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/opengraph-image.tsx",
       "source_location": "L14",
       "weight": 1.0,
@@ -9590,6 +10989,118 @@
       "confidence_score": 1.0,
       "source": "qui_sommes_nous_page_quisommesnous",
       "target": "qui_sommes_nous_page_creersupabase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/FormCandidature.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_formcandidature",
+      "target": "recrutement_formcandidature_formcandidature"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/FormCandidature.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_formcandidature",
+      "target": "recrutement_formcandidature_offre"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_formcandidature"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_fmtremuneration"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_getoffres"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_metadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_page"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_rendertexte"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_rligne"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L66",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page",
+      "target": "recrutement_page_section"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/recrutement/page.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "recrutement_page_page",
+      "target": "recrutement_page_getoffres"
     },
     {
       "relation": "contains",
@@ -9738,9 +11249,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_generatemetadata",
-      "confidence_score": 1.0
+      "target": "ville_page_generatemetadata"
     },
     {
       "relation": "contains",
@@ -9748,9 +11259,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_generatestaticparams",
-      "confidence_score": 1.0
+      "target": "ville_page_generatestaticparams"
     },
     {
       "relation": "contains",
@@ -9758,9 +11269,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_nuisible",
-      "confidence_score": 1.0
+      "target": "ville_page_nuisible"
     },
     {
       "relation": "contains",
@@ -9768,9 +11279,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_ville",
-      "confidence_score": 1.0
+      "target": "ville_page_ville"
     },
     {
       "relation": "contains",
@@ -9778,9 +11289,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_villes",
-      "confidence_score": 1.0
+      "target": "ville_page_villes"
     },
     {
       "relation": "contains",
@@ -9788,9 +11299,9 @@
       "source_file": "app/zones/[ville]/page.tsx",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ville_page",
-      "target": "ville_page_zonepage",
-      "confidence_score": 1.0
+      "target": "ville_page_zonepage"
     },
     {
       "relation": "contains",
@@ -9798,9 +11309,9 @@
       "source_file": "app/zones/page.tsx",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "zones_page",
-      "target": "zones_page_metadata",
-      "confidence_score": 1.0
+      "target": "zones_page_metadata"
     },
     {
       "relation": "contains",
@@ -9808,9 +11319,9 @@
       "source_file": "app/zones/page.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "zones_page",
-      "target": "zones_page_villes",
-      "confidence_score": 1.0
+      "target": "zones_page_villes"
     },
     {
       "relation": "contains",
@@ -9818,9 +11329,9 @@
       "source_file": "app/zones/page.tsx",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "zones_page",
-      "target": "zones_page_zonesindex",
-      "confidence_score": 1.0
+      "target": "zones_page_zonesindex"
     },
     {
       "relation": "contains",
@@ -11253,12 +12764,32 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "vercel.json",
-      "source_location": "L2",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L1",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "vercel",
-      "target": "vercel_crons"
+      "source": "claude_resume",
+      "target": "claude_resume_claude_code_resume_checkpoint"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_resume_claude_code_resume_checkpoint",
+      "target": "claude_resume_plan_from_todowrite_state"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/RESUME.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "claude_resume_claude_code_resume_checkpoint",
+      "target": "claude_resume_to_resume"
     },
     {
       "relation": "contains",
@@ -14793,32 +16324,202 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_archive",
+      "target": "tasks_lessons_archive_lessons_journal_d_apprentissage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_archive_lessons_journal_d_apprentissage",
+      "target": "tasks_lessons_archive_entr\u00e9es"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons-archive.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_archive_lessons_journal_d_apprentissage",
+      "target": "tasks_lessons_archive_format"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tasks/lessons.md",
       "source_location": "L1",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "tasks_lessons",
-      "target": "tasks_lessons_lessons_journal_d_apprentissage"
+      "target": "tasks_lessons_lessons_r\u00e8gles_actives"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tasks/lessons.md",
-      "source_location": "L9",
+      "source_location": "L63",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "tasks_lessons_lessons_journal_d_apprentissage",
-      "target": "tasks_lessons_entr\u00e9es"
+      "source": "tasks_lessons_lessons_r\u00e8gles_actives",
+      "target": "tasks_lessons_format_d_ajout"
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "tasks/lessons.md",
-      "source_location": "L5",
+      "source_location": "L70",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "tasks_lessons_lessons_journal_d_apprentissage",
-      "target": "tasks_lessons_format"
+      "source": "tasks_lessons_lessons_r\u00e8gles_actives",
+      "target": "tasks_lessons_journal_r\u00e9cent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_lessons_r\u00e8gles_actives",
+      "target": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_devis_crm_pipeline"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_documents_imprimables_devis_certificats_fiches_rapports_contrats"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_ia_gemini_prompts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_next_js_16"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L50",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_style_livrables_imp\u00e9ratif"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_supabase_rls_api"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_s\u00e9curit\u00e9_secrets"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/lessons.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_lessons_r\u00e8gles_actives_non_n\u00e9gociables",
+      "target": "tasks_lessons_workflow_qa"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_plan_crm_refonte_v2",
+      "target": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations",
+      "target": "tasks_plan_crm_refonte_v2_contraintes_r\u00e8gles_actives"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations",
+      "target": "tasks_plan_crm_refonte_v2_d\u00e9cision_valid\u00e9e_avec_kabir"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L52",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations",
+      "target": "tasks_plan_crm_refonte_v2_journal_d_avancement"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/plan-crm-refonte-v2.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_plan_crm_refonte_v2_plan_refonte_crm_v2_s\u00e9paration_prospection_ex\u00e9cution_3_am\u00e9liorations",
+      "target": "tasks_plan_crm_refonte_v2_phases_chacune_d\u00e9ploy\u00e9e_qa_avant_la_suivante"
     },
     {
       "relation": "contains",
@@ -14992,5 +16693,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "cc141e85ac934ebec965cfa556f7529bccf1ed8c"
+  "built_at_commit": "6d4dcabdb3b08a26dc854f616da192d37dbc4500"
 }
