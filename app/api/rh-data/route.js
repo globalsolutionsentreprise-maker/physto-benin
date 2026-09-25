@@ -248,5 +248,34 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  if (action === "set_passage_finances") {
+    const { id, montantDu, montantPaye, dateFacture, datePaiement } = body
+    if (!id) return Response.json({ error: "id requis" }, { status: 400 })
+    const patch = {}
+    if (montantDu !== undefined) patch.montant_du = Math.max(0, Number(montantDu) || 0)
+    if (montantPaye !== undefined) patch.montant_paye = Math.max(0, Number(montantPaye) || 0)
+    if (dateFacture !== undefined) patch.date_facture = dateFacture || null
+    if (datePaiement !== undefined) patch.date_paiement = datePaiement || null
+    if (Object.keys(patch).length === 0) return Response.json({ error: "rien à modifier" }, { status: 400 })
+
+    const { data: passage, error: upErr } = await supabase
+      .from("interventions").update(patch).eq("id", id).select("devis_id").single()
+    if (upErr) return Response.json({ error: upErr.message }, { status: 500 })
+
+    // Réconciliation : pour un devis contrat, paiements_recus = somme des passages.
+    if (passage && passage.devis_id) {
+      const { data: dv } = await supabase.from("devis")
+        .select("id, type_crm, date_debut_contrat").eq("id", passage.devis_id).single()
+      const estContrat = dv && (dv.type_crm === "contrat" || dv.date_debut_contrat)
+      if (estContrat) {
+        const { data: rows } = await supabase.from("interventions")
+          .select("montant_paye").eq("devis_id", passage.devis_id)
+        const total = (rows || []).reduce((s, r) => s + (Number(r.montant_paye) || 0), 0)
+        await supabase.from("devis").update({ paiements_recus: total }).eq("id", passage.devis_id)
+      }
+    }
+    return Response.json({ ok: true })
+  }
+
   return Response.json({ error: "Action inconnue" }, { status: 400 })
 }
