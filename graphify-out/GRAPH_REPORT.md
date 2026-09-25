@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-09-25)
 
 ## Corpus Check
-- 179 files · ~710,215 words
+- 183 files · ~717,271 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 808 nodes · 843 edges · 102 communities (66 shown, 36 thin omitted)
+- 842 nodes · 885 edges · 106 communities (69 shown, 37 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6d4dcabd`
+- Built from commit: `88a9e8c3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -107,6 +107,10 @@
 - [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
 - [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -114,13 +118,15 @@
 3. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
 4. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
 5. `Agent WhatsApp IA — Implementation Plan` - 12 edges
-6. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
-7. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
-8. `Pipeline unifié piloté par `etape` — Design` - 11 edges
-9. `Analyse IA de contrat enrichie (rapport de visite + devis réel)` - 11 edges
-10. `/deploy-gse` - 10 edges
+6. `Frise d'encaissement des contrats` - 12 edges
+7. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
+8. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
+9. `Pipeline unifié piloté par `etape` — Design` - 11 edges
+10. `Analyse IA de contrat enrichie (rapport de visite + devis réel)` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `SectionClientsDevis()` --calls--> `paiementsParPassages()`  [EXTRACTED]
+  app/admin/page.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `appliquerContraintes()`  [EXTRACTED]
@@ -129,13 +135,11 @@
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `construireSocleDevis()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
-- `POST()` --calls--> `divergencePrestations()`  [EXTRACTED]
-  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 
 ## Import Cycles
 - None detected.
 
-## Communities (102 total, 36 thin omitted)
+## Communities (106 total, 37 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -158,8 +162,8 @@ Cohesion: 0.15
 Nodes (12): env, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, hooks, PreCompact, PreToolUse, SessionStart, Stop, permissions (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.21
-Nodes (16): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+8 more)
+Cohesion: 0.23
+Nodes (15): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+7 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -195,7 +199,7 @@ Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill rou
 
 ### Community 14 - "Community 14"
 Cohesion: 0.10
-Nodes (42): callGeminiWithRetry(), POST(), esc(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin() (+34 more)
+Nodes (44): SectionClientsDevis(), callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), GET() (+36 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -361,10 +365,22 @@ Nodes (16): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(),
 Cohesion: 0.60
 Nodes (4): GET(), POST(), STATUTS, verifyAdmin()
 
+### Community 102 - "Community 102"
+Cohesion: 0.12
+Nodes (15): 10. Tests, 11. Impact / fichiers touchés, 1. Intention et contexte, 2. État existant sur lequel on s'appuie (rien à réinventer), 3. Modèle de données, 4. Montants automatiques (défaut) et manuels (entente), 5. Statut de paiement dérivé (par passage), 6. Extension de `resumeContrat` (moteur, testé) (+7 more)
+
+### Community 103 - "Community 103"
+Cohesion: 0.18
+Nodes (10): Frise d'encaissement des contrats — Implementation Plan, Global Constraints, Review Focus, Self-Review, Task 1: Logique pure de paiement dans `contrat-analyse.mjs`, Task 2: Migration des 4 colonnes sur `interventions`, Task 3: `generate_planning` remplit `montant_du` auto, Task 4: Action `set_passage_finances` + réconciliation `paiements_recus` (+2 more)
+
+### Community 104 - "Community 104"
+Cohesion: 0.50
+Nodes (3): Pre-flight (shared interfaces), SDD ledger — plan: docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md, Tasks
+
 ## Knowledge Gaps
-- **454 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+449 more)
+- **477 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+472 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -372,7 +388,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 5`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _454 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _477 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
