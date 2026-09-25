@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { datesPassages } from "@/lib/contrat-analyse.mjs"
+import { datesPassages, montantDuPassage } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -496,7 +496,7 @@ export async function POST(req) {
   if (action === "generate_planning") {
     const { devisId, clientNom, adresse } = body
     const { data: devis } = await supabase.from("devis")
-      .select("date_debut_contrat, frequence_intervention, duree_contrat_mois")
+      .select("date_debut_contrat, frequence_intervention, duree_contrat_mois, montant_net")
       .eq("id", devisId).single()
 
     if (!devis?.date_debut_contrat)
@@ -522,6 +522,7 @@ export async function POST(req) {
         adresse: adresse || "",
         notes: `Intervention ${i + 1}/${nbInterventions}`,
         type_passage: "intervention",
+        montant_du: montantDuPassage({ montantNet: devis.montant_net, nbInterventions, type: "intervention" }),
       })
       // Contrôle au point médian (si intervalle >= 2 mois)
       if (intervalMois >= 2) {
@@ -538,6 +539,7 @@ export async function POST(req) {
             adresse: adresse || "",
             notes: `Contrôle ${i + 1}/${nbInterventions} — vérif. état & boîtes`,
             type_passage: "controle",
+            montant_du: 0,
           })
         }
       }
