@@ -4205,6 +4205,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (delaiDF !== null) insights.push({ type: "good", ico: "⏱️", title: "Délai devis → facture : " + delaiDF + " jour" + (delaiDF > 1 ? "s" : ""), txt: "Cycle court sur les clients convertis. Objectif : maintenir sous 7 jours pour optimiser la trésorerie." })
     if (objectifCA && progPct < 50) insights.push({ type: "warn", ico: "🎯", title: "Progression objectif : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA encaissés sur un objectif de " + finFmt(objectifCA) + " FCFA. Il reste " + finFmt(objectifCA - totalEncaisse) + " FCFA à atteindre." })
     else if (objectifCA && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Mi-objectif atteint : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA sur " + finFmt(objectifCA) + " FCFA — bonne trajectoire." })
+    // Alertes d'encaissement : un passage de contrat dû/proche et non réglé.
+    cls.filter(function(c) { return c.typeContrat === "contrat" || c.dateDebutContrat }).forEach(function(c) {
+      var dv = devisList.find(function(x) { return x.id === c.id })
+      if (!dv) return
+      var rc = resumeContrat({ devis: dv, interventions: interventionsList }, new Date().toISOString().slice(0, 10))
+      ;(rc.alertesPaiement || []).forEach(function(a) {
+        insights.push({ type: "warn", ico: "⚠️", title: "Paiement à régler avant un passage", txt: c.client + " · passage du " + finFmtD(a.date) + " : " + finFmt(a.reste) + " FCFA non réglés." })
+      })
+    })
 
     var thS = { textAlign: "left", padding: "8px 10px", fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
     var tdS = { padding: "8px 10px", fontSize: "12px", borderBottom: "1px solid #f0efe9", whiteSpace: "nowrap" }
@@ -5006,6 +5015,36 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               })
             )
           ),
+
+          (function() {
+            var estContrat = d.type_crm === "contrat" || d.date_debut_contrat
+            if (!estContrat) return null
+            var rc = resumeContrat({ devis: d, interventions: interventionsList }, new Date().toISOString().slice(0, 10))
+            if (!rc.passages.length) return null
+            var COULP = { inclus: "#9ca3af", a_venir: "#9ca3af", facture: "#2563eb", partiel: "#d4a920", regle: "#16a34a", alerte: "#dc2626" }
+            var EMO = { inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" }
+            var fj = function(x) { return x ? new Date(x + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+            var fm = function(n) { return Number(n || 0).toLocaleString("fr-FR") }
+            var pct = rc.duTotal > 0 ? Math.round(rc.encaisse / rc.duTotal * 100) : 0
+            return React.createElement('div', { style: { marginBottom: '16px' } },
+              React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '5px' } },
+                React.createElement('span', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' } }, 'Encaissement du contrat'),
+                React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a' } }, fm(rc.encaisse) + ' / ' + fm(rc.duTotal) + ' FCFA (' + pct + '%)')
+              ),
+              React.createElement('div', { style: { height: '5px', backgroundColor: '#e8e6e0', borderRadius: '3px', marginBottom: '8px' } },
+                React.createElement('div', { style: { width: pct + '%', height: '100%', backgroundColor: '#16a34a', borderRadius: '3px' } })
+              ),
+              React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px' } },
+                rc.passages.filter(function(pp) { return (pp.montantDu || 0) > 0 }).map(function(pp, ix) {
+                  return React.createElement('span', { key: pp.id || ix, title: 'dû ' + fm(pp.montantDu) + ' / payé ' + fm(pp.montantPaye) + (pp.dateFacture ? ' · facturé le ' + fj(pp.dateFacture) : ' · non facturé'),
+                    style: { fontSize: '11px', padding: '3px 8px', borderRadius: '12px', border: '1px solid ' + (COULP[pp.statutPaiement] || '#d1d5db'), color: COULP[pp.statutPaiement] || '#555', backgroundColor: '#fff' } },
+                    (EMO[pp.statutPaiement] || '') + ' ' + fj(pp.date) + ' · ' + fm(pp.montantPaye) + '/' + fm(pp.montantDu))
+                })
+              ),
+              (rc.alertesPaiement && rc.alertesPaiement.length > 0) ? React.createElement('div', { style: { fontSize: '11px', color: '#991b1b', fontWeight: '700', marginTop: '6px' } }, '⚠ ' + rc.alertesPaiement.length + ' paiement(s) à régler avant un passage') : null,
+              React.createElement('div', { style: { fontSize: '10px', color: '#aaa', marginTop: '4px' } }, 'Saisie des montants dans l\'onglet Contrats.')
+            )
+          })(),
 
           (certsDevis.length > 0 || fichesDevis.length > 0 || rapVisiteDevis.length > 0 || rapIntervDevis.length > 0) && React.createElement('div', { style: { marginBottom: '14px' } },
             React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Documents'),
