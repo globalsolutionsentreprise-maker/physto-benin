@@ -5781,16 +5781,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var pct = Math.min(100, Math.max(0, (new Date(p.date + "T00:00:00").getTime() - t0) / span * 100))
             var fait = p.statut === "terminee"
             var ctrl = p.type === "controle"
+            var aud = p.type === "audit"
             var retard = !fait && p.date < auj
             return e("div", {
               key: i,
               onClick: p.id ? function() { togglePassage(p.id, p.statut) } : null,
-              title: fmtJ(p.date) + " · " + (ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + (ctrl ? "" : " · dû " + fmtM(p.montantDu) + " / payé " + fmtM(p.montantPaye) + (p.dateFacture ? " · facturé le " + fmtJ(p.dateFacture) : " · non facturé")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
+              title: fmtJ(p.date) + " · " + (aud ? "audit annuel" : ctrl ? "contrôle" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + ((ctrl || aud) ? "" : " · dû " + fmtM(p.montantDu) + " / payé " + fmtM(p.montantPaye) + (p.dateFacture ? " · facturé le " + fmtJ(p.dateFacture) : " · non facturé")) + (p.technicien ? " · " + p.technicien : " · aucun technicien"),
               style: {
                 position: "absolute", top: ctrl ? "12px" : "10px", left: "calc(" + pct + "% - 6px)",
-                width: ctrl ? "10px" : "14px", height: ctrl ? "10px" : "14px", borderRadius: "50%",
-                backgroundColor: COUL_PAIE[p.statutPaiement] || "#9ca3af",
-                border: "2px solid " + (fait ? "#0a2e1a" : (retard ? "#991b1b" : (ctrl ? "#bbb" : "#0a2e1a"))),
+                width: ctrl ? "10px" : "14px", height: ctrl ? "10px" : "14px", borderRadius: aud ? "2px" : "50%",
+                backgroundColor: aud ? "#d4a920" : (COUL_PAIE[p.statutPaiement] || "#9ca3af"),
+                border: "2px solid " + (fait ? "#0a2e1a" : (retard ? "#991b1b" : (aud ? "#b8860b" : ctrl ? "#bbb" : "#0a2e1a"))),
                 boxSizing: "border-box", cursor: p.id ? "pointer" : "help"
               }
             })
@@ -5823,7 +5824,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("span", { style: { color: "#0a2e1a", fontWeight: "600" } }, r.faits + " / " + r.total + " passages faits"),
           (r.enRetard && r.enRetard.length > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "700" } },
             "⚠ " + r.enRetard.length + " passage(s) en retard, depuis le " + fmtJ(r.enRetard[0].date)) : null,
-          r.prochain ? e("span", { style: { color: "#1e40af" } }, "→ prochain : " + fmtJ(r.prochain.date) + " " + (r.prochain.type === "controle" ? "contrôle" : "intervention")) : null,
+          r.prochain ? e("span", { style: { color: "#1e40af" } }, "→ prochain : " + fmtJ(r.prochain.date) + " " + (r.prochain.type === "audit" ? "audit" : r.prochain.type === "controle" ? "contrôle" : "intervention")) : null,
           r.sansTechnicien > 0 ? e("span", { style: { color: "#92400e", fontWeight: "600" } }, "⚠ " + r.sansTechnicien + " passage(s) sans technicien") : null,
           (r.total === 0 && r.passagesAttendus > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "600" } }, "⚠ aucun passage planifié, " + r.passagesAttendus + " attendus") : null
         ) : null,
@@ -5831,10 +5832,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" } }, "Passages — dates et technicien modifiables"),
           r.passages.map(function(p, i) {
             var ctrl = p.type === "controle"
+            var aud = p.type === "audit"
             var fait = p.statut === "terminee"
             var retard = !fait && p.date < auj
             return e("div", { key: p.id || i, style: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", padding: "5px 0", borderBottom: "1px solid #f2f1ee" } },
-              e("span", { style: { fontSize: "12px", width: "104px", flexShrink: 0, color: "#374151" } }, (ctrl ? "🔍 Contrôle" : "🔧 Interv.") + (fait ? " ✅" : (retard ? " ⚠️" : ""))),
+              e("span", { style: { fontSize: "12px", width: "104px", flexShrink: 0, color: "#374151" } }, (aud ? "📋 Audit" : ctrl ? "🔍 Contrôle" : "🔧 Interv.") + (fait ? " ✅" : (retard ? " ⚠️" : ""))),
               e("input", {
                 type: "date", value: p.date || "",
                 onChange: function(ev) { var v = ev.target.value; if (v) savePassagePlanning(p.id, { date: v }) },
@@ -5857,7 +5859,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   }, (sel ? "✓ " : "") + m.nom)
                 })
               ),
-              ctrl ? null : e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
+              (ctrl || aud) ? null : e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
                 e("span", { style: { fontSize: "11px", color: "#6b7280" } }, "dû"),
                 e("input", { type: "number", defaultValue: p.montantDu || 0, onBlur: function(ev) { savePassageFinances(p.id, { montantDu: parseInt(ev.target.value, 10) || 0 }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
                 e("span", { style: { fontSize: "11px", color: "#6b7280" } }, "payé"),

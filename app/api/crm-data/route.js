@@ -642,8 +642,14 @@ export async function POST(req) {
         .limit(1)
         .maybeSingle()
       const prm = (ctr && ctr.params) || {}
+      const estIntegrale = /int[ée]grale/i.test(prm.formule || "")
       const passages = (prm.passages || prm.controles)
-        ? planifierPassages({ dateDebut, dureeMois: duree, nbInterventions: Number(prm.passages) || 1, nbControles: Number(prm.controles) || 0 })
+        ? planifierPassages({
+            dateDebut, dureeMois: duree,
+            nbInterventions: Number(prm.passages) || 1,
+            nbControles: Number(prm.controles) || 0,
+            nbAudits: estIntegrale ? Math.max(1, Math.round(duree / 12)) : 0,
+          })
         : datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
       if (passages.length > 0) {
         // Le dû découle du contrat : le montant net est réparti sur les
