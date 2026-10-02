@@ -3738,7 +3738,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var parcours = idx >= 0 ? parcoursForEtape(newEtape) : {}
     var motifVal = newEtape === "perdu" ? (motif || "Non précisé") : "—"
     // Optimiste : colUnifiee lit devisMap[c.id].etape → MAJ devisList d'abord.
-    setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { etape: newEtape, parcours: parcours }) : d }) })
+    setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { etape: newEtape, parcours: parcours, crm_statut: crm }) : d }) })
     setFinData(function(prev) {
       if (!prev) return prev
       return Object.assign({}, prev, { clients: (prev.clients || []).map(function(c) {
