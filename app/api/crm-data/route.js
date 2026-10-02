@@ -585,7 +585,7 @@ export async function POST(req) {
   // Le contrat signé vit sur le devis : type_crm, date de début, durée et
   // fréquence. La table contrats ne trace que les PDF générés.
   if (action === "marquer_contrat_signe") {
-    const { devisId, dateDebut, dureeMois, frequence } = body
+    const { devisId, dateDebut, dureeMois, frequence, forceReplan } = body
     if (!devisId || !dateDebut) return Response.json({ error: "devisId et dateDebut requis" }, { status: 400 })
 
     const duree = Number(dureeMois) || 12
@@ -606,15 +606,30 @@ export async function POST(req) {
     }).eq("id", devisId)
     if (errUp) return Response.json({ error: "Erreur mise à jour devis: " + errUp.message }, { status: 500 })
 
-    // Planning : on ne recrée jamais par dessus un planning existant, sous peine
-    // de dupliquer des passages déjà organisés avec les techniciens.
+    // Planning. Par défaut on ne recrée jamais par dessus un planning existant
+    // (passages déjà organisés avec les techniciens). Avec forceReplan (p.ex.
+    // changement de la date de début), on régénère DEPUIS LA RÈGLE — mais
+    // uniquement si aucun passage n'est engagé (fait, payé ou avec technicien
+    // affecté), pour ne jamais détruire du travail déjà organisé.
     const { data: dejaLa } = await supabase
       .from("interventions")
-      .select("id")
+      .select("id, statut, montant_paye, personnel_id, personnel_ids")
       .eq("devis_id", devisId)
     const nbExistantes = (dejaLa || []).length
+    const engage = (dejaLa || []).some(i =>
+      (i.statut && i.statut !== "planifiee") ||
+      (Number(i.montant_paye) || 0) > 0 ||
+      i.personnel_id ||
+      (Array.isArray(i.personnel_ids) && i.personnel_ids.length > 0)
+    )
     let creees = 0
-    if (nbExistantes === 0) {
+    let replanifie = false
+    if (nbExistantes === 0 || (forceReplan && !engage)) {
+      if (forceReplan && nbExistantes > 0) {
+        const { error: errDel } = await supabase.from("interventions").delete().eq("devis_id", devisId)
+        if (errDel) return Response.json({ error: "Replanification impossible: " + errDel.message }, { status: 500 })
+        replanifie = true
+      }
       const passages = datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
       if (passages.length > 0) {
         const lignes = passages.map(p => ({
@@ -629,7 +644,7 @@ export async function POST(req) {
         creees = lignes.length
       }
     }
-    return Response.json({ ok: true, passagesCrees: creees, passagesExistants: nbExistantes })
+    return Response.json({ ok: true, passagesCrees: creees, passagesExistants: nbExistantes, replanifie, engage: !!(forceReplan && engage) })
   }
 
   return Response.json({ error: "Action inconnue" }, { status: 400 })

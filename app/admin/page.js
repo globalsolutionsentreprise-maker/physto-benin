@@ -5708,12 +5708,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           devisId: d.id,
           dateDebut: dateDebut,
           dureeMois: d.duree_contrat_mois || 12,
-          frequence: d.frequence_intervention || "trimestrielle"
+          frequence: d.frequence_intervention || "trimestrielle",
+          forceReplan: true
         })
       })
       var data = await res.json()
       if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "maj impossible")) }
-      else if (data.passagesExistants > 0) { setMsg("✓ Début fixé au " + dateDebut + ". Planning existant conservé (" + data.passagesExistants + " passages) — ajustez les dates des passages si besoin.") }
+      else if (data.engage) { setMsg("⚠ Début fixé au " + dateDebut + ", mais planning CONSERVÉ : des passages sont déjà faits/payés/affectés. Ajustez les dates à la main pour ne rien perdre.") }
+      else if (data.replanifie) { setMsg("✓ Début fixé au " + dateDebut + " — planning recalculé depuis la règle (" + (data.passagesCrees || 0) + " passages).") }
       else { setMsg("✓ Début fixé au " + dateDebut + ", " + (data.passagesCrees || 0) + " passages planifiés.") }
       await charger()
     } catch (e) { setMsg("Erreur réseau : " + e.message) }
