@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { datesPassages, montantDuPassage, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
+import { datesPassages, planifierPassages, montantDuPassage, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
@@ -630,7 +630,21 @@ export async function POST(req) {
         if (errDel) return Response.json({ error: "Replanification impossible: " + errDel.message }, { status: 500 })
         replanifie = true
       }
-      const passages = datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
+      // Planning fidèle au contrat : si le contrat porte des compteurs
+      // (passages / contrôles), on suit CES nombres (ex. Formule Intégrale =
+      // 4 interventions + 8 contrôles mensuels). Sinon, repli sur l'heuristique
+      // de fréquence pour les anciens contrats sans params.
+      const { data: ctr } = await supabase
+        .from("contrats")
+        .select("params")
+        .eq("devis_id", devisId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const prm = (ctr && ctr.params) || {}
+      const passages = (prm.passages || prm.controles)
+        ? planifierPassages({ dateDebut, dureeMois: duree, nbInterventions: Number(prm.passages) || 1, nbControles: Number(prm.controles) || 0 })
+        : datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
       if (passages.length > 0) {
         const lignes = passages.map(p => ({
           devis_id: devisId,
