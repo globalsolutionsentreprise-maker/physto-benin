@@ -5691,6 +5691,35 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setSignEnCours(null)
   }
 
+  // Corriger/renseigner la date de début d'un contrat déjà signé (actif). Réutilise
+  // l'action signée : elle met à jour date_debut_contrat sans toucher au planning
+  // s'il existe déjà, et le génère depuis la nouvelle date s'il est vide.
+  async function majDebutContrat(d, dateDebut) {
+    if (!dateDebut) return
+    setSignEnCours(d.id)
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/crm-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({
+          action: "marquer_contrat_signe",
+          devisId: d.id,
+          dateDebut: dateDebut,
+          dureeMois: d.duree_contrat_mois || 12,
+          frequence: d.frequence_intervention || "trimestrielle"
+        })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "maj impossible")) }
+      else if (data.passagesExistants > 0) { setMsg("✓ Début fixé au " + dateDebut + ". Planning existant conservé (" + data.passagesExistants + " passages) — ajustez les dates des passages si besoin.") }
+      else { setMsg("✓ Début fixé au " + dateDebut + ", " + (data.passagesCrees || 0) + " passages planifiés.") }
+      await charger()
+    } catch (e) { setMsg("Erreur réseau : " + e.message) }
+    setSignEnCours(null)
+  }
+
   function renderVueContrats() {
     var e = React.createElement
     var auj = new Date().toISOString().slice(0, 10)
@@ -5774,8 +5803,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("div", { style: { width: (r.duTotal > 0 ? Math.min(100, Math.round(r.encaisse / r.duTotal * 100)) : 0) + "%", height: "100%", backgroundColor: "#16a34a", borderRadius: "3px" } })
         ) : null,
 
-        ouvert ? e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#888", marginBottom: "10px" } },
-          e("span", null, r.debut ? fmtJ(r.debut) : "début non renseigné"),
+        ouvert ? e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "#888", marginBottom: "10px" } },
+          e("span", { style: { display: "flex", alignItems: "center", gap: "6px" } },
+            "Début :",
+            e("input", {
+              type: "date", defaultValue: d.date_debut_contrat || "", disabled: signEnCours === d.id,
+              onChange: function(ev) { if (ev.target.value) majDebutContrat(d, ev.target.value) },
+              title: "Date de début du contrat (modifiable)",
+              style: { fontSize: "11px", padding: "3px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" }
+            })
+          ),
           e("span", null, r.fin ? "→ " + fmtJ(r.fin) : "")
         ) : null,
 
