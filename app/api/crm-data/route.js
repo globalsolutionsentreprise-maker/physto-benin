@@ -593,7 +593,7 @@ export async function POST(req) {
 
     const { data: devis, error: errDevis } = await supabase
       .from("devis")
-      .select("id, client_id, clients(nom)")
+      .select("id, client_id, montant_net, clients(nom)")
       .eq("id", devisId)
       .single()
     if (errDevis || !devis) return Response.json({ error: "Devis introuvable" }, { status: 404 })
@@ -646,12 +646,17 @@ export async function POST(req) {
         ? planifierPassages({ dateDebut, dureeMois: duree, nbInterventions: Number(prm.passages) || 1, nbControles: Number(prm.controles) || 0 })
         : datesPassages({ dateDebut, dureeMois: duree, frequence: freq })
       if (passages.length > 0) {
+        // Le dû découle du contrat : le montant net est réparti sur les
+        // interventions (les contrôles sont inclus → 0). Paiement trimestriel
+        // d'avance : chaque intervention porte sa part.
+        const nbInterv = passages.filter(p => p.type === "intervention").length
         const lignes = passages.map(p => ({
           devis_id: devisId,
           client_nom: (devis.clients && devis.clients.nom) || "",
           date_intervention: p.date,
           type_passage: p.type,
           statut: "planifiee",
+          montant_du: montantDuPassage({ montantNet: devis.montant_net, nbInterventions: nbInterv, type: p.type }),
         }))
         const { error: errIns } = await supabase.from("interventions").insert(lignes)
         if (errIns) return Response.json({ error: "Contrat marqué signé, mais planning non créé: " + errIns.message }, { status: 500 })
