@@ -5449,9 +5449,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var annuel = mep + Math.max(0, passages - 1) * ent
             return React.createElement("div", { style: { marginBottom: "16px", padding: "14px 16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
               React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" } }, "Paramétrage manuel (sans IA) — j'ai déjà les montants"),
-              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" } },
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "8px" } },
                 field("Nb passages / an", "manPassages", "4"),
-                field("Durée (mois)", "manDuree", "12")
+                field("Durée tarifée (mois)", "manDuree", "12"),
+                field("Engagement ferme (mois)", "manEngagement", "12")
               ),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "8px" } },
                 field("Prix mise en place (FCFA)", "manMisePlace", "1200000"),
@@ -5471,7 +5472,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 onClick: function() {
                   if (mep <= 0) { setMsg("Paramétrage manuel : renseigne au moins le prix de mise en place."); return }
                   var duree = parseInt(contratForm.manDuree) || 12
-                  var params = new URLSearchParams({ devisId: d.id, manuel: "1", misePlace: mep, prixEntretien: ent, prixAnnuel: annuel, passages: passages, duree: duree, paiement: contratForm.manPaiement || "trimestriel_avance", formule: "Formule sur mesure", controles: 0, typeEtablissement: contratForm.typeEtablissement || "", sansNoteDevis: "1" })
+                  var engagementMois = parseInt(contratForm.manEngagement) || duree
+                  var params = new URLSearchParams({ devisId: d.id, manuel: "1", misePlace: mep, prixEntretien: ent, prixAnnuel: annuel, passages: passages, duree: duree, engagementMois: engagementMois, paiement: contratForm.manPaiement || "trimestriel_avance", formule: "Formule sur mesure", controles: 0, typeEtablissement: contratForm.typeEtablissement || "", sansNoteDevis: "1" })
                   ouvrirContrat("/api/generate-contract?" + params.toString())
                 },
                 style: { width: "100%", backgroundColor: "#065f46", color: "#fff", border: "none", borderRadius: "8px", padding: "13px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
@@ -5648,6 +5650,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       passages:          p.passages   || 4,
       controles:         p.controles  || 0,
       duree:             p.duree      || 12,
+      engagementMois:    p.engagementMois || p.duree || 12,
       paiement:          p.paiement   || "trimestriel_avance",
       typeEtablissement: p.typeEtablissement || "",
       remise:            p.remisePassed || 0,

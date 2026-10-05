@@ -18,6 +18,11 @@ export async function GET(req) {
     const passages         = parseInt(url.searchParams.get("passages") || "4")
     const controles        = parseInt(url.searchParams.get("controles") || "8")
     const duree            = parseInt(url.searchParams.get("duree") || "12")
+    // Engagement ferme total (mois). Peut dépasser la période tarifée `duree`
+    // (ex. deux ans fermes dont seule la 1re année est chiffrée, la suivante
+    // réévaluée d'un commun accord par avenant). Défaut = duree => aucun
+    // changement pour les contrats mono-période existants.
+    const engagementMois   = parseInt(url.searchParams.get("engagementMois") || "0") || duree
     const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
     const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
     const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
@@ -130,7 +135,7 @@ export async function GET(req) {
         date_generation: today.toISOString().slice(0, 10),
         params: {
           prixAnnuel, prixTrim, formule, passages, controles,
-          duree, paiement, typeEtablissement, remisePassed, remiseGlobale, sansNoteDevis
+          duree, engagementMois, paiement, typeEtablissement, remisePassed, remiseGlobale, sansNoteDevis
         }
       })
     }
@@ -311,7 +316,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     </div>
     <img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
     <div class="hdr-right">
-      <div class="title">Contrat d'entretien annuel</div>
+      <div class="title">${engagementMois >= 24 ? "Contrat d'entretien pluriannuel" : "Contrat d'entretien annuel"}</div>
       <div class="ref">Réf. ${esc(contratRef)}</div>
     </div>
   </div>
@@ -392,6 +397,12 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
         </tr>
       </thead>
       <tbody>
+        ${misePlace === prixEntretien ? `
+        <tr>
+          <td>Passage complet ${frequenceLabel()} : ${esc(prestationLabel)}</td>
+          <td style="text-align:right">× ${passages}</td>
+          <td style="text-align:right">${prixEntretien.toLocaleString("fr-FR")} FCFA / passage</td>
+        </tr>` : `
         <tr>
           <td>Mise en place complète (1ᵉʳ passage)</td>
           <td style="text-align:right">1</td>
@@ -401,7 +412,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
           <td>Passage d'entretien ${frequenceLabel()}</td>
           <td style="text-align:right">× ${passages - 1}</td>
           <td style="text-align:right">${prixEntretien.toLocaleString("fr-FR")} FCFA / passage</td>
-        </tr>` : ""}
+        </tr>` : ""}`}
         <tr class="total">
           <td>Total pour ${duree} mois</td>
           <td style="text-align:right"></td>
@@ -438,12 +449,19 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
     `}
 
+    ${engagementMois > duree ? `
+    <div class="note-box">
+      <strong>Engagement ferme de ${engagementMois} mois.</strong> Le tarif ci-dessus s'applique aux ${duree} premiers mois (tarif de démarrage). La période restante (${engagementMois - duree} mois) fera l'objet d'une réévaluation tarifaire d'un commun accord entre les parties, formalisée par avenant, au plus tard 30 jours avant l'échéance de la première période.
+    </div>` : ""}
+
     ${artTitle("Article 5 — Modalités de paiement")}
     ${paiementArticle()}
 
     ${artTitle("Article 6 — Durée et renouvellement")}
     <ul class="clauses">
-      ${li("Le contrat est conclu pour la durée d'engagement cochée à l'Article 4, à compter de la date de signature.")}
+      ${li(engagementMois > duree
+        ? `Le contrat est conclu pour un engagement ferme de ${engagementMois} mois à compter de la date de signature.`
+        : "Le contrat est conclu pour la durée d'engagement cochée à l'Article 4, à compter de la date de signature.")}
       ${li("À l'échéance, il est reconduit tacitement pour une durée identique, sauf dénonciation écrite avant le terme.")}
       ${li("La date du premier passage sera fixée d'un commun accord dans les 30 jours suivant la signature.")}
     </ul>
