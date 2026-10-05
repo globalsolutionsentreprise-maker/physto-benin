@@ -5458,6 +5458,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 field("Prix mise en place (FCFA)", "manMisePlace", "1200000"),
                 field("Prix par entretien (FCFA)", "manEntretien", "850000")
               ),
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr", gap: "8px", marginBottom: "8px" } },
+                field("Prix / m² (FCFA) — explique le tarif dans le contrat", "manPrixM2", "120")
+              ),
               React.createElement("div", { style: { marginBottom: "10px" } },
                 React.createElement("label", { style: { display: "block", fontSize: "10px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", marginBottom: "3px" } }, "Périodicité de paiement"),
                 React.createElement("select", { value: contratForm.manPaiement || "trimestriel_avance", onChange: function(e) { setF("manPaiement", e.target.value) }, style: inpS },
@@ -5473,7 +5476,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   if (mep <= 0) { setMsg("Paramétrage manuel : renseigne au moins le prix de mise en place."); return }
                   var duree = parseInt(contratForm.manDuree) || 12
                   var engagementMois = parseInt(contratForm.manEngagement) || duree
-                  var params = new URLSearchParams({ devisId: d.id, manuel: "1", misePlace: mep, prixEntretien: ent, prixAnnuel: annuel, passages: passages, duree: duree, engagementMois: engagementMois, paiement: contratForm.manPaiement || "trimestriel_avance", formule: "Formule sur mesure", controles: 0, typeEtablissement: contratForm.typeEtablissement || "", sansNoteDevis: "1" })
+                  var prixM2 = parseInt(contratForm.manPrixM2) || 0
+                  var params = new URLSearchParams({ devisId: d.id, manuel: "1", misePlace: mep, prixEntretien: ent, prixAnnuel: annuel, passages: passages, duree: duree, engagementMois: engagementMois, prixM2: prixM2, paiement: contratForm.manPaiement || "trimestriel_avance", formule: "Formule sur mesure", controles: 0, typeEtablissement: contratForm.typeEtablissement || "", sansNoteDevis: "1" })
                   ouvrirContrat("/api/generate-contract?" + params.toString())
                 },
                 style: { width: "100%", backgroundColor: "#065f46", color: "#fff", border: "none", borderRadius: "8px", padding: "13px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
@@ -5651,6 +5655,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       controles:         p.controles  || 0,
       duree:             p.duree      || 12,
       engagementMois:    p.engagementMois || p.duree || 12,
+      prixM2:            p.prixM2 || 0,
       paiement:          p.paiement   || "trimestriel_avance",
       typeEtablissement: p.typeEtablissement || "",
       remise:            p.remisePassed || 0,
@@ -5774,6 +5779,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           ),
           e("span", { style: { flexShrink: 0, backgroundColor: st.bg, color: st.tc, border: "1px solid " + st.bord, borderRadius: "20px", padding: "3px 12px", fontSize: "11px", fontWeight: "700" } }, st.libelle)
         ),
+
+        // Alerte réévaluation/renouvellement : la période se termine bientôt
+        // (préavis réglable, 32 j par défaut) → refaire/renégocier le contrat.
+        r.alerteRenouvellement ? e("div", { style: { marginTop: "8px", padding: "8px 12px", backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "12px", color: "#991b1b", fontWeight: "600" } },
+          "⏰ Fin de période dans " + r.joursAvantFin + " j (" + fmtJ(r.fin) + ") : refaire / renégocier le contrat"
+        ) : null,
+
         ouvert ? e("div", { style: { fontSize: "12px", color: "#555", margin: "10px 0 14px" } }, d.prestation || "") : null,
 
         // Frise : barre de durée + jalons de passage

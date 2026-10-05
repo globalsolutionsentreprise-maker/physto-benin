@@ -23,6 +23,10 @@ export async function GET(req) {
     // réévaluée d'un commun accord par avenant). Défaut = duree => aucun
     // changement pour les contrats mono-période existants.
     const engagementMois   = parseInt(url.searchParams.get("engagementMois") || "0") || duree
+    // Base tarifaire chiffrée : l'utilisateur saisit le prix au m², le contrat
+    // reconstitue la phrase d'explication (prix/m² × superficie × nb prestations).
+    // 0 => aucune explication affichée (contrats existants inchangés).
+    const prixM2           = parseInt(url.searchParams.get("prixM2") || "0")
     const typeEtablissement = url.searchParams.get("typeEtablissement") || ""
     const paiement         = url.searchParams.get("paiement") || "trimestriel_avance"
     const remisePassed     = parseInt(url.searchParams.get("remise") || "0")
@@ -66,6 +70,9 @@ export async function GET(req) {
     // Le contrat ne doit décrire QUE les volets réellement vendus : on les dérive
     // de la prestation du devis (source de vérité), jamais en dur. Un devis
     // "Désinsectisation" seule ne doit afficher ni dératisation ni stations à rongeurs.
+    // Liste des prestations vendues (pour la base tarifaire chiffrée).
+    const prestList = prestationLabel.split(" + ").map(s => s.trim()).filter(Boolean)
+    const nbPrest   = prestList.length || 1
     const prestNorm = prestationLabel.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
     const aDeratisation     = /deratis|rongeur|raticide/.test(prestNorm)
     const aDesinsectisation = /desinsect|insecticide/.test(prestNorm)
@@ -135,7 +142,7 @@ export async function GET(req) {
         date_generation: today.toISOString().slice(0, 10),
         params: {
           prixAnnuel, prixTrim, formule, passages, controles,
-          duree, engagementMois, paiement, typeEtablissement, remisePassed, remiseGlobale, sansNoteDevis
+          duree, engagementMois, prixM2, paiement, typeEtablissement, remisePassed, remiseGlobale, sansNoteDevis
         }
       })
     }
@@ -235,6 +242,20 @@ export async function GET(req) {
       "— Inspection visuelle complète",
       "— Fiche de passage + Attestation GSE à chaque intervention",
     ].filter(Boolean).join("<br>\n            ")
+
+    // Base tarifaire chiffrée : phrase reconstruite depuis le prix/m² saisi,
+    // la superficie du devis et les prestations vendues. Rien si prixM2 = 0.
+    const superficieNum = Number(devis.superficie) || 0
+    const prestPhrase   = prestList.join(", ").toLowerCase()
+    let baseTarifNote = ""
+    if (prixM2 > 0) {
+      if (superficieNum > 0) {
+        const parPassage = Math.round(prixM2 * superficieNum * nbPrest)
+        baseTarifNote = `<div class="note-box"><strong>Base tarifaire :</strong> ${prixM2.toLocaleString("fr-FR")} FCFA/m² × ${superficieNum.toLocaleString("fr-FR")} m²${nbPrest > 1 ? ` × ${nbPrest} prestations (${esc(prestPhrase)})` : ` (${esc(prestPhrase)})`} = ${parPassage.toLocaleString("fr-FR")} FCFA par passage complet. ${passages} passage${passages > 1 ? "s" : ""} sur ${duree} mois = ${prixAnnuel.toLocaleString("fr-FR")} FCFA.</div>`
+      } else {
+        baseTarifNote = `<div class="note-box"><strong>Base tarifaire :</strong> ${prixM2.toLocaleString("fr-FR")} FCFA/m², soit ${prixTrim.toLocaleString("fr-FR")} FCFA par passage. ${passages} passage${passages > 1 ? "s" : ""} sur ${duree} mois = ${prixAnnuel.toLocaleString("fr-FR")} FCFA.</div>`
+      }
+    }
 
     const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -448,6 +469,8 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     </table>
     <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
     `}
+
+    ${baseTarifNote}
 
     ${engagementMois > duree ? `
     <div class="note-box">
