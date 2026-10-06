@@ -267,7 +267,7 @@
       "label": "nomFichierDoc()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6263",
+      "source_location": "L6389",
       "_origin": "ast",
       "id": "admin_page_nomfichierdoc",
       "community": 5,
@@ -277,7 +277,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6290",
+      "source_location": "L6416",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 5,
@@ -287,7 +287,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6296",
+      "source_location": "L6422",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 5,
@@ -297,7 +297,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6313",
+      "source_location": "L6439",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 5,
@@ -307,7 +307,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6322",
+      "source_location": "L6448",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 5,
@@ -317,7 +317,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6329",
+      "source_location": "L6455",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 5,
@@ -327,7 +327,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6333",
+      "source_location": "L6459",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 5,
@@ -337,7 +337,7 @@
       "label": "buildFichePassageHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6412",
+      "source_location": "L6538",
       "_origin": "ast",
       "id": "admin_page_buildfichepassagehtml",
       "community": 5,
@@ -347,7 +347,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6614",
+      "source_location": "L6740",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 5,
@@ -357,7 +357,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6668",
+      "source_location": "L6794",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 5,
@@ -367,7 +367,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6713",
+      "source_location": "L6839",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 5,
@@ -377,7 +377,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6719",
+      "source_location": "L6845",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -647,27 +647,57 @@
       "label": "callGeminiWithRetry()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L7",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "analyze_rapport_route_callgeminiwithretry",
       "community": 19,
       "norm_label": "callgeminiwithretry()"
     },
     {
+      "label": "uploadVideoToGemini()",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L33",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_uploadvideotogemini",
+      "community": 19,
+      "norm_label": "uploadvideotogemini()"
+    },
+    {
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L28",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "analyze_rapport_route_post",
       "community": 19,
       "norm_label": "post()"
     },
     {
+      "label": "blocVisuels()",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_blocvisuels",
+      "community": 19,
+      "norm_label": "blocvisuels()"
+    },
+    {
+      "label": "blocCaptures()",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L155",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_bloccaptures",
+      "community": 19,
+      "norm_label": "bloccaptures()"
+    },
+    {
       "label": "buildPromptVisite()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L92",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptvisite",
       "community": 19,
@@ -677,7 +707,7 @@
       "label": "buildPromptIntervention()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L123",
+      "source_location": "L193",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptintervention",
       "community": 19,
@@ -2840,10 +2870,30 @@
       "norm_label": "datespassages()"
     },
     {
-      "label": "dateFinContrat()",
+      "label": "isoPlusMois()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L458",
+      "_origin": "ast",
+      "id": "lib_contrat_analyse_isoplusmois",
+      "community": 14,
+      "norm_label": "isoplusmois()"
+    },
+    {
+      "label": "planifierPassages()",
+      "file_type": "code",
+      "source_file": "lib/contrat-analyse.mjs",
+      "source_location": "L473",
+      "_origin": "ast",
+      "id": "lib_contrat_analyse_planifierpassages",
+      "community": 14,
+      "norm_label": "planifierpassages()"
+    },
+    {
+      "label": "dateFinContrat()",
+      "file_type": "code",
+      "source_file": "lib/contrat-analyse.mjs",
+      "source_location": "L505",
       "_origin": "ast",
       "id": "lib_contrat_analyse_datefincontrat",
       "community": 14,
@@ -2853,7 +2903,7 @@
       "label": "paiementsParPassages()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L474",
+      "source_location": "L527",
       "_origin": "ast",
       "id": "lib_contrat_analyse_paiementsparpassages",
       "community": 14,
@@ -2863,7 +2913,7 @@
       "label": "montantDuPassage()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L480",
+      "source_location": "L533",
       "_origin": "ast",
       "id": "lib_contrat_analyse_montantdupassage",
       "community": 14,
@@ -2873,7 +2923,7 @@
       "label": "statutPaiementPassage()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L489",
+      "source_location": "L542",
       "_origin": "ast",
       "id": "lib_contrat_analyse_statutpaiementpassage",
       "community": 14,
@@ -2883,7 +2933,7 @@
       "label": "resumeContrat()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L500",
+      "source_location": "L553",
       "_origin": "ast",
       "id": "lib_contrat_analyse_resumecontrat",
       "community": 14,
@@ -2893,7 +2943,7 @@
       "label": "NUISIBLE_VERS_PRESTATION",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L579",
+      "source_location": "L650",
       "_origin": "ast",
       "id": "lib_contrat_analyse_nuisible_vers_prestation",
       "community": 14,
@@ -2903,7 +2953,7 @@
       "label": "prestationsDepuisNuisibles()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L585",
+      "source_location": "L656",
       "_origin": "ast",
       "id": "lib_contrat_analyse_prestationsdepuisnuisibles",
       "community": 14,
@@ -2913,7 +2963,7 @@
       "label": "divergencePrestations()",
       "file_type": "code",
       "source_file": "lib/contrat-analyse.mjs",
-      "source_location": "L603",
+      "source_location": "L674",
       "_origin": "ast",
       "id": "lib_contrat_analyse_divergenceprestations",
       "community": 14,
@@ -4248,46 +4298,6 @@
       "id": "rules_coding_standards_git_commits",
       "community": 16,
       "norm_label": "git commits"
-    },
-    {
-      "label": "progress.md",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "2026_09_25_frise_encaissement_contrats_progress",
-      "community": 104,
-      "norm_label": "progress.md"
-    },
-    {
-      "label": "SDD ledger \u2014 plan: docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "2026_09_25_frise_encaissement_contrats_progress_sdd_ledger_plan_docs_superpowers_plans_2026_09_25_frise_encaissement_contrats_md",
-      "community": 104,
-      "norm_label": "sdd ledger \u2014 plan: docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md"
-    },
-    {
-      "label": "Pre-flight (shared interfaces)",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L6",
-      "_origin": "ast",
-      "id": "2026_09_25_frise_encaissement_contrats_progress_pre_flight_shared_interfaces",
-      "community": 104,
-      "norm_label": "pre-flight (shared interfaces)"
-    },
-    {
-      "label": "Tasks",
-      "file_type": "document",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L14",
-      "_origin": "ast",
-      "id": "2026_09_25_frise_encaissement_contrats_progress_tasks",
-      "community": 104,
-      "norm_label": "tasks"
     },
     {
       "label": "final-fix-report.md",
@@ -8821,9 +8831,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_contrat_analyse_paiementsparpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_paiementsparpassages"
     },
     {
       "relation": "imports",
@@ -8854,9 +8864,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L1686",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_contrat_analyse_paiementsparpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_paiementsparpassages"
     },
     {
       "relation": "calls",
@@ -9599,6 +9609,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_bloccaptures",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_blocvisuels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L107",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -9636,6 +9666,16 @@
       "target": "analyze_rapport_route_post"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_uploadvideotogemini",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -9645,6 +9685,17 @@
       "confidence_score": 1.0,
       "source": "analyze_rapport_route_post",
       "target": "analyze_rapport_route_callgeminiwithretry"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_post",
+      "target": "analyze_rapport_route_uploadvideotogemini",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -9667,6 +9718,50 @@
       "confidence_score": 1.0,
       "source": "analyze_rapport_route_post",
       "target": "analyze_rapport_route_buildpromptvisite"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_buildpromptintervention",
+      "target": "analyze_rapport_route_blocvisuels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L179",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_buildpromptvisite",
+      "target": "analyze_rapport_route_blocvisuels",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_buildpromptintervention",
+      "target": "analyze_rapport_route_bloccaptures",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_buildpromptvisite",
+      "target": "analyze_rapport_route_bloccaptures",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -9830,9 +9925,20 @@
       "source_file": "app/api/crm-data/route.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "crm_data_route",
-      "target": "lib_contrat_analyse_montantdupassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_montantdupassage"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "crm_data_route",
+      "target": "lib_contrat_analyse_paiementsparpassages"
     },
     {
       "relation": "imports",
@@ -9842,7 +9948,7 @@
       "source_location": "L2",
       "weight": 1.0,
       "source": "crm_data_route",
-      "target": "lib_contrat_analyse_paiementsparpassages",
+      "target": "lib_contrat_analyse_planifierpassages",
       "confidence_score": 1.0
     },
     {
@@ -9910,6 +10016,17 @@
       "weight": 1.0,
       "source": "crm_data_route_post",
       "target": "lib_contrat_analyse_paiementsparpassages"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L647",
+      "weight": 1.0,
+      "source": "crm_data_route_post",
+      "target": "lib_contrat_analyse_planifierpassages"
     },
     {
       "relation": "contains",
@@ -11863,6 +11980,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "lib/contrat-analyse.mjs",
+      "source_location": "L458",
+      "weight": 1.0,
+      "source": "lib_contrat_analyse",
+      "target": "lib_contrat_analyse_isoplusmois",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L394",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -11875,9 +12002,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L480",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_montantdupassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_montantdupassage"
     },
     {
       "relation": "contains",
@@ -11945,9 +12072,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L474",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_paiementsparpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_paiementsparpassages"
     },
     {
       "relation": "contains",
@@ -12008,6 +12135,16 @@
       "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
       "target": "lib_contrat_analyse_plancherpour"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/contrat-analyse.mjs",
+      "source_location": "L473",
+      "weight": 1.0,
+      "source": "lib_contrat_analyse",
+      "target": "lib_contrat_analyse_planifierpassages",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -12105,9 +12242,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L489",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_statutpaiementpassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_statutpaiementpassage"
     },
     {
       "relation": "contains",
@@ -12444,9 +12581,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L495",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_statutpaiementpassage",
-      "target": "lib_contrat_analyse_isoplusjours",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_isoplusjours"
     },
     {
       "relation": "calls",
@@ -12493,6 +12630,17 @@
       "target": "lib_contrat_analyse_datespassages"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/contrat-analyse.test.mjs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "lib_contrat_analyse_test",
+      "target": "lib_contrat_analyse_planifierpassages",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -12521,9 +12669,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_paiementsparpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_paiementsparpassages"
     },
     {
       "relation": "imports",
@@ -12532,9 +12680,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_montantdupassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_montantdupassage"
     },
     {
       "relation": "calls",
@@ -12543,9 +12691,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L537",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_resumecontrat",
-      "target": "lib_contrat_analyse_statutpaiementpassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_statutpaiementpassage"
     },
     {
       "relation": "imports",
@@ -12554,9 +12702,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_statutpaiementpassage",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_statutpaiementpassage"
     },
     {
       "relation": "imports",
@@ -13701,36 +13849,6 @@
       "confidence_score": 1.0,
       "source": "rules_coding_standards_coding_standards_gse_phyto_b\u00e9nin",
       "target": "rules_coding_standards_signatures_on_documents"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L1",
-      "weight": 1.0,
-      "source": "2026_09_25_frise_encaissement_contrats_progress",
-      "target": "2026_09_25_frise_encaissement_contrats_progress_sdd_ledger_plan_docs_superpowers_plans_2026_09_25_frise_encaissement_contrats_md",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L6",
-      "weight": 1.0,
-      "source": "2026_09_25_frise_encaissement_contrats_progress_sdd_ledger_plan_docs_superpowers_plans_2026_09_25_frise_encaissement_contrats_md",
-      "target": "2026_09_25_frise_encaissement_contrats_progress_pre_flight_shared_interfaces",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".superpowers/sdd/2026-09-25-frise-encaissement-contrats/progress.md",
-      "source_location": "L14",
-      "weight": 1.0,
-      "source": "2026_09_25_frise_encaissement_contrats_progress_sdd_ledger_plan_docs_superpowers_plans_2026_09_25_frise_encaissement_contrats_md",
-      "target": "2026_09_25_frise_encaissement_contrats_progress_tasks",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -15878,9 +15996,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_frise_d_encaissement_des_contrats_implementation_plan",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_frise_d_encaissement_des_contrats_implementation_plan"
     },
     {
       "relation": "contains",
@@ -15888,9 +16006,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_frise_d_encaissement_des_contrats_implementation_plan",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_global_constraints",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_global_constraints"
     },
     {
       "relation": "contains",
@@ -15898,9 +16016,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_frise_d_encaissement_des_contrats_implementation_plan",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_review_focus"
     },
     {
       "relation": "contains",
@@ -15908,9 +16026,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_frise_d_encaissement_des_contrats_implementation_plan",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_self_review",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_self_review"
     },
     {
       "relation": "contains",
@@ -15918,9 +16036,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_1_logique_pure_de_paiement_dans_contrat_analyse_mjs",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_1_logique_pure_de_paiement_dans_contrat_analyse_mjs"
     },
     {
       "relation": "contains",
@@ -15928,9 +16046,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L199",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_2_migration_des_4_colonnes_sur_interventions",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_2_migration_des_4_colonnes_sur_interventions"
     },
     {
       "relation": "contains",
@@ -15938,9 +16056,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_3_generate_planning_remplit_montant_du_auto",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_3_generate_planning_remplit_montant_du_auto"
     },
     {
       "relation": "contains",
@@ -15948,9 +16066,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L298",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_4_action_set_passage_finances_r\u00e9conciliation_paiements_recus",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_4_action_set_passage_finances_r\u00e9conciliation_paiements_recus"
     },
     {
       "relation": "contains",
@@ -15958,9 +16076,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L360",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_5_frise_enrichie_dans_l_onglet_contrats_renderfrise",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_5_frise_enrichie_dans_l_onglet_contrats_renderfrise"
     },
     {
       "relation": "contains",
@@ -15968,9 +16086,9 @@
       "source_file": "docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md",
       "source_location": "L437",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_09_25_frise_encaissement_contrats_review_focus",
-      "target": "plans_2026_09_25_frise_encaissement_contrats_task_6_reprise_dans_le_dossier_client_alerte_dans_analyse",
-      "confidence_score": 1.0
+      "target": "plans_2026_09_25_frise_encaissement_contrats_task_6_reprise_dans_le_dossier_client_alerte_dans_analyse"
     },
     {
       "relation": "contains",
@@ -16948,9 +17066,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats"
     },
     {
       "relation": "contains",
@@ -16958,9 +17076,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_10_tests",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_10_tests"
     },
     {
       "relation": "contains",
@@ -16968,9 +17086,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L177",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_11_impact_fichiers_touch\u00e9s",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_11_impact_fichiers_touch\u00e9s"
     },
     {
       "relation": "contains",
@@ -16978,9 +17096,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_1_intention_et_contexte",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_1_intention_et_contexte"
     },
     {
       "relation": "contains",
@@ -16988,9 +17106,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_2_\u00e9tat_existant_sur_lequel_on_s_appuie_rien_\u00e0_r\u00e9inventer",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_2_\u00e9tat_existant_sur_lequel_on_s_appuie_rien_\u00e0_r\u00e9inventer"
     },
     {
       "relation": "contains",
@@ -16998,9 +17116,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_3_mod\u00e8le_de_donn\u00e9es",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_3_mod\u00e8le_de_donn\u00e9es"
     },
     {
       "relation": "contains",
@@ -17008,9 +17126,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_4_montants_automatiques_d\u00e9faut_et_manuels_entente",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_4_montants_automatiques_d\u00e9faut_et_manuels_entente"
     },
     {
       "relation": "contains",
@@ -17018,9 +17136,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_5_statut_de_paiement_d\u00e9riv\u00e9_par_passage",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_5_statut_de_paiement_d\u00e9riv\u00e9_par_passage"
     },
     {
       "relation": "contains",
@@ -17028,9 +17146,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_6_extension_de_resumecontrat_moteur_test\u00e9",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_6_extension_de_resumecontrat_moteur_test\u00e9"
     },
     {
       "relation": "contains",
@@ -17038,9 +17156,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_interface",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_interface"
     },
     {
       "relation": "contains",
@@ -17048,9 +17166,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_8_api_et_coh\u00e9rence",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_8_api_et_coh\u00e9rence"
     },
     {
       "relation": "contains",
@@ -17058,9 +17176,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_frise_d_encaissement_des_contrats",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_9_p\u00e9rim\u00e8tre_exclu_yagni",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_9_p\u00e9rim\u00e8tre_exclu_yagni"
     },
     {
       "relation": "contains",
@@ -17068,9 +17186,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L121",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_7_interface",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_1_onglet_contrats_renderfrise",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_1_onglet_contrats_renderfrise"
     },
     {
       "relation": "contains",
@@ -17078,9 +17196,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_7_interface",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_2_dossier_client_renderdossier",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_2_dossier_client_renderdossier"
     },
     {
       "relation": "contains",
@@ -17088,9 +17206,9 @@
       "source_file": "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_09_25_frise_encaissement_contrats_design_7_interface",
-      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_3_onglet_analyse_insights",
-      "confidence_score": 1.0
+      "target": "specs_2026_09_25_frise_encaissement_contrats_design_7_3_onglet_analyse_insights"
     },
     {
       "relation": "contains",
@@ -17464,5 +17582,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "88a9e8c367ad8ec8acdea9f94bcf6af197f63776"
+  "built_at_commit": "7b85938ff0e9073e3f4ebe7993353c90e2959a93"
 }

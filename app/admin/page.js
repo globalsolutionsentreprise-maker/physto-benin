@@ -1419,6 +1419,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [uploadingAudioInterv, setUploadingAudioInterv] = React.useState(false)
   const [extractingFramesVisite, setExtractingFramesVisite] = React.useState(null)
   const [extractingFramesInterv, setExtractingFramesInterv] = React.useState(null)
+  const [videosVisite, setVideosVisite] = React.useState([])
+  const [videosInterv, setVideosInterv] = React.useState([])
   const [generatingRapportVisite, setGeneratingRapportVisite] = React.useState(false)
   const [rapportVisitePhase, setRapportVisitePhase] = React.useState('saisie')
   const [rapportVisiteErreurIA, setRapportVisiteErreurIA] = React.useState(null)
@@ -2360,6 +2362,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setRapportVisitePhase('saisie')
     setRapportVisiteErreurIA(null)
     setMeteoData(null)
+    setVideosVisite([])
   }
 
   function ouvrirRapportVisite(rapport, devis, client) {
@@ -2382,6 +2385,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setRapportVisitePhase('genere')
     setRapportVisiteErreurIA(null)
     setMeteoData(null)
+    setVideosVisite([])
   }
 
   async function uploaderPhotoRapport(file, setUploading, formSetter) {
@@ -2419,7 +2423,32 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
   }
 
-  async function extraireFramesVideo(file, formSetter, setExtracting) {
+  // Upload de la vidéo brute vers le storage (Gemini la lira côté serveur, image + son).
+  // On garde aussi le File en mémoire pour extraire ensuite les frames aux instants choisis par l'IA.
+  async function ajouterVideosRapport(files, setVideos, setBusy) {
+    var liste = Array.from(files).slice(0, 3)
+    for (var i = 0; i < liste.length; i++) {
+      var f = liste[i]
+      setBusy('⏳ Envoi vidéo ' + (i + 1) + '/' + liste.length)
+      try {
+        var ext = (f.name.split('.').pop() || 'mp4')
+        var nom = 'rapports/video-' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + ext
+        var { error } = await db.storage.from('realisations').upload(nom, f, { upsert: false })
+        if (error) { setMsg('Échec envoi vidéo : ' + f.name); continue }
+        var { data: urlData } = db.storage.from('realisations').getPublicUrl(nom)
+        ;(function(file, url) {
+          setVideos(function(prev) { return prev.concat({ file: file, url: url, name: file.name }) })
+        })(f, urlData.publicUrl)
+      } catch (e) {
+        setMsg('Échec envoi vidéo : ' + (e && e.message ? e.message : f.name))
+      }
+    }
+    setBusy(null)
+  }
+
+  // Extrait des images fixes aux instants (secondes) désignés par l'IA et les ajoute aux photos du rapport.
+  async function extraireFramesAuxInstants(file, instants, formSetter, setBusy) {
+    if (!file || !Array.isArray(instants) || !instants.length) return
     var objectUrl = URL.createObjectURL(file)
     var video = document.createElement('video')
     video.src = objectUrl
@@ -2433,10 +2462,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       })
       var duration = video.duration
       if (!duration || !isFinite(duration) || duration === 0) return
-      var timestamps = [0.2, 0.4, 0.6, 0.8].map(function(p) { return p * duration })
-      for (var ti = 0; ti < timestamps.length; ti++) {
-        setExtracting('⏳ Frames ' + (ti + 1) + '/4 — ' + file.name)
-        video.currentTime = timestamps[ti]
+      var ts = instants
+        .map(function(x) { return Number(x) })
+        .filter(function(x) { return isFinite(x) && x >= 0 })
+        .map(function(x) { return Math.min(x, Math.max(0, duration - 0.1)) })
+        .slice(0, 3)
+      for (var ti = 0; ti < ts.length; ti++) {
+        if (setBusy) setBusy('⏳ Capture ' + (ti + 1) + '/' + ts.length)
+        video.currentTime = ts[ti]
         await new Promise(function(resolve) {
           video.onseeked = resolve
           setTimeout(resolve, 3000)
@@ -2446,16 +2479,30 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         canvas.height = Math.round(video.videoHeight * (canvas.width / video.videoWidth))
         var ctx = canvas.getContext('2d')
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-        var blob = await new Promise(function(resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.8) })
+        var blob = await new Promise(function(resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.85) })
         if (!blob) continue
-        var frameFile = new File([blob], 'frame-' + Math.round(timestamps[ti]) + 's.jpg', { type: 'image/jpeg' })
+        var frameFile = new File([blob], 'capture-' + Math.round(ts[ti]) + 's.jpg', { type: 'image/jpeg' })
         await uploaderPhotoRapport(frameFile, function() {}, formSetter)
       }
     } catch (e) {
       // skip failed video silently
     } finally {
       URL.revokeObjectURL(objectUrl)
-      setExtracting(null)
+      if (setBusy) setBusy(null)
+    }
+  }
+
+  // Extrait les frames pour toutes les vidéos à partir des instants retournés par l'IA.
+  async function extraireCapturesIA(capturesVideo, videos, formSetter, setBusy) {
+    var caps = Array.isArray(capturesVideo) ? capturesVideo : []
+    for (var ci = 0; ci < caps.length; ci++) {
+      var c = caps[ci] || {}
+      var vi = (typeof c.videoIndex === 'number' && c.videoIndex >= 0) ? c.videoIndex : 0
+      var vid = videos[vi]
+      var instants = Array.isArray(c.instants) ? c.instants : (c.instant != null ? [c.instant] : [])
+      if (vid && vid.file && instants.length) {
+        await extraireFramesAuxInstants(vid.file, instants, formSetter, setBusy)
+      }
     }
   }
 
@@ -2480,6 +2527,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           notes: rapportVisiteForm.notesTechnicien,
           photos: rapportVisiteForm.photos || [],
           audios: audiosVisite.map(function(a) { return { mimeType: a.mimeType, data: a.data } }),
+          videos: videosVisite.map(function(v) { return v.url }),
           context: { clientNom, adresse: rapportVisiteForm.adresseSite, date: rapportVisiteForm.dateVisite, technicien: rapportVisiteForm.technicien, prestation: devis.prestation, audiosCount: audiosVisite.length },
         })
       })
@@ -2499,8 +2547,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             recommandations: r.recommandations || prev.recommandations || '',
           })
         })
+        // Extraire les images fixes aux instants choisis par l'IA (captures pertinentes, pas de rideaux)
+        await extraireCapturesIA(r.capturesVideo, videosVisite, setRapportVisiteForm, setExtractingFramesVisite)
         setRapportVisitePhase('genere')
         setAudiosVisite([])
+        setVideosVisite([])
       }
     } catch(e) { setRapportVisiteErreurIA(e.message) }
     setGeneratingRapportVisite(false)
@@ -2668,11 +2719,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             ),
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesVisite ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
-                var files = Array.from(e.target.files).slice(0, 3)
-                files.reduce(function(p, f) { return p.then(function() { return extraireFramesVideo(f, setRapportVisiteForm, setExtractingFramesVisite) }) }, Promise.resolve())
+                ajouterVideosRapport(e.target.files, setVideosVisite, setExtractingFramesVisite)
                 e.target.value = ''
               }, disabled: !!extractingFramesVisite }),
               extractingFramesVisite || '🎥 Ajouter des vidéos'
+            ),
+            videosVisite.length > 0 && React.createElement('div', { style: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' } },
+              videosVisite.map(function(v, i) {
+                return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#166534' } },
+                  React.createElement('span', null, '🎥 ' + (v.name || ('Vidéo ' + (i + 1)))),
+                  React.createElement('button', { type: 'button', onClick: function() { setVideosVisite(function(prev) { return prev.filter(function(_, j) { return j !== i }) }) }, style: { border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', padding: 0 } }, '✕')
+                )
+              })
             )
           ),
 
@@ -2682,8 +2740,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportVisiteIA,
-              disabled: generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length)) ? 0.5 : 1 }
+              disabled: generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length && !videosVisite.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportVisite || uploadingPhotoVisite || uploadingAudioVisite || !!extractingFramesVisite || (!rapportVisiteForm.notesTechnicien && !(rapportVisiteForm.photos || []).length && !audiosVisite.length && !videosVisite.length)) ? 0.5 : 1 }
             }, generatingRapportVisite ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 
@@ -2837,6 +2895,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     })
     setRapportIntervPhase('saisie')
     setRapportIntervErreurIA(null)
+    setVideosInterv([])
   }
 
   function ouvrirRapportInterv(rapport, devis, client) {
@@ -2856,6 +2915,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     })
     setRapportIntervPhase('genere')
     setRapportIntervErreurIA(null)
+    setVideosInterv([])
   }
 
   async function genererRapportIntervIA() {
@@ -2879,6 +2939,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           notes: rapportIntervForm.notesTechnicien,
           photos: rapportIntervForm.photos || [],
           audios: audiosInterv.map(function(a) { return { mimeType: a.mimeType, data: a.data } }),
+          videos: videosInterv.map(function(v) { return v.url }),
           context: { clientNom, date: rapportIntervForm.dateIntervention, technicien: rapportIntervForm.technicien, prestation: devis.prestation, audiosCount: audiosInterv.length },
         })
       })
@@ -2899,8 +2960,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             recommandations: r.recommandations || prev.recommandations || '',
           })
         })
+        await extraireCapturesIA(r.capturesVideo, videosInterv, setRapportIntervForm, setExtractingFramesInterv)
         setRapportIntervPhase('genere')
         setAudiosInterv([])
+        setVideosInterv([])
       }
     } catch(e) { setRapportIntervErreurIA(e.message) }
     setGeneratingRapportInterv(false)
@@ -3040,11 +3103,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             ),
             React.createElement('label', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '6px', border: '1.5px dashed #bbf7d0', backgroundColor: '#f0fdf4', cursor: extractingFramesInterv ? 'wait' : 'pointer', fontSize: '12px', color: '#166534', fontWeight: '600' } },
               React.createElement('input', { type: 'file', accept: 'video/*', multiple: true, style: { display: 'none' }, onChange: function(e) {
-                var files = Array.from(e.target.files).slice(0, 3)
-                files.reduce(function(p, f) { return p.then(function() { return extraireFramesVideo(f, setRapportIntervForm, setExtractingFramesInterv) }) }, Promise.resolve())
+                ajouterVideosRapport(e.target.files, setVideosInterv, setExtractingFramesInterv)
                 e.target.value = ''
               }, disabled: !!extractingFramesInterv }),
               extractingFramesInterv || '🎥 Ajouter des vidéos'
+            ),
+            videosInterv.length > 0 && React.createElement('div', { style: { marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' } },
+              videosInterv.map(function(v, i) {
+                return React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#166534' } },
+                  React.createElement('span', null, '🎥 ' + (v.name || ('Vidéo ' + (i + 1)))),
+                  React.createElement('button', { type: 'button', onClick: function() { setVideosInterv(function(prev) { return prev.filter(function(_, j) { return j !== i }) }) }, style: { border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '13px', padding: 0 } }, '✕')
+                )
+              })
             )
           ),
 
@@ -3060,8 +3130,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '9px 18px', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' } }, 'Annuler'),
             React.createElement('button', {
               onClick: genererRapportIntervIA,
-              disabled: generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length),
-              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length)) ? 0.5 : 1 }
+              disabled: generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length && !videosInterv.length),
+              style: { backgroundColor: '#d4a920', color: '#0a2e1a', border: 'none', borderRadius: '6px', padding: '9px 20px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: (generatingRapportInterv || uploadingPhotoInterv || uploadingAudioInterv || !!extractingFramesInterv || (!rapportIntervForm.notesTechnicien && !(rapportIntervForm.photos || []).length && !audiosInterv.length && !videosInterv.length)) ? 0.5 : 1 }
             }, generatingRapportInterv ? '🤖 Analyse en cours...' : '🤖 Générer le rapport avec l\'IA')
           )
 

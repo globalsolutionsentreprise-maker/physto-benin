@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server"
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+const GEMINI_FILES_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files"
+const GEMINI_FILES = "https://generativelanguage.googleapis.com/v1beta"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 300 // lecture vidéo (upload + traitement Gemini) peut prendre > 60s
 
 async function callGeminiWithRetry(body, maxRetries = 3) {
   let lastErr
@@ -25,16 +28,48 @@ async function callGeminiWithRetry(body, maxRetries = 3) {
   throw Object.assign(new Error("Gemini unavailable après " + maxRetries + " tentatives"), { data: lastErr })
 }
 
+// Télécharge la vidéo (depuis Supabase Storage) puis la pousse à la Files API Gemini,
+// qui l'analyse nativement (image + piste audio). Attend l'état ACTIVE avant usage.
+async function uploadVideoToGemini(url) {
+  const key = process.env.GEMINI_API_KEY
+  let vRes
+  try { vRes = await fetch(url, { signal: AbortSignal.timeout(25000) }) } catch { return null }
+  if (!vRes.ok) return null
+  const buf = Buffer.from(await vRes.arrayBuffer())
+  const mimeType = vRes.headers.get("content-type") || "video/mp4"
+
+  let up
+  try {
+    up = await fetch(`${GEMINI_FILES_UPLOAD}?key=${key}`, {
+      method: "POST",
+      headers: { "X-Goog-Upload-Protocol": "raw", "X-Goog-Upload-File-Name": "rapport-video", "Content-Type": mimeType },
+      body: buf,
+    })
+  } catch { return null }
+  if (!up.ok) return null
+  const meta = await up.json().catch(() => null)
+  let file = meta && (meta.file || meta)
+  if (!file || !file.name) return null
+
+  // ponytail: poll jusqu'à ACTIVE (max ~60s) — la Files API traite la vidéo en arrière-plan
+  for (let i = 0; i < 30 && file.state !== "ACTIVE"; i++) {
+    if (file.state === "FAILED") return null
+    await new Promise(r => setTimeout(r, 2000))
+    const st = await fetch(`${GEMINI_FILES}/${file.name}?key=${key}`).catch(() => null)
+    if (!st || !st.ok) break
+    file = await st.json().catch(() => file)
+  }
+  return file.state === "ACTIVE" ? { mimeType: file.mimeType || mimeType, fileUri: file.uri } : null
+}
+
 export async function POST(req) {
   try {
-    const { type, notes, photos, audios, context } = await req.json()
+    const { type, notes, photos, audios, videos, context } = await req.json()
+    const ctx = Object.assign({}, context)
 
-    const parts = []
+    const mediaParts = []
 
-    const promptText = type === "visite" ? buildPromptVisite(notes, context) : buildPromptIntervention(notes, context)
-    parts.push({ text: promptText })
-
-    // Fetch photos and pass as inline data (max 6)
+    // Photos (+ frames déjà extraites) en inline data (max 12)
     for (const url of (photos || []).slice(0, 12)) {
       try {
         const imgRes = await fetch(url, { signal: AbortSignal.timeout(8000) })
@@ -42,18 +77,31 @@ export async function POST(req) {
         const buffer = await imgRes.arrayBuffer()
         const base64 = Buffer.from(buffer).toString("base64")
         const mimeType = imgRes.headers.get("content-type") || "image/jpeg"
-        parts.push({ inlineData: { mimeType, data: base64 } })
+        mediaParts.push({ inlineData: { mimeType, data: base64 } })
       } catch {
         // skip failed images
       }
     }
 
-    // Notes vocales : déjà en base64 dans le body, passées directement en inlineData (max 5)
+    // Notes vocales : déjà en base64 dans le body (max 5)
     for (const a of (audios || []).slice(0, 5)) {
       if (a && a.data && a.mimeType) {
-        parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } })
+        mediaParts.push({ inlineData: { mimeType: a.mimeType, data: a.data } })
       }
     }
+
+    // Vidéos : lues nativement par Gemini via la Files API (image + son), max 3
+    let videosCount = 0
+    for (const url of (videos || []).slice(0, 3)) {
+      const fd = await uploadVideoToGemini(url)
+      if (fd && fd.fileUri) { mediaParts.push({ fileData: { mimeType: fd.mimeType, fileUri: fd.fileUri } }); videosCount++ }
+    }
+
+    ctx.photosCount = (photos || []).length
+    ctx.videosCount = videosCount
+
+    const promptText = type === "visite" ? buildPromptVisite(notes, ctx) : buildPromptIntervention(notes, ctx)
+    const parts = [{ text: promptText }, ...mediaParts]
 
     let geminiRes
     try {
@@ -89,7 +137,31 @@ export async function POST(req) {
   }
 }
 
+function blocVisuels(ctx) {
+  let out = ""
+  if (ctx?.photosCount > 0) {
+    out += `${ctx.photosCount} photo${ctx.photosCount > 1 ? "s" : ""} jointe${ctx.photosCount > 1 ? "s" : ""} — analyse-les attentivement pour enrichir le rapport.\n`
+  }
+  if (ctx?.videosCount > 0) {
+    out += `${ctx.videosCount} vidéo${ctx.videosCount > 1 ? "s" : ""} jointe${ctx.videosCount > 1 ? "s" : ""} — REGARDE chaque vidéo EN ENTIER, l'image ET le son (le technicien commente souvent à voix haute en filmant). Exploite tout ce que tu vois et entends : nuisibles, zones, dégâts, état des lieux, gestes de traitement.\n`
+  }
+  if (ctx?.audiosCount > 0) {
+    out += `${ctx.audiosCount} note${ctx.audiosCount > 1 ? "s" : ""} vocale${ctx.audiosCount > 1 ? "s" : ""} jointe${ctx.audiosCount > 1 ? "s" : ""} — écoute-les, transcris les informations utiles et intègre-les au rapport.\n`
+  }
+  return out
+}
+
+// Instruction + champ JSON pour que l'IA désigne les meilleurs instants à capturer.
+function blocCaptures(ctx) {
+  if (!(ctx?.videosCount > 0)) return { instr: "", champ: "" }
+  const instr = `\nCAPTURES VIDÉO : pour CHAQUE vidéo jointe (index 0 = 1ère vidéo), choisis 1 à 3 instants (en SECONDES depuis le début) dont l'image fixe illustre le mieux le rapport : nuisible nettement visible, zone infestée, dégât, produit ou geste de traitement en action. ÉVITE IMPÉRATIVEMENT les images floues de mouvement, plans sombres, murs/sols/plafonds vides, portes, transitions. Si rien n'est exploitable dans une vidéo, ne mets pas d'entrée pour elle. Ces instants servent à extraire automatiquement les photos du rapport.`
+  const champ = `,
+  "capturesVideo": [{ "videoIndex": 0, "instants": [12.5], "legende": "Description courte de ce que montre l'image" }]`
+  return { instr, champ }
+}
+
 function buildPromptVisite(notes, ctx) {
+  const cap = blocCaptures(ctx)
   return `Tu es un expert en hygiène et lutte antiparasitaire pour Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
 Rédige un rapport de visite technique professionnel à partir des informations brutes du technicien.
@@ -104,9 +176,7 @@ CONTEXTE
 NOTES BRUTES DU TECHNICIEN :
 ${notes || "(aucune note fournie)"}
 
-${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
-
-${(ctx?.audiosCount > 0) ? `${ctx.audiosCount} note${ctx.audiosCount > 1 ? 's' : ''} vocale${ctx.audiosCount > 1 ? 's' : ''} du technicien jointe${ctx.audiosCount > 1 ? 's' : ''} — écoute-les attentivement, transcris les informations utiles et intègre-les au rapport (état des lieux, nuisibles observés, zones infestées, observations, recommandations).` : ""}
+${blocVisuels(ctx)}${cap.instr}
 
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
@@ -116,11 +186,12 @@ Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un lan
   "zonesInfestees": "Description précise des zones infestées ou à risque",
   "niveauInfestation": "Faible | Moyen | Élevé",
   "observations": "Observations techniques détaillées (points critiques, facteurs favorisants, accessibilité, conditions sanitaires)",
-  "recommandations": "Recommandations de traitement professionnelles (méthodes, fréquence, mesures préventives, délais)"
+  "recommandations": "Recommandations de traitement professionnelles (méthodes, fréquence, mesures préventives, délais)"${cap.champ}
 }`
 }
 
 function buildPromptIntervention(notes, ctx) {
+  const cap = blocCaptures(ctx)
   return `Tu es un expert en hygiène et lutte antiparasitaire pour Global Solutions Entreprise (GSE), société agréée de dératisation, désinsectisation et désinfection à Cotonou, Bénin.
 
 Rédige un rapport d'intervention technique professionnel à partir des informations brutes du technicien.
@@ -135,9 +206,7 @@ CONTEXTE
 NOTES BRUTES DU TECHNICIEN :
 ${notes || "(aucune note fournie)"}
 
-${(ctx?.photos?.length > 0) ? `${ctx.photos.length} visuel${ctx.photos.length > 1 ? 's' : ''} joint${ctx.photos.length > 1 ? 's' : ''} (photos et/ou frames extraites de vidéos) — analyse-les attentivement pour enrichir le rapport.` : ""}
-
-${(ctx?.audiosCount > 0) ? `${ctx.audiosCount} note${ctx.audiosCount > 1 ? 's' : ''} vocale${ctx.audiosCount > 1 ? 's' : ''} du technicien jointe${ctx.audiosCount > 1 ? 's' : ''} — écoute-les attentivement, transcris les informations utiles et intègre-les au rapport (état des lieux, nuisibles observés, zones infestées, observations, recommandations).` : ""}
+${blocVisuels(ctx)}${cap.instr}
 
 Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un langage professionnel, précis et factuel. Réponds UNIQUEMENT avec le JSON, sans markdown :
 
@@ -147,6 +216,6 @@ Rédige un rapport structuré en JSON avec exactement ces champs. Utilise un lan
   "dureeIntervention": "Durée de l'intervention",
   "resultats": "Résultats obtenus et évaluation de l'efficacité du traitement",
   "observations": "Observations techniques (difficultés, zones à risque résiduel, état général post-traitement)",
-  "recommandations": "Recommandations de suivi (prochaine visite, délai, mesures préventives, actions correctives)"
+  "recommandations": "Recommandations de suivi (prochaine visite, délai, mesures préventives, actions correctives)"${cap.champ}
 }`
 }

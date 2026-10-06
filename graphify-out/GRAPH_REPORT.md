@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-09-25)
+# Graph Report - gse-site  (2026-10-06)
 
 ## Corpus Check
-- 183 files · ~717,271 words
+- 182 files · ~720,913 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 842 nodes · 885 edges · 106 communities (69 shown, 37 thin omitted)
+- 843 nodes · 895 edges · 105 communities (68 shown, 37 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88a9e8c3`
+- Built from commit: `7b85938f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -109,7 +109,6 @@
 - [[_COMMUNITY_Community 101|Community 101]]
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
-- [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 105|Community 105]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -139,7 +138,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (106 total, 37 thin omitted)
+## Communities (105 total, 37 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -199,7 +198,7 @@ Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill rou
 
 ### Community 14 - "Community 14"
 Cohesion: 0.10
-Nodes (44): SectionClientsDevis(), callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), GET() (+36 more)
+Nodes (45): SectionClientsDevis(), callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), GET() (+37 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -214,8 +213,8 @@ Cohesion: 0.40
 Nodes (4): QA checklist for CRM module (crm.html), QA checklist for RH module (rh.html), Reporting, Test targets
 
 ### Community 19 - "Community 19"
-Cohesion: 0.70
-Nodes (4): buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST()
+Cohesion: 0.54
+Nodes (7): blocCaptures(), blocVisuels(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST(), uploadVideoToGemini()
 
 ### Community 22 - "Community 22"
 Cohesion: 0.33
@@ -373,12 +372,8 @@ Nodes (15): 10. Tests, 11. Impact / fichiers touchés, 1. Intention et contexte,
 Cohesion: 0.18
 Nodes (10): Frise d'encaissement des contrats — Implementation Plan, Global Constraints, Review Focus, Self-Review, Task 1: Logique pure de paiement dans `contrat-analyse.mjs`, Task 2: Migration des 4 colonnes sur `interventions`, Task 3: `generate_planning` remplit `montant_du` auto, Task 4: Action `set_passage_finances` + réconciliation `paiements_recus` (+2 more)
 
-### Community 104 - "Community 104"
-Cohesion: 0.50
-Nodes (3): Pre-flight (shared interfaces), SDD ledger — plan: docs/superpowers/plans/2026-09-25-frise-encaissement-contrats.md, Tasks
-
 ## Knowledge Gaps
-- **477 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+472 more)
+- **475 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+470 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -388,7 +383,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 5`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _477 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _475 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
