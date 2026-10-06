@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     description: "Désinsectisation, dératisation, désinfection au Bénin. Intervention rapide à Cotonou.",
     // twitter:image hérité de la carte OpenGraph générée
   },
+  verification: {
+    google: "oh7n9Xm6TseGTYnAz43xklTeoI1jtWFSZIgYquEo0uY",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
