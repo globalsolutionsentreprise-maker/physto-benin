@@ -1,0 +1,31 @@
+{
+  "name": "Phyto Bénin by GSE — Questions fréquentes",
+  "url": "https://www.phyto-benin.com",
+  "updated": "2026-10-06",
+  "faq": [
+    {
+      "question": "Combien coûte une désinsectisation à Cotonou ?",
+      "answer": "Le prix dépend de la surface à traiter et du nuisible concerné. On commence toujours par un diagnostic gratuit, puis on remet un devis clair, sans engagement. Les contrats d'entretien démarrent à 25 000 FCFA par mois."
+    },
+    {
+      "question": "Intervenez-vous en urgence, la nuit et le week-end ?",
+      "answer": "Oui, Phyto Bénin est disponible 24h/24 et 7j/7, jours fériés compris, à Cotonou et dans les zones prioritaires (Abomey-Calavi, Sèmè-Kpodji, Porto-Novo)."
+    },
+    {
+      "question": "Êtes-vous agréés par l'État béninois ?",
+      "answer": "Oui, Phyto Bénin (GSE) est agréé par les autorités sanitaires du Bénin (agrément APA/26-025/CNGP-BEN). Un certificat officiel, opposable lors des inspections, est remis après chaque intervention."
+    },
+    {
+      "question": "Vos produits sont-ils dangereux pour les enfants et les animaux ?",
+      "answer": "Non. Nous utilisons uniquement des produits homologués OMS, et nous indiquons le délai exact à respecter avant de réoccuper les lieux selon le traitement réalisé."
+    },
+    {
+      "question": "Dans quelles villes du Bénin intervenez-vous ?",
+      "answer": "Cotonou, Abomey-Calavi, Porto-Novo, Ouidah, Sèmè-Kpodji, et partout ailleurs au Bénin sur demande."
+    },
+    {
+      "question": "Proposez-vous des contrats pour les hôtels et restaurants ?",
+      "answer": "Oui, des contrats d'entretien 3D mensuels ou trimestriels, avec certificat de conformité pour vos inspections HACCP. Tout commence par un audit gratuit sur site."
+    }
+  ]
+}

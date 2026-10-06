@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.phyto-benin.com"),
   alternates: {
     canonical: "https://www.phyto-benin.com",
+    types: {
+      "application/rss+xml": "https://www.phyto-benin.com/feed.xml",
+    },
   },
   openGraph: {
     title: "Phyto Bénin, Hygiène Sanitaire Professionnelle au Bénin",
@@ -42,7 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
-          "name": "Phyto Bénin by GSE, Global Solutions Entreprise",
+          "@id": "https://www.phyto-benin.com/#business",
+          "name": "Phyto Bénin by GSE",
+          "legalName": "Global Solutions Entreprise (GSE)",
+          "alternateName": ["Phyto Bénin", "GSE Global Solutions Entreprise"],
           "description": "Spécialiste en hygiène sanitaire et phytosanitaire au Bénin. Désinsectisation, dératisation, désinfection, anti-termites. Agréé par l'État béninois.",
           "url": "https://www.phyto-benin.com",
           "logo": "https://www.phyto-benin.com/logo-gse.jpeg",
@@ -86,6 +92,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             ]
           },
           "sameAs": []
+        })}} />
+
+        {/* Schema.org WebSite (entité site, pour désambiguïsation par les IA) */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "@id": "https://www.phyto-benin.com/#website",
+          "name": "Phyto Bénin by GSE",
+          "alternateName": "Phyto Bénin",
+          "url": "https://www.phyto-benin.com",
+          "inLanguage": "fr-FR",
+          "publisher": { "@id": "https://www.phyto-benin.com/#business" }
         })}} />
 
         {/* Google Analytics GA4, G-9XPCMJE1PJ */}

@@ -260,7 +260,7 @@
       "source_location": "L1381",
       "_origin": "ast",
       "id": "admin_page_sectionclientsdevis",
-      "community": 14,
+      "community": 5,
       "norm_label": "sectionclientsdevis()"
     },
     {
@@ -720,7 +720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "candidature_route",
-      "community": 105,
+      "community": 14,
       "norm_label": "route.js"
     },
     {
@@ -730,7 +730,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "candidature_route_esc",
-      "community": 105,
+      "community": 14,
       "norm_label": "esc()"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "candidature_route_post",
-      "community": 105,
+      "community": 14,
       "norm_label": "post()"
     },
     {
@@ -1754,6 +1754,46 @@
       "norm_label": "espaceclientlogin()"
     },
     {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "feed_xml_route",
+      "community": 107,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "slugifier()",
+      "file_type": "code",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "feed_xml_route_slugifier",
+      "community": 107,
+      "norm_label": "slugifier()"
+    },
+    {
+      "label": "esc()",
+      "file_type": "code",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "feed_xml_route_esc",
+      "community": 107,
+      "norm_label": "esc()"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "feed_xml_route_get",
+      "community": 107,
+      "norm_label": "get()"
+    },
+    {
       "label": "layout.tsx",
       "file_type": "code",
       "source_file": "app/layout.tsx",
@@ -1777,7 +1817,7 @@
       "label": "RootLayout()",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L33",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
       "community": 3,
@@ -2906,7 +2946,7 @@
       "source_location": "L527",
       "_origin": "ast",
       "id": "lib_contrat_analyse_paiementsparpassages",
-      "community": 14,
+      "community": 5,
       "norm_label": "paiementsparpassages()"
     },
     {
@@ -3378,6 +3418,336 @@
       "id": "postcss_config_config",
       "community": 56,
       "norm_label": "config"
+    },
+    {
+      "label": "faq.json",
+      "file_type": "code",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ai_faq",
+      "community": 106,
+      "norm_label": "faq.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "ai_faq_name",
+      "community": 106,
+      "norm_label": "name"
+    },
+    {
+      "label": "url",
+      "file_type": "code",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "ai_faq_url",
+      "community": 106,
+      "norm_label": "url"
+    },
+    {
+      "label": "updated",
+      "file_type": "code",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "ai_faq_updated",
+      "community": 106,
+      "norm_label": "updated"
+    },
+    {
+      "label": "faq",
+      "file_type": "code",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "ai_faq_faq",
+      "community": 106,
+      "norm_label": "faq"
+    },
+    {
+      "label": "service.json",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ai_service",
+      "community": 105,
+      "norm_label": "service.json"
+    },
+    {
+      "label": "provider",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "ai_service_provider",
+      "community": 105,
+      "norm_label": "provider"
+    },
+    {
+      "label": "url",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "ai_service_url",
+      "community": 105,
+      "norm_label": "url"
+    },
+    {
+      "label": "accreditation",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "ai_service_accreditation",
+      "community": 105,
+      "norm_label": "accreditation"
+    },
+    {
+      "label": "availability",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "ai_service_availability",
+      "community": 105,
+      "norm_label": "availability"
+    },
+    {
+      "label": "areaServed",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "ai_service_areaserved",
+      "community": 105,
+      "norm_label": "areaserved"
+    },
+    {
+      "label": "updated",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "ai_service_updated",
+      "community": 105,
+      "norm_label": "updated"
+    },
+    {
+      "label": "services",
+      "file_type": "code",
+      "source_file": "public/ai/service.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "ai_service_services",
+      "community": 105,
+      "norm_label": "services"
+    },
+    {
+      "label": "summary.json",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "ai_summary",
+      "community": 104,
+      "norm_label": "summary.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "ai_summary_name",
+      "community": 104,
+      "norm_label": "name"
+    },
+    {
+      "label": "legalName",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "ai_summary_legalname",
+      "community": 104,
+      "norm_label": "legalname"
+    },
+    {
+      "label": "alternateName",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "ai_summary_alternatename",
+      "community": 104,
+      "norm_label": "alternatename"
+    },
+    {
+      "label": "url",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "ai_summary_url",
+      "community": 104,
+      "norm_label": "url"
+    },
+    {
+      "label": "description",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "ai_summary_description",
+      "community": 104,
+      "norm_label": "description"
+    },
+    {
+      "label": "accreditation",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "ai_summary_accreditation",
+      "community": 104,
+      "norm_label": "accreditation"
+    },
+    {
+      "label": "services",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "ai_summary_services",
+      "community": 104,
+      "norm_label": "services"
+    },
+    {
+      "label": "areaServed",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "ai_summary_areaserved",
+      "community": 104,
+      "norm_label": "areaserved"
+    },
+    {
+      "label": "availability",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "ai_summary_availability",
+      "community": 104,
+      "norm_label": "availability"
+    },
+    {
+      "label": "pricing",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "ai_summary_pricing",
+      "community": 104,
+      "norm_label": "pricing"
+    },
+    {
+      "label": "contact",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "ai_summary_contact",
+      "community": 104,
+      "norm_label": "contact"
+    },
+    {
+      "label": "telephone",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "ai_summary_contact_telephone",
+      "community": 104,
+      "norm_label": "telephone"
+    },
+    {
+      "label": "email",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "ai_summary_contact_email",
+      "community": 104,
+      "norm_label": "email"
+    },
+    {
+      "label": "resources",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "ai_summary_resources",
+      "community": 104,
+      "norm_label": "resources"
+    },
+    {
+      "label": "llms",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "ai_summary_resources_llms",
+      "community": 104,
+      "norm_label": "llms"
+    },
+    {
+      "label": "faq",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "ai_summary_resources_faq",
+      "community": 104,
+      "norm_label": "faq"
+    },
+    {
+      "label": "services",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "ai_summary_resources_services",
+      "community": 104,
+      "norm_label": "services"
+    },
+    {
+      "label": "feed",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "ai_summary_resources_feed",
+      "community": 104,
+      "norm_label": "feed"
+    },
+    {
+      "label": "updated",
+      "file_type": "code",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "ai_summary_updated",
+      "community": 104,
+      "norm_label": "updated"
     },
     {
       "label": "generer-article.js",
@@ -9611,9 +9981,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route",
-      "target": "analyze_rapport_route_bloccaptures",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_bloccaptures"
     },
     {
       "relation": "contains",
@@ -9621,9 +9991,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route",
-      "target": "analyze_rapport_route_blocvisuels",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_blocvisuels"
     },
     {
       "relation": "contains",
@@ -9671,9 +10041,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route",
-      "target": "analyze_rapport_route_uploadvideotogemini",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_uploadvideotogemini"
     },
     {
       "relation": "calls",
@@ -9693,9 +10063,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_post",
-      "target": "analyze_rapport_route_uploadvideotogemini",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_uploadvideotogemini"
     },
     {
       "relation": "calls",
@@ -9726,9 +10096,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L209",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_buildpromptintervention",
-      "target": "analyze_rapport_route_blocvisuels",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_blocvisuels"
     },
     {
       "relation": "calls",
@@ -9737,9 +10107,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L179",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_buildpromptvisite",
-      "target": "analyze_rapport_route_blocvisuels",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_blocvisuels"
     },
     {
       "relation": "calls",
@@ -9748,9 +10118,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L194",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_buildpromptintervention",
-      "target": "analyze_rapport_route_bloccaptures",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_bloccaptures"
     },
     {
       "relation": "calls",
@@ -9759,9 +10129,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_buildpromptvisite",
-      "target": "analyze_rapport_route_bloccaptures",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_bloccaptures"
     },
     {
       "relation": "contains",
@@ -9947,9 +10317,9 @@
       "source_file": "app/api/crm-data/route.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "crm_data_route",
-      "target": "lib_contrat_analyse_planifierpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_planifierpassages"
     },
     {
       "relation": "calls",
@@ -11122,6 +11492,36 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "feed_xml_route",
+      "target": "feed_xml_route_esc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "feed_xml_route",
+      "target": "feed_xml_route_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/feed.xml/route.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "feed_xml_route",
+      "target": "feed_xml_route_slugifier",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/layout.tsx",
       "source_location": "L6",
       "weight": 1.0,
@@ -11982,9 +12382,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L458",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_isoplusmois",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_isoplusmois"
     },
     {
       "relation": "contains",
@@ -12142,9 +12542,9 @@
       "source_file": "lib/contrat-analyse.mjs",
       "source_location": "L473",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse",
-      "target": "lib_contrat_analyse_planifierpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_planifierpassages"
     },
     {
       "relation": "contains",
@@ -12636,9 +13036,9 @@
       "source_file": "lib/contrat-analyse.test.mjs",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
-      "target": "lib_contrat_analyse_planifierpassages",
-      "confidence_score": 1.0
+      "target": "lib_contrat_analyse_planifierpassages"
     },
     {
       "relation": "calls",
@@ -13089,6 +13489,306 @@
       "confidence_score": 1.0,
       "source": "postcss_config",
       "target": "postcss_config_config"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "ai_faq",
+      "target": "ai_faq_faq",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ai_faq",
+      "target": "ai_faq_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "ai_faq",
+      "target": "ai_faq_updated",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/faq.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "ai_faq",
+      "target": "ai_faq_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_accreditation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_areaserved",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_availability",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_provider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_services",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_updated",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/service.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "ai_service",
+      "target": "ai_service_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_accreditation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_alternatename",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_areaserved",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_availability",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_contact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_description",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_legalname",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_pricing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_resources",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_services",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_updated",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "ai_summary",
+      "target": "ai_summary_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "ai_summary_contact",
+      "target": "ai_summary_contact_email",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "ai_summary_contact",
+      "target": "ai_summary_contact_telephone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "ai_summary_resources",
+      "target": "ai_summary_resources_faq",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "ai_summary_resources",
+      "target": "ai_summary_resources_feed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "ai_summary_resources",
+      "target": "ai_summary_resources_llms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/ai/summary.json",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "ai_summary_resources",
+      "target": "ai_summary_resources_services",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -17582,5 +18282,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "7b85938ff0e9073e3f4ebe7993353c90e2959a93"
+  "built_at_commit": "94ad4d355dc1a6c5ef0ca40eec5d982c7f900d09"
 }

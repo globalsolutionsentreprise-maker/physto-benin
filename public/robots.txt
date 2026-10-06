@@ -1,5 +1,27 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /espace-client
+Disallow: /api
 
+# Crawlers IA explicitement autorisés (indexation + citation avec attribution)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# Résumé lisible par IA : https://www.phyto-benin.com/llms.txt
 Sitemap: https://www.phyto-benin.com/sitemap.xml

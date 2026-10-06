@@ -1,0 +1,17 @@
+# ai.txt — Préférences pour les agents et crawlers IA
+# Phyto Bénin by GSE (Global Solutions Entreprise)
+# https://www.phyto-benin.com
+
+User-Agent: *
+Allow: /
+Disallow: /admin
+Disallow: /espace-client
+Disallow: /api
+
+# Les contenus publics peuvent être lus, indexés et cités par les moteurs
+# génératifs (ChatGPT, Claude, Perplexity, Gemini, Google AI Overviews),
+# avec attribution à « Phyto Bénin by GSE ».
+
+Summary: https://www.phyto-benin.com/llms.txt
+Sitemap: https://www.phyto-benin.com/sitemap.xml
+Contact: contact@phyto-benin.com

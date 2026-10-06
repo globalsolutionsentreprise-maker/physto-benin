@@ -1,0 +1,50 @@
+{
+  "provider": "Phyto Bénin by GSE",
+  "url": "https://www.phyto-benin.com",
+  "accreditation": "APA/26-025/CNGP-BEN (État béninois)",
+  "availability": "24h/24, 7j/7",
+  "areaServed": ["Cotonou", "Abomey-Calavi", "Porto-Novo", "Ouidah", "Sèmè-Kpodji", "Bénin"],
+  "updated": "2026-10-06",
+  "services": [
+    {
+      "name": "Désinsectisation",
+      "description": "Élimination complète des insectes nuisibles : cafards, fourmis, moustiques, mouches.",
+      "url": "https://www.phyto-benin.com/services/desinsectisation-cotonou"
+    },
+    {
+      "name": "Dératisation",
+      "description": "Intervention sécurisée contre les rongeurs : rats, souris.",
+      "url": "https://www.phyto-benin.com/services/deratisation-benin"
+    },
+    {
+      "name": "Désinfection",
+      "description": "Assainissement complet des locaux avec produits virucides et bactéricides certifiés.",
+      "url": "https://www.phyto-benin.com/services/desinfection-locaux"
+    },
+    {
+      "name": "Anti-termites",
+      "description": "Protection durable des structures contre les termites.",
+      "url": "https://www.phyto-benin.com/services/anti-termites-benin"
+    },
+    {
+      "name": "Reptiles et serpents",
+      "description": "Sécurisation des sites contre les reptiles, geckos et serpents.",
+      "url": "https://www.phyto-benin.com/services/reptiles-serpents-benin"
+    },
+    {
+      "name": "Anti-moustiques",
+      "description": "Traitement ciblé contre les moustiques, vecteurs de maladies.",
+      "url": "https://www.phyto-benin.com/services/anti-moustiques-cotonou"
+    },
+    {
+      "name": "Punaises de lit",
+      "description": "Traitement des punaises de lit par méthode thermique et chimique.",
+      "url": "https://www.phyto-benin.com/services/punaises-de-lit-cotonou"
+    },
+    {
+      "name": "Contrat de conformité 3D",
+      "description": "Audit gratuit sur site, passages réguliers et certificat de conformité pour les inspections HACCP. Hôtels, restaurants, cliniques, écoles, supermarchés, entrepôts.",
+      "url": "https://www.phyto-benin.com/contrat-conformite"
+    }
+  ]
+}

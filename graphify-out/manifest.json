@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "app/layout.tsx": {
-    "mtime": 1789124639.6449492,
-    "ast_hash": "fec5e5df1f2296684eed0de05eba2cc7",
+    "mtime": 1791301525.044385,
+    "ast_hash": "9dd6e226dffdd3f36f6a3db64f9259c8",
     "semantic_hash": ""
   },
   "app/lib/supabase.js": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "public/robots.txt": {
-    "mtime": 1780353610.1482966,
-    "ast_hash": "75f161a85c3272678f30affec740b167",
+    "mtime": 1791301430.262139,
+    "ast_hash": "3ea7ed0103bf2c8c9ca4d65ffad5c329",
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
@@ -1017,6 +1017,36 @@
   "docs/superpowers/specs/2026-09-25-frise-encaissement-contrats-design.md": {
     "mtime": 1790364866.9184833,
     "ast_hash": "a7f85d09773b3765ca5b6e7f016268bf",
+    "semantic_hash": ""
+  },
+  "app/feed.xml/route.ts": {
+    "mtime": 1791301501.9703405,
+    "ast_hash": "59dba57d56128c5674a32a920ec6d6ac",
+    "semantic_hash": ""
+  },
+  "public/ai/faq.json": {
+    "mtime": 1791301468.3662102,
+    "ast_hash": "09440e43a8efa16423981bfefb400195",
+    "semantic_hash": ""
+  },
+  "public/ai/service.json": {
+    "mtime": 1791301489.241799,
+    "ast_hash": "c3ad6a63b3cd4e48f7a1ea0e9ad60b73",
+    "semantic_hash": ""
+  },
+  "public/ai/summary.json": {
+    "mtime": 1791301458.8372962,
+    "ast_hash": "57b79e80079a0866e3497517e63ffcae",
+    "semantic_hash": ""
+  },
+  "public/.well-known/ai.txt": {
+    "mtime": 1791301449.305808,
+    "ast_hash": "0d6c6bf2a458905cc5dbdef1fbad6a81",
+    "semantic_hash": ""
+  },
+  "public/llms.txt": {
+    "mtime": 1791301444.1067588,
+    "ast_hash": "8537dbb86aad6e6c98c1d1bf6ab906e4",
     "semantic_hash": ""
   }
 }
