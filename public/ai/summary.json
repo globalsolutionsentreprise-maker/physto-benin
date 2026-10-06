@@ -22,6 +22,7 @@
     "telephone": "+2290153047950",
     "email": "contact@phyto-benin.com"
   },
+  "sameAs": ["https://www.facebook.com/MadeinBeninbyUs"],
   "resources": {
     "llms": "https://www.phyto-benin.com/llms.txt",
     "faq": "https://www.phyto-benin.com/ai/faq.json",
