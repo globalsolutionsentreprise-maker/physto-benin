@@ -1957,7 +1957,7 @@
       "label": "Shell()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L236",
+      "source_location": "L249",
       "_origin": "ast",
       "id": "token_page_shell",
       "community": 108,
@@ -1967,7 +1967,7 @@
       "label": "Lbl()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L250",
+      "source_location": "L263",
       "_origin": "ast",
       "id": "token_page_lbl",
       "community": 108,
@@ -1977,7 +1977,7 @@
       "label": "Chips()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L254",
+      "source_location": "L267",
       "_origin": "ast",
       "id": "token_page_chips",
       "community": 108,
@@ -1987,7 +1987,7 @@
       "label": "inp",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L269",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "token_page_inp",
       "community": 108,
@@ -1997,7 +1997,7 @@
       "label": "chip",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L273",
+      "source_location": "L286",
       "_origin": "ast",
       "id": "token_page_chip",
       "community": 108,
@@ -2007,7 +2007,7 @@
       "label": "chipOn",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L277",
+      "source_location": "L290",
       "_origin": "ast",
       "id": "token_page_chipon",
       "community": 108,
@@ -11530,9 +11530,9 @@
       "source_file": "app/layout.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_layout",
-      "target": "components_siteheader",
-      "confidence_score": 1.0
+      "target": "components_siteheader"
     },
     {
       "relation": "contains",
@@ -11540,9 +11540,9 @@
       "source_file": "app/components/SiteHeader.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_siteheader",
-      "target": "components_siteheader_siteheader",
-      "confidence_score": 1.0
+      "target": "components_siteheader_siteheader"
     },
     {
       "relation": "imports_from",
@@ -18778,5 +18778,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "72ca8694298dbd13a4ac29830f9849be4d530fe8"
+  "built_at_commit": "9b3bf15773a6c62eef1d13308d9c919abaab0251"
 }

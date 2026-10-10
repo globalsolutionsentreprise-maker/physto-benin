@@ -94,6 +94,13 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     set(list.includes(val) ? list.filter((x) => x !== val) : list.concat(val))
   }
 
+  // Saisie d'un nom de produit : coche automatiquement la catégorie (pour l'impression),
+  // la décoche si le champ est vidé.
+  function setProduit(key: string, val: string) {
+    setProduits((p) => ({ ...p, [key]: val }))
+    setProduitsCoches((c) => (val.trim() ? (c.includes(key) ? c : c.concat(key)) : c.filter((k) => k !== key)))
+  }
+
   async function soumettre() {
     setSaving(true); setErreur(null); setProgress("")
     try {
@@ -177,15 +184,21 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Nuisibles observés</Lbl>
       <Chips items={NUISIBLES} selected={nuisibles} onToggle={(v) => toggle(nuisibles, setNuisibles, v)} multi />
 
-      <Lbl>Produits utilisés</Lbl>
-      {PRODUITS_CATS.map((cat) => {
+      <Lbl>Nom du produit insecticide utilisé</Lbl>
+      <input value={produits.insecticides || ""} onChange={(e) => setProduit("insecticides", e.target.value)} placeholder="Ex : IMPERA 300 CS / ROCOGEL" style={inp} />
+
+      <Lbl>Nom du raticide utilisé</Lbl>
+      <input value={produits.raticides || ""} onChange={(e) => setProduit("raticides", e.target.value)} placeholder="Ex : VERTOX" style={inp} />
+
+      <Lbl>Autres produits utilisés</Lbl>
+      {PRODUITS_CATS.filter((cat) => cat.key !== "insecticides" && cat.key !== "raticides").map((cat) => {
         const on = produitsCoches.includes(cat.key)
         return (
           <div key={cat.key} style={{ marginBottom: 8 }}>
             <button type="button" onClick={() => toggle(produitsCoches, setProduitsCoches, cat.key)} style={{ ...chip, ...(on ? chipOn : {}), width: "100%", textAlign: "left" }}>
               {on ? "☑" : "☐"} {cat.label}
             </button>
-            {on ? <input value={produits[cat.key] || ""} onChange={(e) => setProduits({ ...produits, [cat.key]: e.target.value })} placeholder="Nom du produit" style={{ ...inp, marginTop: 6 }} /> : null}
+            {on ? <input value={produits[cat.key] || ""} onChange={(e) => setProduit(cat.key, e.target.value)} placeholder="Nom du produit" style={{ ...inp, marginTop: 6 }} /> : null}
           </div>
         )
       })}
