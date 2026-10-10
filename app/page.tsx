@@ -54,6 +54,42 @@ export default function Accueil() {
     charger()
   }, [])
 
+  // Motion du hero : neutralisation séquencée des nuisibles + cartes magnétiques (desktop).
+  // Respecte prefers-reduced-motion ; purement décoratif, se nettoie au démontage.
+  useEffect(function() {
+    if (typeof window === "undefined") return
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const timers: number[] = []
+    const cleanups: Array<() => void> = []
+
+    if (!reduce) {
+      document.querySelectorAll("[data-bug]").forEach(function(b, i) {
+        timers.push(window.setTimeout(function() { b.classList.add("hit") }, 1700 + i * 260))
+      })
+    }
+    if (!reduce && window.matchMedia("(pointer:fine)").matches) {
+      document.querySelectorAll("[data-magnet]").forEach(function(node) {
+        const el = node as HTMLElement
+        const move = function(ev: Event) {
+          const e = ev as MouseEvent
+          const r = el.getBoundingClientRect()
+          const px = (e.clientX - r.left) / r.width
+          const py = (e.clientY - r.top) / r.height
+          const rx = (0.5 - py) * 8
+          const ry = (px - 0.5) * 10
+          el.style.transform = "perspective(720px) rotateX(" + rx + "deg) rotateY(" + ry + "deg) translateY(-6px)"
+          el.style.setProperty("--mx", (px * 100) + "%")
+          el.style.setProperty("--my", (py * 100) + "%")
+        }
+        const leave = function() { el.style.transform = "" }
+        el.addEventListener("mousemove", move)
+        el.addEventListener("mouseleave", leave)
+        cleanups.push(function() { el.removeEventListener("mousemove", move); el.removeEventListener("mouseleave", leave) })
+      })
+    }
+    return function() { timers.forEach(function(t) { clearTimeout(t) }); cleanups.forEach(function(c) { c() }) }
+  }, [])
+
   const services = [
     { numero: "01", slug: "desinsectisation-cotonou", titre: "Désinsectisation", accroche: "Cafards, fourmis, moustiques, mouches", desc: "Gel appât, pulvérisation résiduelle ou fumigation, on choisit la bonne méthode selon votre situation. Résultat durable, certifié." },
     { numero: "02", slug: "deratisation-benin", titre: "Dératisation", accroche: "Rats, souris, rongeurs", desc: "Pièges homologués, raticides certifiés, sécurisation des points d'entrée. On élimine les rongeurs et on fait en sorte qu'ils ne reviennent pas." },
@@ -105,12 +141,106 @@ export default function Accueil() {
       <style>{`
         .srv-card { transition: border-top-color 0.2s; border-top: 3px solid transparent; }
         .srv-card:hover { border-top-color: #d4a920 !important; }
+
+        /* ===== HERO motion (direction « Terrain vivant ») ===== */
+        .hx-title { font-family: "Bricolage Grotesque", system-ui, sans-serif; }
+
+        /* radar de protection */
+        .hx-radar { position: absolute; right: -9vw; top: 46%; transform: translateY(-50%); z-index: 1; width: min(82vh, 760px); aspect-ratio: 1; pointer-events: none; }
+        .hx-ring { position: absolute; inset: 0; margin: auto; border-radius: 50%; border: 1px solid rgba(212,169,32,0.16); }
+        .hx-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(212,169,32,0.18), transparent 26%); -webkit-mask: radial-gradient(circle, transparent 7%, #000 8%); mask: radial-gradient(circle, transparent 7%, #000 8%); animation: hxTourne 6s linear infinite; }
+        @keyframes hxTourne { to { transform: rotate(360deg); } }
+        .hx-ping { position: absolute; inset: 0; margin: auto; width: 18%; height: 18%; border-radius: 50%; border: 1.5px solid rgba(212,169,32,0.5); opacity: 0; animation: hxPing 4s cubic-bezier(.2,.6,.3,1) infinite; }
+        .hx-ping:nth-child(2) { animation-delay: 1.3s; } .hx-ping:nth-child(3) { animation-delay: 2.6s; }
+        @keyframes hxPing { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(5.2); opacity: 0; } }
+
+        /* nuisibles qui entrent puis sont neutralisés */
+        .hx-bug { position: absolute; z-index: 2; font-size: clamp(22px, 2.8vw, 36px); opacity: 0; animation: hxEntre .6s ease forwards; }
+        .hx-bug .hx-barre { position: absolute; left: -10%; top: 52%; width: 120%; height: 3px; background: #d4a920; border-radius: 2px; transform: scaleX(0); transform-origin: left; box-shadow: 0 0 10px #d4a920; }
+        .hx-bug.hit { animation: hxNeutralise .8s cubic-bezier(.5,0,.75,0) forwards; }
+        .hx-bug.hit .hx-barre { animation: hxRaye .28s ease forwards; }
+        @keyframes hxEntre { to { opacity: .82; } }
+        @keyframes hxRaye { to { transform: scaleX(1); } }
+        @keyframes hxNeutralise { 0% { opacity: .82; transform: scale(1) rotate(0); } 60% { opacity: .45; } 100% { opacity: 0; transform: scale(.4) rotate(26deg); } }
+
+        /* révélation du titre, mot à mot */
+        .hx-mot { display: inline-block; overflow: hidden; vertical-align: bottom; }
+        .hx-mot > span { display: inline-block; transform: translateY(110%); animation: hxMonte .85s cubic-bezier(.19,1,.22,1) var(--d, 0s) forwards; }
+        @keyframes hxMonte { to { transform: translateY(0); } }
+        /* glint doré discret qui passe sur les mots blancs du titre, en boucle lente */
+        .hx-title .hx-mot > span:not(.hx-accent) {
+          background: linear-gradient(100deg, #ffffff 0%, #ffffff 44%, #ffe9ad 50%, #ffffff 56%, #ffffff 100%);
+          background-size: 300% 100%; background-position: 150% 0;
+          -webkit-background-clip: text; background-clip: text;
+          -webkit-text-fill-color: transparent; color: transparent;
+          animation: hxMonte .85s cubic-bezier(.19,1,.22,1) var(--d, 0s) forwards, hxGlint 7s ease-in-out 2.4s infinite;
+        }
+        @keyframes hxGlint { 0%, 100% { background-position: 150% 0; } 50% { background-position: -50% 0; } }
+        /* surlignage or qui balaie « On s'en occupe. » */
+        .hx-accent { position: relative; color: #04110a; font-weight: 800; z-index: 0; padding: 0 .1em; white-space: nowrap; }
+        .hx-accent::before { content: ""; position: absolute; inset: .08em 0; z-index: -1; background: linear-gradient(90deg, #d4a920, #ffde7a); transform: scaleX(0); transform-origin: left; border-radius: 3px; animation: hxSwipe .55s cubic-bezier(.65,0,.35,1) 1.2s forwards; }
+        @keyframes hxSwipe { to { transform: scaleX(1); } }
+        /* reflet assorti qui balaie le bloc doré, synchronisé avec le glint du titre */
+        .hx-accent::after { content: ""; position: absolute; inset: .08em 0; z-index: -1; border-radius: 3px; pointer-events: none; background: linear-gradient(100deg, transparent 42%, rgba(255,255,255,0.45) 50%, transparent 58%); background-size: 260% 100%; background-repeat: no-repeat; background-position: 150% 0; animation: hxGoldSheen 7s ease-in-out 2.4s infinite; }
+        @keyframes hxGoldSheen { 0%, 100% { background-position: 150% 0; } 50% { background-position: -40% 0; } }
+
+        /* cartes parcours : entrée décalée + lumière continue + tilt 3D et lueur au curseur */
+        .hx-carte { position: relative; overflow: hidden; will-change: transform; opacity: 0; transform: translateY(22px); animation: hxUp .8s cubic-bezier(.22,1,.36,1) forwards; transition: transform .18s ease-out, border-color .35s, box-shadow .35s; }
+        .hx-carte:hover { border-color: #d4a920 !important; box-shadow: 0 22px 46px -20px rgba(212,169,32,0.6); }
+        /* ligne de lumière or qui traverse le haut de la carte en continu */
+        .hx-carte::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1.5px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(212,169,32,0.95), transparent); background-size: 42% 100%; background-repeat: no-repeat; animation: hxSheen 5.5s linear infinite; }
+        .hx-carte.part::before { animation-delay: 2.75s; }
+        @keyframes hxSheen { 0% { background-position: -45% 0; } 100% { background-position: 145% 0; } }
+        /* lueur qui suit la souris */
+        .hx-carte::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.16), transparent 60%); }
+        .hx-carte:hover::after { opacity: 1; }
+        .hx-fleche { display: inline-block; transition: transform .35s cubic-bezier(.22,1,.36,1); }
+        .hx-carte:hover .hx-fleche { transform: translateX(6px); }
+        @keyframes hxUp { to { opacity: 1; transform: translateY(0); } }
+
+        .hx-fade { opacity: 0; animation: hxFade .9s ease forwards; }
+        @keyframes hxFade { to { opacity: 1; } }
+
+        @media (max-width: 640px) {
+          .hx-radar { opacity: .4; right: -30vw; }
+          .hx-bug { font-size: 20px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hx-sweep, .hx-ping, .hx-carte::before, .hx-accent::after, .hx-title .hx-mot > span:not(.hx-accent) { animation: none; }
+          .hx-mot > span, .hx-carte, .hx-fade { animation: none !important; opacity: 1; transform: none; }
+          .hx-accent::before { animation: none; transform: scaleX(1); }
+          .hx-bug { opacity: .82; animation: none; }
+          .hx-bug .hx-barre { transform: scaleX(1); }
+        }
       `}</style>
 
       {/* HERO */}
       <section style={{ position: "relative", minHeight: "92vh", display: "flex", flexDirection: "column", justifyContent: "flex-end", overflow: "hidden", backgroundColor: "#050e07" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/images/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.45 }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #020904 0%, rgba(2,9,4,0.75) 45%, rgba(2,9,4,0.2) 100%)" }} />
+
+        {/* RADAR de protection + nuisibles neutralisés (décor animé, aucun contenu ajouté) */}
+        <div className="hx-radar" aria-hidden="true">
+          <div className="hx-ring" style={{ width: "30%", height: "30%" }} />
+          <div className="hx-ring" style={{ width: "55%", height: "55%" }} />
+          <div className="hx-ring" style={{ width: "80%", height: "80%" }} />
+          <div className="hx-ring" style={{ width: "100%", height: "100%" }} />
+          <div className="hx-sweep" />
+          <div className="hx-ping" /><div className="hx-ping" /><div className="hx-ping" />
+        </div>
+        {[
+          { e: "🦟", top: "18%", left: "58%", d: "0.3s" },
+          { e: "🪳", top: "60%", left: "64%", d: "0.55s" },
+          { e: "🐀", top: "30%", left: "80%", d: "0.8s" },
+          { e: "🐍", top: "72%", left: "72%", d: "1.05s" },
+          { e: "🐛", top: "12%", left: "82%", d: "1.3s" },
+        ].map(function(b, i) {
+          return (
+            <div key={i} className="hx-bug" data-bug aria-hidden="true" style={{ top: b.top, left: b.left, animationDelay: b.d }}>
+              {b.e}<span className="hx-barre" />
+            </div>
+          )
+        })}
 
         {/* BADGE AGRÉMENT, haut droite */}
         <div className="badge-float" style={{ position: "absolute", top: "28px", right: "40px", zIndex: 10, display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(212,169,32,0.13)", border: "1.5px solid rgba(212,169,32,0.55)", padding: "10px 18px", borderRadius: "6px", backdropFilter: "blur(6px)" }}>
@@ -120,31 +250,33 @@ export default function Accueil() {
             <div style={{ fontSize: "9px", color: "rgba(212,169,32,0.7)", letterSpacing: "0.06em", marginTop: "2px" }}>{agrement}</div>
           </div>
         </div>
-        <div className="hero-padding" style={{ position: "relative", zIndex: 2, padding: "0 60px 80px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.35)", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "6px 16px", borderRadius: "20px", letterSpacing: "0.08em", marginBottom: "28px" }}>
+        <div className="hero-padding" style={{ position: "relative", zIndex: 3, padding: "0 60px 80px" }}>
+          <div className="hx-fade" style={{ animationDelay: "0.15s", display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.35)", color: "#d4a920", fontSize: "11px", fontWeight: "600", padding: "6px 16px", borderRadius: "20px", letterSpacing: "0.08em", marginBottom: "28px" }}>
             <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "#d4a920" }} />
             BÉNIN · HYGIÈNE SANITAIRE · INTERVENTION 24H/24
           </div>
-          <h1 className="hero-h1" style={{ fontSize: "clamp(32px, 5vw, 62px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.1", maxWidth: "760px", marginBottom: "24px", letterSpacing: "-0.02em" }}>
-            Moustiques, cafards, serpents…
+          <h1 className="hero-h1 hx-title" style={{ fontSize: "clamp(34px, 5.8vw, 74px)", fontWeight: "800", color: "#ffffff", lineHeight: "1.0", maxWidth: "860px", marginBottom: "24px", letterSpacing: "-0.02em", textTransform: "uppercase" }}>
+            <span className="hx-mot"><span style={{ ["--d" as any]: "0.3s" }}>Moustiques,</span></span>{" "}
+            <span className="hx-mot"><span style={{ ["--d" as any]: "0.42s" }}>cafards,</span></span>{" "}
+            <span className="hx-mot"><span style={{ ["--d" as any]: "0.54s" }}>serpents…</span></span>
             <br />
-            <span style={{ color: "#d4a920", fontWeight: "700" }}>On s'en occupe.</span>
+            <span className="hx-mot"><span className="hx-accent" style={{ ["--d" as any]: "0.9s" }}>On s'en occupe.</span></span>
           </h1>
-          <p className="hero-p" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
+          <p className="hero-p hx-fade" style={{ animationDelay: "1.0s", fontSize: "16px", color: "rgba(255,255,255,0.65)", lineHeight: "1.85", maxWidth: "540px", marginBottom: "36px", fontWeight: "300" }}>
             Techniciens certifiés, produits homologués OMS. Partout au Bénin, pour les professionnels comme pour les particuliers.
           </p>
 
           {/* DEUX PARCOURS : pro / particulier */}
           <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", maxWidth: "660px" }}>
-            <a href="/contrat-conformite" style={{ textDecoration: "none", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.45)", borderRadius: "10px", padding: "20px 22px", display: "block" }}>
+            <a href="/contrat-conformite" className="hx-carte" data-magnet style={{ textDecoration: "none", backgroundColor: "rgba(212,169,32,0.12)", border: "1px solid rgba(212,169,32,0.45)", borderRadius: "10px", padding: "20px 22px", display: "block", animationDelay: "1.2s" }}>
               <div style={{ fontSize: "10px", fontWeight: "800", color: "#d4a920", letterSpacing: "0.1em", marginBottom: "8px" }}>PROFESSIONNELS</div>
               <div style={{ fontSize: "17px", fontWeight: "700", color: "#ffffff", marginBottom: "4px" }}>Contrat de conformité 3D</div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Audit gratuit + certificat mensuel →</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Audit gratuit + certificat mensuel <span className="hx-fleche">→</span></div>
             </a>
-            <a href="/contact" style={{ textDecoration: "none", backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: "10px", padding: "20px 22px", display: "block" }}>
+            <a href="/contact" className="hx-carte part" data-magnet style={{ textDecoration: "none", backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: "10px", padding: "20px 22px", display: "block", animationDelay: "1.35s" }}>
               <div style={{ fontSize: "10px", fontWeight: "800", color: "#d4a920", letterSpacing: "0.1em", marginBottom: "8px" }}>PARTICULIERS</div>
               <div style={{ fontSize: "17px", fontWeight: "700", color: "#ffffff", marginBottom: "4px" }}>Intervention à domicile</div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Devis gratuit, réponse rapide →</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>Devis gratuit, réponse rapide <span className="hx-fleche">→</span></div>
             </a>
           </div>
 

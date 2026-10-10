@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-10)
 
 ## Corpus Check
-- 189 files · ~726,640 words
+- 190 files · ~726,761 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 901 nodes · 952 edges · 111 communities (74 shown, 37 thin omitted)
+- 903 nodes · 954 edges · 110 communities (74 shown, 36 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d295756d`
+- Built from commit: `72ca8694`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -114,7 +114,6 @@
 - [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
-- [[_COMMUNITY_Community 110|Community 110]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -143,7 +142,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (111 total, 37 thin omitted)
+## Communities (110 total, 36 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -202,8 +201,8 @@ Cohesion: 0.33
 Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill routing
 
 ### Community 14 - "Community 14"
-Cohesion: 0.10
-Nodes (45): SectionClientsDevis(), callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), GET() (+37 more)
+Cohesion: 0.09
+Nodes (47): SectionClientsDevis(), callGeminiWithRetry(), POST(), esc(), POST(), expirerDevisEnRetard(), GET(), POST() (+39 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -400,7 +399,7 @@ Nodes (5): db(), GET(), passageFromToken(), POST(), signMedias()
 ## Knowledge Gaps
 - **513 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+508 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -416,6 +415,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.07396870554765292 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06923076923076923 - nodes in this community are weakly interconnected._
 - **Should `Community 6` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._

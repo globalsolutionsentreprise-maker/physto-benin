@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1788867424.4968455,
-    "ast_hash": "490a5586f35e8e10eb5d0cc5db6b6452",
+    "mtime": 1791663927.7335522,
+    "ast_hash": "ab04d966e56707038d2dc75c73d50040",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "app/layout.tsx": {
-    "mtime": 1791304175.8558857,
-    "ast_hash": "e278f89df451538cbe4c8ae6306f663b",
+    "mtime": 1791665141.6408257,
+    "ast_hash": "c99caaaa120dd620a239461f47ff15c6",
     "semantic_hash": ""
   },
   "app/lib/supabase.js": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1788868544.7345102,
-    "ast_hash": "7276a0b8222aa267246d7672f26e92e2",
+    "mtime": 1791666176.3587916,
+    "ast_hash": "520a288a0a6f2cd18585ac14a5055309",
     "semantic_hash": ""
   },
   "app/qui-sommes-nous/page.tsx": {
@@ -585,8 +585,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1791242439.321777,
-    "ast_hash": "eab6431d2d28ad958811cf6a7da841cf",
+    "mtime": 1791664219.415466,
+    "ast_hash": "6780d73c971ce8766ca450d29c96ea98",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -930,8 +930,8 @@
     "semantic_hash": ""
   },
   "app/components/WhatsAppFloat.tsx": {
-    "mtime": 1788866658.986568,
-    "ast_hash": "ad4d7463639f890a671ff0be7651cbeb",
+    "mtime": 1791663931.3260741,
+    "ast_hash": "a05661754b93a6af3599838360ec42bb",
     "semantic_hash": ""
   },
   "app/nuisibles/[slug]/page.tsx": {
@@ -1055,8 +1055,8 @@
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1791659203.67522,
-    "ast_hash": "f2cd5b8e51081a29ba302b0bc1c4ae3b",
+    "mtime": 1791663948.9973624,
+    "ast_hash": "beec0382c1739ef22f1c8b8464ac9de2",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {
@@ -1072,6 +1072,11 @@
   "docs/etiquettes-gse.html": {
     "mtime": 1791374912.5419087,
     "ast_hash": "a04a15edc2a0476f5e8d4f7466aa8271",
+    "semantic_hash": ""
+  },
+  "app/components/SiteHeader.tsx": {
+    "mtime": 1791663889.5870233,
+    "ast_hash": "664b3771c0ac807e5a1a735d3320248b",
     "semantic_hash": ""
   }
 }
