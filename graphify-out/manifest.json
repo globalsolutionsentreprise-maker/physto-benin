@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "app/blog/[slug]/page.tsx": {
-    "mtime": 1788704239.8001652,
-    "ast_hash": "f1a9e4ed5d18f9c0ced8a0957a6a7173",
+    "mtime": 1791670308.88733,
+    "ast_hash": "b119430885b5a39ca09c47ec048fb50e",
     "semantic_hash": ""
   },
   "app/blog/layout.tsx": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "public/robots.txt": {
-    "mtime": 1791301430.262139,
-    "ast_hash": "3ea7ed0103bf2c8c9ca4d65ffad5c329",
+    "mtime": 1791670275.1463997,
+    "ast_hash": "16526c1f3c49b8b6e9f49429462d206b",
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
@@ -1077,6 +1077,11 @@
   "app/components/SiteHeader.tsx": {
     "mtime": 1791663889.5870233,
     "ast_hash": "664b3771c0ac807e5a1a735d3320248b",
+    "semantic_hash": ""
+  },
+  "app/fiche/layout.tsx": {
+    "mtime": 1791670282.3196726,
+    "ast_hash": "add86bb169a00632fa4d1c17c282794d",
     "semantic_hash": ""
   }
 }

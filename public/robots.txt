@@ -3,6 +3,7 @@ Allow: /
 Disallow: /admin
 Disallow: /espace-client
 Disallow: /api
+Disallow: /fiche
 
 # Crawlers IA explicitement autorisés (indexation + citation avec attribution)
 User-agent: GPTBot

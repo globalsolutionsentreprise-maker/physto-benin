@@ -139,6 +139,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     ...(article.created_at ? { datePublished: article.created_at } : {}),
   }
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": BASE },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${BASE}/blog` },
+      { "@type": "ListItem", "position": 3, "name": article.titre, "item": `${BASE}/blog/${slug}` },
+    ],
+  }
+
   // FAQPage : vraies paires Q/R curées, par id d'article (les articles FAQ ont un
   // corps expositif, pas des questions dans leurs sous-titres : on ne scrape pas).
   // Ajouter une entrée ici quand un nouvel article FAQ est publié.
@@ -185,6 +195,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
 
       <style>{`

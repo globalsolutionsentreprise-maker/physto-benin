@@ -260,7 +260,7 @@
       "source_location": "L1381",
       "_origin": "ast",
       "id": "admin_page_sectionclientsdevis",
-      "community": 14,
+      "community": 5,
       "norm_label": "sectionclientsdevis()"
     },
     {
@@ -2016,6 +2016,36 @@
     {
       "label": "layout.tsx",
       "file_type": "code",
+      "source_file": "app/fiche/layout.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "fiche_layout",
+      "community": 110,
+      "norm_label": "layout.tsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "app/fiche/layout.tsx",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "fiche_layout_metadata",
+      "community": 110,
+      "norm_label": "metadata"
+    },
+    {
+      "label": "FicheLayout()",
+      "file_type": "code",
+      "source_file": "app/fiche/layout.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "fiche_layout_fichelayout",
+      "community": 110,
+      "norm_label": "fichelayout()"
+    },
+    {
+      "label": "layout.tsx",
+      "file_type": "code",
       "source_file": "app/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
@@ -3166,7 +3196,7 @@
       "source_location": "L527",
       "_origin": "ast",
       "id": "lib_contrat_analyse_paiementsparpassages",
-      "community": 14,
+      "community": 5,
       "norm_label": "paiementsparpassages()"
     },
     {
@@ -12008,6 +12038,26 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/fiche/layout.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "fiche_layout",
+      "target": "fiche_layout_fichelayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/fiche/layout.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "fiche_layout",
+      "target": "fiche_layout_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/layout.tsx",
       "source_location": "L6",
       "weight": 1.0,
@@ -18778,5 +18828,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "52eae3b951d0b93496fc3cbd8fb11b4c9755f36e"
+  "built_at_commit": "534491fc441d2b886a39a5cdd0ca671de51b947c"
 }
