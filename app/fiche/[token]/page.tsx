@@ -184,13 +184,18 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Nuisibles observés</Lbl>
       <Chips items={NUISIBLES} selected={nuisibles} onToggle={(v) => toggle(nuisibles, setNuisibles, v)} multi />
 
+      <Lbl>Produits utilisés</Lbl>
+      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
+        Remplissez seulement les produits réellement utilisés ce jour. Un seul champ, plusieurs, ou juste « Autre produit » : laissez vide ce qui ne s'applique pas.
+      </div>
+
       <Lbl>Nom du produit insecticide utilisé</Lbl>
-      <input value={produits.insecticides || ""} onChange={(e) => setProduit("insecticides", e.target.value)} placeholder="Ex : IMPERA 300 CS / ROCOGEL" style={inp} />
+      <input value={produits.insecticides || ""} onChange={(e) => setProduit("insecticides", e.target.value)} placeholder="Ex : IMPERA 300 CS / ROCOGEL — ou laisser vide" style={inp} />
 
       <Lbl>Nom du raticide utilisé</Lbl>
-      <input value={produits.raticides || ""} onChange={(e) => setProduit("raticides", e.target.value)} placeholder="Ex : VERTOX" style={inp} />
+      <input value={produits.raticides || ""} onChange={(e) => setProduit("raticides", e.target.value)} placeholder="Ex : VERTOX — ou laisser vide" style={inp} />
 
-      <Lbl>Autres produits utilisés</Lbl>
+      <Lbl>Autres produits (cocher si utilisé)</Lbl>
       {PRODUITS_CATS.filter((cat) => !["insecticides", "raticides", "autres"].includes(cat.key)).map((cat) => {
         const on = produitsCoches.includes(cat.key)
         return (
