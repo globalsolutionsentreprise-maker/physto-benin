@@ -61,9 +61,14 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         setInfo(d)
         setDatePassage((d.passage && d.passage.date) || new Date().toISOString().slice(0, 10))
         // Pré-remplir : prestations du devis mappées sur les cases connues.
-        const presta = (d.prestationsDevis || [])
-          .map((p: string) => TYPES_PRESTA.find((t) => t.toLowerCase().startsWith(String(p).toLowerCase().slice(0, 6))))
-          .filter(Boolean) as string[]
+        // Un libellé composé ("Désinsectisation + Dératisation") est éclaté sur
+        // les séparateurs pour cocher chaque prestation, pas seulement la première.
+        const presta = [...new Set(
+          (d.prestationsDevis || [])
+            .flatMap((p: string) => String(p).split(/[+/,&]| et /i))
+            .map((p: string) => TYPES_PRESTA.find((t) => t.toLowerCase().startsWith(p.trim().toLowerCase().slice(0, 6))))
+            .filter(Boolean)
+        )] as string[]
         const f = d.fiche
         if (f) {
           setTypePassage(f.type_passage || "Contrôle")

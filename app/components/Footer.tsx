@@ -1,7 +1,9 @@
 "use client"
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { supabase } from "../lib/supabase"
 export default function Footer() {
+  const pathname = usePathname() || ""
   const [coord, setCoord] = useState({ email: "contact@phyto-benin.com", telephone: "", adresse: "Cotonou, Bénin", whatsapp: "" })
   useEffect(function() {
     supabase.from("parametres").select("cle, valeur").then(function({ data }: { data: any }) {
@@ -12,6 +14,8 @@ export default function Footer() {
       }
     })
   }, [])
+  // Masqué sur /fiche (formulaire technicien terrain, sans chrome marketing).
+  if (pathname.startsWith("/fiche")) return null
   return (
     <footer className="footer-padding" style={{ backgroundColor: "#f9f9f9", padding: "56px 40px 28px" }}>
       <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
