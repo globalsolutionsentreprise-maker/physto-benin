@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-10-06)
+# Graph Report - gse-site  (2026-10-10)
 
 ## Corpus Check
-- 186 files · ~722,084 words
+- 189 files · ~726,640 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 880 nodes · 928 edges · 108 communities (72 shown, 36 thin omitted)
+- 901 nodes · 952 edges · 111 communities (74 shown, 37 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `94ad4d35`
+- Built from commit: `d295756d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -112,6 +112,9 @@
 - [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -126,21 +129,21 @@
 10. `Analyse IA de contrat enrichie (rapport de visite + devis réel)` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
-  app/admin/page.js → lib/contrat-analyse.mjs
-- `POST()` --calls--> `paiementsParPassages()`  [EXTRACTED]
-  app/api/crm-data/route.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `paiementsParPassages()`  [EXTRACTED]
+  app/admin/page.js → lib/contrat-analyse.mjs
+- `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `appliquerContraintes()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 - `POST()` --calls--> `blocRapport()`  [EXTRACTED]
   app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
+- `POST()` --calls--> `construireSocleDevis()`  [EXTRACTED]
+  app/api/analyze-contract/route.js → lib/contrat-analyse.mjs
 
 ## Import Cycles
 - None detected.
 
-## Communities (108 total, 36 thin omitted)
+## Communities (111 total, 37 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -163,8 +166,8 @@ Cohesion: 0.15
 Nodes (12): env, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, hooks, PreCompact, PreToolUse, SessionStart, Stop, permissions (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.20
-Nodes (17): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+9 more)
+Cohesion: 0.23
+Nodes (15): buildCertificatHtml(), buildFichePassageHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, gseFooter(), gseHeader(), gseSigs() (+7 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -200,7 +203,7 @@ Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill rou
 
 ### Community 14 - "Community 14"
 Cohesion: 0.10
-Nodes (45): callGeminiWithRetry(), POST(), esc(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin() (+37 more)
+Nodes (45): SectionClientsDevis(), callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), GET() (+37 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -376,7 +379,7 @@ Nodes (10): Frise d'encaissement des contrats — Implementation Plan, Global Co
 
 ### Community 104 - "Community 104"
 Cohesion: 0.10
-Nodes (19): accreditation, alternateName, areaServed, availability, contact, email, telephone, description (+11 more)
+Nodes (20): accreditation, alternateName, areaServed, availability, contact, email, telephone, description (+12 more)
 
 ### Community 105 - "Community 105"
 Cohesion: 0.25
@@ -386,10 +389,18 @@ Nodes (7): accreditation, areaServed, availability, provider, services, updated,
 Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
+### Community 108 - "Community 108"
+Cohesion: 0.14
+Nodes (9): chip, chipOn, inp, Media, NUISIBLES, PRODUITS_CATS, sb, TYPES_PASSAGE (+1 more)
+
+### Community 109 - "Community 109"
+Cohesion: 0.67
+Nodes (5): db(), GET(), passageFromToken(), POST(), signMedias()
+
 ## Knowledge Gaps
-- **503 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+498 more)
+- **513 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+508 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -397,7 +408,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 5`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _503 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _513 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

@@ -1400,6 +1400,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [savingFiche, setSavingFiche] = React.useState(false)
   const [certsList, setCertsList] = React.useState([])
   const [fichesList, setFichesList] = React.useState([])
+  // Médias terrain d'une fiche (URLs signées), chargés à la demande : { ficheId: [{path,type,url}] }
+  const [ficheMedias, setFicheMedias] = React.useState({})
   const [contratsList, setContratsList] = React.useState([])
   const [contratOuvert, setContratOuvert] = React.useState({})
   const [contratFiltreStatut, setContratFiltreStatut] = React.useState("tous")
@@ -1734,6 +1736,28 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       })
       alert("Échec de l'enregistrement du passage. Réessaie.")
     }
+  }
+
+  // Génère le lien token du passage (fiche terrain) et l'envoie à Fabrice par
+  // WhatsApp (le lien est aussi copié). Fabrice ouvre /fiche/<token> sur son tél,
+  // remplit sur place (photos/vidéos) → la fiche remonte dans l'admin.
+  async function envoyerLienFiche(p) {
+    if (!p || !p.id) return
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/rh-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ action: "generer_fiche_token", id: p.id })
+      })
+      var data = await res.json()
+      if (!res.ok || !data.token) { alert("Erreur génération du lien : " + (data.error || "inconnue")); return }
+      var url = "https://www.phyto-benin.com/fiche/" + data.token
+      try { await navigator.clipboard.writeText(url) } catch (e) {}
+      var msg = "Fiche de passage GSE à remplir sur place :\n" + url
+      window.open("https://wa.me/2290193428585?text=" + encodeURIComponent(msg), "_blank")
+    } catch (e) { alert("Erreur réseau : " + e.message) }
   }
 
   // Modifie la date et/ou le technicien d'un passage depuis la frise. patch =
@@ -2311,7 +2335,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     ouvrirDocImprimable(html, 920, 1050)
   }
 
-  function apercuFiche(fiche, client) {
+  async function apercuFiche(fiche, client) {
     var form = {
       nomClient: [(client && client.prenom) || '', (client && client.nom) || ''].filter(Boolean).join(' '),
       adresse: (client && client.adresse) || '',
@@ -2332,7 +2356,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       superviseurNom: fiche.superviseur_nom || '',
       superviseurContact: fiche.superviseur_contact || '',
     }
-    var html = buildFichePassageHtml(form, client || {}, fiche.numero_unique)
+    var medias = await signMediasAdmin(fiche.medias)
+    var html = buildFichePassageHtml(form, client || {}, fiche.numero_unique, medias)
     ouvrirDocImprimable(html, 920, 1100)
   }
 
@@ -2340,6 +2365,37 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!window.confirm('Supprimer cette fiche ?')) return
     await db.from('fiches_passage').delete().eq('id', id)
     await charger()
+  }
+
+  // Signe les chemins des médias terrain (bucket privé) via l'API service_role.
+  // Retourne [{path,type,name,url}] ; jamais de lecture directe du bucket côté client.
+  async function signMediasAdmin(medias) {
+    var paths = (medias || []).map(function(m) { return m.path }).filter(Boolean)
+    if (!paths.length) return []
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/rh-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ action: "sign_fiche_medias", paths: paths })
+      })
+      var data = await res.json()
+      if (!res.ok) return []
+      var byPath = {}; (medias || []).forEach(function(m) { byPath[m.path] = m })
+      return (data.medias || []).map(function(x) { return Object.assign({}, byPath[x.path] || {}, x) })
+    } catch (e) { return [] }
+  }
+
+  // Affiche/masque les photos-vidéos terrain d'une fiche dans la liste admin.
+  async function voirFicheMedias(fiche) {
+    if (ficheMedias[fiche.id]) {
+      setFicheMedias(function(prev) { var o = Object.assign({}, prev); delete o[fiche.id]; return o })
+      return
+    }
+    if (!(fiche.medias || []).length) return
+    var medias = await signMediasAdmin(fiche.medias)
+    setFicheMedias(function(prev) { var o = Object.assign({}, prev); o[fiche.id] = medias; return o })
   }
 
   function ouvrirNouveauRapportVisite(devis, client) {
@@ -3226,7 +3282,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       superviseurNom: f.superviseur_nom || '',
       superviseurContact: f.superviseur_contact || '',
     })
-    setFicheModal({ client: client || {}, editingId: f.id, existingNumero: f.numero_unique })
+    setFicheModal({ client: client || {}, editingId: f.id, existingNumero: f.numero_unique, medias: f.medias || [] })
   }
 
   // ── FICHES DE PASSAGE ──────────────────────────────
@@ -3294,7 +3350,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       }
       if (opErr) { setMsg('Erreur: ' + opErr.message); setSavingFiche(false); return }
       if (!isEditing && ficheModal.devis) await avancerEtapeMin(ficheModal.devis.id, 'certificat')
-      var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero)
+      var mediasSignes = await signMediasAdmin(ficheModal.medias)
+      var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero, mediasSignes)
       ouvrirDocImprimable(html, 920, 1100)
       setFicheModal(null)
       setMsg(isEditing ? '✓ Fiche mise à jour — imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
@@ -5157,7 +5214,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 )
               }),
               fichesDevis.map(function(fiche) {
-                return React.createElement('div', { key: fiche.id, style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid ' + (fiche.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: fiche.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: '8px', padding: '8px 12px' } },
+                var _medias = ficheMedias[fiche.id]
+                var _nbMed = (fiche.medias || []).length
+                return React.createElement('div', { key: fiche.id },
+                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', border: '1px solid ' + (fiche.envoye ? '#bbf7d0' : '#e0ddd6'), backgroundColor: fiche.envoye ? '#f0fdf4' : '#fafaf8', borderRadius: _medias ? '8px 8px 0 0' : '8px', padding: '8px 12px' } },
                   React.createElement('span', null, '📋'),
                   React.createElement('div', null,
                     React.createElement('div', { style: { fontWeight: '600', color: '#0a2e1a', fontSize: '11px' } }, fiche.numero_unique),
@@ -5165,7 +5225,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   ),
                   React.createElement('button', { onClick: function() { toggleFicheEnvoye(fiche) }, style: { background: fiche.envoye ? '#0a2e1a' : '#fff', color: fiche.envoye ? '#fff' : '#999', border: '1px solid ' + (fiche.envoye ? '#0a2e1a' : '#ccc'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, fiche.envoye ? '✓ Remis' : 'Marquer remis'),
                   React.createElement('button', { onClick: function() { reouvrirFicheModal(fiche, cl) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '👁 Voir'),
+                  _nbMed ? React.createElement('button', { onClick: function() { voirFicheMedias(fiche) }, title: 'Photos / vidéos du terrain', style: { background: _medias ? '#0a2e1a' : '#eff6ff', color: _medias ? '#fff' : '#1e40af', border: '1px solid ' + (_medias ? '#0a2e1a' : '#bfdbfe'), borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '700' } }, '📷 ' + _nbMed) : null,
                   React.createElement('button', { onClick: function() { supprimerFiche(fiche.id) }, style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit' } }, '🗑')
+                ),
+                _medias ? React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '10px 12px', border: '1px solid ' + (fiche.envoye ? '#bbf7d0' : '#e0ddd6'), borderTop: 'none', borderRadius: '0 0 8px 8px', background: '#fff' } },
+                  _medias.length ? _medias.map(function(m, mi) {
+                    var isImg = (m.type || '').indexOf('image') === 0
+                    return React.createElement('a', { key: mi, href: m.url || '#', target: '_blank', rel: 'noreferrer', title: m.name || m.path, style: { textDecoration: 'none' } },
+                      isImg
+                        ? React.createElement('img', { src: m.url, alt: '', style: { width: '76px', height: '76px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e0ddd6', display: 'block' } })
+                        : React.createElement('div', { style: { width: '76px', height: '76px', borderRadius: '6px', border: '1px solid #e0ddd6', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' } }, '🎬')
+                    )
+                  }) : React.createElement('span', { style: { fontSize: '11px', color: '#888' } }, 'Aucun média.')
+                ) : null
                 )
               }),
               contratDevis && React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #e9d5ff', backgroundColor: '#faf5ff', borderRadius: '8px', padding: '8px 12px' } },
@@ -5951,6 +6023,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 e("input", { type: "number", defaultValue: p.montantPaye || 0, onBlur: function(ev) { var v = parseInt(ev.target.value, 10) || 0; savePassageFinances(p.id, { montantPaye: v, datePaiement: v > 0 ? auj : null }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
                 e("button", { onClick: function() { savePassageFinances(p.id, { dateFacture: p.dateFacture ? null : auj }) }, title: p.dateFacture ? "Facturé le " + fmtJ(p.dateFacture) + " — clic pour annuler" : "Marquer facturé", style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (p.dateFacture ? "#2563eb" : "#d1d5db"), backgroundColor: p.dateFacture ? "#2563eb" : "#fff", color: p.dateFacture ? "#fff" : "#555", fontWeight: "600" } }, p.dateFacture ? "✓ facturé" : "facturer"),
                 e("span", { style: { fontSize: "13px" }, title: p.statutPaiement }, ({ inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" })[p.statutPaiement] || "")
+              ),
+              // Fiche terrain : envoyer le lien à Fabrice + état de remontée.
+              e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
+                e("button", {
+                  onClick: function() { envoyerLienFiche(p) },
+                  title: p.ficheToken ? "Renvoyer le lien de la fiche à Fabrice (WhatsApp)" : "Générer et envoyer le lien de la fiche à Fabrice (WhatsApp)",
+                  style: { fontSize: "11px", padding: "3px 10px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid #16a34a", backgroundColor: "#f0fdf4", color: "#166534", fontWeight: "600" }
+                }, "📲 Fabrice"),
+                p.ficheRemplieAt
+                  ? e("span", { style: { fontSize: "11px", color: "#166534", fontWeight: "600" }, title: "Fiche reçue le " + fmtJ(String(p.ficheRemplieAt).slice(0, 10)) }, "✅ fiche reçue")
+                  : (p.ficheToken ? e("span", { style: { fontSize: "11px", color: "#92400e" } }, "⏳ en attente") : null)
               )
             )
           })
@@ -6535,7 +6618,7 @@ function buildCertificatHtml(type, form) {
     '</div></body></html>'
 }
 
-function buildFichePassageHtml(form, client, numero) {
+function buildFichePassageHtml(form, client, numero, medias) {
   var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
   var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
 
@@ -6702,6 +6785,21 @@ function buildFichePassageHtml(form, client, numero) {
     '<div class="section-title">Remarques</div>' +
     '<div style="border:1px solid #ccc;border-radius:4px;min-height:60px;padding:10px;font-size:13px;line-height:1.6">' + (form.remarques || '') + '</div>' +
     '</div>' +
+
+    // Photos intégrées (rasterisées à l'impression PDF) ; vidéos en liens signés.
+    ((medias && medias.length) ?
+      '<div style="margin-bottom:16px">' +
+      '<div class="section-title">Photos / vidéos du passage</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      medias.map(function(m) {
+        var isImg = String(m.type || '').indexOf('image') === 0
+        return isImg
+          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px">'
+          : '<a href="' + (m.url || '#') + '" style="display:flex;align-items:center;justify-content:center;width:150px;height:150px;border:1px solid #ccc;border-radius:6px;background:#f3f4f6;color:#0a2e1a;text-decoration:none;font-size:13px;text-align:center">🎬 Vidéo<br>(voir en ligne)</a>'
+      }).join('') +
+      '</div>' +
+      '</div>'
+    : '') +
 
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
 

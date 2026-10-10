@@ -156,6 +156,17 @@ export async function POST(req) {
   const body = await req.json()
   const { action } = body
 
+  // URLs signées pour relire les médias d'une fiche terrain (bucket privé).
+  if (action === "sign_fiche_medias") {
+    const paths = Array.isArray(body.paths) ? body.paths.slice(0, 40) : []
+    const out = []
+    for (const p of paths) {
+      const { data } = await supabase.storage.from("fiches-medias").createSignedUrl(p, 3600)
+      out.push({ path: p, url: (data && data.signedUrl) || null })
+    }
+    return Response.json({ ok: true, medias: out })
+  }
+
   if (action === "add_personnel") {
     const { nom, prenom, poste, telephone, email, statut, dateEmbauche, contratDate, contratDureeMois, cipNumero, cipExpiration, notes } = body
     const { data } = await supabase.from("personnel").insert({
@@ -225,6 +236,22 @@ export async function POST(req) {
       catch (e) { console.error("preparerCertificat:", e?.message) }
     }
     return Response.json({ ok: true })
+  }
+
+  // Génère (ou réutilise) le lien token d'un passage pour la fiche terrain remplie
+  // par le technicien sur son téléphone. Idempotent : même passage => même token.
+  if (action === "generer_fiche_token") {
+    const { id } = body
+    if (!id) return Response.json({ error: "id requis" }, { status: 400 })
+    const { data: iv } = await supabase.from("interventions").select("fiche_token").eq("id", id).maybeSingle()
+    if (!iv) return Response.json({ error: "Passage introuvable" }, { status: 404 })
+    let token = iv.fiche_token
+    if (!token) {
+      token = randomUUID()
+      const { error } = await supabase.from("interventions").update({ fiche_token: token }).eq("id", id)
+      if (error) return Response.json({ error: error.message }, { status: 500 })
+    }
+    return Response.json({ ok: true, token })
   }
 
   // Modifier date et/ou technicien(s) d'un passage depuis la frise contrat.
