@@ -86,8 +86,45 @@ export default function Accueil() {
         el.addEventListener("mouseleave", leave)
         cleanups.push(function() { el.removeEventListener("mousemove", move); el.removeEventListener("mouseleave", leave) })
       })
+      // boutons magnétiques (translation douce, sans tilt) : CTA final
+      document.querySelectorAll("[data-magnet-soft]").forEach(function(node) {
+        const el = node as HTMLElement
+        const move = function(ev: Event) {
+          const e = ev as MouseEvent
+          const r = el.getBoundingClientRect()
+          const x = e.clientX - r.left - r.width / 2
+          const y = e.clientY - r.top - r.height / 2
+          el.style.transform = "translate(" + x * 0.2 + "px," + y * 0.32 + "px)"
+        }
+        const leave = function() { el.style.transform = "" }
+        el.addEventListener("mousemove", move)
+        el.addEventListener("mouseleave", leave)
+        cleanups.push(function() { el.removeEventListener("mousemove", move); el.removeEventListener("mouseleave", leave) })
+      })
     }
     return function() { timers.forEach(function(t) { clearTimeout(t) }); cleanups.forEach(function(c) { c() }) }
+  }, [])
+
+  // Révélation en cascade des items de section au défilement.
+  // Visible par défaut si JS absent ; filet de sécurité à 3,5 s ; respecte reduced-motion.
+  useEffect(function() {
+    if (typeof window === "undefined") return
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (reduce || !("IntersectionObserver" in window)) return
+    const main = document.querySelector("main")
+    if (!main) return
+    main.classList.add("js-rise")
+    const items = Array.from(document.querySelectorAll(".rise")) as HTMLElement[]
+    const reveal = function(el: Element) { el.classList.add("in") }
+    const obs = new IntersectionObserver(function(entries, o) {
+      entries.forEach(function(e) { if (e.isIntersecting) { reveal(e.target); o.unobserve(e.target) } })
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 })
+    items.forEach(function(el) {
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) reveal(el)
+      else obs.observe(el)
+    })
+    const timer = window.setTimeout(function() { items.forEach(reveal) }, 3500)
+    return function() { obs.disconnect(); window.clearTimeout(timer); main.classList.remove("js-rise") }
   }, [])
 
   const services = [
@@ -139,8 +176,41 @@ export default function Accueil() {
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
       <style>{`
-        .srv-card { transition: border-top-color 0.2s; border-top: 3px solid transparent; }
-        .srv-card:hover { border-top-color: #d4a920 !important; }
+        .srv-card { transition: border-top-color .2s, transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s; border-top: 3px solid transparent; }
+        .srv-card:hover { border-top-color: #d4a920 !important; transform: translateY(-6px); box-shadow: 0 22px 44px -26px rgba(10,46,26,0.55); }
+
+        /* ===== Motion sections : révélation en cascade au scroll ===== */
+        /* visible par défaut (si JS absent ou reduced-motion) ; masqué seulement quand main.js-rise */
+        main.js-rise .rise { opacity: 0; transform: translateY(22px); }
+        main.js-rise .rise.in { opacity: 1; transform: none; transition: opacity .55s ease, transform .6s cubic-bezier(.22,1,.36,1); transition-delay: var(--ri, 0s); }
+
+        /* survols sections */
+        .sect-card { transition: transform .35s cubic-bezier(.22,1,.36,1); }
+        .sect-card img { transition: transform .7s cubic-bezier(.22,1,.36,1); }
+        .sect-card:hover { transform: translateY(-4px); }
+        .sect-card:hover img { transform: scale(1.06); }
+        .nuis-chip { transition: background .25s, color .25s, border-color .25s, transform .25s cubic-bezier(.34,1.56,.64,1); }
+        .nuis-chip:hover { background: #0a2e1a !important; color: #ffffff !important; border-color: #0a2e1a !important; transform: translateY(-3px); }
+        .lift { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s; }
+        .lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -26px rgba(10,46,26,0.5); }
+
+        /* ===== CTA final : moment de conversion ===== */
+        .cta-beacon { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+        .cta-beacon > span { width: min(60vw, 720px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(212,169,32,0.20), transparent 60%); animation: ctaBreath 5s ease-in-out infinite; }
+        @keyframes ctaBreath { 0%, 100% { transform: scale(0.9); opacity: .55; } 50% { transform: scale(1.08); opacity: 1; } }
+        .cta-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #d4a920; margin-right: 9px; vertical-align: middle; box-shadow: 0 0 0 0 rgba(212,169,32,0.6); animation: ctaPulse 2.2s ease-out infinite; }
+        @keyframes ctaPulse { 0% { box-shadow: 0 0 0 0 rgba(212,169,32,0.55); } 70%, 100% { box-shadow: 0 0 0 11px rgba(212,169,32,0); } }
+        /* bouton : anneaux sonar + reflet + magnétique */
+        .cta-btn-wrap { position: relative; display: inline-block; }
+        .cta-btn-wrap::before, .cta-btn-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 6px; border: 2px solid rgba(212,169,32,0.55); z-index: 0; pointer-events: none; animation: ctaRing 2.8s cubic-bezier(.2,.6,.3,1) infinite; }
+        .cta-btn-wrap::after { animation-delay: 1.4s; }
+        @keyframes ctaRing { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(1.5); opacity: 0; } }
+        .cta-cta { position: relative; z-index: 1; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 12px 32px -10px rgba(212,169,32,0.6); transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .3s; }
+        .cta-cta:hover { box-shadow: 0 20px 48px -12px rgba(212,169,32,0.9); }
+        .cta-cta::after { content: ""; position: absolute; top: 0; left: -60%; width: 38%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-18deg); animation: ctaShine 4.5s ease-in-out infinite; }
+        @keyframes ctaShine { 0% { left: -60%; } 28%, 100% { left: 165%; } }
+        .cta-cta .arr { transition: transform .35s cubic-bezier(.22,1,.36,1); }
+        .cta-cta:hover .arr { transform: translateX(6px); }
 
         /* ===== HERO motion (direction « Terrain vivant ») ===== */
         .hx-title { font-family: "Bricolage Grotesque", system-ui, sans-serif; }
@@ -206,7 +276,8 @@ export default function Accueil() {
           .hx-bug { font-size: 20px; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .hx-sweep, .hx-ping, .hx-carte::before, .hx-accent::after, .hx-title .hx-mot > span:not(.hx-accent) { animation: none; }
+          .hx-sweep, .hx-ping, .hx-carte::before, .hx-accent::after, .hx-title .hx-mot > span:not(.hx-accent),
+          .cta-beacon > span, .cta-dot, .cta-btn-wrap::before, .cta-btn-wrap::after, .cta-cta::after { animation: none; }
           .hx-mot > span, .hx-carte, .hx-fade { animation: none !important; opacity: 1; transform: none; }
           .hx-accent::before { animation: none; transform: scaleX(1); }
           .hx-bug { opacity: .82; animation: none; }
@@ -304,9 +375,9 @@ export default function Accueil() {
               { label: "🦟 Moustiques", slug: "anti-moustiques-cotonou" },
               { label: "🐍 Serpents", slug: "reptiles-serpents-benin" },
               { label: "🧴 Désinfection", slug: "desinfection-locaux" },
-            ].map(function(p) {
+            ].map(function(p, i) {
               return (
-                <a key={p.slug} href={`/services/${p.slug}`} style={{ fontSize: "14px", fontWeight: "600", color: "#0a2e1a", backgroundColor: "#f7f7f5", border: "1px solid #e5e5e5", padding: "11px 18px", borderRadius: "30px", textDecoration: "none" }}>
+                <a key={p.slug} href={`/services/${p.slug}`} className="rise nuis-chip" style={{ ["--ri" as any]: (i * 0.05) + "s", fontSize: "14px", fontWeight: "600", color: "#0a2e1a", backgroundColor: "#f7f7f5", border: "1px solid #e5e5e5", padding: "11px 18px", borderRadius: "30px", textDecoration: "none" }}>
                   {p.label}
                 </a>
               )
@@ -369,7 +440,7 @@ export default function Accueil() {
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
             {services.map(function(s, i) {
               return (
-                <a key={i} href={`/services/${s.slug}`} style={{ textDecoration: "none" }}>
+                <a key={i} href={`/services/${s.slug}`} className="rise" style={{ ["--ri" as any]: (i * 0.07) + "s", textDecoration: "none" }}>
                   <div className="srv-card" style={{ backgroundColor: "#ffffff", padding: "40px 32px", minHeight: "280px", display: "flex", flexDirection: "column" }}>
                     <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "20px" }}>{s.numero}</div>
                     <div style={{ fontSize: "10px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.1em", marginBottom: "10px" }}>{s.accroche.toUpperCase()}</div>
@@ -402,7 +473,7 @@ export default function Accueil() {
               { img: "/images/client-bureau.jpg", label: "Bureaux et Entreprises", desc: "Interventions en dehors des heures ouvrées. Vos équipes ne voient rien, ne sentent rien." },
             ].map(function(c, i) {
               return (
-                <div key={i} style={{ position: "relative", borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#0d3d1e" }}>
+                <div key={i} className="rise sect-card" style={{ ["--ri" as any]: (i * 0.08) + "s", position: "relative", borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#0d3d1e" }}>
                   <img src={c.img} alt={c.label} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.55 }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(2,9,4,0.92) 0%, transparent 60%)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "24px" }}>
                     <div style={{ fontSize: "16px", fontWeight: "600", color: "#ffffff", marginBottom: "6px" }}>{c.label}</div>
@@ -429,7 +500,7 @@ export default function Accueil() {
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px" }}>
             {etapes.map(function(e, i) {
               return (
-                <div key={i} style={{ position: "relative" }}>
+                <div key={i} className="rise" style={{ ["--ri" as any]: (i * 0.08) + "s", position: "relative" }}>
                   {i < etapes.length - 1 && (
                     <div style={{ position: "absolute", top: "20px", right: "-20px", width: "40px", height: "1px", backgroundColor: "#e0e0e0" }} />
                   )}
@@ -531,7 +602,7 @@ export default function Accueil() {
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
             {temoignages.slice(0, 3).map(function(t, i) {
               return (
-                <div key={t.id || i} style={{ backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
+                <div key={t.id || i} className="rise lift" style={{ ["--ri" as any]: (i * 0.08) + "s", backgroundColor: "#ffffff", padding: "40px 32px", borderRadius: "4px", borderBottom: "3px solid #d4a920", display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: "48px", color: "#d4a920", lineHeight: 1, marginBottom: "16px", fontFamily: "Georgia, serif" }}>"</div>
                   <p style={{ fontSize: "14px", color: "#444", lineHeight: "1.85", fontStyle: "italic", flex: 1, marginBottom: "32px" }}>{t.texte}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -564,7 +635,7 @@ export default function Accueil() {
           <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "2px" }}>
             {garanties.map(function(g, i) {
               return (
-                <div key={i} style={{ backgroundColor: g.accent ? "#0a2e1a" : "#f7f7f5", padding: "40px 32px", border: g.accent ? "2px solid #d4a920" : "none" }}>
+                <div key={i} className="rise lift" style={{ ["--ri" as any]: (i * 0.07) + "s", backgroundColor: g.accent ? "#0a2e1a" : "#f7f7f5", padding: "40px 32px", border: g.accent ? "2px solid #d4a920" : "none" }}>
                   <h3 style={{ fontSize: "16px", fontWeight: "700", color: g.accent ? "#d4a920" : "#0a0a0a", marginBottom: "12px" }}>{g.titre}</h3>
                   <p style={{ fontSize: "13px", color: g.accent ? "rgba(255,255,255,0.65)" : "#777", lineHeight: "1.75", marginBottom: g.detail ? "16px" : "0" }}>{g.desc}</p>
                   {g.detail && (
@@ -594,7 +665,7 @@ export default function Accueil() {
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
             {faqAccueil.map(function(f, i) {
               return (
-                <div key={i} style={{ backgroundColor: "#ffffff", padding: "24px 28px", borderLeft: "3px solid #d4a920" }}>
+                <div key={i} className="rise" style={{ ["--ri" as any]: (i * 0.05) + "s", backgroundColor: "#ffffff", padding: "24px 28px", borderLeft: "3px solid #d4a920" }}>
                   <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0a2e1a", marginBottom: "10px" }}>{f.q}</h3>
                   <p style={{ fontSize: "14px", color: "#555", lineHeight: "1.75", margin: 0 }}>{f.r}</p>
                 </div>
@@ -612,8 +683,9 @@ export default function Accueil() {
       {/* CTA FINAL */}
       <section style={{ position: "relative", backgroundColor: "#020904", padding: "120px 60px", overflow: "hidden", textAlign: "center" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/images/hero-bg.jpg')", backgroundSize: "cover", backgroundPosition: "center", opacity: 0.12 }} />
+        <div className="cta-beacon" aria-hidden="true"><span /></div>
         <div style={{ position: "relative", zIndex: 1, maxWidth: "680px", margin: "0 auto" }}>
-          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "24px" }}>CONTACTEZ-NOUS</div>
+          <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "24px" }}><span className="cta-dot" />CONTACTEZ-NOUS</div>
           <h2 style={{ fontSize: "clamp(30px, 4vw, 50px)", fontWeight: "300", color: "#ffffff", lineHeight: "1.15", letterSpacing: "-0.02em", marginBottom: "24px" }}>
             Une infestation ne s'arrange
             <br />
@@ -623,9 +695,11 @@ export default function Accueil() {
             Besoin d'une intervention urgente ? Contactez-nous dès maintenant. Diagnostic et devis gratuit, réponse rapide.
           </p>
           <div className="cta-btns" style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
-              Demander une intervention
-            </a>
+            <span className="cta-btn-wrap">
+              <a href="/contact" className="cta-cta" data-magnet-soft style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: "700", fontSize: "14px", padding: "16px 36px", borderRadius: "6px", textDecoration: "none" }}>
+                Demander une intervention <span className="arr">→</span>
+              </a>
+            </span>
           </div>
         </div>
       </section>
