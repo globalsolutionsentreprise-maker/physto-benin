@@ -191,7 +191,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <input value={produits.raticides || ""} onChange={(e) => setProduit("raticides", e.target.value)} placeholder="Ex : VERTOX" style={inp} />
 
       <Lbl>Autres produits utilisés</Lbl>
-      {PRODUITS_CATS.filter((cat) => cat.key !== "insecticides" && cat.key !== "raticides").map((cat) => {
+      {PRODUITS_CATS.filter((cat) => !["insecticides", "raticides", "autres"].includes(cat.key)).map((cat) => {
         const on = produitsCoches.includes(cat.key)
         return (
           <div key={cat.key} style={{ marginBottom: 8 }}>
@@ -202,6 +202,9 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           </div>
         )
       })}
+
+      <Lbl>Autre produit (à préciser)</Lbl>
+      <input value={produits.autres || ""} onChange={(e) => setProduit("autres", e.target.value)} placeholder="Tout autre produit utilisé" style={inp} />
 
       <div style={{ display: "flex", gap: 10 }}>
         <div style={{ flex: 1 }}><Lbl>Début</Lbl><input value={dureeDebut} onChange={(e) => setDureeDebut(e.target.value)} placeholder="08h00" style={inp} /></div>

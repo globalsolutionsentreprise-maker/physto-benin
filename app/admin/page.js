@@ -6825,6 +6825,10 @@ function buildFichePassageHtml(form, client, numero, medias) {
 
     '</div>' +
 
+    '<div style="margin-top:4px;border:1px solid #d4a920;background:#fffdf5;border-radius:6px;padding:8px 12px;font-size:10.5px;color:#555;line-height:1.5;text-align:center">' +
+    '<strong style="color:#0a2e1a">Valeur du document.</strong> Établie et signée par le technicien de Global Solutions Entreprise à l\'issue de l\'intervention, la présente fiche fait foi et vaut preuve de passage et d\'exécution de la prestation, y compris en l\'absence de signature du client.' +
+    '</div>' +
+
     '</div>' +
 
     '<div class="footer">' +
