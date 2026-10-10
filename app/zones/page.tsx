@@ -4,6 +4,9 @@ const VILLES = [
   { slug: "abomey-calavi", nom: "Abomey-Calavi", region: "Atlantique", accroche: "Termites, serpents, moustiques, punaises" },
   { slug: "porto-novo", nom: "Porto-Novo", region: "Ouémé", accroche: "Termites, cafards, rats, désinfection" },
   { slug: "ouidah", nom: "Ouidah", region: "Atlantique", accroche: "Punaises de lit, moustiques, désinfection" },
+  { slug: "seme-kpodji", nom: "Sèmè-Kpodji", region: "Ouémé", accroche: "Moustiques, rats, cafards, termites" },
+  { slug: "parakou", nom: "Parakou", region: "Borgou", accroche: "Rats, termites, cafards, serpents" },
+  { slug: "bohicon", nom: "Bohicon", region: "Zou", accroche: "Rats, cafards, termites, désinfection" },
 ]
 
 export const metadata: Metadata = {

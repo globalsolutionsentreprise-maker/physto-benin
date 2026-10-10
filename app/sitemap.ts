@@ -44,6 +44,9 @@ const pagesStatiques: MetadataRoute.Sitemap = [
   { url: `${BASE}/zones/abomey-calavi`, changeFrequency: "monthly", priority: 0.8 },
   { url: `${BASE}/zones/porto-novo`, changeFrequency: "monthly", priority: 0.8 },
   { url: `${BASE}/zones/ouidah`, changeFrequency: "monthly", priority: 0.8 },
+  { url: `${BASE}/zones/seme-kpodji`, changeFrequency: "monthly", priority: 0.8 },
+  { url: `${BASE}/zones/parakou`, changeFrequency: "monthly", priority: 0.8 },
+  { url: `${BASE}/zones/bohicon`, changeFrequency: "monthly", priority: 0.8 },
   // Hub Nuisibles (une page par cible, SEO)
   { url: `${BASE}/nuisibles`, changeFrequency: "monthly", priority: 0.8 },
   ...NUISIBLE_SLUGS.map((slug) => ({ url: `${BASE}/nuisibles/${slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
