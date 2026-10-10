@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { supabase } from "./lib/supabase"
 
 export default function Accueil() {
@@ -474,7 +475,7 @@ export default function Accueil() {
             ].map(function(c, i) {
               return (
                 <div key={i} className="rise sect-card" style={{ ["--ri" as any]: (i * 0.08) + "s", position: "relative", borderRadius: "4px", overflow: "hidden", aspectRatio: "4/3", backgroundColor: "#0d3d1e" }}>
-                  <img src={c.img} alt={c.label} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.55 }} />
+                  <Image src={c.img} alt={c.label} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover", opacity: 0.55 }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(2,9,4,0.92) 0%, transparent 60%)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: "24px" }}>
                     <div style={{ fontSize: "16px", fontWeight: "600", color: "#ffffff", marginBottom: "6px" }}>{c.label}</div>
                     <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.55)" }}>{c.desc}</div>
@@ -529,13 +530,13 @@ export default function Accueil() {
             <div key={r.id} style={{ backgroundColor: "#f7f7f5", display: "grid", gridTemplateColumns: "1fr 1fr", marginBottom: "24px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
                 <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e0e0e0", overflow: "hidden" }}>
-                  {r.photo_avant ? <img src={r.photo_avant} alt={`Avant intervention ${r.titre || "désinsectisation"}, Phyto Bénin Cotonou`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div></div>}
+                  {r.photo_avant ? <Image src={r.photo_avant} alt={`Avant intervention ${r.titre || "désinsectisation"}, Phyto Bénin Cotonou`} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>📷</div></div>}
                 </div>
                 <div style={{ position: "relative", aspectRatio: "1", backgroundColor: "#e8f5ee", overflow: "hidden" }}>
-                  {r.photo_apres ? <img src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"}, par Phyto Bénin`} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
+                  {r.photo_apres ? <Image src={r.photo_apres} alt={`Après intervention ${r.titre || "désinsectisation"}, par Phyto Bénin`} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: "cover" }} /> : <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><div style={{ fontSize: "32px" }}>✅</div></div>}
                 </div>
                 <div style={{ gridColumn: "span 2", backgroundColor: "#1a1a1a", minHeight: "180px", position: "relative", overflow: "hidden" }}>
-                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><img src="/images/about-team.jpg" alt="Équipe de techniciens certifiés Phyto Bénin, désinsectisation et dératisation au Bénin" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.7, position: "absolute", inset: 0 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
+                  {r.video ? <video src={r.video} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls /> : <><Image src="/images/about-team.jpg" alt="Équipe de techniciens certifiés Phyto Bénin, désinsectisation et dératisation au Bénin" fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.7 }} /><div style={{ position: "absolute", bottom: "16px", left: "16px" }}><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)" }}>ÉQUIPE TERRAIN</div><div style={{ fontSize: "13px", fontWeight: "700", color: "#ffffff" }}>Techniciens Phyto Bénin</div></div></>}
                 </div>
               </div>
               <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>

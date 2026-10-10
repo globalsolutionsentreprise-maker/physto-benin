@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1791663927.7335522,
-    "ast_hash": "ab04d966e56707038d2dc75c73d50040",
+    "mtime": 1791673514.9353416,
+    "ast_hash": "019582a7fc60d256f923a6201042a698",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1791666996.0170774,
-    "ast_hash": "fd249d31e186b0dece21615c91d252af",
+    "mtime": 1791673495.9045048,
+    "ast_hash": "91c3683ceabe8847b40d1e431a22385b",
     "semantic_hash": ""
   },
   "app/qui-sommes-nous/page.tsx": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "next.config.js": {
-    "mtime": 1783042430.399415,
-    "ast_hash": "0fc62352e4d50ab1b25c1398734c86f4",
+    "mtime": 1791673469.256553,
+    "ast_hash": "4b200a0e3b7f0702987715f745076975",
     "semantic_hash": ""
   },
   "next.config.ts": {
@@ -1075,8 +1075,8 @@
     "semantic_hash": ""
   },
   "app/components/SiteHeader.tsx": {
-    "mtime": 1791663889.5870233,
-    "ast_hash": "664b3771c0ac807e5a1a735d3320248b",
+    "mtime": 1791673507.0860684,
+    "ast_hash": "65bff3977dde1260022cf8bcebb3e653",
     "semantic_hash": ""
   },
   "app/fiche/layout.tsx": {

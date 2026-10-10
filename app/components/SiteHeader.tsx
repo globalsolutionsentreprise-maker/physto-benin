@@ -1,4 +1,5 @@
 "use client"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 
 // En-tête public (barre de navigation + bandeau offre de bienvenue).
@@ -13,7 +14,7 @@ export default function SiteHeader() {
       <nav style={{ backgroundColor: "#ffffff", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, zIndex: 50 }}>
         <div className="nav-padding" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 40px" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", flexShrink: 0 }}>
-            <img src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" className="logo-anime" style={{ width: "44px", height: "44px", objectFit: "contain", borderRadius: "8px" }} />
+            <Image src="/logo-gse.jpeg" alt="Logo Global Solutions Entreprise" width={44} height={44} priority className="logo-anime" style={{ objectFit: "contain", borderRadius: "8px" }} />
             <div className="nav-brand-text">
               <div style={{ fontSize: "14px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin <span className="nav-brand-by" style={{ color: "#d4a920" }}>by</span> GSE</div>
               <div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div>

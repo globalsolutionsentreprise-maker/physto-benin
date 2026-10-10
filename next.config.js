@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    // Photos de réalisations stockées dans le bucket public Supabase.
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ijgjdtfaimamcrrnyrvk.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
   async headers() {
     return [
       {
