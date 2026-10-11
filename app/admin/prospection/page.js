@@ -275,6 +275,7 @@ export default function ProspectionPage() {
           <div style={S.board}>
             {STATUTS.map(col => {
               const items = prospects.filter(p => p.statut === col.key)
+                .sort((a, b) => (b.dernier_contact || "").localeCompare(a.dernier_contact || ""))
               return (
                 <div key={col.key}
                   onDragOver={e => { e.preventDefault(); setOverCol(col.key) }}
