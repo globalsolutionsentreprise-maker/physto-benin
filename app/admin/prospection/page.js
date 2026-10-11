@@ -31,8 +31,15 @@ const WA = {
 }
 const WA_DEFAUT = "Bonjour 👋 Kabir de Phyto-Bénin (GSE), hygiène sanitaire agréée par l'État. Nous offrons un audit anti-nuisibles gratuit, sans engagement, avec certificat de conformité. Ça vous intéresse ? www.phyto-benin.com"
 
+// Bénin : wa.me exige l'indicatif pays (229) sans « + ». Un numéro saisi en
+// local (01 53 04 79 50 → 0153047950) donne un lien invalide sans le préfixe.
+function waDigits(tel) {
+  const d = (tel || "").replace(/\D/g, "")
+  if (!d) return ""
+  return d.startsWith("229") ? d : "229" + d
+}
 function waLink(tel, segment) {
-  const num = (tel || "").replace(/\D/g, "")
+  const num = waDigits(tel)
   const txt = encodeURIComponent(WA[segment] || WA_DEFAUT)
   return "https://wa.me/" + num + "?text=" + txt
 }
