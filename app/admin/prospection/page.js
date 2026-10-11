@@ -301,7 +301,7 @@ export default function ProspectionPage() {
                         {p.prochaine_relance ? <div style={{ ...S.krel, color: p.prochaine_relance <= today() ? "#e0b32a" : "#9db69d" }}>⏰ {p.prochaine_relance}</div> : null}
                         <div style={S.kactions}>
                           {(p.whatsapp || p.telephone) ? <a href={waLink(p.whatsapp || p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} title="WhatsApp" style={{ ...S.kbtn, background: "#25d366", color: "#04310f" }}>WA</a> : null}
-                          {p.telephone ? <a href={"tel:+" + p.telephone.replace(/\D/g, "")} onClick={() => logContact(p, "tel")} title="Appeler" style={{ ...S.kbtn, background: "#1f3a2a", color: "#eef3ec" }}>☎</a> : null}
+                          {p.telephone ? <a href={"tel:+" + waDigits(p.telephone)} onClick={() => logContact(p, "tel")} title="Appeler" style={{ ...S.kbtn, background: "#1f3a2a", color: "#eef3ec" }}>☎</a> : null}
                           {p.email ? <a href={"mailto:" + p.email} onClick={() => logContact(p, "email")} title="E-mail" style={{ ...S.kbtn, background: "#1f3a2a", color: "#eef3ec" }}>✉</a> : null}
                           <button onClick={() => relanceJ3(p)} title="Relance J+3" style={{ ...S.kbtn, background: "#2a2a1a", color: "#e0b32a" }}>J+3</button>
                           {p.devis_id
@@ -342,7 +342,7 @@ export default function ProspectionPage() {
                   </div>
                   <div style={S.actions}>
                     {(p.whatsapp || digits) ? <a href={waLink(p.whatsapp || p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} style={{ ...S.btn, background: "#25d366", color: "#04310f" }}>WhatsApp</a> : null}
-                    {digits ? <a href={"tel:+" + digits} onClick={() => logContact(p, "tel")} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>Appeler</a> : null}
+                    {digits ? <a href={"tel:+" + waDigits(p.telephone)} onClick={() => logContact(p, "tel")} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>Appeler</a> : null}
                     {p.email ? <a href={"mailto:" + p.email} onClick={() => logContact(p, "email")} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>E-mail</a> : null}
                     <button onClick={() => relanceJ3(p)} style={{ ...S.btn, background: "#2a2a1a", color: "#e0b32a" }}>Relance J+3</button>
                     <select value="" onChange={e => { if (e.target.value) setStatut(p, e.target.value) }} style={S.statutSelect}>

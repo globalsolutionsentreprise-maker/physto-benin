@@ -7012,7 +7012,7 @@ function SectionRecrutement() {
   const STATUTS = [["nouveau", "Nouveau"], ["rappeler", "À rappeler"], ["entretien", "Entretien"], ["retenu", "Retenu"], ["ecarte", "Écarté"]]
   const ST_COLOR = { nouveau: "#1e40af", rappeler: "#92400e", entretien: "#6b21a8", retenu: "#065f46", ecarte: "#991b1b" }
   function offreTitre(id) { const o = data.offres.find(function (x) { return x.id === id }); return o ? o.titre : "Candidature spontanée" }
-  function waLink(tel) { const n = String(tel || "").replace(/\D/g, ""); return n ? "https://wa.me/" + n : null }
+  function waLink(tel) { let n = String(tel || "").replace(/\D/g, ""); if (!n) return null; if (!n.startsWith("229")) n = "229" + n; return "https://wa.me/" + n }
   function fmtDate(d) { try { return new Date(d).toLocaleDateString("fr-FR") } catch (e) { return "" } }
   const inp = { width: "100%", padding: "9px 11px", fontSize: "13px", border: "1px solid #d1d5db", borderRadius: "7px", fontFamily: "inherit", boxSizing: "border-box" }
   const lbl = { fontSize: "11px", fontWeight: 700, color: "#555", marginBottom: "4px" }
