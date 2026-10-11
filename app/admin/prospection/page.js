@@ -105,7 +105,7 @@ export default function ProspectionPage() {
   const [overCol, setOverCol] = useState(null)
   // Slice 3 : ajout manuel, import CSV, conversion avec choix de prestation.
   const [showAdd, setShowAdd] = useState(false)
-  const [addForm, setAddForm] = useState({ nom: "", categorie: "", segment: "", telephone: "", email: "", adresse: "", campagne: "" })
+  const [addForm, setAddForm] = useState({ nom: "", contact_nom: "", segment: "", telephone: "", whatsapp: "", email: "", adresse: "", campagne: "" })
   const [showImport, setShowImport] = useState(false)
   const [importRows, setImportRows] = useState([])
   const [importCampagne, setImportCampagne] = useState("")
@@ -178,7 +178,7 @@ export default function ProspectionPage() {
   async function addProspect() {
     if (!addForm.nom.trim()) { setMsg("Nom requis"); return }
     const data = await post({ action: "add_prospect", prospect: addForm })
-    if (data && data.ok) { setShowAdd(false); setAddForm({ nom: "", categorie: "", segment: "", telephone: "", email: "", adresse: "", campagne: "" }); charger() }
+    if (data && data.ok) { setShowAdd(false); setAddForm({ nom: "", contact_nom: "", segment: "", telephone: "", whatsapp: "", email: "", adresse: "", campagne: "" }); charger() }
   }
   async function onImportFile(e) {
     const file = e.target.files && e.target.files[0]
@@ -288,11 +288,12 @@ export default function ProspectionPage() {
                         <div style={S.kname}>{p.nom}</div>
                         <div style={S.kmeta}>
                           {p.categorie ? p.categorie : p.segment}
+                          {p.contact_nom ? " · " + p.contact_nom : ""}
                           {p.telephone ? " · " + p.telephone : ""}
                         </div>
                         {p.prochaine_relance ? <div style={{ ...S.krel, color: p.prochaine_relance <= today() ? "#e0b32a" : "#9db69d" }}>⏰ {p.prochaine_relance}</div> : null}
                         <div style={S.kactions}>
-                          {p.telephone ? <a href={waLink(p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} title="WhatsApp" style={{ ...S.kbtn, background: "#25d366", color: "#04310f" }}>WA</a> : null}
+                          {(p.whatsapp || p.telephone) ? <a href={waLink(p.whatsapp || p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} title="WhatsApp" style={{ ...S.kbtn, background: "#25d366", color: "#04310f" }}>WA</a> : null}
                           {p.telephone ? <a href={"tel:+" + p.telephone.replace(/\D/g, "")} onClick={() => logContact(p, "tel")} title="Appeler" style={{ ...S.kbtn, background: "#1f3a2a", color: "#eef3ec" }}>☎</a> : null}
                           {p.email ? <a href={"mailto:" + p.email} onClick={() => logContact(p, "email")} title="E-mail" style={{ ...S.kbtn, background: "#1f3a2a", color: "#eef3ec" }}>✉</a> : null}
                           <button onClick={() => relanceJ3(p)} title="Relance J+3" style={{ ...S.kbtn, background: "#2a2a1a", color: "#e0b32a" }}>J+3</button>
@@ -321,7 +322,9 @@ export default function ProspectionPage() {
                       <div style={S.nom}>{p.nom}</div>
                       <div style={S.meta}>
                         {p.categorie ? <span>{p.categorie}</span> : null}
+                        {p.contact_nom ? <span> · 👤 {p.contact_nom}</span> : null}
                         {p.telephone ? <span> · {p.telephone}</span> : null}
+                        {p.whatsapp ? <span> · WA {p.whatsapp}</span> : null}
                         {p.email ? <span> · {p.email}</span> : null}
                         {p.adresse ? <span> · {p.adresse}</span> : null}
                       </div>
@@ -331,7 +334,7 @@ export default function ProspectionPage() {
                     <span style={{ ...S.badge, background: COLOR[p.statut] || "#555" }}>{LABEL[p.statut] || p.statut}</span>
                   </div>
                   <div style={S.actions}>
-                    {digits ? <a href={waLink(p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} style={{ ...S.btn, background: "#25d366", color: "#04310f" }}>WhatsApp</a> : null}
+                    {(p.whatsapp || digits) ? <a href={waLink(p.whatsapp || p.telephone, p.segment)} target="_blank" rel="noreferrer" onClick={() => logContact(p, "whatsapp")} style={{ ...S.btn, background: "#25d366", color: "#04310f" }}>WhatsApp</a> : null}
                     {digits ? <a href={"tel:+" + digits} onClick={() => logContact(p, "tel")} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>Appeler</a> : null}
                     {p.email ? <a href={"mailto:" + p.email} onClick={() => logContact(p, "email")} style={{ ...S.btn, background: "#1f3a2a", color: "#eef3ec" }}>E-mail</a> : null}
                     <button onClick={() => relanceJ3(p)} style={{ ...S.btn, background: "#2a2a1a", color: "#e0b32a" }}>Relance J+3</button>
@@ -355,10 +358,11 @@ export default function ProspectionPage() {
         <div style={S.overlay} onClick={() => setShowAdd(false)}>
           <div style={S.modal} onClick={e => e.stopPropagation()}>
             <h3 style={S.modalTitle}>Nouveau prospect</h3>
-            <input placeholder="Nom *" value={addForm.nom} onChange={e => setAddForm(f => ({ ...f, nom: e.target.value }))} style={S.field} />
+            <input placeholder="Nom de l'établissement *" value={addForm.nom} onChange={e => setAddForm(f => ({ ...f, nom: e.target.value }))} style={S.field} />
+            <input placeholder="Nom du contact (interlocuteur)" value={addForm.contact_nom} onChange={e => setAddForm(f => ({ ...f, contact_nom: e.target.value }))} style={S.field} />
             <input placeholder="Téléphone (+229 …)" value={addForm.telephone} onChange={e => setAddForm(f => ({ ...f, telephone: e.target.value }))} style={S.field} />
+            <input placeholder="WhatsApp (si différent du téléphone)" value={addForm.whatsapp} onChange={e => setAddForm(f => ({ ...f, whatsapp: e.target.value }))} style={S.field} />
             <input placeholder="E-mail" value={addForm.email} onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))} style={S.field} />
-            <input placeholder="Catégorie (ex. Hôtels)" value={addForm.categorie} onChange={e => setAddForm(f => ({ ...f, categorie: e.target.value, segment: SEG_MAP[e.target.value] || f.segment }))} style={S.field} />
             <select value={addForm.segment} onChange={e => setAddForm(f => ({ ...f, segment: e.target.value }))} style={S.field}>
               <option value="">Segment (facultatif)</option>
               {SEGMENTS.map(s => <option key={s} value={s}>{s}</option>)}

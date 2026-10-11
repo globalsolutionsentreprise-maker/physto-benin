@@ -119,7 +119,8 @@ export async function POST(req) {
     if (!p.nom) return Response.json({ error: "nom requis" }, { status: 400 })
     const { data, error } = await supabase.from("prospects").insert({
       nom: p.nom, categorie: p.categorie || null, segment: p.segment || null,
-      telephone: p.telephone || null, email: p.email || null,
+      telephone: p.telephone || null, whatsapp: p.whatsapp || null,
+      contact_nom: p.contact_nom || null, email: p.email || null,
       ville: p.ville || "Cotonou", adresse: p.adresse || null,
       source: p.source || "manuel", campagne: p.campagne || null,
     }).select().single()
