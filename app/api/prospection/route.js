@@ -43,7 +43,7 @@ export async function GET(req) {
     if (campagne) query = query.eq("campagne", campagne)
     if (relances) query = query.not("prochaine_relance", "is", null).lte("prochaine_relance", new Date().toISOString().split("T")[0])
     if (q) query = query.or(`nom.ilike.%${q}%,telephone.ilike.%${q}%,email.ilike.%${q}%`)
-    query = query.order("created_at", { ascending: true })
+    query = query.order("created_at", { ascending: false })
 
     const { data: prospects, error } = await query
     if (error) return Response.json({ error: error.message }, { status: 500 })
