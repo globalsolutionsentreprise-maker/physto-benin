@@ -112,7 +112,7 @@ export async function GET(req) {
 
   if (action === "get_clients") {
     await expirerDevisEnRetard(supabase)
-    const { data: clients } = await supabase.from("clients").select("*").order("nom")
+    const { data: clients } = await supabase.from("clients").select("*").order("created_at", { ascending: false })
     return Response.json({ clients: clients || [] })
   }
 
