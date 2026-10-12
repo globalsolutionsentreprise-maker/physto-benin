@@ -5317,8 +5317,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
               intervDevis.map(function(iv) {
                 var m = ({ planifiee: { l: 'Planifiée', c: '#0C447C', bg: '#E6F1FB' }, terminee: { l: 'Terminée', c: '#166534', bg: '#DCFCE7' }, annulee: { l: 'Annulée', c: '#991b1b', bg: '#fef2f2' } })[iv.statut] || { l: iv.statut || '—', c: '#555', bg: '#f0ede6' }
+                // Type de passage : distingue intervention / rapport / contrôle / audit.
+                var tp = ({ intervention: { l: '🔧 Intervention', c: '#0a2e1a', bg: '#eef3ee' }, rapport: { l: '📊 Rapport', c: '#1e40af', bg: '#eff4ff' }, controle: { l: '🔍 Contrôle', c: '#6b21a8', bg: '#f6effb' }, audit: { l: '📋 Audit', c: '#92400e', bg: '#fdf4e3' } })[iv.type_passage] || { l: '🔧 Intervention', c: '#0a2e1a', bg: '#eef3ee' }
                 return React.createElement('div', { key: iv.id, style: { display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '8px 12px' } },
                   React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', flexShrink: 0 } }, iv.date_intervention ? new Date(iv.date_intervention + 'T00:00:00').toLocaleDateString('fr-FR') : '—'),
+                  React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: tp.c, backgroundColor: tp.bg, borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, tp.l),
                   React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: m.c, backgroundColor: m.bg, borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, m.l),
                   React.createElement('span', { style: { fontSize: '11px', color: '#777', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, [iv.adresse, iv.notes].filter(Boolean).join(' · '))
                 )
