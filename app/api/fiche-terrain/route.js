@@ -119,7 +119,15 @@ export async function POST(req) {
       medias,
       rempli_par: f.rempliPar || "Fabrice",
       intervention_id: p.id,
+      // Rubriques propres à la fiche de contrôle (postes d'appâtage, infestation,
+      // constat, recommandations, prochain passage, signataire client). null pour
+      // une fiche de passage ordinaire.
+      controle_data: (f.controleData && typeof f.controleData === "object") ? f.controleData : null,
     }
+
+    // Un passage de type contrôle (planning) OU une fiche explicitement marquée
+    // « Contrôle » produit une FICHE DE CONTRÔLE (préfixe FC), sinon FP.
+    const estControle = p.type_passage === "controle" || f.typePassage === "Contrôle"
 
     const { data: existing } = await sb.from("fiches_passage").select("id, numero_unique").eq("intervention_id", p.id).maybeSingle()
     let numero
@@ -134,7 +142,7 @@ export async function POST(req) {
         const { data: d } = await sb.from("devis").select("client_id").eq("id", devis_id).maybeSingle()
         client_id = (d && d.client_id) || null
       }
-      numero = `FP-GSE-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`
+      numero = `${estControle ? "FC" : "FP"}-GSE-${new Date().getFullYear()}-${Date.now().toString().slice(-5)}`
       const { error } = await sb.from("fiches_passage").insert(Object.assign({}, ficheData, { numero_unique: numero, client_id, devis_id }))
       if (error) return Response.json({ error: error.message }, { status: 500 })
     }

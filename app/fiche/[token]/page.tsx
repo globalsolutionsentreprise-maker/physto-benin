@@ -12,6 +12,10 @@ const BUCKET = "fiches-medias"
 const TYPES_PASSAGE = ["Contrôle", "Contractuel", "Occasionnel", "Essai"]
 const TYPES_PRESTA = ["Désinsectisation", "Désinfection", "Dératisation", "Fumigation", "Traitement phytosanitaire espèces verts"]
 const NUISIBLES = ["Insectes rampants", "Insectes volants", "Rongeurs", "Microbes"]
+// Fiche de contrôle : niveaux de consommation des postes d'appâtage et niveau
+// d'infestation constaté par nuisible.
+const NIVEAUX_CONSO = ["Nul", "Faible", "Moyen", "Fort"]
+const NIVEAUX_INFEST = ["Nul", "Faible", "Modéré", "Élevé"]
 const PRODUITS_CATS = [
   { key: "insecticides", label: "Insecticides (rampants / volants)" },
   { key: "raticides", label: "Raticides (rats / souris)" },
@@ -53,12 +57,22 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [files, setFiles] = useState<File[]>([])
   const [mediasExistants, setMediasExistants] = useState<Media[]>([])
 
+  // Mode contrôle (passage de type "controle") : rubriques spécifiques.
+  const [estControle, setEstControle] = useState(false)
+  const [postes, setPostes] = useState({ installes: "", actifs: "", niveau: "", remarque: "" })
+  const [infestation, setInfestation] = useState<Record<string, string>>({})
+  const [constat, setConstat] = useState("")
+  const [recommandations, setRecommandations] = useState("")
+  const [prochainPassage, setProchainPassage] = useState("")
+  const [clientSignataire, setClientSignataire] = useState("")
+
   useEffect(() => {
     fetch("/api/fiche-terrain?token=" + encodeURIComponent(token))
       .then((r) => r.json())
       .then((d) => {
         if (d.error) { setErreur(d.error); return }
         setInfo(d)
+        setEstControle(!!(d.passage && d.passage.type_passage === "controle"))
         setDatePassage((d.passage && d.passage.date) || new Date().toISOString().slice(0, 10))
         // Pré-remplir : prestations du devis mappées sur les cases connues.
         // Un libellé composé ("Désinsectisation + Dératisation") est éclaté sur
@@ -81,6 +95,13 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setRemarques(f.remarques || "")
           setSuperviseurNom(f.rempli_par || "Fabrice")
           if (f.date_passage) setDatePassage(f.date_passage)
+          const cd = f.controle_data || {}
+          if (cd.postes) setPostes({ installes: cd.postes.installes || "", actifs: cd.postes.actifs || "", niveau: cd.postes.niveau || "", remarque: cd.postes.remarque || "" })
+          if (cd.infestation) setInfestation(cd.infestation)
+          setConstat(cd.constat || "")
+          setRecommandations(cd.recommandations || "")
+          setProchainPassage(cd.prochainPassage || "")
+          setClientSignataire(cd.clientSignataire || "")
         } else {
           setPrestations(presta)
         }
@@ -131,9 +152,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         body: JSON.stringify({
           token,
           fiche: {
-            typePassage, prestations, nuisibles, produits, produitsCoches,
+            typePassage: estControle ? "Contrôle" : typePassage,
+            prestations, nuisibles, produits, produitsCoches,
             dureeDebut, dureeFin, remarques, datePassage,
             superviseurNom, rempliPar: superviseurNom,
+            ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage, clientSignataire } } : {}),
           },
           medias,
         }),
@@ -163,7 +186,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
 
   const c = info.client || {}
   return (
-    <Shell>
+    <Shell title={estControle ? "Fiche de contrôle" : "Fiche de passage"}>
       <div style={{ background: "#f5f5f0", borderRadius: 10, padding: 14, margin: "0 0 16px", fontSize: 14, lineHeight: 1.5 }}>
         <div style={{ fontWeight: 700, color: VERT, fontSize: 16 }}>{c.entreprise || c.nom || "Client"}</div>
         {c.entreprise && c.nom ? <div style={{ color: "#555" }}>{c.nom}</div> : null}
@@ -175,6 +198,36 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Date du passage</Lbl>
       <input type="date" value={datePassage} onChange={(e) => setDatePassage(e.target.value)} style={inp} />
 
+      {estControle && (<>
+        <Lbl>Relevé des postes d'appâtage</Lbl>
+        <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ flex: 1 }}><Lbl>Installés</Lbl><input type="number" inputMode="numeric" value={postes.installes} onChange={(e) => setPostes({ ...postes, installes: e.target.value })} placeholder="ex : 12" style={inp} /></div>
+          <div style={{ flex: 1 }}><Lbl>Consommés / actifs</Lbl><input type="number" inputMode="numeric" value={postes.actifs} onChange={(e) => setPostes({ ...postes, actifs: e.target.value })} placeholder="ex : 4" style={inp} /></div>
+        </div>
+        <Lbl>Niveau de consommation</Lbl>
+        <Chips items={NIVEAUX_CONSO} selected={[postes.niveau]} onToggle={(v) => setPostes({ ...postes, niveau: postes.niveau === v ? "" : v })} />
+        <Lbl>Postes déplacés / rechargés</Lbl>
+        <input value={postes.remarque} onChange={(e) => setPostes({ ...postes, remarque: e.target.value })} placeholder="ex : 2 postes rechargés, 1 déplacé zone stockage" style={inp} />
+
+        <Lbl>Niveau d'infestation constaté</Lbl>
+        {NUISIBLES.map((n) => (
+          <div key={n} style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 13, color: "#555", marginBottom: 4 }}>{n}</div>
+            <Chips items={NIVEAUX_INFEST} selected={[infestation[n] || ""]} onToggle={(v) => setInfestation({ ...infestation, [n]: infestation[n] === v ? "" : v })} />
+          </div>
+        ))}
+
+        <Lbl>Constat</Lbl>
+        <textarea value={constat} onChange={(e) => setConstat(e.target.value)} rows={3} placeholder="Ce que le technicien observe sur site…" style={{ ...inp, resize: "vertical" }} />
+
+        <Lbl>Recommandations / actions correctives</Lbl>
+        <textarea value={recommandations} onChange={(e) => setRecommandations(e.target.value)} rows={3} placeholder="Recommandations au client, actions à prévoir…" style={{ ...inp, resize: "vertical" }} />
+
+        <Lbl>Date du prochain passage</Lbl>
+        <input type="date" value={prochainPassage} onChange={(e) => setProchainPassage(e.target.value)} style={inp} />
+      </>)}
+
+      {!estControle && (<>
       <Lbl>Type de passage</Lbl>
       <Chips items={TYPES_PASSAGE} selected={[typePassage]} onToggle={(v) => setTypePassage(v)} />
 
@@ -218,6 +271,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
 
       <Lbl>Remarques</Lbl>
       <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={3} placeholder="Constat, recommandations…" style={{ ...inp, resize: "vertical" }} />
+      </>)}
 
       <Lbl>Photos / Vidéos</Lbl>
       <label style={{ ...chip, display: "block", textAlign: "center", padding: "14px", border: "2px dashed " + OR, background: "#fffdf5", cursor: "pointer" }}>
@@ -242,6 +296,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Technicien</Lbl>
       <input value={superviseurNom} onChange={(e) => setSuperviseurNom(e.target.value)} style={inp} />
 
+      {estControle && (<>
+        <Lbl>Nom du signataire (client)</Lbl>
+        <input value={clientSignataire} onChange={(e) => setClientSignataire(e.target.value)} placeholder="Personne qui réceptionne sur site" style={inp} />
+      </>)}
+
       {erreur ? <div style={{ color: "#991b1b", margin: "12px 0", fontSize: 14 }}>{erreur}</div> : null}
       {progress ? <div style={{ color: VERT, margin: "12px 0", fontSize: 14 }}>{progress}</div> : null}
 
@@ -254,13 +313,13 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, title = "Fiche de passage" }: { children: React.ReactNode; title?: string }) {
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "Arial, Helvetica, sans-serif", color: "#111" }}>
       <div style={{ background: VERT, padding: "16px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <div style={{ color: OR, fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase" }}>Global Solutions Entreprise</div>
-          <div style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>Fiche de passage</div>
+          <div style={{ color: "#fff", fontSize: 18, fontWeight: 700 }}>{title}</div>
         </div>
       </div>
       <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 0" }}>{children}</div>

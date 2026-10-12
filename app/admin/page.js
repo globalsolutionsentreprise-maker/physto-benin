@@ -2357,7 +2357,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       superviseurContact: fiche.superviseur_contact || '',
     }
     var medias = await signMediasAdmin(fiche.medias)
-    var html = buildFichePassageHtml(form, client || {}, fiche.numero_unique, medias)
+    // Fiche de contrôle = document distinct (type Contrôle ou controle_data présent).
+    var estControle = fiche.type_passage === 'Contrôle' || !!fiche.controle_data
+    var html = estControle
+      ? buildFicheControleHtml(fiche, client || {}, fiche.numero_unique, medias)
+      : buildFichePassageHtml(form, client || {}, fiche.numero_unique, medias)
     ouvrirDocImprimable(html, 920, 1100)
   }
 
@@ -6830,6 +6834,159 @@ function buildFichePassageHtml(form, client, numero, medias) {
 
     '<div style="margin-top:4px;border:1px solid #d4a920;background:#fffdf5;border-radius:6px;padding:8px 12px;font-size:10.5px;color:#555;line-height:1.5;text-align:center">' +
     '<strong style="color:#0a2e1a">Valeur du document.</strong> Établie et signée par le technicien de Global Solutions Entreprise à l\'issue de l\'intervention, la présente fiche fait foi et vaut preuve de passage et d\'exécution de la prestation, y compris en l\'absence de signature du client.' +
+    '</div>' +
+
+    '</div>' +
+
+    '<div class="footer">' +
+    'Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
+    '</div>' +
+
+    '</div></body></html>'
+}
+
+// Fiche de CONTRÔLE (document distinct de la fiche de passage) : remise lors
+// d'une visite de contrôle. Même charte GSE, mais rubriques propres au contrôle
+// lues dans fiche.controle_data (postes d'appâtage, infestation, constat,
+// recommandations, prochain passage, signataire client).
+function buildFicheControleHtml(fiche, client, numero, medias) {
+  var cd = (fiche && fiche.controle_data) || {}
+  var postes = cd.postes || {}
+  var infestation = cd.infestation || {}
+  var NUISIBLES = ['Insectes rampants', 'Insectes volants', 'Rongeurs', 'Microbes']
+  var nomClient = (client && (client.entreprise || [(client.prenom || ''), client.nom].filter(Boolean).join(' '))) || (fiche && fiche.superviseur_nom) || ''
+  var adresse = (client && client.adresse) || ''
+  var lieu = (fiche && fiche.lieu_prestation) || ''
+  var dateAff = (fiche && fiche.date_passage) ? new Date(fiche.date_passage).toLocaleDateString('fr-FR') : '__________'
+  var prochain = cd.prochainPassage ? new Date(cd.prochainPassage).toLocaleDateString('fr-FR') : ''
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+  function couleurNiveau(v) { return v === 'Nul' ? '#16a34a' : v === 'Élevé' ? '#dc2626' : (v ? '#d97706' : '#999') }
+
+  var infestHtml = NUISIBLES.map(function(n) {
+    var v = infestation[n] || ''
+    return '<tr>' +
+      '<td style="border:1px solid #ccc;padding:6px 10px">' + n + '</td>' +
+      '<td style="border:1px solid #ccc;padding:6px 10px;font-weight:700;color:' + couleurNiveau(v) + '">' + (v || '<span style="color:#ccc">—</span>') + '</td>' +
+      '</tr>'
+  }).join('')
+
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">' +
+    '<title>' + nomFichierDoc('Fiche_controle', numero, (client && (client.entreprise || client.nom)) || '') + '</title>' +
+    '<style>' +
+    '* { box-sizing: border-box; margin: 0; padding: 0; }' +
+    'body { font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; color: #111; background: #f5f5f0; }' +
+    '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
+    '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
+    '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
+    '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+    '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
+    '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
+    '.hdr-left .name { color: #fff; font-size: 20px; font-weight: 700; }' +
+    '.hdr-right { text-align: right; }' +
+    '.hdr-right .title { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }' +
+    '.hdr-right .num { color: #d4a920; font-size: 13px; font-weight: 700; margin-top: 4px; }' +
+    '.agr { background: #d4a920; padding: 5px 12px; font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; }' +
+    '.body { padding: 22px 28px; }' +
+    '.section-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #0a2e1a; padding-bottom: 4px; margin-bottom: 10px; }' +
+    '.field-row { display: flex; gap: 0; margin-bottom: 8px; align-items: baseline; }' +
+    '.field-label { font-weight: 700; color: #555; min-width: 90px; font-size: 11.5px; }' +
+    '.field-value { flex: 1; border-bottom: 1px solid #999; min-height: 18px; padding-bottom: 2px; font-size: 12.5px; }' +
+    '.box { border: 1px solid #ccc; border-radius: 4px; min-height: 54px; padding: 10px; font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; }' +
+    '.sig-zone { border: 1px solid #ccc; border-radius: 6px; padding: 12px; min-height: 80px; }' +
+    '.sig-title { font-size: 10px; font-weight: 700; color: #0a2e1a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }' +
+    '.footer { background: #f0ede6; border-top: 1px solid #e0ddd6; padding: 8px 28px; text-align: center; font-size: 10px; color: #888; line-height: 1.6; }' +
+    'table { width: 100%; border-collapse: collapse; }' +
+    '@media print {' +
+    '  @page { size: A4 portrait; margin: 8mm 10mm; }' +
+    '  .noprint { display: none; }' +
+    '  body { background: #fff; font-size: 10.5px; }' +
+    '  .page { max-width: 100%; }' +
+    '  .box { min-height: 34px; }' +
+    '  .sig-zone { min-height: 48px; }' +
+    '}' +
+    '</style></head><body>' +
+
+    '<div class="noprint"><button onclick="window.print()">🖨️ Imprimer / PDF</button><button class="sec" onclick="window.close()">Fermer</button></div>' +
+
+    '<div class="page">' +
+    '<div class="hdr">' +
+    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
+    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<div class="hdr-right"><div class="title">Fiche de Contrôle</div><div class="num">N° ' + numero + '</div></div>' +
+    '</div>' +
+    '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>' +
+
+    '<div class="body">' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Informations client</div>' +
+    '<div class="field-row"><span class="field-label">Client</span><span class="field-value">' + esc(nomClient) + '</span></div>' +
+    '<div class="field-row"><span class="field-label">Site / lieu</span><span class="field-value">' + esc(lieu || adresse) + '</span></div>' +
+    '<div class="field-row"><span class="field-label">Date du contrôle</span><span class="field-value">' + dateAff + '</span></div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Relevé des postes d\'appâtage</div>' +
+    '<div style="display:flex;gap:24px;margin-bottom:6px">' +
+    '<div class="field-row" style="flex:1"><span class="field-label">Installés</span><span class="field-value">' + esc(postes.installes) + '</span></div>' +
+    '<div class="field-row" style="flex:1"><span class="field-label">Consommés</span><span class="field-value">' + esc(postes.actifs) + '</span></div>' +
+    '<div class="field-row" style="flex:1"><span class="field-label">Consommation</span><span class="field-value" style="font-weight:700;color:' + couleurNiveau(postes.niveau) + '">' + esc(postes.niveau) + '</span></div>' +
+    '</div>' +
+    '<div class="field-row"><span class="field-label">Déplacés / rechargés</span><span class="field-value">' + esc(postes.remarque) + '</span></div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Niveau d\'infestation constaté</div>' +
+    '<table><thead><tr>' +
+    '<th style="background:#0a2e1a;color:#fff;padding:6px 10px;text-align:left;font-size:11px;border:1px solid #0a2e1a;width:60%">Nuisible</th>' +
+    '<th style="background:#0a2e1a;color:#fff;padding:6px 10px;text-align:left;font-size:11px;border:1px solid #0a2e1a">Niveau</th>' +
+    '</tr></thead><tbody>' + infestHtml + '</tbody></table>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Constat</div>' +
+    '<div class="box">' + esc(cd.constat) + '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:16px">' +
+    '<div class="section-title">Recommandations / actions correctives</div>' +
+    '<div class="box">' + esc(cd.recommandations) + '</div>' +
+    '</div>' +
+
+    (prochain ?
+      '<div class="field-row" style="margin-bottom:16px"><span class="field-label">Prochain passage</span><span class="field-value" style="font-weight:700;color:#0a2e1a">' + prochain + '</span></div>'
+    : '') +
+
+    ((medias && medias.length) ?
+      '<div style="margin-bottom:16px">' +
+      '<div class="section-title">Photos / vidéos du contrôle</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      medias.map(function(m) {
+        var isImg = String(m.type || '').indexOf('image') === 0
+        return isImg
+          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px">'
+          : '<a href="' + (m.url || '#') + '" style="display:flex;align-items:center;justify-content:center;width:150px;height:150px;border:1px solid #ccc;border-radius:6px;background:#f3f4f6;color:#0a2e1a;text-decoration:none;font-size:13px;text-align:center">🎬 Vidéo<br>(voir en ligne)</a>'
+      }).join('') +
+      '</div></div>'
+    : '') +
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
+    '<div>' +
+    '<div class="sig-title">Pour le client — Nom & Prénom(s)</div>' +
+    '<div class="sig-zone">' + (cd.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(cd.clientSignataire) + '</div>' : '') + '</div>' +
+    '</div>' +
+    '<div>' +
+    '<div class="sig-title">Pour Global Solutions Entreprise</div>' +
+    '<div class="sig-zone">' +
+    ((fiche && fiche.superviseur_nom) ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(fiche.superviseur_nom) + '</div>' : '') +
+    ((fiche && fiche.superviseur_contact) ? '<div style="font-size:11px;color:#666;margin-top:2px">' + esc(fiche.superviseur_contact) + '</div>' : '') +
+    '</div>' +
+    '</div>' +
+    '</div>' +
+
+    '<div style="margin-top:4px;border:1px solid #d4a920;background:#fffdf5;border-radius:6px;padding:8px 12px;font-size:10.5px;color:#555;line-height:1.5;text-align:center">' +
+    '<strong style="color:#0a2e1a">Valeur du document.</strong> Établie et signée par le technicien de Global Solutions Entreprise lors de la visite de contrôle, la présente fiche fait foi et vaut preuve de passage de contrôle, y compris en l\'absence de signature du client.' +
     '</div>' +
 
     '</div>' +
