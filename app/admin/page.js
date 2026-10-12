@@ -3285,6 +3285,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       datePassage: f.date_passage || '',
       superviseurNom: f.superviseur_nom || '',
       superviseurContact: f.superviseur_contact || '',
+      controleData: f.controle_data || {},
     })
     setFicheModal({ client: client || {}, editingId: f.id, existingNumero: f.numero_unique, medias: f.medias || [] })
   }
@@ -3321,6 +3322,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   async function saveFichePassage() {
     setSavingFiche(true); setMsg('')
     try {
+      var estControle = ficheForm.typePassage === 'Contrôle'
       var ficheData = {
         type_passage: ficheForm.typePassage,
         prestations: ficheForm.prestations,
@@ -3335,6 +3337,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         date_passage: ficheForm.datePassage,
         superviseur_nom: ficheForm.superviseurNom,
         superviseur_contact: ficheForm.superviseurContact,
+        controle_data: estControle ? (ficheForm.controleData || {}) : null,
       }
       var ficheNumero
       var isEditing = !!ficheModal.editingId
@@ -3346,6 +3349,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       } else {
         var { data: numero } = await db.rpc('generate_fiche_numero')
         ficheNumero = numero || ('FP-GSE-' + new Date().getFullYear() + '-' + Date.now().toString().slice(-4))
+        // Fiche de contrôle : préfixe FC (réutilise la même séquence que FP).
+        if (estControle && ficheNumero) ficheNumero = ficheNumero.replace(/^FP/, 'FC')
         ficheData.numero_unique = ficheNumero
         ficheData.client_id = ficheModal.client.id
         if (ficheModal.devis) ficheData.devis_id = ficheModal.devis.id
@@ -3355,7 +3360,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       if (opErr) { setMsg('Erreur: ' + opErr.message); setSavingFiche(false); return }
       if (!isEditing && ficheModal.devis) await avancerEtapeMin(ficheModal.devis.id, 'certificat')
       var mediasSignes = await signMediasAdmin(ficheModal.medias)
-      var html = buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero, mediasSignes)
+      var html = estControle
+        ? buildFicheControleHtml(ficheData, ficheModal.client, ficheNumero, mediasSignes)
+        : buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero, mediasSignes)
       ouvrirDocImprimable(html, 920, 1100)
       setFicheModal(null)
       setMsg(isEditing ? '✓ Fiche mise à jour — imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
@@ -3386,6 +3393,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       { key: 'autres', label: 'Autres (à préciser)' },
     ]
 
+    // Mode contrôle : le type « Contrôle » bascule le modal sur les rubriques de
+    // la fiche de contrôle (postes d'appâtage, infestation, constat, reco…).
+    var estControle = ficheForm.typePassage === 'Contrôle'
+    var NIVEAUX_CONSO = ['Nul', 'Faible', 'Moyen', 'Fort']
+    var NIVEAUX_INFEST = ['Nul', 'Faible', 'Modéré', 'Élevé']
+    var cd = ficheForm.controleData || {}
+    var updCtrl = function(field, val) { setFicheForm(function(prev) { return Object.assign({}, prev, { controleData: Object.assign({}, prev.controleData, { [field]: val }) }) }) }
+    var updPoste = function(field, val) { setFicheForm(function(prev) { var p = prev.controleData || {}; return Object.assign({}, prev, { controleData: Object.assign({}, p, { postes: Object.assign({}, p.postes, { [field]: val }) }) }) }) }
+    var updInfest = function(n, val) { setFicheForm(function(prev) { var p = prev.controleData || {}; var inf = Object.assign({}, p.infestation); inf[n] = inf[n] === val ? '' : val; return Object.assign({}, prev, { controleData: Object.assign({}, p, { infestation: inf }) }) }) }
+    var pillBtn = function(on) { return { fontSize: '12px', padding: '4px 10px', borderRadius: '14px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid ' + (on ? '#0a2e1a' : '#d1d5db'), backgroundColor: on ? '#0a2e1a' : '#fff', color: on ? '#fff' : '#555', fontWeight: on ? '600' : '400' } }
+
     return React.createElement('div', {
       style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
       onClick: function(e) { if (e.target === e.currentTarget) setFicheModal(null) }
@@ -3396,7 +3414,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement('div', { style: { background: '#0a2e1a', padding: '18px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
           React.createElement('div', null,
             React.createElement('div', { style: { color: '#d4a920', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '3px' } }, 'Global Solutions Entreprise'),
-            React.createElement('div', { style: { color: '#fff', fontSize: '16px', fontWeight: '700' } }, '📋 Nouvelle fiche de passage')
+            React.createElement('div', { style: { color: '#fff', fontSize: '16px', fontWeight: '700' } }, estControle ? '🔎 Nouvelle fiche de contrôle' : '📋 Nouvelle fiche de passage')
           ),
           React.createElement('button', { onClick: function() { setFicheModal(null) }, style: { background: 'none', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer' } }, '×')
         ),
@@ -3442,8 +3460,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
           ),
 
-          // Type de prestation
-          React.createElement('div', { style: { marginBottom: '16px' } },
+          // Type de prestation (fiche de passage uniquement)
+          !estControle && React.createElement('div', { style: { marginBottom: '16px' } },
             React.createElement('label', { style: lbl2 }, 'Type de prestation'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
               TYPES_PRESTA.map(function(t) {
@@ -3465,8 +3483,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('input', { value: ficheForm.lieuPrestation || '', onChange: function(e) { upd('lieuPrestation', e.target.value) }, style: inp2 })
           ),
 
-          // Nuisibles
-          React.createElement('div', { style: { marginBottom: '16px' } },
+          // Nuisibles (fiche de passage uniquement ; en contrôle, voir infestation)
+          !estControle && React.createElement('div', { style: { marginBottom: '16px' } },
             React.createElement('label', { style: lbl2 }, 'Nuisibles présents'),
             React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' } },
               NUISIBLES.map(function(n) {
@@ -3482,8 +3500,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
           ),
 
-          // Produits phytopharmaceutiques
-          React.createElement('div', { style: { marginBottom: '16px' } },
+          // Produits phytopharmaceutiques (fiche de passage uniquement)
+          !estControle && React.createElement('div', { style: { marginBottom: '16px' } },
             React.createElement('label', { style: lbl2 }, 'Produits phytopharmaceutiques appliqués'),
             React.createElement('div', { style: { background: '#f7f7f5', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '12px', marginTop: '6px' } },
               PRODUITS_CATS.map(function(cat) {
@@ -3497,8 +3515,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
           ),
 
-          // Durée
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
+          // Durée (fiche de passage uniquement)
+          !estControle && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
             React.createElement('div', null,
               React.createElement('label', { style: lbl2 }, "Durée — début"),
               React.createElement('input', { value: ficheForm.dureeDebut || '', onChange: function(e) { upd('dureeDebut', e.target.value) }, placeholder: 'Ex: 08h00', style: inp2 })
@@ -3509,10 +3527,49 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
           ),
 
-          // Remarques
-          React.createElement('div', { style: { marginBottom: '20px' } },
+          // Remarques (fiche de passage uniquement)
+          !estControle && React.createElement('div', { style: { marginBottom: '20px' } },
             React.createElement('label', { style: lbl2 }, 'Remarques'),
             React.createElement('textarea', { value: ficheForm.remarques || '', onChange: function(e) { upd('remarques', e.target.value) }, rows: 3, style: Object.assign({}, inp2, { resize: 'vertical' }) })
+          ),
+
+          // Rubriques fiche de CONTRÔLE (postes d'appâtage, infestation, constat…)
+          estControle && React.createElement('div', { style: { marginBottom: '20px', background: '#f7faf7', border: '1px solid #dbe8db', borderRadius: '8px', padding: '14px 16px' } },
+            React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#0a2e1a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' } }, '🔎 Fiche de contrôle'),
+
+            React.createElement('label', { style: lbl2 }, "Relevé des postes d'appâtage"),
+            React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' } },
+              React.createElement('div', null, React.createElement('div', { style: { fontSize: '11px', color: '#666', marginBottom: '3px' } }, 'Installés'), React.createElement('input', { type: 'number', value: (cd.postes && cd.postes.installes) || '', onChange: function(e) { updPoste('installes', e.target.value) }, placeholder: 'ex : 12', style: inp2 })),
+              React.createElement('div', null, React.createElement('div', { style: { fontSize: '11px', color: '#666', marginBottom: '3px' } }, 'Consommés / actifs'), React.createElement('input', { type: 'number', value: (cd.postes && cd.postes.actifs) || '', onChange: function(e) { updPoste('actifs', e.target.value) }, placeholder: 'ex : 4', style: inp2 }))
+            ),
+            React.createElement('div', { style: { fontSize: '11px', color: '#666', margin: '4px 0 3px' } }, 'Niveau de consommation'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' } },
+              NIVEAUX_CONSO.map(function(v) { var on = (cd.postes && cd.postes.niveau) === v; return React.createElement('button', { key: v, type: 'button', onClick: function() { updPoste('niveau', on ? '' : v) }, style: pillBtn(on) }, v) })
+            ),
+            React.createElement('input', { value: (cd.postes && cd.postes.remarque) || '', onChange: function(e) { updPoste('remarque', e.target.value) }, placeholder: 'Postes déplacés / rechargés', style: Object.assign({}, inp2, { marginBottom: '14px' }) }),
+
+            React.createElement('label', { style: lbl2 }, "Niveau d'infestation constaté"),
+            NUISIBLES.map(function(n) {
+              return React.createElement('div', { key: n, style: { marginBottom: '8px' } },
+                React.createElement('div', { style: { fontSize: '12px', color: '#555', marginBottom: '3px' } }, n),
+                React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '6px' } },
+                  NIVEAUX_INFEST.map(function(v) { var on = (cd.infestation || {})[n] === v; return React.createElement('button', { key: v, type: 'button', onClick: function() { updInfest(n, v) }, style: pillBtn(on) }, v) })
+                )
+              )
+            }),
+
+            React.createElement('div', { style: { marginTop: '10px' } },
+              React.createElement('label', { style: lbl2 }, 'Constat'),
+              React.createElement('textarea', { value: cd.constat || '', onChange: function(e) { updCtrl('constat', e.target.value) }, rows: 3, placeholder: 'Ce qui est observé sur site…', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+            ),
+            React.createElement('div', { style: { marginTop: '10px' } },
+              React.createElement('label', { style: lbl2 }, 'Recommandations / actions correctives'),
+              React.createElement('textarea', { value: cd.recommandations || '', onChange: function(e) { updCtrl('recommandations', e.target.value) }, rows: 3, placeholder: 'Recommandations au client, actions à prévoir…', style: Object.assign({}, inp2, { resize: 'vertical' }) })
+            ),
+            React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '10px' } },
+              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Date du prochain passage'), React.createElement('input', { type: 'date', value: cd.prochainPassage || '', onChange: function(e) { updCtrl('prochainPassage', e.target.value) }, style: inp2 })),
+              React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Nom du signataire (client)'), React.createElement('input', { value: cd.clientSignataire || '', onChange: function(e) { updCtrl('clientSignataire', e.target.value) }, placeholder: 'Personne qui réceptionne', style: inp2 }))
+            )
           ),
 
           // Superviseur
@@ -6974,7 +7031,10 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
     '<div>' +
     '<div class="sig-title">Pour le client — Nom & Prénom(s)</div>' +
-    '<div class="sig-zone">' + (cd.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(cd.clientSignataire) + '</div>' : '') + '</div>' +
+    '<div class="sig-zone">' +
+    (cd.signatureDataUrl ? '<img src="' + cd.signatureDataUrl + '" alt="Signature client" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
+    (cd.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(cd.clientSignataire) + '</div>' : '') +
+    '</div>' +
     '</div>' +
     '<div>' +
     '<div class="sig-title">Pour Global Solutions Entreprise</div>' +

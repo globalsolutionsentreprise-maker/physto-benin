@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { use, useEffect, useRef, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
 
 // Fiche de passage terrain, remplie par le technicien sur son téléphone via un
@@ -65,6 +65,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [recommandations, setRecommandations] = useState("")
   const [prochainPassage, setProchainPassage] = useState("")
   const [clientSignataire, setClientSignataire] = useState("")
+  const [signatureDataUrl, setSignatureDataUrl] = useState("")
 
   useEffect(() => {
     fetch("/api/fiche-terrain?token=" + encodeURIComponent(token))
@@ -102,6 +103,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setRecommandations(cd.recommandations || "")
           setProchainPassage(cd.prochainPassage || "")
           setClientSignataire(cd.clientSignataire || "")
+          setSignatureDataUrl(cd.signatureDataUrl || "")
         } else {
           setPrestations(presta)
         }
@@ -156,7 +158,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
             prestations, nuisibles, produits, produitsCoches,
             dureeDebut, dureeFin, remarques, datePassage,
             superviseurNom, rempliPar: superviseurNom,
-            ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage, clientSignataire } } : {}),
+            ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl } } : {}),
           },
           medias,
         }),
@@ -299,6 +301,8 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       {estControle && (<>
         <Lbl>Nom du signataire (client)</Lbl>
         <input value={clientSignataire} onChange={(e) => setClientSignataire(e.target.value)} placeholder="Personne qui réceptionne sur site" style={inp} />
+        <Lbl>Signature du client (sur place)</Lbl>
+        <SignaturePad value={signatureDataUrl} onChange={setSignatureDataUrl} />
       </>)}
 
       {erreur ? <div style={{ color: "#991b1b", margin: "12px 0", fontSize: 14 }}>{erreur}</div> : null}
@@ -310,6 +314,77 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       </button>
       <div style={{ height: 40 }} />
     </Shell>
+  )
+}
+
+// Pad de signature tactile : le client signe du doigt sur le téléphone. La
+// signature est exportée en PNG (dataURL) et stockée dans controle_data, puis
+// imprimée telle quelle sur la fiche de contrôle.
+function SignaturePad({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const drawing = useRef(false)
+  const last = useRef<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    const c = canvasRef.current
+    if (!c) return
+    const ratio = window.devicePixelRatio || 1
+    c.width = c.offsetWidth * ratio
+    c.height = c.offsetHeight * ratio
+    const ctx = c.getContext("2d")
+    if (!ctx) return
+    ctx.scale(ratio, ratio)
+    ctx.lineWidth = 2.2
+    ctx.lineCap = "round"
+    ctx.lineJoin = "round"
+    ctx.strokeStyle = "#0a2e1a"
+    if (value) {
+      const img = new Image()
+      img.onload = () => ctx.drawImage(img, 0, 0, c.offsetWidth, c.offsetHeight)
+      img.src = value
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function point(e: React.PointerEvent) {
+    const c = canvasRef.current as HTMLCanvasElement
+    const r = c.getBoundingClientRect()
+    return { x: e.clientX - r.left, y: e.clientY - r.top }
+  }
+  function down(e: React.PointerEvent) {
+    drawing.current = true
+    last.current = point(e)
+    try { (e.target as Element).setPointerCapture(e.pointerId) } catch {}
+  }
+  function move(e: React.PointerEvent) {
+    if (!drawing.current) return
+    const ctx = (canvasRef.current as HTMLCanvasElement).getContext("2d")
+    if (!ctx || !last.current) return
+    const p = point(e)
+    ctx.beginPath()
+    ctx.moveTo(last.current.x, last.current.y)
+    ctx.lineTo(p.x, p.y)
+    ctx.stroke()
+    last.current = p
+  }
+  function up() {
+    if (!drawing.current) return
+    drawing.current = false
+    onChange((canvasRef.current as HTMLCanvasElement).toDataURL("image/png"))
+  }
+  function clear() {
+    const c = canvasRef.current as HTMLCanvasElement
+    const ctx = c.getContext("2d")
+    if (ctx) ctx.clearRect(0, 0, c.width, c.height)
+    onChange("")
+  }
+
+  return (
+    <div>
+      <canvas ref={canvasRef} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={up}
+        style={{ width: "100%", height: 160, border: "1.5px dashed " + OR, borderRadius: 10, background: "#fffdf5", touchAction: "none", display: "block" }} />
+      <button type="button" onClick={clear} style={{ marginTop: 6, fontSize: 13, background: "#fff", border: "1px solid #d1d5db", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>Effacer la signature</button>
+    </div>
   )
 }
 
