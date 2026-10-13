@@ -86,7 +86,7 @@ export default function AttestationPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
             <div>
               {/* Logo officiel GSE */}
-              <img src="/logo-gse.jpeg" alt="Logo GSE" style={{ width: "72px", height: "72px", objectFit: "contain", marginBottom: "10px", borderRadius: "8px", display: "block" }} />
+              <img src="/logo-gse.png" alt="Logo GSE" style={{ width: "72px", height: "72px", objectFit: "contain", marginBottom: "10px", borderRadius: "8px", display: "block" }} />
               <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "11px", color: "#999", lineHeight: "1.8" }}>
                 <div>RCCM : RB/COT/24 B 38910</div>
                 <div>IFU : 3202420126111</div>

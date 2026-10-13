@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <head>
-        <link rel="icon" href="/logo-gse.jpeg" type="image/jpeg" />
+        <link rel="icon" href="/logo-gse.png" type="image/png" />
         <meta name="theme-color" content="#0a2e1a" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "alternateName": ["Phyto Bénin", "GSE Global Solutions Entreprise"],
           "description": "Spécialiste en hygiène sanitaire et phytosanitaire au Bénin. Désinsectisation, dératisation, désinfection, anti-termites. Agréé par l'État béninois.",
           "url": "https://www.phyto-benin.com",
-          "logo": "https://www.phyto-benin.com/logo-gse.jpeg",
+          "logo": "https://www.phyto-benin.com/logo-gse.png",
           "image": "https://www.phyto-benin.com/images/hero-bg.jpg",
           "telephone": "+2290153047950",
           "email": "contact@phyto-benin.com",

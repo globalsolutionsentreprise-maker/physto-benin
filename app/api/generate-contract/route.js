@@ -335,7 +335,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       <div class="sub">Global Solutions Entreprise</div>
       <div class="name">Phyto Bénin</div>
     </div>
-    <img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
+    <img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
     <div class="hdr-right">
       <div class="title">${engagementMois >= 24 ? "Contrat d'entretien pluriannuel" : "Contrat d'entretien annuel"}</div>
       <div class="ref">Réf. ${esc(contratRef)}</div>

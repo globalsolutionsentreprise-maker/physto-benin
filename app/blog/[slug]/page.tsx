@@ -134,7 +134,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     "publisher": {
       "@type": "Organization",
       "name": "Phyto Bénin by GSE",
-      "logo": { "@type": "ImageObject", "url": `${BASE}/logo-gse.jpeg` },
+      "logo": { "@type": "ImageObject", "url": `${BASE}/logo-gse.png` },
     },
     ...(article.created_at ? { datePublished: article.created_at } : {}),
   }

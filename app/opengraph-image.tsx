@@ -15,8 +15,9 @@ export default async function Image() {
   // Logo embarqué en base64 (runtime Node.js, chemin relatif à la racine projet)
   let logoSrc = ""
   try {
-    const logo = await readFile(join(process.cwd(), "public/logo-gse.jpeg"), "base64")
-    logoSrc = `data:image/jpeg;base64,${logo}`
+    // Version reverse (ivoire) car la carte OG est sur fond vert foncé
+    const logo = await readFile(join(process.cwd(), "public/logo-gse-reverse.png"), "base64")
+    logoSrc = `data:image/png;base64,${logo}`
   } catch {
     logoSrc = ""
   }

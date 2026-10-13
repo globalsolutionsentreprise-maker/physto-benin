@@ -22,7 +22,7 @@ export default function Footer() {
       <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-            <Image src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE, Hygiène sanitaire et phytosanitaire au Bénin" width={44} height={44} className="logo-anime" style={{ objectFit: "contain", borderRadius: "8px" }} />
+            <Image src="/logo-gse.png" alt="Logo Phyto Bénin by GSE, Hygiène sanitaire et phytosanitaire au Bénin" width={44} height={44} className="logo-anime" style={{ objectFit: "contain", borderRadius: "8px" }} />
             <div className="nav-brand-text"><div style={{ fontSize: "13px", fontWeight: "700", color: "#0a2e1a" }}>Phyto Bénin</div><div style={{ fontSize: "10px", color: "#888" }}>Global Solutions Entreprise</div></div>
           </div>
           <p style={{ fontSize: "12px", color: "#888", lineHeight: "1.8" }}>Spécialiste hygiène sanitaire et phytosanitaire au Bénin.</p>

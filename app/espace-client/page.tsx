@@ -48,7 +48,7 @@ export default function EspaceClientLogin() {
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <div style={{ marginBottom: "20px" }}>
             <a href="/" aria-label="Retour à l'accueil">
-              <img src="/logo-gse.jpeg" alt="Logo Phyto Bénin by GSE" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px", cursor: "pointer" }} />
+              <img src="/logo-gse.png" alt="Logo Phyto Bénin by GSE" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "12px", cursor: "pointer" }} />
             </a>
           </div>
           <h1 style={{ fontSize: "22px", fontWeight: "300", color: "#0a2e1a", margin: "0 0 8px", letterSpacing: "-0.02em" }}>

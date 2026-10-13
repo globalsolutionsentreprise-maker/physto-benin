@@ -687,7 +687,7 @@ export default function Admin() {
       <main style={{ minHeight: "100vh", backgroundColor: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ backgroundColor: "#fff", borderRadius: "12px", padding: "48px 40px", width: "100%", maxWidth: "380px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <img src="/logo-gse.jpeg" alt="Logo" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
+            <img src="/logo-gse.png" alt="Logo" className="logo-anime" style={{ width: "64px", height: "64px", objectFit: "contain", borderRadius: "10px", marginBottom: "16px" }} />
             <h1 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>{setupMode ? "Première configuration" : "Back Office"}</h1>
             <p style={{ fontSize: "13px", color: "#888" }}>{setupMode ? "Créez votre compte administrateur" : "Phyto Bénin"}</p>
           </div>
@@ -725,7 +725,7 @@ export default function Admin() {
 
       <div style={{ backgroundColor: "#0a2e1a", padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img src="/logo-gse.jpeg" alt="Logo" className="logo-anime" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px" }} />
+          <img src="/logo-gse.png" alt="Logo" className="logo-anime" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px" }} />
           <div>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#d4a920" }}>Back Office Phyto Bénin</div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>
@@ -6574,7 +6574,7 @@ function nomFichierDoc() {
 // document une vraie source, rechargeable à tout moment.
 // Repli sur document.write si les URL blob sont indisponibles.
 // Dans un document blob:, les chemins relatifs ne se resolvent plus contre le
-// domaine : le logo `<img src="/logo-gse.jpeg">` ne chargeait plus dans AUCUN
+// domaine : le logo `<img src="/logo-gse.png">` ne chargeait plus dans AUCUN
 // document imprime. On injecte une balise <base> pointant sur l'origine, ce qui
 // retablit tous les chemins racine d'un coup, ici et pour tout futur document.
 function injecterBase(html) {
@@ -6603,7 +6603,7 @@ function ouvrirDocImprimable(html, largeur, hauteur) {
 function gseHeader(title, ref) {
   return '<div class="hdr">' +
     '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
-    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right"><div class="title">' + title + '</div>' + (ref ? '<div class="ref">' + ref + '</div>' : '') + '</div>' +
     '</div>' +
     '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>'
@@ -6802,7 +6802,7 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div class="sub">Global Solutions Entreprise</div>' +
     '<div class="name">Phyto Bénin</div>' +
     '</div>' +
-    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right">' +
     '<div class="title">Fiche de Passage</div>' +
     '<div class="num">N° ' + numero + '</div>' +
@@ -6986,7 +6986,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '<div class="page">' +
     '<div class="hdr">' +
     '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
-    '<img src="/logo-gse.jpeg" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
+    '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right"><div class="title">Fiche de Contrôle</div><div class="num">N° ' + numero + '</div></div>' +
     '</div>' +
     '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>' +
