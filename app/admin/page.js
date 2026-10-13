@@ -3754,8 +3754,22 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     : devisList.filter(function(d) { return filtre === "tous" || d.statut === filtre })
 
   function renderCompteurs() {
-    return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "12px", marginBottom: "24px" } },
-      [["Clients", clients.length, "#0a2e1a"], ["Envoyés", devisList.filter(function(d) { return d.statut === "envoye" }).length, "#1e40af"], ["En cours", devisList.filter(function(d) { return d.statut === "en_cours" }).length, "#0f766e"], ["Terminés", devisList.filter(function(d) { return d.statut === "termine" }).length, "#555"]].map(function(s) {
+    var auj = new Date().toISOString().slice(0, 10)
+    var annee = String(new Date().getFullYear())
+    // Contrats signés (devis type_crm contrat / date de début), hors perdus.
+    var estPerdu = function(d) { return d.etape === "perdu" || d.crm_statut === "echec" }
+    var contratsSignes = devisList.filter(function(d) { return (d.type_crm === "contrat" || d.date_debut_contrat) && !estPerdu(d) })
+    // En cours = actif ou à renouveler (statut calculé centralement via resumeContrat).
+    var contratsEnCours = contratsSignes.filter(function(d) {
+      var st = resumeContrat({ devis: d, interventions: interventionsList }, auj).statut
+      return st === "actif" || st === "a_renouveler"
+    }).length
+    // Exécution = passage terrain réel (on exclut le jalon "rapport", coût 0).
+    var estExec = function(iv) { return iv.type_passage !== "rapport" }
+    var execEnCours = interventionsList.filter(function(iv) { return estExec(iv) && iv.statut === "planifiee" }).length
+    var execTermineAnnee = interventionsList.filter(function(iv) { return estExec(iv) && iv.statut === "terminee" && String(iv.date_intervention || "").slice(0, 4) === annee }).length
+    return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "12px", marginBottom: "24px" } },
+      [["Clients", clients.length, "#0a2e1a"], ["Devis envoyés", devisList.filter(function(d) { return d.statut === "envoye" }).length, "#1e40af"], ["Contrats en cours", contratsEnCours, "#0f766e"], ["Exécutions en cours", execEnCours, "#b45309"], ["Exéc. terminées " + annee, execTermineAnnee, "#065f46"]].map(function(s) {
         return React.createElement("div", { key: s[0], style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "18px", borderTop: "3px solid " + s[2] } },
           React.createElement("div", { style: { fontSize: "28px", fontWeight: "300", color: s[2] } }, s[1]),
           React.createElement("div", { style: { fontSize: "11px", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "4px" } }, s[0])
