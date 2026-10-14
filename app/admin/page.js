@@ -6501,7 +6501,8 @@ var GSE_DOC_STYLES = '<style>' +
   '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
   '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
   '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-  '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+  '.page { max-width: 780px; margin: 0 auto; background: #fff; position: relative; isolation: isolate; }' +
+  '.page::before { content: ""; position: absolute; inset: 0; background: url("/logo-gse.png") no-repeat center 44%; background-size: min(70%, 520px); opacity: 0.06; z-index: -1; pointer-events: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
   '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
   '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
   '.hdr-left .name { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }' +
@@ -6750,7 +6751,8 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
     '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
     '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+    '.page { max-width: 780px; margin: 0 auto; background: #fff; position: relative; isolation: isolate; }' +
+  '.page::before { content: ""; position: absolute; inset: 0; background: url("/logo-gse.png") no-repeat center 44%; background-size: min(70%, 520px); opacity: 0.06; z-index: -1; pointer-events: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
     '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
     '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
     '.hdr-left .name { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 0.03em; }' +
@@ -6953,7 +6955,8 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '.noprint { text-align: center; padding: 12px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }' +
     '.noprint button { background: #0a2e1a; color: #d4a920; border: none; border-radius: 6px; padding: 9px 24px; font-size: 13px; font-weight: 700; cursor: pointer; margin: 4px; font-family: inherit; }' +
     '.noprint button.sec { background: #fff; color: #0a2e1a; border: 1px solid #0a2e1a; }' +
-    '.page { max-width: 780px; margin: 0 auto; background: #fff; }' +
+    '.page { max-width: 780px; margin: 0 auto; background: #fff; position: relative; isolation: isolate; }' +
+  '.page::before { content: ""; position: absolute; inset: 0; background: url("/logo-gse.png") no-repeat center 44%; background-size: min(70%, 520px); opacity: 0.06; z-index: -1; pointer-events: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
     '.hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }' +
     '.hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }' +
     '.hdr-left .name { color: #fff; font-size: 20px; font-weight: 700; }' +
