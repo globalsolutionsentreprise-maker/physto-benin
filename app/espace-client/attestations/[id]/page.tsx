@@ -108,7 +108,7 @@ export default function AttestationPage() {
           {/* === TITRE === */}
           <div style={{ textAlign: "center", marginBottom: "40px" }}>
             <div style={{ fontFamily: "system-ui, sans-serif", fontSize: "10px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "10px" }}>
-              Document officiel — République du Bénin
+              Document officiel · République du Bénin
             </div>
             <h1 style={{ fontFamily: "system-ui, sans-serif", fontSize: "24px", fontWeight: "700", color: "#0a2e1a", margin: "0 0 4px", letterSpacing: "0.03em", textTransform: "uppercase" }}>
               Attestation de Bonne Fin d'Exécution
@@ -193,7 +193,7 @@ export default function AttestationPage() {
               <div style={{ width: "120px", height: "50px", borderBottom: "1.5px solid #0a2e1a", marginTop: "24px" }} />
             </div>
 
-            {/* Cachet du Directeur Général — reproduction SVG fidèle */}
+            {/* Cachet du Directeur Général · reproduction SVG fidèle */}
             <div style={{ textAlign: "center", margin: "0 16px", paddingBottom: "4px" }}>
               <div style={{
                 display: "inline-block",
