@@ -137,19 +137,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             60%  { opacity: 1; transform: scale(1.08) rotate(3deg); }
             100% { opacity: 1; transform: scale(1) rotate(0deg); }
           }
-          @keyframes logoBrille {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(212,169,32,0), 0 2px 8px rgba(10,46,26,0.15); }
-            50%       { box-shadow: 0 0 0 5px rgba(212,169,32,0.18), 0 2px 8px rgba(10,46,26,0.15); }
-          }
           .logo-anime {
-            animation: logoEntree 0.7s cubic-bezier(0.34,1.56,0.64,1) both,
-                       logoBrille 3.5s ease-in-out 0.7s infinite;
-            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+            animation: logoEntree 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
             cursor: pointer;
           }
           .logo-anime:hover {
             transform: scale(1.15) rotate(6deg);
-            box-shadow: 0 0 0 6px rgba(212,169,32,0.3), 0 6px 20px rgba(10,46,26,0.25) !important;
           }
 
           @keyframes texteEntree {
