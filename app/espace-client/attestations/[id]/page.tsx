@@ -52,6 +52,8 @@ export default function AttestationPage() {
   return (
     <>
       <style>{`
+        .attestation-card { isolation: isolate; }
+        .attestation-card::before { content: ""; position: absolute; inset: 0; background: url("/logo-gse.png") no-repeat center 46%; background-size: min(68%, 500px); opacity: 0.06; z-index: -1; pointer-events: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @media print {
           .no-print { display: none !important; }
           body { margin: 0; background: white; }
