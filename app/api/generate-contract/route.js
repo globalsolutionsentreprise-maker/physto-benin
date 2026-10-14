@@ -55,9 +55,9 @@ export async function GET(req) {
     const client     = devis.clients || {}
     const nomClient  = [client.prenom, client.nom].filter(Boolean).join(" ")
     // Établissement (site) : ses infos priment sur celles du client. Un contrat
-    // par site => dénomination « Client — Site », adresse et IFU propres au site.
+    // par site => dénomination « Client · Site », adresse et IFU propres au site.
     const baseEnt    = client.entreprise || nomClient
-    const entreprise = devis.etablissement_nom ? (baseEnt ? `${baseEnt} — ${devis.etablissement_nom}` : devis.etablissement_nom) : baseEnt
+    const entreprise = devis.etablissement_nom ? (baseEnt ? `${baseEnt} · ${devis.etablissement_nom}` : devis.etablissement_nom) : baseEnt
     const adresse    = devis.etablissement_adresse || client.adresse || "Cotonou, Bénin"
     const ifu        = devis.etablissement_ifu || client.ifu || ""
     const telephone  = client.telephone || "_______________"
@@ -228,19 +228,19 @@ export async function GET(req) {
         <td>× ${controles} / an<br><small>(mensuel, inter-passage)</small></td>
         <td>Contrôle des stations à rongeurs</td>
         <td>
-          — Vérification état et consommation des appâts<br>
-          — Rechargement si nécessaire<br>
-          — Rapport succinct transmis au Client
+          · Vérification état et consommation des appâts<br>
+          · Rechargement si nécessaire<br>
+          · Rapport succinct transmis au Client
         </td>
       </tr>` : ""
 
     // Détail de l'intervention principale : uniquement les volets vendus.
     const detailInterv = [
-      aDesinsectisation ? "— Traitement insecticide rémanent : murs, plinthes, zones d'ombre" : null,
-      aDeratisation     ? "— Dératisation : vérification et rechargement des stations" : null,
-      aDesinfection     ? "— Désinfection : traitement des surfaces et points de contact" : null,
-      "— Inspection visuelle complète",
-      "— Fiche de passage + Attestation GSE à chaque intervention",
+      aDesinsectisation ? "· Traitement insecticide rémanent : murs, plinthes, zones d'ombre" : null,
+      aDeratisation     ? "· Dératisation : vérification et rechargement des stations" : null,
+      aDesinfection     ? "· Désinfection : traitement des surfaces et points de contact" : null,
+      "· Inspection visuelle complète",
+      "· Fiche de passage + Attestation GSE à chaque intervention",
     ].filter(Boolean).join("<br>\n            ")
 
     // Base tarifaire chiffrée : phrase reconstruite depuis le prix/m² saisi,
@@ -261,7 +261,7 @@ export async function GET(req) {
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Contrat ${esc(entreprise)} — GSE</title>
+<title>Contrat ${esc(entreprise)} · GSE</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #111; background: #f5f5f0; }
@@ -351,7 +351,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       <div class="ref-cell"><div class="ref-label">Date de signature</div><div class="ref-value">${esc(dateJour)}</div></div>
     </div>
 
-    ${artTitle("Article 1 — Parties contractantes")}
+    ${artTitle("Article 1 · Parties contractantes")}
     <div class="parties">
       <div class="party-box">
         <div class="party-title">Prestataire</div>
@@ -375,10 +375,10 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       </div>
     </div>
 
-    ${artTitle("Article 2 — Objet du contrat")}
+    ${artTitle("Article 2 · Objet du contrat")}
     <p class="art-text">Le présent contrat a pour objet la réalisation par GSE d'un programme annuel d'entretien sanitaire conformément aux recommandations du rapport de visite technique et dans le respect de la loi 91-004 du 11 Février 1991 portant réglementation Phytosanitaire en République du Bénin.</p>
 
-    ${artTitle(`Article 3 — Prestations incluses (${esc(formule)})`)}
+    ${artTitle(`Article 3 · Prestations incluses (${esc(formule)})`)}
     <table class="services">
       <thead>
         <tr>
@@ -400,15 +400,15 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
           <td>× 1 / an<br><small>(fin de contrat)</small></td>
           <td>Audit de conformité sanitaire annuel</td>
           <td>
-            — Bilan complet du plan IPM sur 12 mois<br>
-            — Rapport écrit utilisable lors de contrôles sanitaires officiels
+            · Bilan complet du plan IPM sur 12 mois<br>
+            · Rapport écrit utilisable lors de contrôles sanitaires officiels
           </td>
         </tr>
       </tbody>
     </table>
 
     ${manuel ? `
-    ${artTitle("Article 4 — Formule d'engagement")}
+    ${artTitle("Article 4 · Formule d'engagement")}
     <p class="art-text">Le présent contrat porte sur <strong>${passages} passage${passages > 1 ? "s" : ""}</strong> sur une durée de <strong>${duree} mois</strong>, selon le détail ci-dessous.</p>
     <table class="finances">
       <thead>
@@ -444,7 +444,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
     </table>
     <p style="font-size:11px;color:#888;font-style:italic;margin-bottom:12px">Paiement par ${periodicite}, en avance (voir Article 5). TVA non applicable, entreprise non assujettie. Montant net à payer.</p>
     ` : `
-    ${artTitle("Article 4 — Formule d'engagement (à cocher par le Client)")}
+    ${artTitle("Article 4 · Formule d'engagement (à cocher par le Client)")}
     <p class="art-text">Le Client choisit la durée de son engagement en cochant <strong>une seule</strong> case ci-dessous. Le tarif par passage diminue à mesure que l'engagement s'allonge. Prix de référence d'un passage ponctuel : <strong>${prixPonctuel.toLocaleString("fr-FR")} FCFA</strong>.</p>
     <table class="finances">
       <thead>
@@ -461,7 +461,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
           const cls = reco ? ' class="total"' : (o.dureeMois === 6 ? ' class="alt"' : '')
           return `<tr${cls}>
           <td style="text-align:center;font-size:18px">☐</td>
-          <td>${o.dureeMois} mois — ${o.passages} passage${o.passages > 1 ? "s" : ""} inclus${reco ? " <strong>(le plus avantageux)</strong>" : ""}</td>
+          <td>${o.dureeMois} mois · ${o.passages} passage${o.passages > 1 ? "s" : ""} inclus${reco ? " <strong>(le plus avantageux)</strong>" : ""}</td>
           <td style="text-align:right">${o.prixPassage.toLocaleString("fr-FR")} FCFA</td>
           <td style="text-align:right">${o.prixTotal.toLocaleString("fr-FR")} FCFA</td>
         </tr>`
@@ -478,10 +478,10 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       <strong>Engagement ferme de ${engagementMois} mois.</strong> Le tarif ci-dessus s'applique aux ${duree} premiers mois (tarif de démarrage). La période restante (${engagementMois - duree} mois) fera l'objet d'une réévaluation tarifaire d'un commun accord entre les parties, formalisée par avenant, au plus tard 30 jours avant l'échéance de la première période.
     </div>` : ""}
 
-    ${artTitle("Article 5 — Modalités de paiement")}
+    ${artTitle("Article 5 · Modalités de paiement")}
     ${paiementArticle()}
 
-    ${artTitle("Article 6 — Durée et renouvellement")}
+    ${artTitle("Article 6 · Durée et renouvellement")}
     <ul class="clauses">
       ${li(engagementMois > duree
         ? `Le contrat est conclu pour un engagement ferme de ${engagementMois} mois à compter de la date de signature.`
@@ -490,7 +490,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       ${li("La date du premier passage sera fixée d'un commun accord dans les 30 jours suivant la signature.")}
     </ul>
 
-    ${artTitle("Article 7 — Résiliation")}
+    ${artTitle("Article 7 · Résiliation")}
     <ul class="clauses">
       ${li(`Chaque partie peut résilier le contrat avec un préavis écrit d'un ${periodicite} complet.`)}
       ${li(`Toute résiliation en cours ${periodiciteEnCours} ne donne droit à aucun remboursement.`)}
@@ -498,7 +498,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       ${li("GSE peut résilier sans préavis en cas de non-paiement ou d'impossibilité d'accès répétée.")}
     </ul>
 
-    ${artTitle("Article 8 — Obligations des parties")}
+    ${artTitle("Article 8 · Obligations des parties")}
     <div class="sub-title">8.1 &nbsp; Obligations de GSE</div>
     <ul class="clauses">
       ${li("Réaliser les interventions aux dates convenues par des techniciens certifiés.")}
@@ -514,16 +514,16 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       ${li("Informer GSE de tout changement affectant le site.")}
     </ul>
 
-    ${artTitle("Article 9 — Limitation de responsabilité")}
+    ${artTitle("Article 9 · Limitation de responsabilité")}
     <p class="art-text">GSE ne saurait être tenu responsable des recontaminations résultant du non-respect par le Client des recommandations d'hygiène transmises. Le rapport de visite technique GSE fait foi en cas de litige.</p>
 
-    ${artTitle("Article 10 — Révision tarifaire")}
+    ${artTitle("Article 10 · Révision tarifaire")}
     <p class="art-text">Le tarif annuel peut être révisé à chaque renouvellement sur notification écrite 30 jours avant l'échéance.</p>
 
     <div class="sigs">
       <div class="sig-box">
         <div class="sig-title">Signature du client</div>
-        <div class="sig-sub">${esc(entreprise)} — Bon pour accord</div>
+        <div class="sig-sub">${esc(entreprise)} · Bon pour accord</div>
         <div class="sig-line"></div>
         <div class="sig-date">À Cotonou, le ${esc(dateJour)}</div>
       </div>
@@ -538,7 +538,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
   </div>
 
-  <div class="gse-footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
+  <div class="gse-footer">Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
 
 </div>
 </body>

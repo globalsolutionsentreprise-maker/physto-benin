@@ -191,7 +191,7 @@ const INTERV_STATUTS=[
 const PALETTE=["#185FA5","#1D9E75","#BA7517","#8B5CF6","#E24B4A","#0891B2"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fd=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"2-digit"}):"—";
+const fd=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"2-digit"}):"·";
 const fdShort=d=>d?new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}):"";
 const initiales=m=>(((m.prenom||"").charAt(0)+(m.nom||"").charAt(0))||"?").toUpperCase();
 const colorOf=(id,arr)=>PALETTE[arr.findIndex(x=>x.id===id)%PALETTE.length]||PALETTE[0];
@@ -248,9 +248,9 @@ function exporterPlanning(){
       <td style="padding:10px 12px;color:#888;font-size:12px;">${i+1}</td>
       <td style="padding:10px 12px;font-weight:600;">${fdLong(p.dateIntervention)}</td>
       <td style="padding:10px 12px;font-weight:700;color:${typeColor};">${typeLbl}</td>
-      <td style="padding:10px 12px;">${p.clientNom||"—"}</td>
+      <td style="padding:10px 12px;">${p.clientNom||"·"}</td>
       <td style="padding:10px 12px;">${techLbl}</td>
-      <td style="padding:10px 12px;color:#888;font-size:12px;">${p.notes||"—"}</td>
+      <td style="padding:10px 12px;color:#888;font-size:12px;">${p.notes||"·"}</td>
     </tr>`;
   }).join("");
 
@@ -259,7 +259,7 @@ function exporterPlanning(){
   const dateExport=new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
 
   const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-<title>Planning GSE — ${dateExport}</title>
+<title>Planning GSE · ${dateExport}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#111;background:#fff;}
@@ -404,7 +404,7 @@ function renderEquipe(){
           docLabel(cs,ce)
         }</div>
         <div class="doc-row">${docDot(cip)}<span style="font-weight:500;">CIP : </span>${
-          m.cipNumero?`N° ${m.cipNumero} — ${docLabel(cip,m.cipExpiration)}`:`<span style="color:var(--text-3);">Non renseigné</span>`
+          m.cipNumero?`N° ${m.cipNumero} · ${docLabel(cip,m.cipExpiration)}`:`<span style="color:var(--text-3);">Non renseigné</span>`
         }</div>
       </div>
       <div class="mc-footer">
@@ -418,7 +418,7 @@ function renderEquipe(){
 function renderPlanning(){
   const el=document.getElementById("tab-planning");
   const days=weekDays(weekOffset);
-  const label=`${fdShort(days[0].date)} – ${fd(days[6].date)}`;
+  const label=`${fdShort(days[0].date)} · ${fd(days[6].date)}`;
 
   // Interventions non assignées
   const nonAss=plannings.filter(p=>!p.personnelId&&p.statut==="planifiee");
@@ -502,12 +502,12 @@ function buildAlerts(){
   const alerts=[];
   membres.forEach(m=>{
     const cs=contratStatut(m);
-    if(cs==="absent")alerts.push({type:"danger",icon:"ti-file-x",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat`,sub:"Aucun contrat enregistré",action:()=>openEditMembre(m.id)});
-    if(cs==="expire")alerts.push({type:"danger",icon:"ti-file-alert",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat expiré`,sub:`Expiré le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
-    if(cs==="proche")alerts.push({type:"warn",icon:"ti-file-time",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — Contrat`,sub:`Expire le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
+    if(cs==="absent")alerts.push({type:"danger",icon:"ti-file-x",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} · Contrat`,sub:"Aucun contrat enregistré",action:()=>openEditMembre(m.id)});
+    if(cs==="expire")alerts.push({type:"danger",icon:"ti-file-alert",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} · Contrat expiré`,sub:`Expiré le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
+    if(cs==="proche")alerts.push({type:"warn",icon:"ti-file-time",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} · Contrat`,sub:`Expire le ${fd(contratExpiry(m))}`,action:()=>openEditMembre(m.id)});
     const cip=docStatut(m.cipExpiration,90);
-    if(cip==="expire")alerts.push({type:"danger",icon:"ti-id-badge-off",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — CIP expirée`,sub:`Expirée le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
-    if(cip==="proche")alerts.push({type:"warn",icon:"ti-id-badge",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} — CIP`,sub:`Expire le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
+    if(cip==="expire")alerts.push({type:"danger",icon:"ti-id-badge-off",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} · CIP expirée`,sub:`Expirée le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
+    if(cip==="proche")alerts.push({type:"warn",icon:"ti-id-badge",title:`${[m.prenom,m.nom].filter(Boolean).join(" ")} · CIP`,sub:`Expire le ${fd(m.cipExpiration)}`,action:()=>openEditMembre(m.id)});
   });
   const soon=new Date();soon.setDate(soon.getDate()+7);
   plannings.filter(p=>p.statut==="planifiee"&&new Date(p.dateIntervention+"T00:00:00")<=soon&&new Date(p.dateIntervention+"T00:00:00")>=new Date()).forEach(p=>{
@@ -520,7 +520,7 @@ function renderAlertes(){
   const el=document.getElementById("tab-alertes");
   const alerts=buildAlerts();
   if(!alerts.length){
-    el.innerHTML=`<div class="empty-state"><i class="ti ti-check" style="color:var(--primary);"></i>Aucune alerte — tout est à jour !</div>`;
+    el.innerHTML=`<div class="empty-state"><i class="ti ti-check" style="color:var(--primary);"></i>Aucune alerte · tout est à jour !</div>`;
     return;
   }
   const colors={danger:"#FCEBEB",warn:"#FFF8E6",info:"var(--primary-bg)"};
@@ -568,7 +568,7 @@ function membreForm(m){
     <div><label class="fl">Date d'embauche</label><input type="date" id="mde" value="${m?.dateEmbauche||""}"></div>
     <div class="fg-div">Contrat</div>
     <div><label class="fl">Date de signature</label><input type="date" id="mcd" value="${m?.contratDate||""}"></div>
-    <div><label class="fl">Durée (mois) — 0 = indéterminée</label><input type="number" id="mcm" min="0" value="${m?.contratDureeMois||0}"></div>
+    <div><label class="fl">Durée (mois) · 0 = indéterminée</label><input type="number" id="mcm" min="0" value="${m?.contratDureeMois||0}"></div>
     <div class="fg-div">CIP / Pièce d'identité</div>
     <div><label class="fl">Numéro CIP</label><input id="mcip" value="${m?.cipNumero||""}"></div>
     <div><label class="fl">Date d'expiration</label><input type="date" id="mcipx" value="${m?.cipExpiration||""}"></div>
@@ -630,20 +630,20 @@ function intervForm(p,datePrefill,persPrefill,clientPrefill){
   <div class="form-body"><div class="form-grid">
     <div class="fg-full"><label class="fl">Client *</label>
       <select id="icl" onchange="onClientChange(this)">
-        <option value="">— Sélectionner un client —</option>
+        <option value="">· Sélectionner un client ·</option>
         ${clientOpts}
       </select></div>
     <div class="fg-full"><label class="fl">Lié à un contrat CRM</label>
-      <select id="idev"><option value="">— Aucun contrat lié —</option>${crmOpts}</select></div>
+      <select id="idev"><option value="">· Aucun contrat lié ·</option>${crmOpts}</select></div>
     <div><label class="fl">Date *</label><input type="date" id="idate" value="${p?.dateIntervention||datePrefill||new Date().toISOString().slice(0,10)}"></div>
     <div><label class="fl">Heure</label><input type="time" id="iheure" value="${p?.heureDebut||"08:00"}"></div>
     <div class="fg-full"><label class="fl">Technicien assigné</label>
       <select id="iper" onchange="onPersonnelChange(this.value)">
-        <option value="">— Non assigné —</option>
+        <option value="">· Non assigné ·</option>
         ${membres.filter(m=>m.statut!=="inactif").map(m=>`<option value="${m.id}" ${(p?.personnelId||persPrefill)===m.id?"selected":""}>${[m.prenom,m.nom].filter(Boolean).join(" ")} · ${m.poste}${m.statut==="prestataire"?" (prestataire)":""}</option>`).join("")}
       </select></div>
     <div id="imontant-wrap" style="${(()=>{const sel=p?.personnelId||persPrefill;const m=membres.find(m=>m.id===sel);return m?.statut==="prestataire"?"":"opacity:.45;"})()}">
-      <label class="fl">Coût prestataire (FCFA) <span style="font-weight:400;color:var(--text-3);">— laisser 0 si salarié</span></label>
+      <label class="fl">Coût prestataire (FCFA) <span style="font-weight:400;color:var(--text-3);">· laisser 0 si salarié</span></label>
       <input type="number" id="imontant" min="0" value="${p?.montantPrestataire||0}" placeholder="0">
     </div>
     <div><label class="fl">Statut</label>

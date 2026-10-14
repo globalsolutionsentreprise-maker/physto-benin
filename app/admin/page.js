@@ -614,7 +614,7 @@ export default function Admin() {
     var lbl = { display: 'block', fontSize: '11px', fontWeight: '700', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }
     var isForm = m.mode === 'form'
     var isEntree = m.mode === 'entree'
-    var titre = isForm ? (m.produit ? '✏️ Modifier ' + m.produit.nom : '📦 Nouveau produit') : (isEntree ? '➕ Entrée stock — ' + m.produit.nom : '➖ Sortie stock — ' + m.produit.nom)
+    var titre = isForm ? (m.produit ? '✏️ Modifier ' + m.produit.nom : '📦 Nouveau produit') : (isEntree ? '➕ Entrée stock · ' + m.produit.nom : '➖ Sortie stock · ' + m.produit.nom)
     var couleur = isEntree ? '#1a6b38' : '#991b1b'
     return React.createElement('div', {
       style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' },
@@ -661,10 +661,10 @@ export default function Admin() {
                   onChange: function(e) { setStockForm(function(prev) { return Object.assign({}, prev, { clientId: e.target.value }) }) },
                   style: inp
                 },
-                  React.createElement('option', { value: '' }, '— Sortie générale (pas chez un client) —'),
+                  React.createElement('option', { value: '' }, '· Sortie générale (pas chez un client) ·'),
                   clientsStock.slice().sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||'') }).map(function(c) {
                     var nom = [c.prenom, c.nom].filter(Boolean).join(' ') || c.entreprise || 'Client'
-                    return React.createElement('option', { key: c.id, value: c.id }, nom + (c.entreprise ? ' — ' + c.entreprise : ''))
+                    return React.createElement('option', { key: c.id, value: c.id }, nom + (c.entreprise ? ' · ' + c.entreprise : ''))
                   })
                 )
               ),
@@ -729,7 +729,7 @@ export default function Admin() {
           <div>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#d4a920" }}>Back Office Phyto Bénin</div>
             <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>
-              {chargement ? "Chargement..." : "Connecte a Supabase — Modifications en temps reel"}
+              {chargement ? "Chargement..." : "Connecte a Supabase · Modifications en temps reel"}
             </div>
           </div>
         </div>
@@ -979,7 +979,7 @@ export default function Admin() {
                         const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
                         setNouvelArticle({ categorie: a.categorie || "", titre: a.titre || "", resume: a.resume || "", contenu: a.contenu || "", date: today, lecture: a.lecture || "5 min", vedette: false })
                         setSujetArticle("")
-                        setArticleGenMsg("✅ Article généré — vérifiez et cliquez Publier")
+                        setArticleGenMsg("✅ Article généré · vérifiez et cliquez Publier")
                       } catch(e) { setArticleGenMsg("❌ Erreur réseau") }
                       setGeneratingArticle(false)
                     }}
@@ -1122,7 +1122,7 @@ export default function Admin() {
 
           {onglet === "crm" && (
             <div>
-              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM — Clients & Devis</h2>
+              <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM · Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
               <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="prospection" />
             </div>
@@ -1376,7 +1376,7 @@ export default function Admin() {
 }
 
 // ══════════════════════════════════════════════════
-// COMPOSANT SECTION CLIENTS & DEVIS — VERSION COMPLÈTE
+// COMPOSANT SECTION CLIENTS & DEVIS · VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
 function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const COMMISSION_FEDAPAY = 0.0185
@@ -1618,7 +1618,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const lbl = { display: "block", fontSize: "11px", fontWeight: "700", color: "#888", marginBottom: "6px", textTransform: "uppercase" }
 
   // Au montage : on déclenche d'abord l'expiration serveur (get_clients la lance),
-  // puis on charge les listes — ainsi devisList reflète les affaires expirées.
+  // puis on charge les listes · ainsi devisList reflète les affaires expirées.
   React.useEffect(function() {
     (async function() {
       try {
@@ -1860,7 +1860,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!formClient.nom) { setMsg("Le nom est obligatoire."); return }
     setSubmittingClient(true); setMsg("")
     // Évite le "doublon" d'affichage : si l'entreprise est identique au nom, on la
-    // vide — sinon le rendu « nom — entreprise » affiche deux fois la même valeur.
+    // vide · sinon le rendu « nom · entreprise » affiche deux fois la même valeur.
     var entRedondante = (formClient.entreprise || "").trim().toLowerCase() === (formClient.nom || "").trim().toLowerCase()
     var formClientNorm = Object.assign({}, formClient, { entreprise: entRedondante ? "" : formClient.entreprise })
     if (editingClient) {
@@ -2104,7 +2104,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   async function validerLivraison(id) {
     setValidating(id)
     await db.from("devis").update({ statut: "en_cours" }).eq("id", id)
-    setMsg("✓ Livraison validée — le client peut payer le solde")
+    setMsg("✓ Livraison validée · le client peut payer le solde")
     await charger(); setValidating(null)
   }
 
@@ -2159,9 +2159,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var pf = (prev && prev.form_data) || {}
     var pft = (prevT && prevT.form_data) || {}
     // Site (établissement) : ses infos priment sur celles du client. Nom composé
-    // « Client — Nom du site » quand le devis porte un établissement.
+    // « Client · Nom du site » quand le devis porte un établissement.
     var baseEnt = (cl && cl.entreprise) ? cl.entreprise : [(cl && cl.prenom) || '', (cl && cl.nom) || ''].filter(Boolean).join(' ')
-    var entSite = d.etablissement_nom ? (baseEnt ? baseEnt + ' — ' + d.etablissement_nom : d.etablissement_nom) : baseEnt
+    var entSite = d.etablissement_nom ? (baseEnt ? baseEnt + ' · ' + d.etablissement_nom : d.etablissement_nom) : baseEnt
     setCertForm({
       ref: nextCertRef(type),
       dateJour: jour,
@@ -2281,10 +2281,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f8f7f4', borderRadius: '8px', padding: '16px', marginBottom: '16px' } },
-          React.createElement('label', { style: lbl2 }, type === 'double' ? 'Matières actives — Désinsectisation' : 'Matières actives utilisées'),
+          React.createElement('label', { style: lbl2 }, type === 'double' ? 'Matières actives · Désinsectisation' : 'Matières actives utilisées'),
           React.createElement('textarea', { value: certForm.matieres || '', onChange: function(e) { updateForm('matieres', e.target.value) }, placeholder: 'Ex: IMPERA 300 CS\nROCOGEL', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) }),
           type === 'double' && React.createElement('div', { style: { marginTop: '12px' } },
-            React.createElement('label', { style: lbl2 }, 'Matières actives — Dératisation'),
+            React.createElement('label', { style: lbl2 }, 'Matières actives · Dératisation'),
             React.createElement('textarea', { value: certForm.matieresDerat || '', onChange: function(e) { updateForm('matieresDerat', e.target.value) }, placeholder: 'Ex: VERTOX', style: Object.assign({}, inp2, { minHeight: '80px', resize: 'vertical' }) })
           )
         ),
@@ -2571,7 +2571,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setGeneratingRapportVisite(true)
     setRapportVisiteErreurIA(null)
     var { devis, client } = rapportVisiteModal
-    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
     try {
       var totalB64V = (audiosVisite || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
       if (totalB64V > AUDIO_MAX_TOTAL_B64) {
@@ -2594,7 +2594,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var data = null
       try { data = await res.json() } catch (_) { data = null }
       if (!res.ok || !data || !data.success) {
-        setRapportVisiteErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
+        setRapportVisiteErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') · notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportVisiteForm(function(prev) {
@@ -2658,7 +2658,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         if (!dejaPlanning) {
           var techNom = rapportVisiteForm.technicien.split(',')[0].trim()
           var techPers = personnelAdmin.find(function(p) { return p.nom === techNom })
-          var clientNomStr = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+          var clientNomStr = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
           var { data: { session: sess } } = await db.auth.getSession()
           await fetch('/api/rh-data', {
             method: 'POST',
@@ -2672,7 +2672,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               statut: 'planifiee',
               clientNom: clientNomStr,
               adresse: rapportVisiteForm.adresseSite || '',
-              notes: 'Rapport de visite — ' + (devis.prestation || ''),
+              notes: 'Rapport de visite · ' + (devis.prestation || ''),
               montantPrestataire: 0
             })
           })
@@ -2681,7 +2681,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }
     await charger()
     setSavingRapportVisite(false)
-    setMsg('✓ Rapport de visite enregistré — mission ajoutée au planning')
+    setMsg('✓ Rapport de visite enregistré · mission ajoutée au planning')
   }
 
   async function supprimerRapportVisite(id) {
@@ -2711,7 +2711,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, '🔍 Rapport de visite'),
-            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '') + ' · ' + devis.prestation)
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '') + ' · ' + devis.prestation)
           ),
           React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
         ),
@@ -2729,7 +2729,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   onChange: function(e) { upd('technicien', e.target.value) },
                   style: inp2
                 },
-                React.createElement('option', { value: '' }, '— Choisir un technicien —'),
+                React.createElement('option', { value: '' }, '· Choisir un technicien ·'),
                 personnelAdmin.map(function(m) {
                   return React.createElement('option', { key: m.id, value: m.nom }, m.nom + (m.poste ? ' · ' + m.poste : ''))
                 })
@@ -2808,7 +2808,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ) : React.createElement(React.Fragment, null,
 
           React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '12px', color: '#166534', fontWeight: '600' } },
-            '✅ Rapport généré par l\'IA — vérifiez et modifiez si nécessaire avant d\'enregistrer'
+            '✅ Rapport généré par l\'IA · vérifiez et modifiez si nécessaire avant d\'enregistrer'
           ),
 
           React.createElement('div', { style: section },
@@ -2894,7 +2894,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                         var dates = rapportVisiteForm.datesProposees || []
                         upd('datesProposees', selected ? dates.filter(function(x) { return x !== d.dateFr }) : dates.concat(d.dateFr))
                       },
-                      title: d.label + ' — ' + d.rain + 'mm · ' + d.tempMax + '°C',
+                      title: d.label + ' · ' + d.rain + 'mm · ' + d.tempMax + '°C',
                       style: { background: bg, color: color, border: '1px solid ' + border, borderRadius: '8px', padding: '6px 8px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', minWidth: '82px', lineHeight: '1.4' }
                     },
                       React.createElement('div', { style: { fontWeight: '700' } }, d.icon + ' ' + d.dateFr),
@@ -2930,7 +2930,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  var PRODUITS_DEFAUT_INTERV = 'Insecticide : IMPERA 300 CS — traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL — application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX — mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.'
+  var PRODUITS_DEFAUT_INTERV = 'Insecticide : IMPERA 300 CS · traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL · application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX · mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.'
 
   function ouvrirNouveauRapportInterv(devis, client) {
     var technicienStr = ''
@@ -2983,7 +2983,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setGeneratingRapportInterv(true)
     setRapportIntervErreurIA(null)
     var { devis, client } = rapportIntervModal
-    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
+    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
     try {
       var totalB64I = (audiosInterv || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
       if (totalB64I > AUDIO_MAX_TOTAL_B64) {
@@ -3006,7 +3006,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var data = null
       try { data = await res.json() } catch (_) { data = null }
       if (!res.ok || !data || !data.success) {
-        setRapportIntervErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') — notes vocales trop volumineuses ?'))
+        setRapportIntervErreurIA((data && data.error) || ('Erreur serveur (' + res.status + ') · notes vocales trop volumineuses ?'))
       } else {
         var r = data.rapport
         setRapportIntervForm(function(prev) {
@@ -3096,7 +3096,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, "📊 Rapport d'intervention"),
-            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '') + ' · ' + devis.prestation)
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '') + ' · ' + devis.prestation)
           ),
           React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
         ),
@@ -3180,7 +3180,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
           React.createElement('div', { style: Object.assign({}, section, { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '14px' }) },
             React.createElement('label', { style: Object.assign({}, lbl2, { color: '#166534' }) }, '🧪 Produits utilisés'),
-            React.createElement('p', { style: { fontSize: '11px', color: '#166534', marginBottom: '8px' } }, 'Pré-rempli avec vos produits homologués — modifiable si besoin.'),
+            React.createElement('p', { style: { fontSize: '11px', color: '#166534', marginBottom: '8px' } }, 'Pré-rempli avec vos produits homologués · modifiable si besoin.'),
             React.createElement('textarea', { value: rapportIntervForm.produitsUtilises || '', onChange: function(e) { upd('produitsUtilises', e.target.value) }, rows: 5, style: Object.assign({}, inp2, { resize: 'vertical', backgroundColor: '#fff' }) })
           ),
 
@@ -3198,7 +3198,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ) : React.createElement(React.Fragment, null,
 
           React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '12px', color: '#166534', fontWeight: '600' } },
-            '✅ Rapport généré par l\'IA — vérifiez et modifiez si nécessaire avant d\'enregistrer'
+            '✅ Rapport généré par l\'IA · vérifiez et modifiez si nécessaire avant d\'enregistrer'
           ),
 
           React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
@@ -3365,7 +3365,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         : buildFichePassageHtml(ficheForm, ficheModal.client, ficheNumero, mediasSignes)
       ouvrirDocImprimable(html, 920, 1100)
       setFicheModal(null)
-      setMsg(isEditing ? '✓ Fiche mise à jour — imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée — imprimez en PDF')
+      setMsg(isEditing ? '✓ Fiche mise à jour · imprimez en PDF' : '✓ Fiche ' + ficheNumero + ' créée · imprimez en PDF')
     } catch(e) { setMsg('Erreur: ' + e.message) }
     setSavingFiche(false)
   }
@@ -3424,7 +3424,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           // Client pré-rempli (lecture seule)
           React.createElement('div', { style: { background: '#f7f7f5', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#444' } },
             React.createElement('span', { style: { fontWeight: '700', color: '#0a2e1a' } }, 'Client : '),
-            (c.prenom || '') + ' ' + c.nom + (c.entreprise ? ' — ' + c.entreprise : '') + (c.telephone ? ' · ' + c.telephone : '')
+            (c.prenom || '') + ' ' + c.nom + (c.entreprise ? ' · ' + c.entreprise : '') + (c.telephone ? ' · ' + c.telephone : '')
           ),
 
           // Adresse / Tel / Mob
@@ -3518,7 +3518,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           // Durée (fiche de passage uniquement)
           !estControle && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
             React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, "Durée — début"),
+              React.createElement('label', { style: lbl2 }, "Durée · début"),
               React.createElement('input', { value: ficheForm.dureeDebut || '', onChange: function(e) { upd('dureeDebut', e.target.value) }, placeholder: 'Ex: 08h00', style: inp2 })
             ),
             React.createElement('div', null,
@@ -3575,7 +3575,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           // Superviseur
           React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' } },
             React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, 'Superviseur GSE — Nom & Prénom'),
+              React.createElement('label', { style: lbl2 }, 'Superviseur GSE · Nom & Prénom'),
               React.createElement('input', { value: ficheForm.superviseurNom || '', onChange: function(e) { upd('superviseurNom', e.target.value) }, style: inp2 })
             ),
             React.createElement('div', null,
@@ -3661,8 +3661,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           var montP = montantLigne(l)
           return "<tr>" +
             "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;color:#0a2e1a;font-weight:600\">" + (l.prestation || (isForfait ? "Forfait" : "")) + "</td>" +
-            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#555\">" + (l.secteur ? l.secteur : "—") + "</td>" +
-            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (isForfait ? "—" : (sup ? sup.toLocaleString("fr-FR") + " m²" : "—")) + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#555\">" + (l.secteur ? l.secteur : "·") + "</td>" +
+            "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:center\">" + (isForfait ? "·" : (sup ? sup.toLocaleString("fr-FR") + " m²" : "·")) + "</td>" +
             "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:12px;color:#888;text-align:right\">" + (isForfait ? "Forfait" : pm2.toLocaleString("fr-FR") + " FCFA/m²") + "</td>" +
             "<td style=\"padding:8px 10px;border-bottom:1px solid #f0ede8;font-size:13px;font-weight:700;color:#0a2e1a;text-align:right\">" + montP.toLocaleString("fr-FR") + " FCFA</td>" +
             "</tr>"
@@ -3728,7 +3728,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           d.remise_bienvenue > 0 && React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 7px", borderRadius: "20px" } }, "−10%")
         ),
         React.createElement("div", { style: { fontSize: "14px", fontWeight: "600", color: "#0a2e1a", marginBottom: "2px" } }, d.prestation),
-        cl && React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, [(cl.prenom || ""), cl.nom].filter(Boolean).join(" ") + (cl.entreprise ? " — " + cl.entreprise : "")),
+        cl && React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, [(cl.prenom || ""), cl.nom].filter(Boolean).join(" ") + (cl.entreprise ? " · " + cl.entreprise : "")),
         d.statut === "modification_demandee" && React.createElement("div", { style: { marginTop: "6px", padding: "6px 10px", backgroundColor: "#faf5ff", border: "1px solid #e9d5ff", borderRadius: "6px", fontSize: "11px", color: "#6b21a8" } },
           React.createElement("strong", null, "⚠ Modification : "), d.notes_modification
         )
@@ -3778,7 +3778,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  // Export CSV du pipeline — récupère le tableau aplati depuis le GET par défaut de
+  // Export CSV du pipeline · récupère le tableau aplati depuis le GET par défaut de
   // /api/crm-data (calculs centralisés côté serveur, aucune duplication de logique).
   async function exporterCSV() {
     try {
@@ -3828,7 +3828,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   var FREQ_MOIS = { mensuelle: 1, bimestrielle: 2, trimestrielle: 3, semestrielle: 6, annuelle: 12 }
   var FREQ_LABEL = { mensuelle: "Mensuelle", bimestrielle: "Bimestrielle", trimestrielle: "Trimestrielle", semestrielle: "Semestrielle", annuelle: "Annuelle" }
   function finFmt(n) { return Math.round(n || 0).toLocaleString("fr-FR") }
-  function finFmtD(d) { return d ? new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+  function finFmtD(d) { return d ? new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "·" }
   function finFreqMois(k) { return FREQ_MOIS[k] || 3 }
   function finInterventionDates(c) {
     if (c.typeContrat !== "contrat" || !c.dateDebutContrat) return []
@@ -3938,7 +3938,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var idx = ETAPE_IDS.indexOf(newEtape)
     var crm = ETAPE_CRM[newEtape] || "contact"
     var parcours = idx >= 0 ? parcoursForEtape(newEtape) : {}
-    var motifVal = newEtape === "perdu" ? (motif || "Non précisé") : "—"
+    var motifVal = newEtape === "perdu" ? (motif || "Non précisé") : "·"
     // Optimiste : colUnifiee lit devisMap[c.id].etape → MAJ devisList d'abord.
     setDevisList(function(prev) { return (prev || []).map(function(d) { return d.id === devisId ? Object.assign({}, d, { etape: newEtape, parcours: parcours, crm_statut: crm }) : d }) })
     setFinData(function(prev) {
@@ -3969,7 +3969,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setPerduModal(null)
   }
   // Lead (formulaire web) marqué perdu : sort de la colonne Prospect (traité) en
-  // conservant le motif — visible ensuite dans « Voir les leads traités ».
+  // conservant le motif · visible ensuite dans « Voir les leads traités ».
   async function marquerLeadPerdu(leadId, motif) {
     setLeads(function(prev) { return prev.filter(function(l) { return l.id !== leadId }) })
     setMsg("Lead marqué perdu : " + (motif || "Non précisé"))
@@ -4072,10 +4072,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           )
         ),
         e("div", { style: { marginBottom: "12px" } },
-          e("label", { style: lblS }, "Affaire liée (optionnel — rattache la dépense à un devis)"),
+          e("label", { style: lblS }, "Affaire liée (optionnel · rattache la dépense à un devis)"),
           e("select", { value: depForm.devisId || "", onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { devisId: v }) }) }, style: Object.assign({}, inpS, { cursor: "pointer" }) },
-            e("option", { value: "" }, "— Dépense générale (non rattachée) —"),
-            (finData.clients || []).map(function(c) { return e("option", { key: c.id, value: c.id }, c.client + " — " + finFmt(c.montantDevis) + " FCFA") })
+            e("option", { value: "" }, "· Dépense générale (non rattachée) ·"),
+            (finData.clients || []).map(function(c) { return e("option", { key: c.id, value: c.id }, c.client + " · " + finFmt(c.montantDevis) + " FCFA") })
           )
         ),
         depForm.categorie === "prestataire" ? (function() {
@@ -4125,7 +4125,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var totalInvest = tdInvestAff + tdgInvest
     var investRows = []
     cls.forEach(function(c) { (c.depensesItems || []).forEach(function(i) { if (i.categorie === "investissement") investRows.push({ client: c.client, libelle: i.libelle, montant: i.montant || 0, date: i.date }) }) })
-    depGlob.forEach(function(d) { if (d.categorie === "investissement") investRows.push({ client: "— (général)", libelle: d.libelle, montant: d.montant || 0, date: d.date }) })
+    depGlob.forEach(function(d) { if (d.categorie === "investissement") investRows.push({ client: "· (général)", libelle: d.libelle, montant: d.montant || 0, date: d.date }) })
     var tdc = cls.reduce(function(s, c) { return s + (c.depenses || 0) }, 0) - tdInvestAff
     var tdp = cls.reduce(function(s, c) { return s + (c.depensesPrestataires || 0) }, 0)
     var tdg = depGlob.reduce(function(s, d) { return s + (d.montant || 0) }, 0) - tdgInvest
@@ -4153,7 +4153,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var contrats = cls.filter(function(c) { return c.typeContrat === "contrat" && c.statut !== "echec" })
     var recurringBlock
     if (!contrats.length) {
-      recurringBlock = e("div", { style: { padding: "18px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", color: "#888", textAlign: "center", fontSize: "13px" } }, "Aucun contrat récurrent — ouvrez une fiche client et choisissez « Contrat récurrent ».")
+      recurringBlock = e("div", { style: { padding: "18px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", color: "#888", textAlign: "center", fontSize: "13px" } }, "Aucun contrat récurrent · ouvrez une fiche client et choisissez « Contrat récurrent ».")
     } else {
       var today = new Date()
       var months = []
@@ -4188,7 +4188,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               }),
               e("tr", { style: { fontWeight: "600", borderTop: "2px solid #e0ddd6" } },
                 e("td", { style: Object.assign({}, tdS, { color: "#555" }), colSpan: 3 }, "CA récurrent mensuel"),
-                mCA.map(function(v, idx) { return e("td", { key: idx, style: Object.assign({}, tdS, { textAlign: "center", color: v > 0 ? "#1a6b38" : "#ccc" }) }, v > 0 ? finFmt(v) : "—") })
+                mCA.map(function(v, idx) { return e("td", { key: idx, style: Object.assign({}, tdS, { textAlign: "center", color: v > 0 ? "#1a6b38" : "#ccc" }) }, v > 0 ? finFmt(v) : "·") })
               )
             )
           )
@@ -4209,7 +4209,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("div", { style: { background: "#f0efe9", borderRadius: "5px", height: "18px", overflow: "hidden", marginBottom: "6px" } },
             e("div", { style: { width: Math.min(objPct, 100) + "%", background: objPct >= 100 ? "#1D9E75" : "#185FA5", height: "100%" } })
           ),
-          e("div", { style: { fontSize: "12px", color: "#555" } }, "Facturé " + finFmt(tfa) + " FCFA — atteint à ", e("b", { style: { color: objPct >= 100 ? "#1D9E75" : "#185FA5" } }, objPct + "%"))
+          e("div", { style: { fontSize: "12px", color: "#555" } }, "Facturé " + finFmt(tfa) + " FCFA · atteint à ", e("b", { style: { color: objPct >= 100 ? "#1D9E75" : "#185FA5" } }, objPct + "%"))
         )
       : e("div", { style: { background: "#fafaf8", border: "1px dashed #d8d5cc", borderRadius: "10px", padding: "14px 18px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
           e("span", { style: { fontSize: "12px", color: "#888" } }, "Aucun objectif de chiffre d'affaires défini."),
@@ -4238,10 +4238,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, c.client),
               e("td", { style: tdS }, e("span", { style: { background: meta.bg, color: meta.tc, borderRadius: "20px", padding: "2px 8px", fontSize: "11px", fontWeight: "600" } }, meta.label)),
               e("td", { style: tdS }, finFmt(c.montantDevis)),
-              e("td", { style: Object.assign({}, tdS, { color: c.montantFacture ? "#1D9E75" : "#bbb" }) }, c.montantFacture ? finFmt(c.montantFacture) : "—"),
-              e("td", { style: Object.assign({}, tdS, { color: c.paiementsRecus ? "#1D9E75" : "#bbb" }) }, c.paiementsRecus ? finFmt(c.paiementsRecus) : "—"),
-              e("td", { style: Object.assign({}, tdS, { color: depTotal ? "#E24B4A" : "#bbb" }) }, depTotal ? finFmt(depTotal) : "—"),
-              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#bbb" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
+              e("td", { style: Object.assign({}, tdS, { color: c.montantFacture ? "#1D9E75" : "#bbb" }) }, c.montantFacture ? finFmt(c.montantFacture) : "·"),
+              e("td", { style: Object.assign({}, tdS, { color: c.paiementsRecus ? "#1D9E75" : "#bbb" }) }, c.paiementsRecus ? finFmt(c.paiementsRecus) : "·"),
+              e("td", { style: Object.assign({}, tdS, { color: depTotal ? "#E24B4A" : "#bbb" }) }, depTotal ? finFmt(depTotal) : "·"),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#bbb" }) }, res === 0 ? "·" : (res > 0 ? "+" : "") + finFmt(res))
             )
           }))
         )
@@ -4335,7 +4335,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
-  // ── G1a : Vue Analyse — KPIs analytiques + insights (hors graphes) ──────────
+  // ── G1a : Vue Analyse · KPIs analytiques + insights (hors graphes) ──────────
   function renderVueAnalyse() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement de l'analyse…")
@@ -4358,7 +4358,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var delaiAll = cls.filter(function(c) { return c.dateContact && c.dateDevis })
     var delaiMoyenContact = delaiAll.length ? Math.round(delaiAll.reduce(function(s, c) { return s + (new Date(c.dateDevis) - new Date(c.dateContact)) / 864e5 }, 0) / delaiAll.length) : null
     var bySrc = {}
-    cls.forEach(function(c) { var k = c.provenance || "—"; if (!bySrc[k]) bySrc[k] = { count: 0, montant: 0, conv: 0 }; bySrc[k].count++; bySrc[k].montant += (c.montantDevis || 0); if (c.statut === "converti") bySrc[k].conv++ })
+    cls.forEach(function(c) { var k = c.provenance || "·"; if (!bySrc[k]) bySrc[k] = { count: 0, montant: 0, conv: 0 }; bySrc[k].count++; bySrc[k].montant += (c.montantDevis || 0); if (c.statut === "converti") bySrc[k].conv++ })
     var srcList = Object.entries(bySrc).sort(function(a, b) { return b[1].montant - a[1].montant })
     var maxSrcMontant = Math.max.apply(null, srcList.map(function(s) { return s[1].montant }).concat([1]))
     var byPrest = {}
@@ -4375,10 +4375,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var stCounts = stOrder.map(function(k) { var meta = ST_META[k] || {}; var arr = cls.filter(function(c) { return c.statut === k }); return { key: k, label: meta.label, bg: meta.bg, tc: meta.tc, count: arr.length, montant: arr.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0) } })
     var maxCount = Math.max.apply(null, stCounts.map(function(s) { return s.count }).concat([1]))
     var byMotif = {}
-    echecs.forEach(function(c) { var k = c.motifEchec || "—"; if (!byMotif[k]) byMotif[k] = 0; byMotif[k]++ })
+    echecs.forEach(function(c) { var k = c.motifEchec || "·"; if (!byMotif[k]) byMotif[k] = 0; byMotif[k]++ })
     // Perdues APRÈS visite/intervention : coûteuses (déplacement, temps technicien
     // engagés pour rien). Dérivé de la présence d'un artefact terrain (rapport de
-    // visite, fiche de passage, intervention planifiée, certificat) lié au devis —
+    // visite, fiche de passage, intervention planifiée, certificat) lié au devis ·
     // ces lignes survivent au passage en « perdu » (tables séparées).
     function aEuVisite(c) {
       return (rapportsVisite || []).some(function(r) { return r.devis_id === c.id }) ||
@@ -4392,7 +4392,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     // ne pas fausser le taux de conversion. Un lead perdu = traité avec un motif.
     var leadsPerdus = (leadsTraites || []).filter(function(l) { return l.motif })
     var byMotifLead = {}
-    leadsPerdus.forEach(function(l) { var k = l.motif || "—"; byMotifLead[k] = (byMotifLead[k] || 0) + 1 })
+    leadsPerdus.forEach(function(l) { var k = l.motif || "·"; byMotifLead[k] = (byMotifLead[k] || 0) + 1 })
     var depCatTotals = { transport: 0, produits: 0, materiels: 0, autre: 0 }
     cls.forEach(function(c) { (c.depensesItems || []).forEach(function(i) { var k = i.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += i.montant || 0 }) })
     depGlob.forEach(function(d) { var k = d.categorie || "autre"; if (depCatTotals[k] !== undefined) depCatTotals[k] += d.montant || 0 })
@@ -4403,13 +4403,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var insights = []
     if (txConv < 20) insights.push({ type: "warn", ico: "⚠️", title: "Taux de conversion : " + txConv + "%", txt: "Seulement " + conv.length + " client" + (conv.length > 1 ? "s" : "") + " converti" + (conv.length > 1 ? "s" : "") + " sur " + total + ". Un taux < 20 % indique des leviers à activer : relances, révision tarifaire ou ciblage." })
     else insights.push({ type: "good", ico: "✅", title: "Bon taux de conversion : " + txConv + "%", txt: conv.length + " client" + (conv.length > 1 ? "s" : "") + " converti" + (conv.length > 1 ? "s" : "") + " sur " + total + ". Capitalisez sur les canaux et profils qui fonctionnent." })
-    if (concPct >= 60) insights.push({ type: "warn", ico: "⚡", title: "Concentration élevée : " + concPct + "% sur 2 clients", txt: "Les 2 plus gros dossiers représentent " + concPct + "% de votre pipeline. Un risque de dépendance — diversifier le portefeuille." })
+    if (concPct >= 60) insights.push({ type: "warn", ico: "⚡", title: "Concentration élevée : " + concPct + "% sur 2 clients", txt: "Les 2 plus gros dossiers représentent " + concPct + "% de votre pipeline. Un risque de dépendance · diversifier le portefeuille." })
     var bestSrc = srcList[0]
     if (bestSrc) insights.push({ type: "info", ico: "📡", title: "Meilleur canal : " + bestSrc[0], txt: "Source la plus productive avec " + finFmt(bestSrc[1].montant) + " FCFA en devis et " + bestSrc[1].count + " prospect" + (bestSrc[1].count > 1 ? "s" : "") + ". Renforcer les actions sur ce canal." })
     if (actifs.length >= 4) insights.push({ type: "info", ico: "🔄", title: actifs.length + " dossiers actifs en cours", txt: "Pipeline en cours estimé à " + finFmt(pipeW) + " FCFA (valeur pondérée). Prioriser les relances sur les dossiers \"En attente\"." })
     if (delaiDF !== null) insights.push({ type: "good", ico: "⏱️", title: "Délai devis → facture : " + delaiDF + " jour" + (delaiDF > 1 ? "s" : ""), txt: "Cycle court sur les clients convertis. Objectif : maintenir sous 7 jours pour optimiser la trésorerie." })
     if (objectifCA && progPct < 50) insights.push({ type: "warn", ico: "🎯", title: "Progression objectif : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA encaissés sur un objectif de " + finFmt(objectifCA) + " FCFA. Il reste " + finFmt(objectifCA - totalEncaisse) + " FCFA à atteindre." })
-    else if (objectifCA && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Mi-objectif atteint : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA sur " + finFmt(objectifCA) + " FCFA — bonne trajectoire." })
+    else if (objectifCA && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Mi-objectif atteint : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA sur " + finFmt(objectifCA) + " FCFA · bonne trajectoire." })
     // Alertes d'encaissement : un passage de contrat dû/proche et non réglé.
     cls.filter(function(c) { return c.typeContrat === "contrat" || c.dateDebutContrat }).forEach(function(c) {
       var dv = devisList.find(function(x) { return x.id === c.id })
@@ -4437,7 +4437,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     // G1b : graphes recharts
     var donutStData = stCounts.filter(function(s) { return s.montant > 0 }).map(function(s) { return { name: s.label, value: s.montant } })
     var prestDonutData = Object.entries(byPrest).sort(function(a, b) { return b[1].montant - a[1].montant }).map(function(entry) { return { name: entry[0], value: entry[1].montant } })
-    var segBarData = [{ name: "< 50 000", value: seg.petit }, { name: "50k–200k", value: seg.moyen }, { name: "> 200 000", value: seg.grand }]
+    var segBarData = [{ name: "< 50 000", value: seg.petit }, { name: "50k·200k", value: seg.moyen }, { name: "> 200 000", value: seg.grand }]
     var segColors = ["#5DCAA5", "#185FA5", "#BA7517"]
     function chartDonut(data) {
       if (!data.length) return null
@@ -4485,7 +4485,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         anKpi(txConv + "%", "Taux de conversion", conv.length + "/" + total + " clients", "#1D9E75"),
         anKpi(finFmt(pipeW), "Pipeline pondéré (FCFA)", "Probabilité réelle", "#185FA5"),
         anKpi(txRecouvr + "%", "Taux de recouvrement", finFmt(totalEncaisse) + " / " + finFmt(totalFacture) + " FCFA", txRecouvr >= 100 ? "#1D9E75" : "#BA7517"),
-        anKpi(delaiDF !== null ? delaiDF + "j" : "—", "Délai devis → facture", delaiMoyenContact !== null ? "Contact→devis : " + delaiMoyenContact + "j" : "Sur clients convertis", delaiDF === null ? "#999" : "#1D9E75"),
+        anKpi(delaiDF !== null ? delaiDF + "j" : "·", "Délai devis → facture", delaiMoyenContact !== null ? "Contact→devis : " + delaiMoyenContact + "j" : "Sur clients convertis", delaiDF === null ? "#999" : "#1D9E75"),
         anKpi(txEchec + "%", "Taux d'échec", echecs.length + " dossier" + (echecs.length > 1 ? "s" : "") + " perdu" + (echecs.length > 1 ? "s" : ""), "#E24B4A")
       ),
       // Insights
@@ -4530,7 +4530,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       grid2(
         anCard("Segmentation par taille de devis", e("div", null,
           chartSegBar(),
-          [{ lbl: "Petits (< 50 000 F)", n: seg.petit, m: segM.petit, c: "#5DCAA5" }, { lbl: "Moyens (50k–200k F)", n: seg.moyen, m: segM.moyen, c: "#185FA5" }, { lbl: "Grands (> 200 000 F)", n: seg.grand, m: segM.grand, c: "#BA7517" }].map(function(s, i) {
+          [{ lbl: "Petits (< 50 000 F)", n: seg.petit, m: segM.petit, c: "#5DCAA5" }, { lbl: "Moyens (50k·200k F)", n: seg.moyen, m: segM.moyen, c: "#185FA5" }, { lbl: "Grands (> 200 000 F)", n: seg.grand, m: segM.grand, c: "#BA7517" }].map(function(s, i) {
             return e("div", { key: i, style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" } },
               e("div", { style: { fontSize: "11px", width: "130px", flexShrink: 0 } }, s.lbl),
               e("div", { style: { fontSize: "13px", fontWeight: "700", width: "24px" } }, s.n),
@@ -4568,7 +4568,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             )
         )
       ),
-      // Leads perdus (formulaire web) — distinct des devis, ne compte pas dans le funnel
+      // Leads perdus (formulaire web) · distinct des devis, ne compte pas dans le funnel
       e("div", { style: secLblS }, "Leads perdus (formulaire web)"),
       e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px", marginBottom: "24px" } },
         leadsPerdus.length === 0
@@ -4612,14 +4612,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             return e("tr", { key: c.id || i },
               e("td", { style: Object.assign({}, tdS, { color: "#999", fontWeight: "600" }) }, i + 1),
               e("td", { style: Object.assign({}, tdS, { fontWeight: "500" }) }, c.client),
-              e("td", { style: Object.assign({}, tdS, { color: "#777" }) }, c.zone || "—"),
-              e("td", { style: tdS }, c.categorie || "—"),
+              e("td", { style: Object.assign({}, tdS, { color: "#777" }) }, c.zone || "·"),
+              e("td", { style: tdS }, c.categorie || "·"),
               e("td", { style: tdS }, c.provenance),
-              e("td", { style: Object.assign({}, tdS, { color: "#777", fontSize: "11px" }) }, c.typePrestation || "—"),
+              e("td", { style: Object.assign({}, tdS, { color: "#777", fontSize: "11px" }) }, c.typePrestation || "·"),
               e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }) }, finFmt(c.montantDevis)),
               e("td", { style: tdS }, e("span", { style: { background: meta.bg, color: meta.tc, borderRadius: "20px", padding: "2px 8px", fontSize: "11px", fontWeight: "600" } }, meta.label)),
-              e("td", { style: Object.assign({}, tdS, { textAlign: "center", color: "#999" }) }, cycleJ !== null ? cycleJ + "j" : "—"),
-              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#999" }) }, res === 0 ? "—" : (res > 0 ? "+" : "") + finFmt(res))
+              e("td", { style: Object.assign({}, tdS, { textAlign: "center", color: "#999" }) }, cycleJ !== null ? cycleJ + "j" : "·"),
+              e("td", { style: Object.assign({}, tdS, { fontWeight: "500", color: res > 0 ? "#1D9E75" : res < 0 ? "#E24B4A" : "#999" }) }, res === 0 ? "·" : (res > 0 ? "+" : "") + finFmt(res))
             )
           }))
         )
@@ -4675,7 +4675,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var p = Object.assign({}, rd.parcours || {})
       p.encaissement = { done: true, date: new Date().toISOString().split("T")[0] }
       saveParcours(c.id, p)
-      setMsg("✓ Encaissement enregistré — reflété dans les Finances")
+      setMsg("✓ Encaissement enregistré · reflété dans les Finances")
     }
 
     var byCol = {}
@@ -4683,7 +4683,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     cls.forEach(function(c) { var k = colUnifiee(c); if (byCol[k]) byCol[k].push(c) })
 
     // Export PDF de la liste des prospects (colonne Prospect + leads du formulaire
-    // web) pour Fabrice — suit le prospect au lieu de dérouler le kanban. Réutilise
+    // web) pour Fabrice · suit le prospect au lieu de dérouler le kanban. Réutilise
     // le pipeline d'impression des devis/certificats (blob → window.print → PDF).
     function imprimerProspects() {
       function esc(v) { return String(v == null ? "" : v).replace(/[&<>]/g, function(ch) { return ch === "&" ? "&amp;" : ch === "<" ? "&lt;" : "&gt;" }) }
@@ -4692,10 +4692,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         return "<tr>" +
           "<td " + td + ">" + (i + 1) + "</td>" +
           "<td " + td + "><strong>" + esc(c.client) + "</strong>" + (c.entreprise ? "<br><span style='color:#888'>" + esc(c.entreprise) + "</span>" : "") + "</td>" +
-          "<td " + td + ">" + esc(c.telephone || "—") + (c.email ? "<br><span style='color:#888'>" + esc(c.email) + "</span>" : "") + "</td>" +
-          "<td " + td + ">" + esc(c.provenance || "—") + "</td>" +
-          "<td " + td + ">" + esc(c.categorie || "—") + (c.typePrestation && c.typePrestation !== "—" ? "<br><span style='color:#888'>" + esc(c.typePrestation) + "</span>" : "") + "</td>" +
-          "<td " + td + ">" + esc(c.zone || "—") + "</td>" +
+          "<td " + td + ">" + esc(c.telephone || "·") + (c.email ? "<br><span style='color:#888'>" + esc(c.email) + "</span>" : "") + "</td>" +
+          "<td " + td + ">" + esc(c.provenance || "·") + "</td>" +
+          "<td " + td + ">" + esc(c.categorie || "·") + (c.typePrestation && c.typePrestation !== "·" ? "<br><span style='color:#888'>" + esc(c.typePrestation) + "</span>" : "") + "</td>" +
+          "<td " + td + ">" + esc(c.zone || "·") + "</td>" +
           "<td " + td + ">" + finFmtD(c.dateContact) + "</td>" +
           "<td " + td + ">" + esc(c.commentaire || "") + "</td>" +
           "</tr>"
@@ -4704,11 +4704,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         return "<tr style='background:#fffdf7'>" +
           "<td " + td + ">" + ((byCol.prospect || []).length + i + 1) + "</td>" +
           "<td " + td + "><strong>" + esc(lead.nom) + "</strong> <span style='font-size:10px;color:#8a6d1a'>🌱 lead</span></td>" +
-          "<td " + td + ">" + esc(lead.telephone || "—") + "</td>" +
+          "<td " + td + ">" + esc(lead.telephone || "·") + "</td>" +
           "<td " + td + ">Formulaire web</td>" +
-          "<td " + td + ">" + esc(lead.nuisible || "—") + "</td>" +
-          "<td " + td + ">" + esc(lead.ville || "—") + "</td>" +
-          "<td " + td + ">" + (lead.created_at ? finFmtD(lead.created_at.split("T")[0]) : "—") + "</td>" +
+          "<td " + td + ">" + esc(lead.nuisible || "·") + "</td>" +
+          "<td " + td + ">" + esc(lead.ville || "·") + "</td>" +
+          "<td " + td + ">" + (lead.created_at ? finFmtD(lead.created_at.split("T")[0]) : "·") + "</td>" +
           "<td " + td + "></td>" +
           "</tr>"
       })
@@ -4721,7 +4721,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         '<div class="page">' +
         gseHeader("LISTE DES PROSPECTS", new Date().toLocaleDateString("fr-FR")) +
         '<div class="body">' +
-        '<div style="font-size:12px;color:#555;margin-bottom:14px">' + total + ' prospect' + (total > 1 ? 's' : '') + ' à suivre — édité le ' + new Date().toLocaleDateString("fr-FR") + '</div>' +
+        '<div style="font-size:12px;color:#555;margin-bottom:14px">' + total + ' prospect' + (total > 1 ? 's' : '') + ' à suivre · édité le ' + new Date().toLocaleDateString("fr-FR") + '</div>' +
         '<table style="width:100%;border-collapse:collapse">' +
         '<thead><tr>' +
         '<th ' + th + '>N°</th><th ' + th + '>Prospect</th><th ' + th + '>Contact</th><th ' + th + '>Source</th><th ' + th + '>Catégorie / Prestation</th><th ' + th + '>Zone</th><th ' + th + '>1er contact</th><th ' + th + '>Commentaire</th>' +
@@ -4750,7 +4750,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       // Contrat d'entretien : la question se pose dès que l'affaire est convertie.
       // Le modal existait déjà mais n'était accessible que depuis le tableau de bord
       // client (renderVueDevisClient), une vue qu'on ne traverse pas en travaillant
-      // dans le pipeline — donc introuvable en pratique. Affiché à partir de
+      // dans le pipeline · donc introuvable en pratique. Affiché à partir de
       // « Converti » (et non uniquement dessus) : un devis déjà passé en Visite ou
       // en Intervention doit rester éligible.
       var devisCarte = devisMap[c.id]
@@ -4775,7 +4775,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           }, contratCarte ? "📄 Voir le contrat" : "📄 Proposer un contrat")
         : null
       // Mini-stepper : où en est le client dans le parcours (barres = étapes).
-      var motifPerte = estPerdu && c.motifEchec && c.motifEchec !== "—" ? c.motifEchec : null
+      var motifPerte = estPerdu && c.motifEchec && c.motifEchec !== "·" ? c.motifEchec : null
       var stepper = estPerdu
         ? e("div", { style: { marginBottom: "6px" } },
             e("span", { style: { display: "inline-block", fontSize: "10px", color: "#fff", background: "#991b1b", fontWeight: "700", borderRadius: "10px", padding: "1px 8px" } }, "❌ Perdu"),
@@ -4837,7 +4837,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         // pour que le board tienne à l'écran au lieu de faire défiler la page.
         e("div", { style: { maxHeight: "58vh", overflowY: nb > 0 ? "auto" : "visible", paddingRight: nb > 0 ? "3px" : "0" } },
           leadEls,
-          (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "—") : cards.map(function(c) { return renderCard(c, col.id) })
+          (cards.length === 0 && colLeads.length === 0) ? e("div", { style: { textAlign: "center", color: "#bbb", fontSize: "11px", padding: "18px 0" } }, "·") : cards.map(function(c) { return renderCard(c, col.id) })
         )
       )
     }
@@ -4893,7 +4893,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         var setF = function(champ, val) { setFormDevis(function(prev) { return Object.assign({}, prev, (function(){ var o={}; o[champ]=val; return o })()) }) }
         var inpE = { width: "100%", padding: "8px 10px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
         return React.createElement("div", { style: { backgroundColor: "#f4f7f4", border: "1px solid #dfe7df", borderRadius: "8px", padding: "14px", marginBottom: "16px" } },
-          React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#1a6b38", marginBottom: "10px", textTransform: "uppercase" } }, "🏢 Établissement / site (facultatif — vide = infos du client)"),
+          React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#1a6b38", marginBottom: "10px", textTransform: "uppercase" } }, "🏢 Établissement / site (facultatif · vide = infos du client)"),
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" } },
             React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Nom du site (ex. Annexe Hèvié Houinmè)"), React.createElement("input", { value: formDevis.etabNom || "", onChange: function(e) { setF("etabNom", e.target.value) }, style: inpE })),
             React.createElement("div", null, React.createElement("label", { style: lbl }, "N° IFU du site"), React.createElement("input", { value: formDevis.etabIfu || "", onChange: function(e) { setF("etabIfu", e.target.value) }, style: inpE })),
@@ -4903,7 +4903,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       })(),
       React.createElement("div", { style: { marginBottom: "14px" } },
-        React.createElement("label", { style: lbl }, "Lignes du devis * — une ligne par secteur/zone (renseigne Surface + Prix/m², OU un Forfait)"),
+        React.createElement("label", { style: lbl }, "Lignes du devis * · une ligne par secteur/zone (renseigne Surface + Prix/m², OU un Forfait)"),
         React.createElement("div", { style: { border: "1.5px solid #e0ddd6", borderRadius: "8px", overflow: "hidden" } },
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", backgroundColor: "#0a2e1a", fontSize: "10px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.06em" } },
             React.createElement("span", null, "Prestation"),
@@ -4926,14 +4926,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var estForfait = (parseFloat(l.forfait) || 0) > 0
             return React.createElement("div", { key: idx, style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", alignItems: "center", borderTop: "1px solid #f0ede8", backgroundColor: "#fff" } },
               React.createElement("select", { value: l.prestation || "", onChange: function(e) { setLigne("prestation", e.target.value) }, style: Object.assign({}, inp, { padding: "7px 8px" }) },
-                React.createElement("option", { value: "" }, "— choisir —"),
+                React.createElement("option", { value: "" }, "· choisir ·"),
                 PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) })
               ),
               React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Ex: Magasin, dératisation…", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
               React.createElement("input", { type: "number", value: l.superficie || "", disabled: estForfait, onChange: function(e) { setLigne("superficie", e.target.value) }, placeholder: "m²", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
               React.createElement("input", { type: "number", value: l.prixM2 || "", disabled: estForfait, onChange: function(e) { setLigne("prixM2", e.target.value) }, placeholder: "FCFA", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
               React.createElement("input", { type: "number", value: l.forfait || "", onChange: function(e) { setLigne("forfait", e.target.value) }, placeholder: "FCFA", title: "Montant forfaitaire (prime sur surface × prix)", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
-              React.createElement("span", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", textAlign: "right" } }, m > 0 ? m.toLocaleString("fr-FR") : "—"),
+              React.createElement("span", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", textAlign: "right" } }, m > 0 ? m.toLocaleString("fr-FR") : "·"),
               React.createElement("button", { type: "button", title: "Supprimer la ligne", onClick: function() {
                 setFormDevis(function(prev) {
                   var arr = (prev.lignes || []).filter(function(x, i) { return i !== idx })
@@ -4953,7 +4953,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       ),
       ((formDevis.lignes || []).reduce(function(s, x) { return s + montantLigne(x) }, 0) === 0) && React.createElement("div", { style: { marginBottom: "12px" } },
-        React.createElement("label", { style: lbl }, "Prix de base FCFA * — saisie manuelle (aucune ligne chiffrée)"),
+        React.createElement("label", { style: lbl }, "Prix de base FCFA * · saisie manuelle (aucune ligne chiffrée)"),
         React.createElement("input", { type: "number", value: formDevis.montantBrut, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { montantBrut: v }) }) }, placeholder: "200000", style: inp })
       ),
       React.createElement("div", { style: { marginBottom: "12px" } },
@@ -5003,7 +5003,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           ),
           React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { modeTransmission: "impression" }) }) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "impression" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "impression" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
             React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "impression" ? "#0a2e1a" : "#555" } }, "🖨️ Imprimer le devis"),
-            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Remise en main — paiement libre")
+            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Remise en main · paiement libre")
           )
         )
       ),
@@ -5068,7 +5068,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ),
       showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
         React.createElement("h4", { style: { margin: "0 0 4px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : (leadEnConversion ? "Convertir le lead en client" : "Ajouter un client")),
-        leadEnConversion ? React.createElement("p", { style: { margin: "0 0 16px", fontSize: "12px", color: "#b0885a" } }, "🌱 Lead « " + leadEnConversion.nom + " » — il sera archivé automatiquement après enregistrement.") : React.createElement("div", { style: { height: "12px" } }),
+        leadEnConversion ? React.createElement("p", { style: { margin: "0 0 16px", fontSize: "12px", color: "#b0885a" } }, "🌱 Lead « " + leadEnConversion.nom + " » · il sera archivé automatiquement après enregistrement.") : React.createElement("div", { style: { height: "12px" } }),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" } },
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Prénom"), React.createElement("input", { value: formClient.prenom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { prenom: e.target.value })) }, placeholder: "Jean", style: inp })),
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Nom *"), React.createElement("input", { value: formClient.nom, onChange: function(e) { setFormClient(Object.assign({}, formClient, { nom: e.target.value })) }, placeholder: "Dupont", style: inp })),
@@ -5091,7 +5091,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               var nbDocs = certsList.filter(function(cert) { return cert.client_id === c.id }).length + fichesList.filter(function(f) { return f.client_id === c.id }).length
               return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
                 React.createElement("div", null,
-                  React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, [(c.prenom || ""), c.nom].filter(Boolean).join(" ") + (c.entreprise ? " — " + c.entreprise : "")),
+                  React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, [(c.prenom || ""), c.nom].filter(Boolean).join(" ") + (c.entreprise ? " · " + c.entreprise : "")),
                   React.createElement("div", { style: { fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap" } },
                     c.email ? React.createElement("span", null, c.email) : null,
                     c.telephone ? React.createElement("span", null, c.telephone) : null,
@@ -5228,7 +5228,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             if (!rc.passages.length) return null
             var COULP = { inclus: "#9ca3af", a_venir: "#9ca3af", facture: "#2563eb", partiel: "#d4a920", regle: "#16a34a", alerte: "#dc2626" }
             var EMO = { inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" }
-            var fj = function(x) { return x ? new Date(x + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+            var fj = function(x) { return x ? new Date(x + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "·" }
             var fm = function(n) { return Number(n || 0).toLocaleString("fr-FR") }
             var pct = rc.duTotal > 0 ? Math.min(100, Math.round(rc.encaisse / rc.duTotal * 100)) : 0
             return React.createElement('div', { style: { marginBottom: '16px' } },
@@ -5319,7 +5319,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 React.createElement('span', null, '📄'),
                 React.createElement('div', { style: { flex: 1 } },
                   React.createElement('div', { style: { fontWeight: '600', color: '#6b21a8', fontSize: '11px' } }, contratDevis.reference),
-                  React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, 'Contrat d\'entretien · ' + (contratDevis.date_generation ? new Date(contratDevis.date_generation).toLocaleDateString('fr-FR') : '—'))
+                  React.createElement('div', { style: { fontSize: '10px', color: '#888' } }, 'Contrat d\'entretien · ' + (contratDevis.date_generation ? new Date(contratDevis.date_generation).toLocaleDateString('fr-FR') : '·'))
                 ),
                 React.createElement('button', { onClick: function() { ouvrirContratExistant(contratDevis) }, style: { background: '#fff', border: '1px solid #e9d5ff', color: '#6b21a8', borderRadius: '20px', padding: '3px 10px', fontSize: '10px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' } }, '🖨️ Réimprimer')
               )
@@ -5330,11 +5330,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Interventions'),
             React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
               intervDevis.map(function(iv) {
-                var m = ({ planifiee: { l: 'Planifiée', c: '#0C447C', bg: '#E6F1FB' }, terminee: { l: 'Terminée', c: '#166534', bg: '#DCFCE7' }, annulee: { l: 'Annulée', c: '#991b1b', bg: '#fef2f2' } })[iv.statut] || { l: iv.statut || '—', c: '#555', bg: '#f0ede6' }
+                var m = ({ planifiee: { l: 'Planifiée', c: '#0C447C', bg: '#E6F1FB' }, terminee: { l: 'Terminée', c: '#166534', bg: '#DCFCE7' }, annulee: { l: 'Annulée', c: '#991b1b', bg: '#fef2f2' } })[iv.statut] || { l: iv.statut || '·', c: '#555', bg: '#f0ede6' }
                 // Type de passage : distingue intervention / rapport / contrôle / audit.
                 var tp = ({ intervention: { l: '🔧 Intervention', c: '#0a2e1a', bg: '#eef3ee' }, rapport: { l: '📊 Rapport', c: '#1e40af', bg: '#eff4ff' }, controle: { l: '🔍 Contrôle', c: '#6b21a8', bg: '#f6effb' }, audit: { l: '📋 Audit', c: '#92400e', bg: '#fdf4e3' } })[iv.type_passage] || { l: '🔧 Intervention', c: '#0a2e1a', bg: '#eef3ee' }
                 return React.createElement('div', { key: iv.id, style: { display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #e8e6e0', borderRadius: '8px', padding: '8px 12px' } },
-                  React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', flexShrink: 0 } }, iv.date_intervention ? new Date(iv.date_intervention + 'T00:00:00').toLocaleDateString('fr-FR') : '—'),
+                  React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', flexShrink: 0 } }, iv.date_intervention ? new Date(iv.date_intervention + 'T00:00:00').toLocaleDateString('fr-FR') : '·'),
                   React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: tp.c, backgroundColor: tp.bg, borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, tp.l),
                   React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: m.c, backgroundColor: m.bg, borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, m.l),
                   React.createElement('span', { style: { fontSize: '11px', color: '#777', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, [iv.adresse, iv.notes].filter(Boolean).join(' · '))
@@ -5378,7 +5378,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '24px' } },
         React.createElement('button', { onClick: function() { setVue('clients'); setClientDetail(null) }, style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '6px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, marginTop: '4px' } }, '← Retour'),
         React.createElement('div', { style: { backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '10px', padding: '16px 20px', flex: 1 } },
-          React.createElement('div', { style: { fontSize: '18px', fontWeight: '700', color: '#0a2e1a', marginBottom: '4px' } }, [(cl.prenom || ''), cl.nom].filter(Boolean).join(' ') + (cl.entreprise ? ' — ' + cl.entreprise : '')),
+          React.createElement('div', { style: { fontSize: '18px', fontWeight: '700', color: '#0a2e1a', marginBottom: '4px' } }, [(cl.prenom || ''), cl.nom].filter(Boolean).join(' ') + (cl.entreprise ? ' · ' + cl.entreprise : '')),
           React.createElement('div', { style: { fontSize: '12px', color: '#666', display: 'flex', gap: '16px', flexWrap: 'wrap' } },
             cl.email ? React.createElement('span', null, '✉ ' + cl.email) : null,
             cl.telephone ? React.createElement('span', null, '📱 ' + cl.telephone) : null,
@@ -5504,7 +5504,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       } else {
         var errMsg = data.error || "Erreur inconnue"
         if (errMsg.includes("quota") || errMsg.includes("RESOURCE_EXHAUSTED")) {
-          setContratErreur("Limite API atteinte — réessaie dans 30 secondes.")
+          setContratErreur("Limite API atteinte · réessaie dans 30 secondes.")
         } else {
           setContratErreur("Erreur : " + errMsg)
         }
@@ -5571,7 +5571,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" } },
           React.createElement("div", null,
             React.createElement("div", { style: { fontSize: "11px", color: "#d4a920", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" } }, "Préparer un contrat"),
-            React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " — " + nomClient),
+            React.createElement("div", { style: { fontSize: "17px", fontWeight: "700", color: "#0a2e1a" } }, d.numero + " · " + nomClient),
             React.createElement("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } }, Number(d.montant_total).toLocaleString("fr-FR") + " FCFA · " + (d.prestation || ""))
           ),
           React.createElement("button", { onClick: function() { setContratModal(null); setContratAnalyse(null); setContratErreur(null); setContratRapport(null); setContratQuestions(null); setContratReponses({}); setOffreChoisie(null) }, style: { background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "#888", lineHeight: 1 } }, "×")
@@ -5620,9 +5620,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("textarea", { value: contratForm.notes, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { notes: e.target.value })) }, placeholder: "Ex : infestation active signalée, client négocie, production alimentaire à haut risque…", rows: 3, style: { width: "100%", padding: "9px 12px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box", resize: "vertical" } })
           ),
           React.createElement("div", { style: { marginBottom: "20px", backgroundColor: "#f0fdf4", borderRadius: "8px", padding: "12px 14px", border: "1px solid #bbf7d0" } },
-            React.createElement("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#065f46", marginBottom: "6px", textTransform: "uppercase" } }, "Prix déjà négocié (FCFA/an) — optionnel"),
-            React.createElement("input", { value: contratForm.prixNegocie, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { prixNegocie: e.target.value })) }, placeholder: "Ex : 200000 — laisser vide pour laisser l'IA proposer", type: "number", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } }),
-            React.createElement("div", { style: { fontSize: "11px", color: "#065f46", marginTop: "5px" } }, "Si renseigné, un bouton de génération directe apparaîtra — sans passer par l'IA.")
+            React.createElement("label", { style: { display: "block", fontSize: "11px", fontWeight: "700", color: "#065f46", marginBottom: "6px", textTransform: "uppercase" } }, "Prix déjà négocié (FCFA/an) · optionnel"),
+            React.createElement("input", { value: contratForm.prixNegocie, onChange: function(e) { setContratForm(Object.assign({}, contratForm, { prixNegocie: e.target.value })) }, placeholder: "Ex : 200000 · laisser vide pour laisser l'IA proposer", type: "number", style: { width: "100%", padding: "9px 12px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" } }),
+            React.createElement("div", { style: { fontSize: "11px", color: "#065f46", marginTop: "5px" } }, "Si renseigné, un bouton de génération directe apparaîtra · sans passer par l'IA.")
           ),
           contratErreur && React.createElement("div", { style: { backgroundColor: "#fff7ed", border: "1px solid #fed7aa", borderRadius: "8px", padding: "12px 14px", marginBottom: "12px", fontSize: "13px", color: "#92400e", display: "flex", justifyContent: "space-between", alignItems: "center" } },
             contratErreur,
@@ -5653,7 +5653,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               ouvrirContrat("/api/generate-contract?" + params.toString())
             },
             style: { width: "100%", backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "8px", padding: "14px", fontSize: "14px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", marginBottom: "10px" }
-          }, "⚡ Générer directement — " + parseInt(contratForm.prixNegocie || 0).toLocaleString("fr-FR") + " FCFA/an"),
+          }, "⚡ Générer directement · " + parseInt(contratForm.prixNegocie || 0).toLocaleString("fr-FR") + " FCFA/an"),
           (function() {
             var inpS = { width: "100%", padding: "8px 10px", border: "1.5px solid #bbf7d0", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
             var setF = function(k, v) { setContratForm(Object.assign({}, contratForm, (function() { var o = {}; o[k] = v; return o })())) }
@@ -5668,7 +5668,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var ent = parseInt(contratForm.manEntretien) || 0
             var annuel = mep + Math.max(0, passages - 1) * ent
             return React.createElement("div", { style: { marginBottom: "16px", padding: "14px 16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px" } },
-              React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" } }, "Paramétrage manuel (sans IA) — j'ai déjà les montants"),
+              React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" } }, "Paramétrage manuel (sans IA) · j'ai déjà les montants"),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "8px" } },
                 field("Nb passages / an", "manPassages", "4"),
                 field("Durée tarifée (mois)", "manDuree", "12"),
@@ -5679,7 +5679,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 field("Prix par entretien (FCFA)", "manEntretien", "850000")
               ),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr", gap: "8px", marginBottom: "8px" } },
-                field("Prix / m² (FCFA) — explique le tarif dans le contrat", "manPrixM2", "120")
+                field("Prix / m² (FCFA) · explique le tarif dans le contrat", "manPrixM2", "120")
               ),
               React.createElement("div", { style: { marginBottom: "10px" } },
                 React.createElement("label", { style: { display: "block", fontSize: "10px", fontWeight: "700", color: "#065f46", textTransform: "uppercase", marginBottom: "3px" } }, "Périodicité de paiement"),
@@ -5943,7 +5943,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var data = await res.json()
       if (!res.ok || !data.ok) { setMsg("Erreur : " + (data.error || "maj impossible")) }
       else if (data.engage) { setMsg("⚠ Début fixé au " + dateDebut + ", mais planning CONSERVÉ : des passages sont déjà faits/payés/affectés. Ajustez les dates à la main pour ne rien perdre.") }
-      else if (data.replanifie) { setMsg("✓ Début fixé au " + dateDebut + " — planning recalculé depuis la règle (" + (data.passagesCrees || 0) + " passages).") }
+      else if (data.replanifie) { setMsg("✓ Début fixé au " + dateDebut + " · planning recalculé depuis la règle (" + (data.passagesCrees || 0) + " passages).") }
       else { setMsg("✓ Début fixé au " + dateDebut + ", " + (data.passagesCrees || 0) + " passages planifiés.") }
       await charger()
     } catch (e) { setMsg("Erreur réseau : " + e.message) }
@@ -5971,7 +5971,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       termine:      { libelle: "Terminé",       bg: "#f5f5f4", tc: "#57534e", bord: "#e7e5e4" },
       sans_date:    { libelle: "Sans date",     bg: "#fef2f2", tc: "#991b1b", bord: "#fecaca" },
     }
-    var fmtJ = function(iso) { return iso ? new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "—" }
+    var fmtJ = function(iso) { return iso ? new Date(iso + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "·" }
 
     function renderFrise(d) {
       var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
@@ -5985,7 +5985,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var pctAuj = span ? Math.min(100, Math.max(0, (new Date(auj + "T00:00:00").getTime() - t0) / span * 100)) : null
 
       var ouvert = !!contratOuvert[d.id]
-      var nomAff = ((cl && cl.nom) || "Client inconnu") + (d.etablissement_nom ? " — " + d.etablissement_nom : "")
+      var nomAff = ((cl && cl.nom) || "Client inconnu") + (d.etablissement_nom ? " · " + d.etablissement_nom : "")
       var nbRetard = (r.enRetard && r.enRetard.length) || 0
       var resumeLigne = r.faits + "/" + r.total + " passages" + (r.prochain ? " · prochain " + fmtJ(r.prochain.date) : "") + (nbRetard > 0 ? " · ⚠ " + nbRetard + " en retard" : "")
       return e("div", { key: d.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: ouvert ? "18px 20px" : "12px 16px", marginBottom: "10px" } },
@@ -6022,7 +6022,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             return e("div", {
               key: i,
               onClick: p.id ? function() { togglePassage(p.id, p.statut) } : null,
-              title: fmtJ(p.date) + " · " + (aud ? "audit annuel" : ctrl ? "contrôle" : rap ? "rapport d'intervention" : "intervention") + " · " + (fait ? "terminé — clic pour annuler" : (retard ? "EN RETARD — clic pour marquer fait" : "prévu — clic pour marquer fait")) + ((ctrl || aud || rap) ? "" : " · dû " + fmtM(p.montantDu) + " / payé " + fmtM(p.montantPaye) + (p.dateFacture ? " · facturé le " + fmtJ(p.dateFacture) : " · non facturé")) + (rap ? "" : (p.technicien ? " · " + p.technicien : " · aucun technicien")),
+              title: fmtJ(p.date) + " · " + (aud ? "audit annuel" : ctrl ? "contrôle" : rap ? "rapport d'intervention" : "intervention") + " · " + (fait ? "terminé · clic pour annuler" : (retard ? "EN RETARD · clic pour marquer fait" : "prévu · clic pour marquer fait")) + ((ctrl || aud || rap) ? "" : " · dû " + fmtM(p.montantDu) + " / payé " + fmtM(p.montantPaye) + (p.dateFacture ? " · facturé le " + fmtJ(p.dateFacture) : " · non facturé")) + (rap ? "" : (p.technicien ? " · " + p.technicien : " · aucun technicien")),
               style: {
                 position: "absolute", top: (ctrl || rap) ? "12px" : "10px", left: "calc(" + pct + "% - 6px)",
                 width: (ctrl || rap) ? "10px" : "14px", height: (ctrl || rap) ? "10px" : "14px", borderRadius: (aud || rap) ? "2px" : "50%",
@@ -6065,7 +6065,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           (r.total === 0 && r.passagesAttendus > 0) ? e("span", { style: { color: "#991b1b", fontWeight: "600" } }, "⚠ aucun passage planifié, " + r.passagesAttendus + " attendus") : null
         ) : null,
         (ouvert && r.passages.length > 0) ? e("div", { style: { marginTop: "14px", borderTop: "1px solid #eee", paddingTop: "10px" } },
-          e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" } }, "Passages — dates et technicien modifiables"),
+          e("div", { style: { fontSize: "10px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" } }, "Passages · dates et technicien modifiables"),
           r.passages.map(function(p, i) {
             var ctrl = p.type === "controle"
             var aud = p.type === "audit"
@@ -6101,7 +6101,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 e("input", { type: "number", defaultValue: p.montantDu || 0, onBlur: function(ev) { savePassageFinances(p.id, { montantDu: parseInt(ev.target.value, 10) || 0 }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
                 e("span", { style: { fontSize: "11px", color: "#6b7280" } }, "payé"),
                 e("input", { type: "number", defaultValue: p.montantPaye || 0, onBlur: function(ev) { var v = parseInt(ev.target.value, 10) || 0; savePassageFinances(p.id, { montantPaye: v, datePaiement: v > 0 ? auj : null }) }, style: { width: "80px", fontSize: "12px", padding: "4px 6px", border: "1px solid #d1d5db", borderRadius: "5px", fontFamily: "inherit", color: "#111" } }),
-                e("button", { onClick: function() { savePassageFinances(p.id, { dateFacture: p.dateFacture ? null : auj }) }, title: p.dateFacture ? "Facturé le " + fmtJ(p.dateFacture) + " — clic pour annuler" : "Marquer facturé", style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (p.dateFacture ? "#2563eb" : "#d1d5db"), backgroundColor: p.dateFacture ? "#2563eb" : "#fff", color: p.dateFacture ? "#fff" : "#555", fontWeight: "600" } }, p.dateFacture ? "✓ facturé" : "facturer"),
+                e("button", { onClick: function() { savePassageFinances(p.id, { dateFacture: p.dateFacture ? null : auj }) }, title: p.dateFacture ? "Facturé le " + fmtJ(p.dateFacture) + " · clic pour annuler" : "Marquer facturé", style: { fontSize: "11px", padding: "3px 8px", borderRadius: "12px", cursor: "pointer", fontFamily: "inherit", border: "1px solid " + (p.dateFacture ? "#2563eb" : "#d1d5db"), backgroundColor: p.dateFacture ? "#2563eb" : "#fff", color: p.dateFacture ? "#fff" : "#555", fontWeight: "600" } }, p.dateFacture ? "✓ facturé" : "facturer"),
                 e("span", { style: { fontSize: "13px" }, title: p.statutPaiement }, ({ inclus: "", a_venir: "⚪", facture: "🔵", partiel: "🟠", regle: "🟢", alerte: "🔴" })[p.statutPaiement] || "")
               ),
               // Fiche terrain : envoyer le lien à Fabrice + état de remontée.
@@ -6229,9 +6229,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             var ctr = (contratsList || []).find(function(c) { return c.devis_id === d.id })
             return e("div", { key: d.id, style: { backgroundColor: "#fdfaf9", border: "1px solid #f0d5d5", borderLeft: "3px solid #991b1b", borderRadius: "10px", padding: "12px 16px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" } },
               e("div", { style: { minWidth: 0 } },
-                e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, ((cl && cl.nom) || "Client") + (d.etablissement_nom ? " — " + d.etablissement_nom : "")),
+                e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, ((cl && cl.nom) || "Client") + (d.etablissement_nom ? " · " + d.etablissement_nom : "")),
                 e("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, d.numero + (ctr ? " · " + ctr.reference : "")),
-                e("div", { style: { fontSize: "12px", color: "#991b1b", fontWeight: "600", marginTop: "3px" } }, "Motif : " + (d.motif_echec || "—"))
+                e("div", { style: { fontSize: "12px", color: "#991b1b", fontWeight: "600", marginTop: "3px" } }, "Motif : " + (d.motif_echec || "·"))
               ),
               e("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap" } },
                 ctr ? e("button", { onClick: function() { ouvrirContratExistant(ctr) }, style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📄 Voir le contrat") : null,
@@ -6301,14 +6301,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               var isRI      = doc._type === "rapport_interv"
               var icon = isContrat ? "📄" : isRV ? "🔍" : isRI ? "📊" : isCert ? (doc.sousType === "desinsect" ? "🪲" : doc.sousType === "double" ? "🪲🐭" : "🐭") : "📋"
               var typeLabel = isContrat ? "Contrat d'entretien" : isRV ? "Rapport de visite" : isRI ? "Rapport d'intervention" : isCert ? (doc.sousType === "desinsect" ? "Certificat Désinsect." : doc.sousType === "double" ? "Certificat Combiné" : "Certificat Dératisation") : "Fiche de passage"
-              var clientNom = doc.client ? ([doc.client.prenom, doc.client.nom].filter(Boolean).join(" ") + (doc.client.entreprise ? " — " + doc.client.entreprise : "")) : "Client inconnu"
-              var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "—"
+              var clientNom = doc.client ? ([doc.client.prenom, doc.client.nom].filter(Boolean).join(" ") + (doc.client.entreprise ? " · " + doc.client.entreprise : "")) : "Client inconnu"
+              var dateStr = doc.date ? new Date(doc.date).toLocaleDateString("fr-FR") : "·"
               var borderColor = isContrat ? "#e9d5ff" : isRV ? "#bae6fd" : isRI ? "#fed7aa" : "#e8e6e0"
               var bgColor     = isContrat ? "#faf5ff" : isRV ? "#f0f9ff" : isRI ? "#fff7ed" : "#fff"
               return React.createElement("div", { key: doc._type + doc._id, style: { backgroundColor: bgColor, border: "1px solid " + borderColor, borderRadius: "8px", padding: "14px 18px", display: "flex", alignItems: "center", gap: "14px" } },
                 React.createElement("span", { style: { fontSize: "22px", flexShrink: 0 } }, icon),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, doc.numero || "—"),
+                  React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, doc.numero || "·"),
                   React.createElement("div", { style: { fontSize: "12px", color: "#555", marginTop: "2px" } }, typeLabel + " · " + clientNom),
                   React.createElement("div", { style: { fontSize: "11px", color: "#999", marginTop: "2px" } }, dateStr)
                 ),
@@ -6387,7 +6387,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setLeadEnConversion(lead)
     setShowFormClient(true)
     setVue("clients")
-    setMsg("Complétez la fiche client puis enregistrez — le lead sera archivé automatiquement.")
+    setMsg("Complétez la fiche client puis enregistrez · le lead sera archivé automatiquement.")
   }
 
   function renderVueDevis() {
@@ -6401,7 +6401,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       renderFormDevis(),
       leads.length > 0 && React.createElement("div", { style: { backgroundColor: "#fff8e1", border: "1px solid #d4a920", borderRadius: "8px", padding: "14px 16px", marginBottom: "20px" } },
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" } },
-          React.createElement("strong", { style: { fontSize: "13px", color: "#0a2e1a" } }, "Leads site — offre de bienvenue"),
+          React.createElement("strong", { style: { fontSize: "13px", color: "#0a2e1a" } }, "Leads site · offre de bienvenue"),
           React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 8px", borderRadius: "20px" } }, leads.length + " en attente")
         ),
         leads.map(function(lead) {
@@ -6549,7 +6549,7 @@ var GSE_DOC_STYLES = '<style>' +
 // Nom de fichier proposé par Chrome à l'enregistrement en PDF : il vient du
 // <title> du document. On le veut directement exploitable (pas de tiret
 // cadratin, pas de caractère interdit par le système de fichiers) pour que
-// l'utilisateur n'ait pas à le retaper dans la boîte d'enregistrement — c'est
+// l'utilisateur n'ait pas à le retaper dans la boîte d'enregistrement · c'est
 // justement ce renommage qui produisait un PDF vide (voir ouvrirDocImprimable).
 function nomFichierDoc() {
   var parts = []
@@ -6618,7 +6618,7 @@ function gseSigs() {
 }
 
 function gseFooter() {
-  return '<div class="gse-footer">Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
+  return '<div class="gse-footer">Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
 }
 
 function buildCertificatHtml(type, form) {
@@ -6684,7 +6684,7 @@ function buildCertificatHtml(type, form) {
     '<table style="margin-bottom:20px;border-collapse:collapse;width:100%">' +
     '<thead><tr>' +
     '<th style="background:#1a4731;color:#fff;padding:8px 10px;border:1px solid #1a4731;text-align:left;font-size:13px;width:38%;font-weight:bold">Matières actives</th>' +
-    '<th style="background:#1a4731;color:#fff;padding:8px 10px;border:1px solid #1a4731;text-align:left;font-size:13px;font-weight:bold">Observations — Homologués par le CNEIP / DPV APV / CNGP-BEN</th>' +
+    '<th style="background:#1a4731;color:#fff;padding:8px 10px;border:1px solid #1a4731;text-align:left;font-size:13px;font-weight:bold">Observations · Homologués par le CNEIP / DPV APV / CNGP-BEN</th>' +
     '</tr></thead>' +
     '<tbody>' + rowsHtml + '</tbody>' +
     '</table>' +
@@ -6894,7 +6894,7 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div></div>' +
 
     '<div>' +
-    '<div class="sig-title">Pour le client — Nom & Prénom(s)</div>' +
+    '<div class="sig-title">Pour le client · Nom & Prénom(s)</div>' +
     '<div class="sig-zone"></div>' +
     '</div>' +
 
@@ -6915,7 +6915,7 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '</div>' +
 
     '<div class="footer">' +
-    'Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
     'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
     '</div>' +
 
@@ -6943,7 +6943,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     var v = infestation[n] || ''
     return '<tr>' +
       '<td style="border:1px solid #ccc;padding:6px 10px">' + n + '</td>' +
-      '<td style="border:1px solid #ccc;padding:6px 10px;font-weight:700;color:' + couleurNiveau(v) + '">' + (v || '<span style="color:#ccc">—</span>') + '</td>' +
+      '<td style="border:1px solid #ccc;padding:6px 10px;font-weight:700;color:' + couleurNiveau(v) + '">' + (v || '<span style="color:#ccc">·</span>') + '</td>' +
       '</tr>'
   }).join('')
 
@@ -7050,7 +7050,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
 
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
     '<div>' +
-    '<div class="sig-title">Pour le client — Nom & Prénom(s)</div>' +
+    '<div class="sig-title">Pour le client · Nom & Prénom(s)</div>' +
     '<div class="sig-zone">' +
     (cd.signatureDataUrl ? '<img src="' + cd.signatureDataUrl + '" alt="Signature client" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
     (cd.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(cd.clientSignataire) + '</div>' : '') +
@@ -7072,7 +7072,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '</div>' +
 
     '<div class="footer">' +
-    'Global Solutions Entreprise — Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
     'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
     '</div>' +
 
@@ -7080,10 +7080,10 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
 }
 
 function buildRapportVisiteHtml(form, client, devis) {
-  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
-  var nuisiblesStr = (form.nuisibles || []).concat(form.autresNuisible ? [form.autresNuisible] : []).join(', ') || '—'
+  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+  var nuisiblesStr = (form.nuisibles || []).concat(form.autresNuisible ? [form.autresNuisible] : []).join(', ') || '·'
   var niveauColor = form.niveauInfestation === 'Faible' ? '#16a34a' : form.niveauInfestation === 'Élevé' ? '#dc2626' : '#d97706'
-  var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
+  var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '·'
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Rapport_visite', (client && (client.entreprise || client.nom)) || '', form.dateVisite) + '</title>' +
     GSE_DOC_STYLES +
     '</style></head><body>' +
@@ -7094,24 +7094,24 @@ function buildRapportVisiteHtml(form, client, devis) {
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
-    '<div><div class="section-title">Adresse du site</div><div class="value-box">' + (form.adresseSite || '—') + '</div></div>' +
+    '<div><div class="section-title">Adresse du site</div><div class="value-box">' + (form.adresseSite || '·') + '</div></div>' +
     '</div>' +
 
     '<div class="grid2 section">' +
-    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '—') + '</div></div>' +
-    '<div><div class="section-title">Technicien</div><div class="value-box">' + (form.technicien || '—') + '</div></div>' +
+    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '·') + '</div></div>' +
+    '<div><div class="section-title">Technicien</div><div class="value-box">' + (form.technicien || '·') + '</div></div>' +
     '</div>' +
 
-    '<div class="section"><div class="section-title">Description du site</div><div class="value-box">' + (form.descriptionSite || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Description du site</div><div class="value-box">' + (form.descriptionSite || '·') + '</div></div>' +
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Nuisibles observés</div><div class="value-box">' + nuisiblesStr + '</div></div>' +
-    '<div><div class="section-title">Niveau d\'infestation</div><div class="value-box"><span class="badge" style="background:' + niveauColor + '">' + (form.niveauInfestation || '—') + '</span></div></div>' +
+    '<div><div class="section-title">Niveau d\'infestation</div><div class="value-box"><span class="badge" style="background:' + niveauColor + '">' + (form.niveauInfestation || '·') + '</span></div></div>' +
     '</div>' +
 
-    '<div class="section"><div class="section-title">Zones infestées</div><div class="value-box">' + (form.zonesInfestees || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Recommandations</div><div class="value-box">' + (form.recommandations || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Observations techniques</div><div class="value-box">' + (form.observations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Zones infestées</div><div class="value-box">' + (form.zonesInfestees || '·') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations</div><div class="value-box">' + (form.recommandations || '·') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations techniques</div><div class="value-box">' + (form.observations || '·') + '</div></div>' +
 
     ((form.datesProposees && form.datesProposees.length > 0) ? (
       '<div class="section"><div class="section-title">📅 Dates d\'intervention proposées</div>' +
@@ -7134,8 +7134,8 @@ function buildRapportVisiteHtml(form, client, devis) {
 }
 
 function buildRapportIntervHtml(form, client, devis) {
-  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' — ' + client.entreprise : '')
-  var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'
+  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+  var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '·'
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Rapport_intervention', (client && (client.entreprise || client.nom)) || '', form.dateIntervention) + '</title>' +
     GSE_DOC_STYLES +
     '</style></head><body>' +
@@ -7146,23 +7146,23 @@ function buildRapportIntervHtml(form, client, devis) {
 
     '<div class="grid2 section">' +
     '<div><div class="section-title">Client</div><div class="value-box">' + nomClient + '</div></div>' +
-    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '—') + '</div></div>' +
+    '<div><div class="section-title">Prestation</div><div class="value-box">' + (devis.prestation || '·') + '</div></div>' +
     '</div>' +
 
     '<div class="grid2 section">' +
-    '<div><div class="section-title">Technicien(s)</div><div class="value-box">' + (form.technicien || '—') + '</div></div>' +
-    '<div><div class="section-title">Durée de l\'intervention</div><div class="value-box">' + (form.dureeIntervention || '—') + '</div></div>' +
+    '<div><div class="section-title">Technicien(s)</div><div class="value-box">' + (form.technicien || '·') + '</div></div>' +
+    '<div><div class="section-title">Durée de l\'intervention</div><div class="value-box">' + (form.dureeIntervention || '·') + '</div></div>' +
     '</div>' +
 
     '<div class="grid2 section">' +
-    '<div><div class="section-title">Méthode d\'application</div><div class="value-box">' + (form.methodeApplication || '—') + '</div></div>' +
-    '<div><div class="section-title">Zones traitées</div><div class="value-box">' + (form.zonesTraitees || '—') + '</div></div>' +
+    '<div><div class="section-title">Méthode d\'application</div><div class="value-box">' + (form.methodeApplication || '·') + '</div></div>' +
+    '<div><div class="section-title">Zones traitées</div><div class="value-box">' + (form.zonesTraitees || '·') + '</div></div>' +
     '</div>' +
 
-    '<div class="section"><div class="section-title">Produits utilisés</div><div class="value-box">' + (form.produitsUtilises || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box">' + (form.resultats || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Observations</div><div class="value-box">' + (form.observations || '—') + '</div></div>' +
-    '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box">' + (form.recommandations || '—') + '</div></div>' +
+    '<div class="section"><div class="section-title">Produits utilisés</div><div class="value-box">' + (form.produitsUtilises || '·') + '</div></div>' +
+    '<div class="section"><div class="section-title">Résultats obtenus</div><div class="value-box">' + (form.resultats || '·') + '</div></div>' +
+    '<div class="section"><div class="section-title">Observations</div><div class="value-box">' + (form.observations || '·') + '</div></div>' +
+    '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box">' + (form.recommandations || '·') + '</div></div>' +
 
     ((form.photos && form.photos.length > 0) ? (
       '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
