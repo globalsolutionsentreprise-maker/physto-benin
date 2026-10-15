@@ -132,18 +132,53 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           .nav-mobile-btn { display: none; }
           .nav-links-mobile { display: none; }
 
+          /* Transform composé via custom properties : chaque source (entrée, flottement
+             ambiant, survol) possède ses propres variables, donc aucune ne surcharge
+             l'autre dans la cascade. @property les rend interpolables. */
+          @property --logo-ent-sc { syntax: "<number>"; inherits: false; initial-value: 1; }
+          @property --logo-ent-rot { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+          @property --logo-ty { syntax: "<length>"; inherits: false; initial-value: 0px; }
+          @property --logo-breathe { syntax: "<number>"; inherits: false; initial-value: 1; }
+          @property --logo-hov-sc { syntax: "<number>"; inherits: false; initial-value: 1; }
+          @property --logo-hov-rot { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
           @keyframes logoEntree {
-            0%   { opacity: 0; transform: scale(0.7) rotate(-8deg); }
-            60%  { opacity: 1; transform: scale(1.08) rotate(3deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            0%   { opacity: 0; --logo-ent-sc: 0.7;  --logo-ent-rot: -8deg; }
+            60%  { opacity: 1; --logo-ent-sc: 1.08; --logo-ent-rot: 3deg; }
+            100% { opacity: 1; --logo-ent-sc: 1;    --logo-ent-rot: 0deg; }
+          }
+          /* Vie au repos : flottement vertical quasi imperceptible + légère respiration. */
+          @keyframes logoFloat {
+            0%, 100% { --logo-ty: 0px;    --logo-breathe: 1; }
+            50%      { --logo-ty: -4px;   --logo-breathe: 1.015; }
           }
           .logo-anime {
-            animation: logoEntree 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
-            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            animation: logoEntree 0.7s cubic-bezier(0.34,1.56,0.64,1) both,
+                       logoFloat 7s ease-in-out 0.7s infinite;
+            transform:
+              translateY(var(--logo-ty))
+              rotate(calc(var(--logo-ent-rot) + var(--logo-hov-rot)))
+              scale(calc(var(--logo-ent-sc) * var(--logo-breathe) * var(--logo-hov-sc)));
+            will-change: transform;
             cursor: pointer;
           }
-          .logo-anime:hover {
-            transform: scale(1.15) rotate(6deg);
+          /* Survol seulement sur vrai pointeur (évite les faux hover au tap). */
+          @media (hover: hover) and (pointer: fine) {
+            .logo-anime {
+              transition: --logo-hov-sc 0.35s cubic-bezier(0.34,1.56,0.64,1),
+                          --logo-hov-rot 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            }
+            .logo-anime:hover { --logo-hov-sc: 1.12; --logo-hov-rot: 5deg; }
+          }
+          /* Accessibilité : on coupe tout mouvement, on garde juste l'apparition. */
+          @keyframes logoFade { from { opacity: 0; } to { opacity: 1; } }
+          @media (prefers-reduced-motion: reduce) {
+            .logo-anime {
+              animation: logoFade 0.4s ease both;
+              transform: none;
+              transition: none;
+            }
+            .logo-anime:hover { --logo-hov-sc: 1; --logo-hov-rot: 0deg; }
           }
 
           @keyframes texteEntree {
