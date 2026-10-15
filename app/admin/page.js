@@ -3606,7 +3606,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var html = "<!DOCTYPE html><html lang=\"fr\"><head><meta charset=\"UTF-8\"><title>" + nomFichierDoc("Devis", d.numero, nomClient) + "</title><style>" +
       "* { box-sizing: border-box; margin: 0; padding: 0; }" +
       "body { font-family: Georgia, serif; background: #f5f5f0; }" +
-      ".page { max-width: 780px; margin: 0 auto; background: #fff; }" +
+      ".page { max-width: 780px; margin: 0 auto; background: #fff; position: relative; isolation: isolate; }" +
+      ".page::before { content: ''; position: absolute; inset: 0; background: url('/logo-gse.png') no-repeat center 44%; background-size: min(70%, 520px); opacity: 0.06; z-index: -1; pointer-events: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }" +
       ".hdr { background: #0a2e1a; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }" +
       ".hdr-left .sub { color: #d4a920; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }" +
       ".hdr-left .name { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }" +
