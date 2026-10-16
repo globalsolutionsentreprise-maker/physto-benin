@@ -36,6 +36,8 @@ export async function POST(req) {
     try {
       const resendKey = process.env.RESEND_API_KEY
       const notifyTo = process.env.LEAD_NOTIFY_EMAIL || "contact@phyto-benin.com"
+      // Équipe commerciale (Fabrice) en copie des leads entrants, comme le compte global.
+      const equipeCommerciale = ["babatoundefab@yahoo.com", "babatoundea67@gmail.com"]
       if (resendKey) {
         const rows = [
           ["Nom", nom],
@@ -53,7 +55,7 @@ export async function POST(req) {
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
           body: JSON.stringify({
             from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
-            to: [notifyTo],
+            to: [notifyTo, ...equipeCommerciale],
             ...(email ? { reply_to: email } : {}),
             subject: `🌱 Nouveau lead : ${nom}${urgence ? " (URGENT)" : ""}`,
             html: `<div style="font-family:Arial,sans-serif;max-width:520px;color:#111;">
