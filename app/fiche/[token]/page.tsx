@@ -271,8 +271,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         <div style={{ flex: 1 }}><Lbl>Fin</Lbl><input value={dureeFin} onChange={(e) => setDureeFin(e.target.value)} placeholder="11h30" style={inp} /></div>
       </div>
 
-      <Lbl>Remarques</Lbl>
-      <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={3} placeholder="Constat, recommandations…" style={{ ...inp, resize: "vertical" }} />
+      <Lbl>Observations libres</Lbl>
+      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
+        Écrivez librement tout ce que vous voulez noter sur le passage : constat, zones traitées, difficultés, conseils au client…
+      </div>
+      <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={4} placeholder="Écrivez ici…" style={{ ...inp, resize: "vertical" }} />
       </>)}
 
       <Lbl>Photos / Vidéos</Lbl>
