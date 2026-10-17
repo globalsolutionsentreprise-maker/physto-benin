@@ -3288,6 +3288,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       controleData: f.controle_data || {},
     })
     setFicheModal({ client: client || {}, editingId: f.id, existingNumero: f.numero_unique, medias: f.medias || [] })
+    // Signer les URLs des médias pour l'aperçu/retouche dans l'éditeur.
+    if ((f.medias || []).length) {
+      signMediasAdmin(f.medias).then(function(signed) {
+        setFicheModal(function(prev) { return (prev && prev.editingId === f.id) ? Object.assign({}, prev, { medias: signed }) : prev })
+      })
+    }
   }
 
   // ── FICHES DE PASSAGE ──────────────────────────────
@@ -3338,6 +3344,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         superviseur_nom: ficheForm.superviseurNom,
         superviseur_contact: ficheForm.superviseurContact,
         controle_data: estControle ? (ficheForm.controleData || {}) : null,
+      }
+      // Médias retouchés au bureau (légendes éditées, photos retirées). Seulement
+      // en édition : on nettoie l'URL signée (éphémère), on garde path/type/name/note.
+      if (ficheModal.medias) {
+        ficheData.medias = ficheModal.medias.map(function(m) { return { path: m.path, type: m.type, name: m.name, note: m.note || '' } })
       }
       var ficheNumero
       var isEditing = !!ficheModal.editingId
@@ -3403,6 +3414,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var updPoste = function(field, val) { setFicheForm(function(prev) { var p = prev.controleData || {}; return Object.assign({}, prev, { controleData: Object.assign({}, p, { postes: Object.assign({}, p.postes, { [field]: val }) }) }) }) }
     var updInfest = function(n, val) { setFicheForm(function(prev) { var p = prev.controleData || {}; var inf = Object.assign({}, p.infestation); inf[n] = inf[n] === val ? '' : val; return Object.assign({}, prev, { controleData: Object.assign({}, p, { infestation: inf }) }) }) }
     var pillBtn = function(on) { return { fontSize: '12px', padding: '4px 10px', borderRadius: '14px', cursor: 'pointer', fontFamily: 'inherit', border: '1px solid ' + (on ? '#0a2e1a' : '#d1d5db'), backgroundColor: on ? '#0a2e1a' : '#fff', color: on ? '#fff' : '#555', fontWeight: on ? '600' : '400' } }
+    // Retouche des photos au bureau : légende éditable + retrait avant génération.
+    var mediasEdit = (ficheModal && ficheModal.medias) || []
+    var updMediaNote = function(i, val) { setFicheModal(function(prev) { if (!prev) return prev; var arr = (prev.medias || []).slice(); arr[i] = Object.assign({}, arr[i], { note: val }); return Object.assign({}, prev, { medias: arr }) }) }
+    var removeMedia = function(i) { setFicheModal(function(prev) { if (!prev) return prev; return Object.assign({}, prev, { medias: (prev.medias || []).filter(function(_, j) { return j !== i }) }) }) }
 
     return React.createElement('div', {
       style: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px' },
@@ -3571,6 +3586,24 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement('div', null, React.createElement('label', { style: lbl2 }, 'Nom du signataire (client)'), React.createElement('input', { value: cd.clientSignataire || '', onChange: function(e) { updCtrl('clientSignataire', e.target.value) }, placeholder: 'Personne qui réceptionne', style: inp2 }))
             )
           ),
+
+          // Photos du passage : retouche des légendes + retrait avant génération
+          mediasEdit.length ? React.createElement('div', { style: { marginBottom: '24px' } },
+            React.createElement('label', { style: lbl2 }, 'Photos du passage · légende éditable'),
+            React.createElement('div', { style: { fontSize: '11px', color: '#888', margin: '-4px 0 8px' } }, 'Corrigez la remarque sous chaque photo (saisie brute du terrain) ou retirez une photo avant de générer.'),
+            React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '12px' } },
+              mediasEdit.map(function(m, i) {
+                var isImg = String(m.type || '').indexOf('image') === 0
+                return React.createElement('div', { key: m.path || i, style: { width: '140px', position: 'relative' } },
+                  isImg
+                    ? React.createElement('img', { src: m.url || '', style: { width: '140px', height: '140px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #ccc', display: 'block' } })
+                    : React.createElement('a', { href: m.url || '#', target: '_blank', rel: 'noreferrer', style: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '140px', height: '140px', borderRadius: '8px', border: '1px solid #ccc', background: '#f3f4f6', color: '#0a2e1a', textDecoration: 'none', fontSize: '13px' } }, '🎬 Vidéo'),
+                  React.createElement('button', { type: 'button', onClick: function() { removeMedia(i) }, title: 'Retirer cette photo', style: { position: 'absolute', top: '-8px', right: '-8px', background: '#991b1b', color: '#fff', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', fontSize: '14px', lineHeight: '1' } }, '×'),
+                  React.createElement('input', { value: m.note || '', onChange: function(e) { updMediaNote(i, e.target.value) }, placeholder: 'Légende…', style: Object.assign({}, inp2, { marginTop: '4px', fontSize: '12px', padding: '6px 8px' }) })
+                )
+              })
+            )
+          ) : null,
 
           // Superviseur
           React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' } },
