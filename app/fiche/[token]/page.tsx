@@ -33,7 +33,7 @@ const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
 )
 
-type Media = { path: string; type: string; name: string; url?: string | null }
+type Media = { path: string; type: string; name: string; url?: string | null; note?: string }
 
 export default function FicheTerrain({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params)
@@ -55,6 +55,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [datePassage, setDatePassage] = useState("")
   const [superviseurNom, setSuperviseurNom] = useState("Fabrice")
   const [files, setFiles] = useState<File[]>([])
+  const [fileNotes, setFileNotes] = useState<string[]>([])
   const [mediasExistants, setMediasExistants] = useState<Media[]>([])
 
   // Mode contrôle (passage de type "controle") : rubriques spécifiques.
@@ -128,7 +129,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     setSaving(true); setErreur(null); setProgress("")
     try {
       // 1) Upload direct des médias vers Storage via URL signée.
-      let medias: Media[] = mediasExistants.map((m) => ({ path: m.path, type: m.type, name: m.name }))
+      let medias: Media[] = mediasExistants.map((m) => ({ path: m.path, type: m.type, name: m.name, note: m.note || "" }))
       if (files.length) {
         setProgress("Envoi des médias…")
         const r = await fetch("/api/fiche-terrain", {
@@ -143,7 +144,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setProgress(`Envoi média ${i + 1}/${d.uploads.length}…`)
           const up = await sb.storage.from(BUCKET).uploadToSignedUrl(u.path, u.token, files[i])
           if (up.error) throw new Error("Échec envoi " + files[i].name + " : " + up.error.message)
-          medias.push({ path: u.path, type: u.type, name: u.name })
+          medias.push({ path: u.path, type: u.type, name: u.name, note: fileNotes[i] || "" })
         }
       }
       // 2) Enregistrer la fiche.
@@ -279,20 +280,35 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       </>)}
 
       <Lbl>Photos / Vidéos</Lbl>
+      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
+        Ajoutez vos photos, puis écrivez une remarque sous chacune (ce que montre la photo). La remarque apparaît sous la photo sur la fiche.
+      </div>
       <label style={{ ...chip, display: "block", textAlign: "center", padding: "14px", border: "2px dashed " + OR, background: "#fffdf5", cursor: "pointer" }}>
         📷 Ajouter photos / vidéos
         <input type="file" accept="image/*,video/*" multiple capture="environment" style={{ display: "none" }}
-          onChange={(e) => setFiles(files.concat(Array.from(e.target.files || [])))} />
+          onChange={(e) => { const add = Array.from(e.target.files || []); setFiles(files.concat(add)); setFileNotes(fileNotes.concat(add.map(() => ""))) }} />
       </label>
-      {mediasExistants.length ? <div style={{ fontSize: 13, color: "#555", marginTop: 8 }}>{mediasExistants.length} média(s) déjà envoyé(s).</div> : null}
+      {mediasExistants.length ? (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
+          {mediasExistants.map((m, i) => (
+            <div key={"ex" + i} style={{ width: 120 }}>
+              {String(m.type || "").startsWith("image/") && m.url
+                ? <img src={m.url} alt="" style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8 }} />
+                : <div style={{ width: 120, height: 120, borderRadius: 8, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🎬</div>}
+              <input value={m.note || ""} onChange={(e) => setMediasExistants(mediasExistants.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} placeholder="Remarque sur cette photo…" style={{ ...inp, marginTop: 4, fontSize: 13, padding: "6px 8px" }} />
+            </div>
+          ))}
+        </div>
+      ) : null}
       {files.length ? (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
           {files.map((f, i) => (
-            <div key={i} style={{ position: "relative" }}>
+            <div key={i} style={{ width: 120, position: "relative" }}>
               {f.type.startsWith("image/")
-                ? <img src={URL.createObjectURL(f)} alt="" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8 }} />
-                : <div style={{ width: 72, height: 72, borderRadius: 8, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🎬</div>}
-              <button type="button" onClick={() => setFiles(files.filter((_, j) => j !== i))} style={{ position: "absolute", top: -6, right: -6, background: "#991b1b", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer" }}>×</button>
+                ? <img src={URL.createObjectURL(f)} alt="" style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8 }} />
+                : <div style={{ width: 120, height: 120, borderRadius: 8, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🎬</div>}
+              <button type="button" onClick={() => { setFiles(files.filter((_, j) => j !== i)); setFileNotes(fileNotes.filter((_, j) => j !== i)) }} style={{ position: "absolute", top: -6, right: -6, background: "#991b1b", color: "#fff", border: "none", borderRadius: "50%", width: 22, height: 22, cursor: "pointer" }}>×</button>
+              <input value={fileNotes[i] || ""} onChange={(e) => setFileNotes(fileNotes.map((n, j) => (j === i ? e.target.value : n)))} placeholder="Remarque sur cette photo…" style={{ ...inp, marginTop: 4, fontSize: 13, padding: "6px 8px" }} />
             </div>
           ))}
         </div>

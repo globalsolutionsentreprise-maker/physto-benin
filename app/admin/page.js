@@ -6877,9 +6877,11 @@ function buildFichePassageHtml(form, client, numero, medias) {
       '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
       medias.map(function(m) {
         var isImg = String(m.type || '').indexOf('image') === 0
-        return isImg
-          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px">'
+        var media = isImg
+          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px;display:block">'
           : '<a href="' + (m.url || '#') + '" style="display:flex;align-items:center;justify-content:center;width:150px;height:150px;border:1px solid #ccc;border-radius:6px;background:#f3f4f6;color:#0a2e1a;text-decoration:none;font-size:13px;text-align:center">🎬 Vidéo<br>(voir en ligne)</a>'
+        var cap = m.note ? '<div style="width:150px;font-size:11px;color:#333;line-height:1.4;margin-top:3px">' + m.note + '</div>' : ''
+        return '<div style="width:150px">' + media + cap + '</div>'
       }).join('') +
       '</div>' +
       '</div>'
@@ -7042,9 +7044,11 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
       '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
       medias.map(function(m) {
         var isImg = String(m.type || '').indexOf('image') === 0
-        return isImg
-          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px">'
+        var media = isImg
+          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px;display:block">'
           : '<a href="' + (m.url || '#') + '" style="display:flex;align-items:center;justify-content:center;width:150px;height:150px;border:1px solid #ccc;border-radius:6px;background:#f3f4f6;color:#0a2e1a;text-decoration:none;font-size:13px;text-align:center">🎬 Vidéo<br>(voir en ligne)</a>'
+        var cap = m.note ? '<div style="width:150px;font-size:11px;color:#333;line-height:1.4;margin-top:3px">' + m.note + '</div>' : ''
+        return '<div style="width:150px">' + media + cap + '</div>'
       }).join('') +
       '</div></div>'
     : '') +
