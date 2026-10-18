@@ -6992,13 +6992,8 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '</div>' +
     '</div>' +
 
-    '<div style="margin-bottom:16px">' +
-    '<div class="section-title">Remarques</div>' +
-    '<div style="border:1px solid #ccc;border-radius:4px;min-height:60px;padding:10px;font-size:13px;line-height:1.6">' + (form.remarques || '') + '</div>' +
-    '</div>' +
-
-    // Pas de photos sur la fiche de passage : c'est une preuve de passage.
-    // Les photos remontées par le technicien alimentent le rapport d'intervention.
+    // Fiche de passage épurée : preuve de passage. Pas de texte libre ni de photos.
+    // Observations et photos du technicien vont dans le rapport d'intervention.
 
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
 
