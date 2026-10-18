@@ -382,24 +382,42 @@ function SignaturePad({ value, onChange }: { value: string; onChange: (v: string
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const drawing = useRef(false)
   const last = useRef<{ x: number; y: number } | null>(null)
+  // Valeur courante lue par le re-dimensionnement (évite une fermeture périmée).
+  const valueRef = useRef(value)
+  valueRef.current = value
 
   useEffect(() => {
     const c = canvasRef.current
     if (!c) return
-    const ratio = window.devicePixelRatio || 1
-    c.width = c.offsetWidth * ratio
-    c.height = c.offsetHeight * ratio
-    const ctx = c.getContext("2d")
-    if (!ctx) return
-    ctx.scale(ratio, ratio)
-    ctx.lineWidth = 2.2
-    ctx.lineCap = "round"
-    ctx.lineJoin = "round"
-    ctx.strokeStyle = "#0a2e1a"
-    if (value) {
-      const img = new Image()
-      img.onload = () => ctx.drawImage(img, 0, 0, c.offsetWidth, c.offsetHeight)
-      img.src = value
+    function setup() {
+      const el = canvasRef.current
+      if (!el) return
+      const w = el.offsetWidth, h = el.offsetHeight
+      if (!w || !h) return // pas encore mis en page : on réessaiera au resize
+      const ratio = window.devicePixelRatio || 1
+      el.width = w * ratio
+      el.height = h * ratio
+      const ctx = el.getContext("2d")
+      if (!ctx) return
+      ctx.scale(ratio, ratio)
+      ctx.lineWidth = 2.2
+      ctx.lineCap = "round"
+      ctx.lineJoin = "round"
+      ctx.strokeStyle = "#0a2e1a"
+      if (valueRef.current) {
+        const img = new Image()
+        img.onload = () => ctx.drawImage(img, 0, 0, w, h)
+        img.src = valueRef.current
+      }
+    }
+    setup()
+    // Rotation / redimensionnement du téléphone : on reconfigure en gardant
+    // la signature déjà enregistrée.
+    window.addEventListener("resize", setup)
+    window.addEventListener("orientationchange", setup)
+    return () => {
+      window.removeEventListener("resize", setup)
+      window.removeEventListener("orientationchange", setup)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
