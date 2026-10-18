@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792237379.0963185,
-    "ast_hash": "3838a0c417ac00a82acc8f8dc4a9e140",
+    "mtime": 1792327332.3256032,
+    "ast_hash": "59ec9edb2222830a77277f0b4c535445",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "app/api/generate-contract/route.js": {
-    "mtime": 1792017402.8593264,
-    "ast_hash": "7a9fab203630ca64088d95b6ca79a593",
+    "mtime": 1792316784.2597368,
+    "ast_hash": "0e969c8a085bc87fc8d18a5d8c640250",
     "semantic_hash": ""
   },
   "app/api/meteo-cotonou/route.js": {
@@ -1045,13 +1045,13 @@
     "semantic_hash": ""
   },
   "app/api/fiche-terrain/route.js": {
-    "mtime": 1791842795.5103827,
-    "ast_hash": "8ea4ba87d1ef970825ab66c10c861ada",
+    "mtime": 1792327343.4882572,
+    "ast_hash": "f6ca696a1b1d8195e77cb9ddd0e5c033",
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1792236376.418496,
-    "ast_hash": "ee2826f3064b14b5ca4bf3ff51a6bc4e",
+    "mtime": 1792327951.751169,
+    "ast_hash": "09ed2b832432fe32c0abe20cfc8e906a",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {
@@ -1110,18 +1110,18 @@
     "semantic_hash": ""
   },
   "docs/manuel-source/gen.py": {
-    "mtime": 1792234536.1467652,
-    "ast_hash": "ee665e26cfe36828632f28abbfd7890c",
+    "mtime": 1792238612.650767,
+    "ast_hash": "d5d6fc4fe201e0f6f79443c44fb0595a",
     "semantic_hash": ""
   },
   "docs/livret-hotellerie-gse.html": {
-    "mtime": 1792229841.8751798,
-    "ast_hash": "a8f2ae7be2bcfb31c1192b1d2afcea07",
+    "mtime": 1792244418.2726355,
+    "ast_hash": "22b83d6f2f107dd496d1ee8d51c9875b",
     "semantic_hash": ""
   },
   "docs/manuel-source/index.html": {
-    "mtime": 1792234536.1464067,
-    "ast_hash": "a81840fb1a81bf60a95472f18302a850",
+    "mtime": 1792238620.0322924,
+    "ast_hash": "7e0da8009dfd815926fe7c4af49ad8d5",
     "semantic_hash": ""
   },
   "docs/manuel-source/logo-gse.png": {
@@ -1147,6 +1147,61 @@
   "docs/manuel-source/photo-phyto.jpg": {
     "mtime": 1792234536.1488214,
     "ast_hash": "3377413ec94da669b9f4790aec4cebc4",
+    "semantic_hash": ""
+  },
+  "docs/gen-livret.py": {
+    "mtime": 1792244973.4679594,
+    "ast_hash": "ed2f29b8ef6268da567e12ddc6a88003",
+    "semantic_hash": ""
+  },
+  "docs/sectors_data.py": {
+    "mtime": 1792245112.9191082,
+    "ast_hash": "dac80362ff52139b569032975bd44b7e",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261018120000_fiche_date_fin.sql": {
+    "mtime": 1792313748.6049638,
+    "ast_hash": "519ac20d1c9e397e0238459d811ad7dc",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261018130000_fiche_signatures.sql": {
+    "mtime": 1792314789.3499908,
+    "ast_hash": "c2da2c76577dbd1448445f49bf564dca",
+    "semantic_hash": ""
+  },
+  "docs/livret-commerces-gse.html": {
+    "mtime": 1792245117.1834946,
+    "ast_hash": "1da4f85108238276566ebba943e09de6",
+    "semantic_hash": ""
+  },
+  "docs/livret-entrepots-gse.html": {
+    "mtime": 1792245117.1824064,
+    "ast_hash": "5e81280c81d06f44f5d5c735fce4900c",
+    "semantic_hash": ""
+  },
+  "docs/livret-restauration-gse.html": {
+    "mtime": 1792245117.180875,
+    "ast_hash": "d3c76937ec4e1abbe1fd9fec9d552231",
+    "semantic_hash": ""
+  },
+  "docs/manuel-source/manuel.pdf": {
+    "mtime": 1792238623.6090286,
+    "ast_hash": "a3749c10a07d708b4327b6dd1f3343bd",
+    "semantic_hash": ""
+  },
+  "lib/fiche-html.js": {
+    "mtime": 1792327249.0276928,
+    "ast_hash": "00d1c49d6bb92229df273e1935e58e2b",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261018140000_fiche_journees.sql": {
+    "mtime": 1792317773.4683805,
+    "ast_hash": "bf6845be922ad987fe203d8a584e415d",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261018150000_clients_bilingue.sql": {
+    "mtime": 1792327338.3790104,
+    "ast_hash": "37b5e4d29c7cace6951483167c686926",
     "semantic_hash": ""
   }
 }

@@ -2,6 +2,7 @@
 
 import { use, useEffect, useRef, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
+import { buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 
 // Fiche de passage terrain, remplie par le technicien sur son téléphone via un
 // lien token (un par passage). Pré-remplie depuis le contrat ; photos/vidéos
@@ -192,6 +193,43 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     }
   }
 
+  // Télécharge la fiche FINALISÉE (avec les signatures) depuis le téléphone de
+  // Fabrice, pour l'envoyer au client. Bilingue (FR + EN dans le même PDF) si le
+  // client est anglophone. On reconstruit la fiche à partir de l'état saisi, en
+  // dérivant dates/horaires comme à l'enregistrement.
+  function telechargerFiche() {
+    const c = (info && info.client) || {}
+    const bilingue = !!c.bilingue
+    const jrs = journees.filter((j) => j.date || j.debut || j.fin)
+    const jr0 = jrs[0] || { date: datePassage, debut: dureeDebut, fin: dureeFin }
+    const dpass = jr0.date || datePassage
+    const dfin = jrs.length > 1 ? jrs[jrs.length - 1].date : ""
+    const numero = done || "—"
+    let html: string
+    if (estControle) {
+      const fiche = {
+        controle_data: { postes, infestation, constat, recommandations, prochainPassage, signatureDataUrl, clientSignataire },
+        date_passage: dpass, date_fin_passage: dfin, lieu_prestation: (info && info.lieu) || "",
+        signature_client_data_url: signatureDataUrl, client_signataire: clientSignataire,
+        signature_tech_data_url: signatureTech, superviseur_nom: superviseurNom, superviseur_contact: "",
+      }
+      html = buildFicheControleHtml(fiche, { entreprise: c.entreprise, nom: c.nom, adresse: c.adresse }, numero, [], { bilingue })
+    } else {
+      const form = {
+        nomClient: c.entreprise || c.nom || "", adresse: c.adresse || "", tel: c.tel || "", mob: "",
+        typePassage, prestations, nuisibles, produits, produitsCoches, autresPrestation: "", autresNuisible: "",
+        lieuPrestation: (info && info.lieu) || "", journees: jrs,
+        dureeDebut: jr0.debut || "", dureeFin: jr0.fin || "", datePassage: dpass, dateFinPassage: dfin,
+        clientSignataire, signatureClient: signatureDataUrl, signatureTech, superviseurNom, superviseurContact: "",
+      }
+      html = buildFichePassageHtml(form, { entreprise: c.entreprise, nom: c.nom }, numero, [], { bilingue })
+    }
+    // <base> : les chemins racine (logo) ne se résolvent pas dans une URL blob:.
+    html = html.replace("<head>", '<head><base href="' + window.location.origin + '/">')
+    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }))
+    window.open(url, "_blank")
+  }
+
   if (loading) return <Shell><p style={{ padding: 24, textAlign: "center" }}>Chargement…</p></Shell>
   if (erreur && !info) return <Shell><p style={{ padding: 24, textAlign: "center", color: "#991b1b" }}>{erreur}</p></Shell>
   if (done) return (
@@ -200,7 +238,12 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         <div style={{ fontSize: 48 }}>✅</div>
         <h2 style={{ color: VERT, margin: "12px 0" }}>Fiche envoyée</h2>
         <p style={{ color: "#555" }}>N° {done}. Merci Fabrice, le bureau la reçoit.</p>
-        <p style={{ color: "#999", fontSize: 13, marginTop: 10 }}>Vous pouvez fermer cette page.</p>
+        <button type="button" onClick={telechargerFiche} style={{ background: VERT, color: OR, border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 16, fontWeight: 700, cursor: "pointer", width: "100%", marginTop: 18 }}>
+          📄 Télécharger la fiche{info && info.client && info.client.bilingue ? " (FR + EN)" : ""}
+        </button>
+        <p style={{ color: "#777", fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
+          La fiche s'ouvre avec les signatures. Enregistrez-la en PDF (menu « Partager » / « Imprimer » du téléphone) puis envoyez-la au client.
+        </p>
       </div>
     </Shell>
   )
@@ -350,17 +393,25 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <div style={{ marginTop: 18, paddingTop: 14, borderTop: "2px solid " + OR }}>
         <div style={{ fontWeight: 700, color: VERT, fontSize: 15, marginBottom: 2 }}>Signatures (sur place)</div>
         <div style={{ fontSize: 13, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
-          Faites signer le client au doigt, puis signez vous-même. Les deux signatures apparaissent sur la fiche.
+          Signez d'abord votre partie. Si le client veut lire la fiche avant de signer, téléchargez-la et envoyez-la lui (bouton ci-dessous) : votre signature y figure déjà. Le client peut aussi signer directement au doigt ci-dessous.
         </div>
 
-        <Lbl>Nom du signataire (client)</Lbl>
-        <input value={clientSignataire} onChange={(e) => setClientSignataire(e.target.value)} placeholder="Personne qui réceptionne sur site" style={inp} />
-        <Lbl>Signature du client</Lbl>
-        <SignaturePad value={signatureDataUrl} onChange={setSignatureDataUrl} />
-
-        <div style={{ height: 10 }} />
         <Lbl>Signature du technicien ({superviseurNom || "vous"})</Lbl>
         <SignaturePad value={signatureTech} onChange={setSignatureTech} />
+
+        <button type="button" onClick={telechargerFiche} disabled={!signatureTech}
+          style={{ width: "100%", background: "#fff", color: VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "13px", fontSize: 15, fontWeight: 700, cursor: signatureTech ? "pointer" : "not-allowed", marginTop: 12, opacity: signatureTech ? 1 : 0.5 }}>
+          📄 Télécharger ma fiche signée{info && info.client && info.client.bilingue ? " (FR + EN)" : ""} → envoyer au client
+        </button>
+        <div style={{ fontSize: 12.5, color: "#8a8a8a", marginTop: 6, lineHeight: 1.5 }}>
+          {signatureTech ? "La fiche s'ouvre avec votre signature. Enregistrez-la en PDF (menu Partager / Imprimer) et envoyez-la au client pour lecture, puis signature." : "Signez votre partie ci-dessus pour activer le téléchargement."}
+        </div>
+
+        <div style={{ height: 16 }} />
+        <Lbl>Nom du signataire (client)</Lbl>
+        <input value={clientSignataire} onChange={(e) => setClientSignataire(e.target.value)} placeholder="Personne qui réceptionne sur site" style={inp} />
+        <Lbl>Signature du client (après lecture)</Lbl>
+        <SignaturePad value={signatureDataUrl} onChange={setSignatureDataUrl} />
       </div>
 
       {erreur ? <div style={{ color: "#991b1b", margin: "12px 0", fontSize: 14 }}>{erreur}</div> : null}

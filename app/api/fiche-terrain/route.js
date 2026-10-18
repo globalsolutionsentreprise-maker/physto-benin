@@ -66,6 +66,7 @@ export async function GET(req) {
         entreprise: (client && client.entreprise) || "",
         adresse: (devis && devis.etablissement_adresse) || (client && client.adresse) || p.adresse || "",
         tel: (client && client.telephone) || "",
+        bilingue: !!(client && client.bilingue),
       },
       lieu: (devis && devis.etablissement_nom) || "",
       prestationsDevis,
