@@ -6730,7 +6730,7 @@ function ouvrirDocImprimable(html, largeur, hauteur) {
 
 function gseHeader(title, ref) {
   return '<div class="hdr">' +
-    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
+    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin by GSE</div></div>' +
     '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right"><div class="title">' + title + '</div>' + (ref ? '<div class="ref">' + ref + '</div>' : '') + '</div>' +
     '</div>' +
@@ -6745,7 +6745,7 @@ function gseSigs() {
 }
 
 function gseFooter() {
-  return '<div class="gse-footer">Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
+  return '<div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
 }
 
 function buildCertificatHtml(type, form) {
@@ -6930,7 +6930,7 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div class="hdr">' +
     '<div class="hdr-left">' +
     '<div class="sub">Global Solutions Entreprise</div>' +
-    '<div class="name">Phyto Bénin</div>' +
+    '<div class="name">Phyto Bénin by GSE</div>' +
     '</div>' +
     '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right">' +
@@ -7030,7 +7030,7 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '</div>' +
 
     '<div class="footer">' +
-    'Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
     'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
     '</div>' +
 
@@ -7104,7 +7104,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
 
     '<div class="page">' +
     '<div class="hdr">' +
-    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin</div></div>' +
+    '<div class="hdr-left"><div class="sub">Global Solutions Entreprise</div><div class="name">Phyto Bénin by GSE</div></div>' +
     '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right"><div class="title">Fiche de Contrôle</div><div class="num">N° ' + numero + '</div></div>' +
     '</div>' +
@@ -7191,7 +7191,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '</div>' +
 
     '<div class="footer">' +
-    'Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
+    'Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>' +
     'RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin' +
     '</div>' +
 

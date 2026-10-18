@@ -334,7 +334,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
   <div class="hdr">
     <div class="hdr-left">
       <div class="sub">Global Solutions Entreprise</div>
-      <div class="name">Phyto Bénin</div>
+      <div class="name">Phyto Bénin by GSE</div>
     </div>
     <img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">
     <div class="hdr-right">
@@ -538,7 +538,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
   </div>
 
-  <div class="gse-footer">Global Solutions Entreprise · Phyto Bénin | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
+  <div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
 
 </div>
 </body>
