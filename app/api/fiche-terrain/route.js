@@ -114,6 +114,7 @@ export async function POST(req) {
       duree_fin: f.dureeFin || null,
       remarques: f.remarques || null,
       date_passage: f.datePassage || p.date_intervention || new Date().toISOString().slice(0, 10),
+      date_fin_passage: f.dateFinPassage || null,
       superviseur_nom: f.superviseurNom || null,
       superviseur_contact: f.superviseurContact || null,
       medias,

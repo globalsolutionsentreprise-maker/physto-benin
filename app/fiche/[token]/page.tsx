@@ -53,6 +53,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [dureeFin, setDureeFin] = useState("")
   const [remarques, setRemarques] = useState("")
   const [datePassage, setDatePassage] = useState("")
+  const [dateFinPassage, setDateFinPassage] = useState("")
   const [superviseurNom, setSuperviseurNom] = useState("Fabrice")
   const [files, setFiles] = useState<File[]>([])
   const [fileNotes, setFileNotes] = useState<string[]>([])
@@ -97,6 +98,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setRemarques(f.remarques || "")
           setSuperviseurNom(f.rempli_par || "Fabrice")
           if (f.date_passage) setDatePassage(f.date_passage)
+          if (f.date_fin_passage) setDateFinPassage(f.date_fin_passage)
           const cd = f.controle_data || {}
           if (cd.postes) setPostes({ installes: cd.postes.installes || "", actifs: cd.postes.actifs || "", niveau: cd.postes.niveau || "", remarque: cd.postes.remarque || "" })
           if (cd.infestation) setInfestation(cd.infestation)
@@ -157,7 +159,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           fiche: {
             typePassage: estControle ? "Contrôle" : typePassage,
             prestations, nuisibles, produits, produitsCoches,
-            dureeDebut, dureeFin, remarques, datePassage,
+            dureeDebut, dureeFin, remarques, datePassage, dateFinPassage,
             superviseurNom, rempliPar: superviseurNom,
             ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl } } : {}),
           },
@@ -200,6 +202,12 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
 
       <Lbl>Date du passage</Lbl>
       <input type="date" value={datePassage} onChange={(e) => setDatePassage(e.target.value)} style={inp} />
+
+      <Lbl>Date de fin (si le passage s'est étalé sur plusieurs jours)</Lbl>
+      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
+        À remplir uniquement si l'intervention a duré plus d'une journée. Laissez vide pour un passage sur une seule journée.
+      </div>
+      <input type="date" value={dateFinPassage} min={datePassage || undefined} onChange={(e) => setDateFinPassage(e.target.value)} style={inp} />
 
       {estControle && (<>
         <Lbl>Relevé des postes d'appâtage</Lbl>

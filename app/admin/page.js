@@ -2353,6 +2353,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       dureeFin: fiche.duree_fin || '',
       remarques: fiche.remarques || '',
       datePassage: fiche.date_passage || '',
+      dateFinPassage: fiche.date_fin_passage || '',
       superviseurNom: fiche.superviseur_nom || '',
       superviseurContact: fiche.superviseur_contact || '',
     }
@@ -3283,6 +3284,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       dureeFin: f.duree_fin || '',
       remarques: f.remarques || '',
       datePassage: f.date_passage || '',
+      dateFinPassage: f.date_fin_passage || '',
       superviseurNom: f.superviseur_nom || '',
       superviseurContact: f.superviseur_contact || '',
       controleData: f.controle_data || {},
@@ -3319,6 +3321,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       dureeFin: '',
       remarques: '',
       datePassage: yyyy + '-' + mm + '-' + dd,
+      dateFinPassage: '',
       superviseurNom: '',
       superviseurContact: '',
     })
@@ -3341,6 +3344,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         duree_fin: ficheForm.dureeFin,
         remarques: ficheForm.remarques,
         date_passage: ficheForm.datePassage,
+        date_fin_passage: ficheForm.dateFinPassage || null,
         superviseur_nom: ficheForm.superviseurNom,
         superviseur_contact: ficheForm.superviseurContact,
         controle_data: estControle ? (ficheForm.controleData || {}) : null,
@@ -3459,6 +3463,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('div', null,
               React.createElement('label', { style: lbl2 }, 'Date de passage'),
               React.createElement('input', { type: 'date', value: ficheForm.datePassage || '', onChange: function(e) { upd('datePassage', e.target.value) }, style: inp2 })
+            ),
+            React.createElement('div', null,
+              React.createElement('label', { style: lbl2 }, 'Date de fin (passage sur plusieurs jours)'),
+              React.createElement('input', { type: 'date', value: ficheForm.dateFinPassage || '', min: ficheForm.datePassage || undefined, onChange: function(e) { upd('dateFinPassage', e.target.value) }, style: inp2 })
             )
           ),
 
@@ -6737,6 +6745,7 @@ function buildCertificatHtml(type, form) {
 function buildFichePassageHtml(form, client, numero, medias) {
   var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
   var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
+  var dateFinAff = form.dateFinPassage ? new Date(form.dateFinPassage).toLocaleDateString('fr-FR') : ''
 
   function chk(checked) {
     return '<span style="display:inline-block;width:12px;height:12px;border:1.5px solid #333;border-radius:2px;vertical-align:middle;margin-right:4px;background:' + (checked ? '#0a2e1a' : '#fff') + ';text-align:center;line-height:12px;font-size:9px;color:#fff">' + (checked ? '✓' : '') + '</span>'
@@ -6923,8 +6932,8 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
 
     '<div>' +
-    '<div class="section-title" style="margin-bottom:8px">Date de passage</div>' +
-    '<div style="font-size:14px;font-weight:700;color:#0a2e1a">' + dateAff + '</div>' +
+    '<div class="section-title" style="margin-bottom:8px">' + (dateFinAff ? 'Période de passage' : 'Date de passage') + '</div>' +
+    '<div style="font-size:14px;font-weight:700;color:#0a2e1a">' + (dateFinAff ? 'du ' + dateAff + ' au ' + dateFinAff : dateAff) + '</div>' +
     '</div>' +
 
     '<div></div>' +
@@ -6971,6 +6980,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
   var adresse = (client && client.adresse) || ''
   var lieu = (fiche && fiche.lieu_prestation) || ''
   var dateAff = (fiche && fiche.date_passage) ? new Date(fiche.date_passage).toLocaleDateString('fr-FR') : '__________'
+  var dateFinAff = (fiche && fiche.date_fin_passage) ? new Date(fiche.date_fin_passage).toLocaleDateString('fr-FR') : ''
   var prochain = cd.prochainPassage ? new Date(cd.prochainPassage).toLocaleDateString('fr-FR') : ''
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
   function couleurNiveau(v) { return v === 'Nul' ? '#16a34a' : v === 'Élevé' ? '#dc2626' : (v ? '#d97706' : '#999') }
@@ -7036,7 +7046,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '<div class="section-title">Informations client</div>' +
     '<div class="field-row"><span class="field-label">Client</span><span class="field-value">' + esc(nomClient) + '</span></div>' +
     '<div class="field-row"><span class="field-label">Site / lieu</span><span class="field-value">' + esc(lieu || adresse) + '</span></div>' +
-    '<div class="field-row"><span class="field-label">Date du contrôle</span><span class="field-value">' + dateAff + '</span></div>' +
+    '<div class="field-row"><span class="field-label">' + (dateFinAff ? 'Période du contrôle' : 'Date du contrôle') + '</span><span class="field-value">' + (dateFinAff ? 'du ' + dateAff + ' au ' + dateFinAff : dateAff) + '</span></div>' +
     '</div>' +
 
     '<div style="margin-bottom:16px">' +
