@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { nomFichierDoc, buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 import QRCode from "qrcode"
+import { appendEnglishPage, DEVIS_EN } from "@/lib/doc-bilingue"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
@@ -2092,7 +2093,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
       } else if (!enLigne) {
         setMsg("✓ Devis modifié")
-        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, lignes: lignesClean, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement }
+        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, lignes: lignesClean, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement, bilingue: cl ? !!cl.bilingue : false }
         imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
       setEditingDevis(null)
@@ -3865,6 +3866,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       "</div>" +
       gseFooter() +
       "</div></body></html>"
+    if (d.bilingue) html = appendEnglishPage(html, DEVIS_EN)
     ouvrirDocImprimable(html, 820, 900)
   }
 

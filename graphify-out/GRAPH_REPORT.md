@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-18)
 
 ## Corpus Check
-- 205 files · ~783,569 words
+- 206 files · ~784,024 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 949 nodes · 1020 edges · 117 communities (77 shown, 40 thin omitted)
+- 952 nodes · 1026 edges · 117 communities (77 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bed4a414`
+- Built from commit: `2a819f33`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -137,11 +137,11 @@
   app/admin/page.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
+- `SectionClientsDevis()` --calls--> `appendEnglishPage()`  [EXTRACTED]
+  app/admin/page.js → lib/doc-bilingue.js
 - `SectionClientsDevis()` --calls--> `buildFicheControleHtml()`  [EXTRACTED]
   app/admin/page.js → lib/fiche-html.js
 - `SectionClientsDevis()` --calls--> `buildFichePassageHtml()`  [EXTRACTED]
-  app/admin/page.js → lib/fiche-html.js
-- `SectionClientsDevis()` --calls--> `nomFichierDoc()`  [EXTRACTED]
   app/admin/page.js → lib/fiche-html.js
 
 ## Import Cycles
@@ -394,8 +394,8 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.08
-Nodes (37): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+29 more)
+Cohesion: 0.07
+Nodes (39): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+31 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.67

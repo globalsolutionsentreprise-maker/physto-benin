@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792331865.140245,
-    "ast_hash": "589d883a940f0d287ba2dfd0d744707f",
+    "mtime": 1792332293.9471295,
+    "ast_hash": "f05bbb868bbcfca6c974b39d922c1224",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -1212,6 +1212,11 @@
   "app/api/album/route.js": {
     "mtime": 1792331059.1970406,
     "ast_hash": "b4d18e7611222567b07efad1c8fbc29e",
+    "semantic_hash": ""
+  },
+  "lib/doc-bilingue.js": {
+    "mtime": 1792332283.4526315,
+    "ast_hash": "7bde7cf554af7490cdca002f5c277e5d",
     "semantic_hash": ""
   }
 }
