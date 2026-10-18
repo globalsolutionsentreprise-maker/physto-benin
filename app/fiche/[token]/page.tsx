@@ -283,16 +283,16 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         <div style={{ flex: 1 }}><Lbl>Fin</Lbl><input value={dureeFin} onChange={(e) => setDureeFin(e.target.value)} placeholder="11h30" style={inp} /></div>
       </div>
 
-      <Lbl>Observations libres</Lbl>
+      <Lbl>Observations libres (pour le rapport)</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
-        Écrivez librement tout ce que vous voulez noter sur le passage : constat, zones traitées, difficultés, conseils au client…
+        Écrivez librement tout ce que vous notez : constat, zones traitées, difficultés, conseils au client… Ces notes servent à rédiger le rapport d'intervention (elles ne figurent pas telles quelles sur la fiche).
       </div>
       <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={4} placeholder="Écrivez ici…" style={{ ...inp, resize: "vertical" }} />
       </>)}
 
-      <Lbl>Photos / Vidéos</Lbl>
+      <Lbl>Photos / Vidéos (pour le rapport)</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
-        Ajoutez vos photos, puis écrivez une remarque sous chacune (ce que montre la photo). La remarque apparaît sous la photo sur la fiche.
+        Ajoutez vos photos, puis écrivez une remarque sous chacune (ce que montre la photo). Les photos et leurs remarques servent au rapport d'intervention, pas à la fiche.
       </div>
       <label style={{ ...chip, display: "block", textAlign: "center", padding: "14px", border: "2px dashed " + OR, background: "#fffdf5", cursor: "pointer" }}>
         📷 Ajouter photos / vidéos

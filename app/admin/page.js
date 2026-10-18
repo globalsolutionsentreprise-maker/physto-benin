@@ -2467,6 +2467,29 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     formSetter(function(prev) { return Object.assign({}, prev, { photos: (prev.photos || []).filter(function(u) { return u !== url }) }) })
   }
 
+  // Copie les photos (images) de la fiche de passage (bucket privé, URLs signées)
+  // vers le bucket public des rapports, et les ajoute aux photos du rapport.
+  async function importerPhotosFiche(fiche, formSetter, setUploading) {
+    var imgs = (fiche.medias || []).filter(function(m) { return m && m.path && String(m.type || '').startsWith('image/') })
+    if (!imgs.length) return
+    setUploading(true)
+    try {
+      var signed = await signMediasAdmin(imgs)
+      for (var i = 0; i < signed.length; i++) {
+        var m = signed[i]
+        if (!m.url) continue
+        try {
+          var resp = await fetch(m.url)
+          if (!resp.ok) continue
+          var blob = await resp.blob()
+          var ext = (m.name && m.name.indexOf('.') >= 0) ? m.name.split('.').pop() : ((blob.type.split('/')[1]) || 'jpg')
+          var file = new File([blob], (m.name || ('photo-fiche.' + ext)), { type: blob.type || 'image/jpeg' })
+          await uploaderPhotoRapport(file, function() {}, formSetter)
+        } catch (e) { /* une photo qui échoue ne bloque pas les autres */ }
+      }
+    } finally { setUploading(false) }
+  }
+
   async function ajouterAudios(files, existants, setAudios, setUploading) {
     setUploading(true)
     try {
@@ -3003,6 +3026,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setRapportIntervPhase('saisie')
     setRapportIntervErreurIA(null)
     setVideosInterv([])
+    // Les photos de la fiche (bucket privé) sont copiées vers le rapport (bucket public).
+    var fiche = fichesList.find(function(f) { return f.devis_id === devis.id })
+    if (fiche) importerPhotosFiche(fiche, setRapportIntervForm, setUploadingPhotoInterv)
   }
 
   function ouvrirRapportInterv(rapport, devis, client) {
@@ -3149,7 +3175,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ),
 
         rapportIntervModal.fromFiche && React.createElement('div', { style: { background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '10px 12px', marginBottom: '16px', fontSize: '12px', color: '#065f46', lineHeight: '1.5' } },
-          '✓ Pré-rempli depuis la fiche de passage du technicien (date, technicien, produits, durée, zone, observations). Complétez puis, au besoin, lancez la rédaction par l\'IA.'
+          '✓ Pré-rempli depuis la fiche de passage du technicien (date, technicien, produits, durée, zone, observations et photos importées). Complétez puis, au besoin, lancez la rédaction par l\'IA.'
         ),
 
         React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
@@ -6971,22 +6997,8 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div style="border:1px solid #ccc;border-radius:4px;min-height:60px;padding:10px;font-size:13px;line-height:1.6">' + (form.remarques || '') + '</div>' +
     '</div>' +
 
-    // Photos intégrées (rasterisées à l'impression PDF) ; vidéos en liens signés.
-    ((medias && medias.length) ?
-      '<div style="margin-bottom:16px">' +
-      '<div class="section-title">Photos / vidéos du passage</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
-      medias.map(function(m) {
-        var isImg = String(m.type || '').indexOf('image') === 0
-        var media = isImg
-          ? '<img src="' + (m.url || '') + '" style="width:150px;height:150px;object-fit:cover;border:1px solid #ccc;border-radius:6px;display:block">'
-          : '<a href="' + (m.url || '#') + '" style="display:flex;align-items:center;justify-content:center;width:150px;height:150px;border:1px solid #ccc;border-radius:6px;background:#f3f4f6;color:#0a2e1a;text-decoration:none;font-size:13px;text-align:center">🎬 Vidéo<br>(voir en ligne)</a>'
-        var cap = m.note ? '<div style="width:150px;font-size:11px;color:#333;line-height:1.4;margin-top:3px">' + m.note + '</div>' : ''
-        return '<div style="width:150px">' + media + cap + '</div>'
-      }).join('') +
-      '</div>' +
-      '</div>'
-    : '') +
+    // Pas de photos sur la fiche de passage : c'est une preuve de passage.
+    // Les photos remontées par le technicien alimentent le rapport d'intervention.
 
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">' +
 
