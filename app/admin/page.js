@@ -2354,6 +2354,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: fiche.remarques || '',
       datePassage: fiche.date_passage || '',
       dateFinPassage: fiche.date_fin_passage || '',
+      journees: Array.isArray(fiche.journees) ? fiche.journees : [],
       clientSignataire: fiche.client_signataire || ((fiche.controle_data || {}).clientSignataire) || '',
       signatureClient: fiche.signature_client_data_url || ((fiche.controle_data || {}).signatureDataUrl) || '',
       signatureTech: fiche.signature_tech_data_url || '',
@@ -2972,8 +2973,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       .filter(function(k) { return prod[k] && String(prod[k]).trim() })
       .map(function(k) { return (labels[k] || k) + ' : ' + prod[k] })
     var dateFr = function(d) { return d ? new Date(d).toLocaleDateString('fr-FR') : '' }
+    var jrs = Array.isArray(fiche.journees) ? fiche.journees : []
     var duree = ''
-    if (fiche.date_fin_passage && fiche.date_fin_passage !== fiche.date_passage) {
+    if (jrs.length) {
+      duree = jrs.map(function(j) { return dateFr(j.date) + ' : ' + (j.debut || '') + (j.fin ? ' à ' + j.fin : '') }).join(' ; ')
+    } else if (fiche.date_fin_passage && fiche.date_fin_passage !== fiche.date_passage) {
       duree = 'du ' + dateFr(fiche.date_passage) + (fiche.duree_debut ? ' ' + fiche.duree_debut : '') +
               ' au ' + dateFr(fiche.date_fin_passage) + (fiche.duree_fin ? ' ' + fiche.duree_fin : '')
     } else if (fiche.duree_debut || fiche.duree_fin) {
@@ -3361,6 +3365,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: f.remarques || '',
       datePassage: f.date_passage || '',
       dateFinPassage: f.date_fin_passage || '',
+      journees: Array.isArray(f.journees) ? f.journees : [],
       clientSignataire: f.client_signataire || ((f.controle_data || {}).clientSignataire) || '',
       signatureClient: f.signature_client_data_url || ((f.controle_data || {}).signatureDataUrl) || '',
       signatureTech: f.signature_tech_data_url || '',
@@ -3401,6 +3406,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: '',
       datePassage: yyyy + '-' + mm + '-' + dd,
       dateFinPassage: '',
+      journees: [{ date: yyyy + '-' + mm + '-' + dd, debut: '', fin: '' }],
       clientSignataire: '',
       signatureClient: '',
       signatureTech: '',
@@ -3414,6 +3420,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setSavingFiche(true); setMsg('')
     try {
       var estControle = ficheForm.typePassage === 'Contrôle'
+      var jrs = (ficheForm.journees || []).filter(function(j) { return j && (j.date || j.debut || j.fin) })
+      var jr0 = jrs[0] || { date: ficheForm.datePassage, debut: ficheForm.dureeDebut, fin: ficheForm.dureeFin }
+      var dpass = jr0.date || ficheForm.datePassage
+      var dfin = jrs.length > 1 ? jrs[jrs.length - 1].date : (ficheForm.dateFinPassage || null)
       var ficheData = {
         type_passage: ficheForm.typePassage,
         prestations: ficheForm.prestations,
@@ -3422,11 +3432,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         nuisibles: ficheForm.nuisibles,
         autres_nuisible: ficheForm.autresNuisible,
         produits: ficheForm.produits,
-        duree_debut: ficheForm.dureeDebut,
-        duree_fin: ficheForm.dureeFin,
+        duree_debut: jr0.debut || '',
+        duree_fin: jr0.fin || '',
+        journees: jrs,
         remarques: ficheForm.remarques,
-        date_passage: ficheForm.datePassage,
-        date_fin_passage: ficheForm.dateFinPassage || null,
+        date_passage: dpass,
+        date_fin_passage: dfin || null,
         client_signataire: ficheForm.clientSignataire || null,
         signature_client_data_url: ficheForm.signatureClient || null,
         signature_tech_data_url: ficheForm.signatureTech || null,
@@ -3545,14 +3556,30 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               React.createElement('label', { style: lbl2 }, 'Mobile'),
               React.createElement('input', { value: ficheForm.mob || '', onChange: function(e) { upd('mob', e.target.value) }, style: inp2 })
             ),
-            React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, 'Date de passage'),
-              React.createElement('input', { type: 'date', value: ficheForm.datePassage || '', onChange: function(e) { upd('datePassage', e.target.value) }, style: inp2 })
-            ),
-            React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, 'Date de fin (passage sur plusieurs jours)'),
-              React.createElement('input', { type: 'date', value: ficheForm.dateFinPassage || '', min: ficheForm.datePassage || undefined, onChange: function(e) { upd('dateFinPassage', e.target.value) }, style: inp2 })
-            )
+          ),
+
+          // Journées d'intervention : date + horaires par jour
+          React.createElement('div', { style: { marginBottom: '16px' } },
+            React.createElement('label', { style: lbl2 }, "Journées d'intervention"),
+            (ficheForm.journees || []).map(function(j, i) {
+              var setJ = function(field, v) { setFicheForm(function(p) { var a = (p.journees || []).slice(); a[i] = Object.assign({}, a[i], { [field]: v }); return Object.assign({}, p, { journees: a }) }) }
+              return React.createElement('div', { key: i, style: { display: 'flex', gap: '8px', alignItems: 'flex-end', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '8px', marginBottom: '6px', background: '#fafafa' } },
+                React.createElement('div', { style: { flex: '1.4' } },
+                  React.createElement('label', { style: Object.assign({}, lbl2, { fontSize: '10px' }) }, 'Jour ' + (i + 1)),
+                  React.createElement('input', { type: 'date', value: j.date || '', onChange: function(e) { setJ('date', e.target.value) }, style: inp2 })
+                ),
+                React.createElement('div', { style: { flex: '1' } },
+                  React.createElement('label', { style: Object.assign({}, lbl2, { fontSize: '10px' }) }, 'Début'),
+                  React.createElement('input', { value: j.debut || '', placeholder: '08h00', onChange: function(e) { setJ('debut', e.target.value) }, style: inp2 })
+                ),
+                React.createElement('div', { style: { flex: '1' } },
+                  React.createElement('label', { style: Object.assign({}, lbl2, { fontSize: '10px' }) }, 'Fin'),
+                  React.createElement('input', { value: j.fin || '', placeholder: '17h00', onChange: function(e) { setJ('fin', e.target.value) }, style: inp2 })
+                ),
+                (ficheForm.journees || []).length > 1 ? React.createElement('button', { type: 'button', onClick: function() { setFicheForm(function(p) { return Object.assign({}, p, { journees: (p.journees || []).filter(function(_, k) { return k !== i }) }) }) }, style: { background: '#fff', border: '1px solid #e5b4b4', color: '#991b1b', borderRadius: '6px', padding: '7px 9px', fontSize: '12px', cursor: 'pointer' } }, '×') : null
+              )
+            }),
+            React.createElement('button', { type: 'button', onClick: function() { setFicheForm(function(p) { var a = (p.journees || []).slice(); var last = a[a.length - 1]; var nd = ''; if (last && last.date) { var dd = new Date(last.date); dd.setDate(dd.getDate() + 1); nd = dd.toISOString().slice(0, 10) } a.push({ date: nd, debut: '', fin: '' }); return Object.assign({}, p, { journees: a }) }) }, style: { background: '#fff', border: '1px dashed #d4a920', color: '#0a2e1a', borderRadius: '6px', padding: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', width: '100%' } }, '+ Ajouter une journée')
           ),
 
           // Type de passage
@@ -3620,18 +3647,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   React.createElement('input', { value: (ficheForm.produits || {})[cat.key] || '', onChange: function(e) { updProd(cat.key, e.target.value) }, placeholder: 'Nom du produit utilisé', style: Object.assign({}, inp2, { flex: 1, fontSize: '12px', padding: '5px 8px' }) })
                 )
               })
-            )
-          ),
-
-          // Durée (fiche de passage uniquement)
-          !estControle && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' } },
-            React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, "Durée · début"),
-              React.createElement('input', { value: ficheForm.dureeDebut || '', onChange: function(e) { upd('dureeDebut', e.target.value) }, placeholder: 'Ex: 08h00', style: inp2 })
-            ),
-            React.createElement('div', null,
-              React.createElement('label', { style: lbl2 }, 'Fin'),
-              React.createElement('input', { value: ficheForm.dureeFin || '', onChange: function(e) { upd('dureeFin', e.target.value) }, placeholder: 'Ex: 11h30', style: inp2 })
             )
           ),
 
@@ -6838,11 +6853,6 @@ function buildFichePassageHtml(form, client, numero, medias) {
   var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
   var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
   var dateFinAff = form.dateFinPassage ? new Date(form.dateFinPassage).toLocaleDateString('fr-FR') : ''
-  // Intervention multi-jours : on accole le jour (jj/mm) à chaque heure du créneau.
-  var jMulti = !!(dateFinAff && dateFinAff !== dateAff)
-  var ddShort = function(d) { if (!d) return ''; var x = new Date(d); return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0') }
-  var debJour = jMulti ? ' <span style="color:#555;font-size:11px">(' + ddShort(form.datePassage) + ')</span>' : ''
-  var finJour = jMulti ? ' <span style="color:#555;font-size:11px">(' + ddShort(form.dateFinPassage) + ')</span>' : ''
 
   function chk(checked) {
     return '<span style="display:inline-block;width:12px;height:12px;border:1.5px solid #333;border-radius:2px;vertical-align:middle;margin-right:4px;background:' + (checked ? '#0a2e1a' : '#fff') + ';text-align:center;line-height:12px;font-size:9px;color:#fff">' + (checked ? '✓' : '') + '</span>'
@@ -6997,11 +7007,24 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '</div>' +
 
     '<div style="margin-bottom:14px">' +
-    '<div class="section-title">Durée de prestation</div>' +
-    '<div style="display:flex;align-items:baseline;gap:12px;font-size:13px">' +
-    'de <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeDebut || '') + debJour + '&nbsp;</span>' +
-    'à <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeFin || '') + finJour + '&nbsp;</span>' +
-    '</div>' +
+    '<div class="section-title">Horaires d\'intervention</div>' +
+    ((form.journees && form.journees.length) ?
+      '<table style="width:100%;border-collapse:collapse;font-size:12.5px">' +
+      form.journees.map(function(j) {
+        var jd = j.date ? new Date(j.date).toLocaleDateString('fr-FR') : '__________'
+        var h = (j.debut || j.fin) ? ('de ' + (j.debut || '____') + ' à ' + (j.fin || '____')) : '__________'
+        return '<tr>' +
+          '<td style="padding:4px 14px 4px 0;font-weight:700;color:#0a2e1a;white-space:nowrap;border-bottom:1px solid #eee;width:1%">' + jd + '</td>' +
+          '<td style="padding:4px 0;border-bottom:1px solid #eee">' + h + '</td>' +
+          '</tr>'
+      }).join('') +
+      '</table>'
+    :
+      '<div style="display:flex;align-items:baseline;gap:12px;font-size:13px">' +
+      'de <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeDebut || '') + '&nbsp;</span>' +
+      'à <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeFin || '') + '&nbsp;</span>' +
+      '</div>'
+    ) +
     '</div>' +
 
     // Fiche de passage épurée : preuve de passage. Pas de texte libre ni de photos.

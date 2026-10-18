@@ -54,6 +54,8 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [remarques, setRemarques] = useState("")
   const [datePassage, setDatePassage] = useState("")
   const [dateFinPassage, setDateFinPassage] = useState("")
+  // Détail horaire par jour : une ligne par journée d'intervention.
+  const [journees, setJournees] = useState<{ date: string; debut: string; fin: string }[]>([{ date: "", debut: "", fin: "" }])
   const [superviseurNom, setSuperviseurNom] = useState("Fabrice")
   const [files, setFiles] = useState<File[]>([])
   const [fileNotes, setFileNotes] = useState<string[]>([])
@@ -100,6 +102,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setSuperviseurNom(f.rempli_par || "Fabrice")
           if (f.date_passage) setDatePassage(f.date_passage)
           if (f.date_fin_passage) setDateFinPassage(f.date_fin_passage)
+          setJournees(
+            Array.isArray(f.journees) && f.journees.length
+              ? f.journees
+              : [{ date: f.date_passage || "", debut: f.duree_debut || "", fin: f.duree_fin || "" }]
+          )
           const cd = f.controle_data || {}
           if (cd.postes) setPostes({ installes: cd.postes.installes || "", actifs: cd.postes.actifs || "", niveau: cd.postes.niveau || "", remarque: cd.postes.remarque || "" })
           if (cd.infestation) setInfestation(cd.infestation)
@@ -111,6 +118,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setSignatureTech(f.signature_tech_data_url || "")
         } else {
           setPrestations(presta)
+          setJournees([{ date: (d.passage && d.passage.date) || new Date().toISOString().slice(0, 10), debut: "", fin: "" }])
         }
         setMediasExistants(d.medias || [])
       })
@@ -151,7 +159,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           medias.push({ path: u.path, type: u.type, name: u.name, note: fileNotes[i] || "" })
         }
       }
-      // 2) Enregistrer la fiche.
+      // 2) Enregistrer la fiche. Les dates et horaires dérivent des journées.
+      const jrs = journees.filter((j) => j.date || j.debut || j.fin)
+      const jr0 = jrs[0] || { date: datePassage, debut: dureeDebut, fin: dureeFin }
+      const dpass = jr0.date || datePassage
+      const dfin = jrs.length > 1 ? jrs[jrs.length - 1].date : ""
       setProgress("Enregistrement de la fiche…")
       const r2 = await fetch("/api/fiche-terrain", {
         method: "POST",
@@ -161,7 +173,8 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           fiche: {
             typePassage: estControle ? "Contrôle" : typePassage,
             prestations, nuisibles, produits, produitsCoches,
-            dureeDebut, dureeFin, remarques, datePassage, dateFinPassage,
+            dureeDebut: jr0.debut || "", dureeFin: jr0.fin || "", remarques,
+            datePassage: dpass, dateFinPassage: dfin, journees: jrs,
             superviseurNom, rempliPar: superviseurNom,
             clientSignataire, signatureClient: signatureDataUrl, signatureTech,
             ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage } } : {}),
@@ -203,14 +216,24 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         {info.passage && info.passage.dejaRemplie ? <div style={{ color: OR, fontWeight: 700, marginTop: 6 }}>Déjà renseignée — vous pouvez corriger.</div> : null}
       </div>
 
-      <Lbl>Date du passage</Lbl>
-      <input type="date" value={datePassage} onChange={(e) => setDatePassage(e.target.value)} style={inp} />
-
-      <Lbl>Date de fin (si le passage s'est étalé sur plusieurs jours)</Lbl>
-      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
-        À remplir uniquement si l'intervention a duré plus d'une journée. Laissez vide pour un passage sur une seule journée.
+      <Lbl>Journées d'intervention</Lbl>
+      <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 8px", lineHeight: 1.5 }}>
+        Une ligne par jour : la date, puis l'heure de début et de fin de ce jour-là. Ajoutez une journée si l'intervention s'est étalée sur plusieurs jours.
       </div>
-      <input type="date" value={dateFinPassage} min={datePassage || undefined} onChange={(e) => setDateFinPassage(e.target.value)} style={inp} />
+      {journees.map((j, i) => (
+        <div key={i} style={{ border: "1px solid #e5e7eb", borderRadius: 10, padding: 10, marginBottom: 8, background: "#fafafa" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: VERT }}>Jour {i + 1}</span>
+            {journees.length > 1 ? <button type="button" onClick={() => setJournees(journees.filter((_, k) => k !== i))} style={{ background: "#fff", border: "1px solid #e5b4b4", color: "#991b1b", borderRadius: 8, padding: "2px 10px", fontSize: 12, cursor: "pointer" }}>Retirer</button> : null}
+          </div>
+          <input type="date" value={j.date} onChange={(e) => setJournees(journees.map((x, k) => (k === i ? { ...x, date: e.target.value } : x)))} style={inp} />
+          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <div style={{ flex: 1 }}><Lbl>Début</Lbl><input value={j.debut} onChange={(e) => setJournees(journees.map((x, k) => (k === i ? { ...x, debut: e.target.value } : x)))} placeholder="08h00" style={inp} /></div>
+            <div style={{ flex: 1 }}><Lbl>Fin</Lbl><input value={j.fin} onChange={(e) => setJournees(journees.map((x, k) => (k === i ? { ...x, fin: e.target.value } : x)))} placeholder="17h00" style={inp} /></div>
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={() => { const last = journees[journees.length - 1]; let nd = ""; if (last && last.date) { const dd = new Date(last.date); dd.setDate(dd.getDate() + 1); nd = dd.toISOString().slice(0, 10) } setJournees(journees.concat({ date: nd, debut: "", fin: "" })) }} style={{ background: "#fff", border: "1px dashed " + OR, color: VERT, borderRadius: 10, padding: "10px", fontSize: 14, fontWeight: 700, cursor: "pointer", width: "100%", marginBottom: 4 }}>+ Ajouter une journée</button>
 
       {estControle && (<>
         <Lbl>Relevé des postes d'appâtage</Lbl>
@@ -278,10 +301,6 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Autre produit (à préciser)</Lbl>
       <input value={produits.autres || ""} onChange={(e) => setProduit("autres", e.target.value)} placeholder="Tout autre produit utilisé" style={inp} />
 
-      <div style={{ display: "flex", gap: 10 }}>
-        <div style={{ flex: 1 }}><Lbl>Début</Lbl><input value={dureeDebut} onChange={(e) => setDureeDebut(e.target.value)} placeholder="08h00" style={inp} /></div>
-        <div style={{ flex: 1 }}><Lbl>Fin</Lbl><input value={dureeFin} onChange={(e) => setDureeFin(e.target.value)} placeholder="11h30" style={inp} /></div>
-      </div>
 
       <Lbl>Observations libres (pour le rapport)</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>

@@ -115,6 +115,7 @@ export async function POST(req) {
       remarques: f.remarques || null,
       date_passage: f.datePassage || p.date_intervention || new Date().toISOString().slice(0, 10),
       date_fin_passage: f.dateFinPassage || null,
+      journees: Array.isArray(f.journees) ? f.journees : [],
       client_signataire: f.clientSignataire || null,
       signature_client_data_url: f.signatureClient || null,
       signature_tech_data_url: f.signatureTech || null,
