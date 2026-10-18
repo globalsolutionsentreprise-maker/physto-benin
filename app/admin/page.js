@@ -2598,7 +2598,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setGeneratingRapportVisite(true)
     setRapportVisiteErreurIA(null)
     var { devis, client } = rapportVisiteModal
-    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+    var clientNom = clientNomComplet(client)
     try {
       var totalB64V = (audiosVisite || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
       if (totalB64V > AUDIO_MAX_TOTAL_B64) {
@@ -2685,7 +2685,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         if (!dejaPlanning) {
           var techNom = rapportVisiteForm.technicien.split(',')[0].trim()
           var techPers = personnelAdmin.find(function(p) { return p.nom === techNom })
-          var clientNomStr = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+          var clientNomStr = clientNomComplet(client)
           var { data: { session: sess } } = await db.auth.getSession()
           await fetch('/api/rh-data', {
             method: 'POST',
@@ -2738,7 +2738,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, '🔍 Rapport de visite'),
-            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '') + ' · ' + devis.prestation)
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, clientNomComplet(client) + ' · ' + devis.prestation)
           ),
           React.createElement('button', { onClick: function() { setRapportVisiteModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
         ),
@@ -3056,7 +3056,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     setGeneratingRapportInterv(true)
     setRapportIntervErreurIA(null)
     var { devis, client } = rapportIntervModal
-    var clientNom = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+    var clientNom = clientNomComplet(client)
     try {
       var totalB64I = (audiosInterv || []).reduce(function(s, a) { return s + (a.data ? a.data.length : 0) }, 0)
       if (totalB64I > AUDIO_MAX_TOTAL_B64) {
@@ -3169,7 +3169,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
           React.createElement('div', null,
             React.createElement('div', { style: { fontSize: '17px', fontWeight: '700', color: '#0a2e1a' } }, "📊 Rapport d'intervention"),
-            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '') + ' · ' + devis.prestation)
+            React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, clientNomComplet(client) + ' · ' + devis.prestation)
           ),
           React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
         ),
@@ -6827,6 +6827,13 @@ function buildCertificatHtml(type, form) {
     '</div></body></html>'
 }
 
+// Nom affichable d'un client sans séparateur orphelin : « Prénom Nom · Entreprise »,
+// ou juste l'entreprise si pas de personne, ou juste la personne.
+function clientNomComplet(client) {
+  var pers = [(client.prenom || ''), (client.nom || '')].filter(Boolean).join(' ')
+  return [pers, (client.entreprise || '')].filter(Boolean).join(' · ')
+}
+
 function buildFichePassageHtml(form, client, numero, medias) {
   var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
   var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
@@ -7199,7 +7206,7 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
 }
 
 function buildRapportVisiteHtml(form, client, devis) {
-  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+  var nomClient = clientNomComplet(client)
   var nuisiblesStr = (form.nuisibles || []).concat(form.autresNuisible ? [form.autresNuisible] : []).join(', ') || '·'
   var niveauColor = form.niveauInfestation === 'Faible' ? '#16a34a' : form.niveauInfestation === 'Élevé' ? '#dc2626' : '#d97706'
   var dateStr = form.dateVisite ? new Date(form.dateVisite).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '·'
@@ -7253,7 +7260,7 @@ function buildRapportVisiteHtml(form, client, devis) {
 }
 
 function buildRapportIntervHtml(form, client, devis) {
-  var nomClient = [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '')
+  var nomClient = clientNomComplet(client)
   var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '·'
   return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>' + nomFichierDoc('Rapport_intervention', (client && (client.entreprise || client.nom)) || '', form.dateIntervention) + '</title>' +
     GSE_DOC_STYLES +
