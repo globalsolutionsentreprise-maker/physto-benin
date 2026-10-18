@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "app/api/generate-contract/route.js": {
-    "mtime": 1792316784.2597368,
-    "ast_hash": "0e969c8a085bc87fc8d18a5d8c640250",
+    "mtime": 1792332884.1231406,
+    "ast_hash": "bb88657d96cb32bb8a98a109d50a03d8",
     "semantic_hash": ""
   },
   "app/api/meteo-cotonou/route.js": {
@@ -1215,8 +1215,8 @@
     "semantic_hash": ""
   },
   "lib/doc-bilingue.js": {
-    "mtime": 1792332555.9519024,
-    "ast_hash": "2e175d470806d012807043462128625a",
+    "mtime": 1792332944.6807268,
+    "ast_hash": "677f0ca24a6fd61294c89580d3758412",
     "semantic_hash": ""
   }
 }

@@ -810,7 +810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "candidature_route",
-      "community": 14,
+      "community": 108,
       "norm_label": "route.js"
     },
     {
@@ -820,7 +820,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "candidature_route_esc",
-      "community": 14,
+      "community": 108,
       "norm_label": "esc()"
     },
     {
@@ -830,7 +830,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "candidature_route_post",
-      "community": 14,
+      "community": 108,
       "norm_label": "post()"
     },
     {
@@ -1070,17 +1070,17 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "generate_contract_route",
-      "community": 14,
+      "community": 108,
       "norm_label": "route.js"
     },
     {
       "label": "GET()",
       "file_type": "code",
       "source_file": "app/api/generate-contract/route.js",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "generate_contract_route_get",
-      "community": 14,
+      "community": 108,
       "norm_label": "get()"
     },
     {
@@ -11553,6 +11553,28 @@
       "target": "lib_contrat_analyse_offrescontrat"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "lib_doc_bilingue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "lib_doc_bilingue_appendenglishpage",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -11562,6 +11584,17 @@
       "weight": 1.0,
       "source": "generate_contract_route_get",
       "target": "lib_contrat_analyse_offrescontrat"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L550",
+      "weight": 1.0,
+      "source": "generate_contract_route_get",
+      "target": "lib_doc_bilingue_appendenglishpage"
     },
     {
       "relation": "contains",
@@ -20021,5 +20054,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "483849afb7ac8f7c842c29f40f2b8bb5830e2870"
+  "built_at_commit": "f2933531f92508c7acc870f5f9389420d880121d"
 }

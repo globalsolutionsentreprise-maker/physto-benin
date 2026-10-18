@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-18)
 
 ## Corpus Check
-- 206 files · ~784,605 words
+- 206 files · ~786,364 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 952 nodes · 1026 edges · 117 communities (77 shown, 40 thin omitted)
+- 952 nodes · 1029 edges · 117 communities (77 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `483849af`
+- Built from commit: `f2933531`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -137,11 +137,11 @@
   app/admin/page.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
+- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
+  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `appendEnglishPage()`  [EXTRACTED]
   app/admin/page.js → lib/doc-bilingue.js
 - `SectionClientsDevis()` --calls--> `buildFicheControleHtml()`  [EXTRACTED]
-  app/admin/page.js → lib/fiche-html.js
-- `SectionClientsDevis()` --calls--> `buildFichePassageHtml()`  [EXTRACTED]
   app/admin/page.js → lib/fiche-html.js
 
 ## Import Cycles
@@ -206,8 +206,8 @@ Cohesion: 0.33
 Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill routing
 
 ### Community 14 - "Community 14"
-Cohesion: 0.09
-Nodes (46): callGeminiWithRetry(), POST(), esc(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin() (+38 more)
+Cohesion: 0.11
+Nodes (43): callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), appliquerContraintes(), blocRapport() (+35 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -395,7 +395,7 @@ Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
 Cohesion: 0.07
-Nodes (39): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+31 more)
+Nodes (42): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+34 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.67

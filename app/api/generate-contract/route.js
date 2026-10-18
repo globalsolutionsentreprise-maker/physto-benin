@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { offresContrat } from "@/lib/contrat-analyse.mjs"
+import { appendEnglishPage, CONTRAT_EN } from "@/lib/doc-bilingue"
 
 export const dynamic = "force-dynamic"
 
@@ -544,7 +545,11 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 </body>
 </html>`
 
-    return new NextResponse(html, {
+    // Client anglophone : ajouter une page EN (traduction de courtoisie, la
+    // version FR prévaut). La version FR reste intacte.
+    const htmlOut = client.bilingue ? appendEnglishPage(html, CONTRAT_EN) : html
+
+    return new NextResponse(htmlOut, {
       status: 200,
       headers: { "Content-Type": "text/html; charset=utf-8" }
     })
