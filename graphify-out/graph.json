@@ -267,7 +267,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6714",
+      "source_location": "L6728",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 108,
@@ -277,7 +277,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6720",
+      "source_location": "L6734",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 108,
@@ -287,7 +287,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6737",
+      "source_location": "L6751",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 108,
@@ -297,7 +297,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6746",
+      "source_location": "L6760",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 108,
@@ -307,7 +307,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6753",
+      "source_location": "L6767",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 108,
@@ -317,7 +317,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6757",
+      "source_location": "L6771",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 108,
@@ -327,7 +327,7 @@
       "label": "clientNomComplet()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6838",
+      "source_location": "L6852",
       "_origin": "ast",
       "id": "admin_page_clientnomcomplet",
       "community": 108,
@@ -337,7 +337,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6845",
+      "source_location": "L6859",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 108,
@@ -347,7 +347,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6899",
+      "source_location": "L6913",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 108,
@@ -357,7 +357,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6944",
+      "source_location": "L6967",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 108,
@@ -367,7 +367,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6950",
+      "source_location": "L6973",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -564,6 +564,56 @@
       "norm_label": "s"
     },
     {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_album_token_page_tsx_token_page",
+      "community": 5,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "Media",
+      "file_type": "code",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "app_album_token_page_tsx_token_page_media",
+      "community": 5,
+      "norm_label": "media"
+    },
+    {
+      "label": "Album",
+      "file_type": "code",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "token_page_album",
+      "community": 5,
+      "norm_label": "album"
+    },
+    {
+      "label": "dateFr()",
+      "file_type": "code",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "token_page_datefr",
+      "community": 5,
+      "norm_label": "datefr()"
+    },
+    {
+      "label": "AlbumPage()",
+      "file_type": "code",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "token_page_albumpage",
+      "community": 5,
+      "norm_label": "albumpage()"
+    },
+    {
       "label": "route.js",
       "file_type": "code",
       "source_file": "app/api/admin-auth/route.js",
@@ -602,6 +652,36 @@
       "id": "admin_auth_route_post",
       "community": 31,
       "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "album_route",
+      "community": 116,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "db()",
+      "file_type": "code",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "album_route_db",
+      "community": 116,
+      "norm_label": "db()"
+    },
+    {
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "album_route_get",
+      "community": 116,
+      "norm_label": "get()"
     },
     {
       "label": "route.js",
@@ -2019,7 +2099,7 @@
       "source_file": "app/fiche/[token]/page.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "id": "token_page_media",
+      "id": "app_fiche_token_page_tsx_token_page_media",
       "community": 108,
       "norm_label": "media"
     },
@@ -10319,6 +10399,57 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "app_album_token_page_tsx_token_page",
+      "target": "app_album_token_page_tsx_token_page_media",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "app_album_token_page_tsx_token_page",
+      "target": "token_page_album",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "app_album_token_page_tsx_token_page",
+      "target": "token_page_albumpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "app_album_token_page_tsx_token_page",
+      "target": "token_page_datefr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/album/[token]/page.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "token_page_albumpage",
+      "target": "token_page_datefr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/api/admin-auth/route.js",
       "source_location": "L9",
       "weight": 1.0,
@@ -10367,6 +10498,37 @@
       "confidence_score": 1.0,
       "source": "admin_auth_route_post",
       "target": "admin_auth_route_verifyadmin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "album_route",
+      "target": "album_route_db",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "album_route",
+      "target": "album_route_get",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/album/route.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "album_route_get",
+      "target": "album_route_db",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -12395,6 +12557,16 @@
       "target": "feed_xml_route_slugifier"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/fiche/[token]/page.tsx",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "app_fiche_token_page_tsx_token_page",
+      "target": "app_fiche_token_page_tsx_token_page_media",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -12486,16 +12658,6 @@
       "confidence_score": 1.0,
       "source": "app_fiche_token_page_tsx_token_page",
       "target": "token_page_lbl"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L32",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_fiche_token_page_tsx_token_page",
-      "target": "token_page_media"
     },
     {
       "relation": "contains",
@@ -19734,5 +19896,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "28586ee38c723ad2f20a337866ffc2285e5b60cd"
+  "built_at_commit": "0f3dfac5b134fe735d4f4f05eee5d3c5cfc61dbe"
 }

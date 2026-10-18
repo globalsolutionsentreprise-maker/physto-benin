@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792327332.3256032,
-    "ast_hash": "59ec9edb2222830a77277f0b4c535445",
+    "mtime": 1792331173.4989913,
+    "ast_hash": "650528a881c7e9672de80d003be71ed6",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1791916374.024678,
-    "ast_hash": "05328bbb3f8f41fab03f7ebb03589c54",
+    "mtime": 1792331098.9554918,
+    "ast_hash": "a195b5a7ba2429d7b6395cb3d0d29d5b",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -925,8 +925,8 @@
     "semantic_hash": ""
   },
   "app/components/WhatsAppFloat.tsx": {
-    "mtime": 1791663931.3260741,
-    "ast_hash": "a05661754b93a6af3599838360ec42bb",
+    "mtime": 1792331100.4377108,
+    "ast_hash": "940eab8c86726af558e0e7d1251a2141",
     "semantic_hash": ""
   },
   "app/nuisibles/[slug]/page.tsx": {
@@ -1070,8 +1070,8 @@
     "semantic_hash": ""
   },
   "app/components/SiteHeader.tsx": {
-    "mtime": 1791916374.0252345,
-    "ast_hash": "ac65e8750c86dc6369103aeaa30f034a",
+    "mtime": 1792331097.4239423,
+    "ast_hash": "9d3f79d1b17a887bba2983106177479c",
     "semantic_hash": ""
   },
   "app/fiche/layout.tsx": {
@@ -1202,6 +1202,16 @@
   "supabase/migrations/20261018150000_clients_bilingue.sql": {
     "mtime": 1792327338.3790104,
     "ast_hash": "37b5e4d29c7cace6951483167c686926",
+    "semantic_hash": ""
+  },
+  "app/album/[token]/page.tsx": {
+    "mtime": 1792331089.7589352,
+    "ast_hash": "da4151bab087479430f035f64147e4c9",
+    "semantic_hash": ""
+  },
+  "app/api/album/route.js": {
+    "mtime": 1792331059.1970406,
+    "ast_hash": "b4d18e7611222567b07efad1c8fbc29e",
     "semantic_hash": ""
   }
 }

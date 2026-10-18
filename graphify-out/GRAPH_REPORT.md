@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-18)
 
 ## Corpus Check
-- 203 files · ~782,143 words
+- 205 files · ~783,343 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 940 nodes · 1010 edges · 115 communities (76 shown, 39 thin omitted)
+- 948 nodes · 1018 edges · 117 communities (77 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `28586ee3`
+- Built from commit: `0f3dfac5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,6 +20,7 @@
 - [[_COMMUNITY_Community 2|Community 2]]
 - [[_COMMUNITY_Community 3|Community 3]]
 - [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
 - [[_COMMUNITY_Community 7|Community 7]]
 - [[_COMMUNITY_Community 8|Community 8]]
@@ -117,6 +118,7 @@
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 116|Community 116]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -145,7 +147,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (115 total, 39 thin omitted)
+## Communities (117 total, 40 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -166,6 +168,10 @@ Nodes (16): generateMetadata(), generateStaticParams(), metadata, Blog(), slugif
 ### Community 4 - "Community 4"
 Cohesion: 0.15
 Nodes (12): env, CLAUDE_AUTOCOMPACT_PCT_OVERRIDE, hooks, PreCompact, PreToolUse, SessionStart, Stop, permissions (+4 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.50
+Nodes (4): Media, Album, AlbumPage(), dateFr()
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
@@ -400,9 +406,9 @@ Cohesion: 0.70
 Nodes (4): build(), fiche(), hdr(), li()
 
 ## Knowledge Gaps
-- **518 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+513 more)
+- **520 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+515 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -410,7 +416,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _518 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _520 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

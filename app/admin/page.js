@@ -3003,6 +3003,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       dureeIntervention: duree,
       recommandations: cd.recommandations || '',
       notesTechnicien: notes.join('\n'),
+      albumUrl: fiche.album_token ? ((typeof window !== 'undefined' ? window.location.origin : 'https://www.phyto-benin.com') + '/album/' + fiche.album_token) : '',
+      albumCount: (fiche.medias || []).length,
     }
   }
 
@@ -3027,6 +3029,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       recommandations: (pre && pre.recommandations) || '',
       notesTechnicien: (pre && pre.notesTechnicien) || '',
       photos: [],
+      albumUrl: (pre && pre.albumUrl) || '',
+      albumCount: (pre && pre.albumCount) || 0,
     })
     setRapportIntervPhase('saisie')
     setRapportIntervErreurIA(null)
@@ -3038,6 +3042,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function ouvrirRapportInterv(rapport, devis, client) {
     setRapportIntervModal({ devis, client, editingId: rapport.id })
+    var _af = fichesList.find(function(f) { return f.devis_id === (devis && devis.id) })
+    var _aurl = (_af && _af.album_token) ? ((typeof window !== 'undefined' ? window.location.origin : 'https://www.phyto-benin.com') + '/album/' + _af.album_token) : ''
     setRapportIntervForm({
       dateIntervention: rapport.date_intervention || '',
       technicien: rapport.technicien || '',
@@ -3050,6 +3056,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       recommandations: rapport.recommandations || '',
       notesTechnicien: rapport.notes_technicien || '',
       photos: rapport.photos || [],
+      albumUrl: _aurl,
+      albumCount: _af ? (_af.medias || []).length : 0,
     })
     setRapportIntervPhase('genere')
     setRapportIntervErreurIA(null)
@@ -6668,6 +6676,12 @@ var GSE_DOC_STYLES = '<style>' +
   '.photos-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; page-break-inside: avoid; }' +
   '.photos-grid > div { aspect-ratio: 1; overflow: hidden; border-radius: 6px; border: 1px solid #e0ddd6; }' +
   '.photos-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }' +
+  '.album-box { display: flex; gap: 14px; align-items: center; border: 1.5px solid #0a2e1a; border-radius: 10px; padding: 14px; background: #f7faf8; page-break-inside: avoid; }' +
+  '.album-cover { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #e0ddd6; flex: 0 0 auto; }' +
+  '.album-meta { flex: 1; min-width: 0; }' +
+  '.album-count { font-weight: 700; color: #0a2e1a; font-size: 13px; margin-bottom: 4px; }' +
+  '.album-link { color: #1a6b3a; font-size: 12px; word-break: break-all; text-decoration: underline; font-weight: 600; }' +
+  '.album-hint { font-size: 11px; color: #666; margin-top: 4px; }' +
   '@media print {' +
   '  @page { size: A4 portrait; margin: 7mm 10mm 18mm 10mm; }' +
   '  .noprint { display: none; }' +
@@ -6927,12 +6941,21 @@ function buildRapportIntervHtml(form, client, devis) {
     '<div class="section"><div class="section-title">Observations</div><div class="value-box">' + (form.observations || '·') + '</div></div>' +
     '<div class="section"><div class="section-title">Recommandations / suivi</div><div class="value-box">' + (form.recommandations || '·') + '</div></div>' +
 
-    ((form.photos && form.photos.length > 0) ? (
+    (form.albumUrl ? (
+      '<div class="section"><div class="section-title">Album photos &amp; vidéos de l\'intervention</div>' +
+      '<div class="album-box">' +
+      ((form.photos && form.photos.length) ? '<img class="album-cover" src="' + form.photos[0] + '" alt="Aperçu"/>' : '') +
+      '<div class="album-meta">' +
+      '<div class="album-count">' + (form.albumCount || 0) + ' média' + ((form.albumCount || 0) > 1 ? 's' : '') + ' (photos &amp; vidéos)</div>' +
+      '<a class="album-link" href="' + form.albumUrl + '">' + form.albumUrl + '</a>' +
+      '<div class="album-hint">Ouvrez le lien pour voir toutes les photos et vidéos de l\'intervention.</div>' +
+      '</div></div></div>'
+    ) : ((form.photos && form.photos.length > 0) ? (
       '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
       '<div class="photos-grid">' +
       form.photos.map(function(url, i) { return '<div><img src="' + url + '" alt="Photo ' + (i+1) + '"/></div>' }).join('') +
       '</div></div>'
-    ) : '') +
+    ) : '')) +
 
     gseSigs() +
     '</div>' +
