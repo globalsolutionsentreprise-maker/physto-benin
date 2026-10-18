@@ -267,7 +267,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6734",
+      "source_location": "L6738",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 108,
@@ -277,7 +277,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6740",
+      "source_location": "L6744",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 108,
@@ -287,7 +287,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6757",
+      "source_location": "L6761",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 108,
@@ -297,7 +297,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6766",
+      "source_location": "L6770",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 108,
@@ -307,7 +307,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6773",
+      "source_location": "L6777",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 108,
@@ -317,7 +317,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6777",
+      "source_location": "L6781",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 108,
@@ -327,7 +327,7 @@
       "label": "clientNomComplet()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6858",
+      "source_location": "L6862",
       "_origin": "ast",
       "id": "admin_page_clientnomcomplet",
       "community": 108,
@@ -337,7 +337,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6865",
+      "source_location": "L6869",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 108,
@@ -347,7 +347,7 @@
       "label": "qrSvg()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6922",
+      "source_location": "L6926",
       "_origin": "ast",
       "id": "admin_page_qrsvg",
       "community": 108,
@@ -357,7 +357,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6938",
+      "source_location": "L6942",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 108,
@@ -367,7 +367,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6994",
+      "source_location": "L6998",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 108,
@@ -377,7 +377,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7000",
+      "source_location": "L7004",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -9943,9 +9943,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_doc_bilingue",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue"
     },
     {
       "relation": "imports",
@@ -9954,9 +9954,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_doc_bilingue_appendenglishpage",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue_appendenglishpage"
     },
     {
       "relation": "imports_from",
@@ -10042,9 +10042,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L3869",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_doc_bilingue_appendenglishpage",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue_appendenglishpage"
     },
     {
       "relation": "calls",
@@ -14623,9 +14623,9 @@
       "source_file": "lib/doc-bilingue.js",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_doc_bilingue",
-      "target": "lib_doc_bilingue_appendenglishpage",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue_appendenglishpage"
     },
     {
       "relation": "contains",
@@ -14633,9 +14633,9 @@
       "source_file": "lib/doc-bilingue.js",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_doc_bilingue",
-      "target": "lib_doc_bilingue_translate",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue_translate"
     },
     {
       "relation": "calls",
@@ -14644,9 +14644,9 @@
       "source_file": "lib/doc-bilingue.js",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_doc_bilingue_appendenglishpage",
-      "target": "lib_doc_bilingue_translate",
-      "confidence_score": 1.0
+      "target": "lib_doc_bilingue_translate"
     },
     {
       "relation": "contains",
@@ -20021,5 +20021,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2a819f333d36df7fc9fd501420b2296a2029528b"
+  "built_at_commit": "483849afb7ac8f7c842c29f40f2b8bb5830e2870"
 }

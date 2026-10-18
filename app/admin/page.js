@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { nomFichierDoc, buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 import QRCode from "qrcode"
-import { appendEnglishPage, DEVIS_EN } from "@/lib/doc-bilingue"
+import { appendEnglishPage, DEVIS_EN, RAPPORT_INTERV_EN, CERT_EN } from "@/lib/doc-bilingue"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
@@ -2178,6 +2178,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       dateFin: '',
       matieres: pft.matieres || ((type === 'desinsect' || type === 'double') ? 'IMPERA 300 CS\nROCOGEL' : 'VERTOX'),
       matieresDerat: pft.matieresDerat || (type === 'double' ? 'VERTOX' : ''),
+      bilingue: !!(cl && cl.bilingue),
     })
     setCertModal({ type: type, devis: d, cl: cl })
   }
@@ -2211,6 +2212,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function imprimerCertificat() {
     var html = buildCertificatHtml(certModal.type, certForm)
+    if (certForm.bilingue || (certModal.cl && certModal.cl.bilingue)) html = appendEnglishPage(html, CERT_EN)
     ouvrirDocImprimable(html, 920, 1050)
   }
 
@@ -2335,6 +2337,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function apercuCert(cert) {
     var form = cert.form_data || {}
     var html = buildCertificatHtml(cert.type, form)
+    if (form.bilingue) html = appendEnglishPage(html, CERT_EN)
     ouvrirDocImprimable(html, 920, 1050)
   }
 
@@ -3121,6 +3124,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (!rapportIntervModal) return
     var { client, devis } = rapportIntervModal
     var html = buildRapportIntervHtml(rapportIntervForm, client, devis)
+    if (client && client.bilingue) html = appendEnglishPage(html, RAPPORT_INTERV_EN)
     ouvrirDocImprimable(html, 920, 1100)
   }
 
