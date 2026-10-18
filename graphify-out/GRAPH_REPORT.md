@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-18)
 
 ## Corpus Check
-- 205 files · ~783,343 words
+- 205 files · ~783,569 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 948 nodes · 1018 edges · 117 communities (77 shown, 40 thin omitted)
+- 949 nodes · 1020 edges · 117 communities (77 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0f3dfac5`
+- Built from commit: `bed4a414`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -395,7 +395,7 @@ Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
 Cohesion: 0.08
-Nodes (36): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+28 more)
+Nodes (37): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+29 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.67

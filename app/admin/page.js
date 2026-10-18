@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { nomFichierDoc, buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
+import QRCode from "qrcode"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
@@ -6682,6 +6683,9 @@ var GSE_DOC_STYLES = '<style>' +
   '.album-count { font-weight: 700; color: #0a2e1a; font-size: 13px; margin-bottom: 4px; }' +
   '.album-link { color: #1a6b3a; font-size: 12px; word-break: break-all; text-decoration: underline; font-weight: 600; }' +
   '.album-hint { font-size: 11px; color: #666; margin-top: 4px; }' +
+  '.album-qr { flex: 0 0 auto; text-align: center; }' +
+  '.album-qr svg { display: block; width: 96px; height: 96px; border: 1px solid #e0ddd6; border-radius: 6px; background: #fff; }' +
+  '.album-qr-lbl { font-size: 10px; color: #0a2e1a; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 3px; }' +
   '@media print {' +
   '  @page { size: A4 portrait; margin: 7mm 10mm 18mm 10mm; }' +
   '  .noprint { display: none; }' +
@@ -6910,6 +6914,25 @@ function buildRapportVisiteHtml(form, client, devis) {
     '</div></body></html>'
 }
 
+// QR code (SVG inline) de l'URL d'album, imprimé à côté du lien dans le rapport :
+// le client peut scanner un rapport papier pour ouvrir l'album. Synchrone
+// (QRCode.create expose la matrice de modules), pas de dépendance ajoutée.
+function qrSvg(text, px) {
+  try {
+    var qr = QRCode.create(String(text), { errorCorrectionLevel: 'M' })
+    var n = qr.modules.size
+    var d = qr.modules.data
+    var rects = ''
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        if (d[y * n + x]) rects += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>'
+      }
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + px + '" height="' + px + '" viewBox="0 0 ' + n + ' ' + n + '" shape-rendering="crispEdges">' +
+      '<rect width="' + n + '" height="' + n + '" fill="#fff"/><g fill="#0a2e1a">' + rects + '</g></svg>'
+  } catch (e) { return '' }
+}
+
 function buildRapportIntervHtml(form, client, devis) {
   var nomClient = clientNomComplet(client)
   var dateStr = form.dateIntervention ? new Date(form.dateIntervention).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '·'
@@ -6948,8 +6971,10 @@ function buildRapportIntervHtml(form, client, devis) {
       '<div class="album-meta">' +
       '<div class="album-count">' + (form.albumCount || 0) + ' média' + ((form.albumCount || 0) > 1 ? 's' : '') + ' (photos &amp; vidéos)</div>' +
       '<a class="album-link" href="' + form.albumUrl + '">' + form.albumUrl + '</a>' +
-      '<div class="album-hint">Ouvrez le lien pour voir toutes les photos et vidéos de l\'intervention.</div>' +
-      '</div></div></div>'
+      '<div class="album-hint">Ouvrez le lien, ou scannez le QR code, pour voir toutes les photos et vidéos de l\'intervention.</div>' +
+      '</div>' +
+      '<div class="album-qr">' + qrSvg(form.albumUrl, 96) + '<div class="album-qr-lbl">Scannez</div></div>' +
+      '</div></div>'
     ) : ((form.photos && form.photos.length > 0) ? (
       '<div class="section"><div class="section-title">Photos du terrain (' + form.photos.length + ')</div>' +
       '<div class="photos-grid">' +

@@ -207,7 +207,7 @@
       "label": "supabase",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L8",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "admin_page_supabase",
       "community": 108,
@@ -217,7 +217,7 @@
       "label": "CHIFFRES_DEFAUT",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "admin_page_chiffres_defaut",
       "community": 108,
@@ -227,7 +227,7 @@
       "label": "mimeAudioDepuisNom()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "admin_page_mimeaudiodepuisnom",
       "community": 108,
@@ -237,7 +237,7 @@
       "label": "lireAudioBase64()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "admin_page_lireaudiobase64",
       "community": 108,
@@ -247,7 +247,7 @@
       "label": "Admin()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L46",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "admin_page_admin",
       "community": 108,
@@ -257,7 +257,7 @@
       "label": "SectionClientsDevis()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L1382",
+      "source_location": "L1383",
       "_origin": "ast",
       "id": "admin_page_sectionclientsdevis",
       "community": 108,
@@ -267,7 +267,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6728",
+      "source_location": "L6732",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 108,
@@ -277,7 +277,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6734",
+      "source_location": "L6738",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 108,
@@ -287,7 +287,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6751",
+      "source_location": "L6755",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 108,
@@ -297,7 +297,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6760",
+      "source_location": "L6764",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 108,
@@ -307,7 +307,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6767",
+      "source_location": "L6771",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 108,
@@ -317,7 +317,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6771",
+      "source_location": "L6775",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 108,
@@ -327,7 +327,7 @@
       "label": "clientNomComplet()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6852",
+      "source_location": "L6856",
       "_origin": "ast",
       "id": "admin_page_clientnomcomplet",
       "community": 108,
@@ -337,17 +337,27 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6859",
+      "source_location": "L6863",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 108,
       "norm_label": "buildrapportvisitehtml()"
     },
     {
+      "label": "qrSvg()",
+      "file_type": "code",
+      "source_file": "app/admin/page.js",
+      "source_location": "L6920",
+      "_origin": "ast",
+      "id": "admin_page_qrsvg",
+      "community": 108,
+      "norm_label": "qrsvg()"
+    },
+    {
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6913",
+      "source_location": "L6936",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 108,
@@ -357,7 +367,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6967",
+      "source_location": "L6992",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 108,
@@ -367,7 +377,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L6973",
+      "source_location": "L6998",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -9816,6 +9826,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.js",
+      "source_location": "L6920",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "admin_page_qrsvg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
       "source_location": "L1355",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10155,6 +10175,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "app/admin/page.js",
+      "source_location": "L6976",
+      "weight": 1.0,
+      "source": "admin_page_buildrapportintervhtml",
+      "target": "admin_page_qrsvg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
       "source_location": "L6902",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -10402,9 +10433,9 @@
       "source_file": "app/album/[token]/page.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_album_token_page_tsx_token_page",
-      "target": "app_album_token_page_tsx_token_page_media",
-      "confidence_score": 1.0
+      "target": "app_album_token_page_tsx_token_page_media"
     },
     {
       "relation": "contains",
@@ -10412,9 +10443,9 @@
       "source_file": "app/album/[token]/page.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_album_token_page_tsx_token_page",
-      "target": "token_page_album",
-      "confidence_score": 1.0
+      "target": "token_page_album"
     },
     {
       "relation": "contains",
@@ -10422,9 +10453,9 @@
       "source_file": "app/album/[token]/page.tsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_album_token_page_tsx_token_page",
-      "target": "token_page_albumpage",
-      "confidence_score": 1.0
+      "target": "token_page_albumpage"
     },
     {
       "relation": "contains",
@@ -10432,9 +10463,9 @@
       "source_file": "app/album/[token]/page.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_album_token_page_tsx_token_page",
-      "target": "token_page_datefr",
-      "confidence_score": 1.0
+      "target": "token_page_datefr"
     },
     {
       "relation": "calls",
@@ -10443,9 +10474,9 @@
       "source_file": "app/album/[token]/page.tsx",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "token_page_albumpage",
-      "target": "token_page_datefr",
-      "confidence_score": 1.0
+      "target": "token_page_datefr"
     },
     {
       "relation": "contains",
@@ -10505,9 +10536,9 @@
       "source_file": "app/api/album/route.js",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "album_route",
-      "target": "album_route_db",
-      "confidence_score": 1.0
+      "target": "album_route_db"
     },
     {
       "relation": "contains",
@@ -10515,9 +10546,9 @@
       "source_file": "app/api/album/route.js",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "album_route",
-      "target": "album_route_get",
-      "confidence_score": 1.0
+      "target": "album_route_get"
     },
     {
       "relation": "calls",
@@ -10526,9 +10557,9 @@
       "source_file": "app/api/album/route.js",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "album_route_get",
-      "target": "album_route_db",
-      "confidence_score": 1.0
+      "target": "album_route_db"
     },
     {
       "relation": "contains",
@@ -12562,9 +12593,9 @@
       "source_file": "app/fiche/[token]/page.tsx",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_fiche_token_page_tsx_token_page",
-      "target": "app_fiche_token_page_tsx_token_page_media",
-      "confidence_score": 1.0
+      "target": "app_fiche_token_page_tsx_token_page_media"
     },
     {
       "relation": "imports_from",
@@ -19896,5 +19927,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0f3dfac5b134fe735d4f4f05eee5d3c5cfc61dbe"
+  "built_at_commit": "bed4a41427cb3959adc6f36f520f44897078bb92"
 }
