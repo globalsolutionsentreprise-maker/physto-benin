@@ -68,6 +68,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [prochainPassage, setProchainPassage] = useState("")
   const [clientSignataire, setClientSignataire] = useState("")
   const [signatureDataUrl, setSignatureDataUrl] = useState("")
+  const [signatureTech, setSignatureTech] = useState("")
 
   useEffect(() => {
     fetch("/api/fiche-terrain?token=" + encodeURIComponent(token))
@@ -105,8 +106,9 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setConstat(cd.constat || "")
           setRecommandations(cd.recommandations || "")
           setProchainPassage(cd.prochainPassage || "")
-          setClientSignataire(cd.clientSignataire || "")
-          setSignatureDataUrl(cd.signatureDataUrl || "")
+          setClientSignataire(f.client_signataire || cd.clientSignataire || "")
+          setSignatureDataUrl(f.signature_client_data_url || cd.signatureDataUrl || "")
+          setSignatureTech(f.signature_tech_data_url || "")
         } else {
           setPrestations(presta)
         }
@@ -161,7 +163,8 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
             prestations, nuisibles, produits, produitsCoches,
             dureeDebut, dureeFin, remarques, datePassage, dateFinPassage,
             superviseurNom, rempliPar: superviseurNom,
-            ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl } } : {}),
+            clientSignataire, signatureClient: signatureDataUrl, signatureTech,
+            ...(estControle ? { controleData: { postes, infestation, constat, recommandations, prochainPassage } } : {}),
           },
           medias,
         }),
@@ -325,12 +328,21 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <Lbl>Technicien</Lbl>
       <input value={superviseurNom} onChange={(e) => setSuperviseurNom(e.target.value)} style={inp} />
 
-      {estControle && (<>
+      <div style={{ marginTop: 18, paddingTop: 14, borderTop: "2px solid " + OR }}>
+        <div style={{ fontWeight: 700, color: VERT, fontSize: 15, marginBottom: 2 }}>Signatures (sur place)</div>
+        <div style={{ fontSize: 13, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
+          Faites signer le client au doigt, puis signez vous-même. Les deux signatures apparaissent sur la fiche.
+        </div>
+
         <Lbl>Nom du signataire (client)</Lbl>
         <input value={clientSignataire} onChange={(e) => setClientSignataire(e.target.value)} placeholder="Personne qui réceptionne sur site" style={inp} />
-        <Lbl>Signature du client (sur place)</Lbl>
+        <Lbl>Signature du client</Lbl>
         <SignaturePad value={signatureDataUrl} onChange={setSignatureDataUrl} />
-      </>)}
+
+        <div style={{ height: 10 }} />
+        <Lbl>Signature du technicien ({superviseurNom || "vous"})</Lbl>
+        <SignaturePad value={signatureTech} onChange={setSignatureTech} />
+      </div>
 
       {erreur ? <div style={{ color: "#991b1b", margin: "12px 0", fontSize: 14 }}>{erreur}</div> : null}
       {progress ? <div style={{ color: VERT, margin: "12px 0", fontSize: 14 }}>{progress}</div> : null}

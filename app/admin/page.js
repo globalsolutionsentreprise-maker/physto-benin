@@ -2354,6 +2354,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: fiche.remarques || '',
       datePassage: fiche.date_passage || '',
       dateFinPassage: fiche.date_fin_passage || '',
+      clientSignataire: fiche.client_signataire || ((fiche.controle_data || {}).clientSignataire) || '',
+      signatureClient: fiche.signature_client_data_url || ((fiche.controle_data || {}).signatureDataUrl) || '',
+      signatureTech: fiche.signature_tech_data_url || '',
       superviseurNom: fiche.superviseur_nom || '',
       superviseurContact: fiche.superviseur_contact || '',
     }
@@ -2933,6 +2936,48 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   var PRODUITS_DEFAUT_INTERV = 'Insecticide : IMPERA 300 CS · traitement des insectes rampants et volants par pulvérisation sur les surfaces, plinthes et zones d\'ombre.\nGel : ROCOGEL · application en points de gel dans les zones d\'infestation (cuisines, sanitaires, fissures et recoins).\nRaticide : VERTOX · mise en place de boîtes d\'appâts sécurisées dans les zones de passage et terriers des rongeurs.'
 
+  // Dérive un pré-remplissage du rapport d'intervention à partir de la fiche de
+  // passage remplie par le technicien (la fiche est la source du rapport). Renvoie
+  // null si aucune fiche n'existe pour ce devis.
+  function ficheVersRapport(devisId, fallbackTech) {
+    var fiche = fichesList.find(function(f) { return f.devis_id === devisId })
+    if (!fiche) return null
+    var cd = fiche.controle_data || {}
+    var labels = { insecticides: 'Insecticide', raticides: 'Raticide', desinfectants: 'Désinfectant', fumigants: 'Fumigant', phytosanitaires: 'Phytosanitaire', autres: 'Autre' }
+    var prod = fiche.produits || {}
+    var prodLignes = Object.keys(prod)
+      .filter(function(k) { return prod[k] && String(prod[k]).trim() })
+      .map(function(k) { return (labels[k] || k) + ' : ' + prod[k] })
+    var dateFr = function(d) { return d ? new Date(d).toLocaleDateString('fr-FR') : '' }
+    var duree = ''
+    if (fiche.date_fin_passage && fiche.date_fin_passage !== fiche.date_passage) {
+      duree = 'du ' + dateFr(fiche.date_passage) + (fiche.duree_debut ? ' ' + fiche.duree_debut : '') +
+              ' au ' + dateFr(fiche.date_fin_passage) + (fiche.duree_fin ? ' ' + fiche.duree_fin : '')
+    } else if (fiche.duree_debut || fiche.duree_fin) {
+      duree = [fiche.duree_debut, fiche.duree_fin].filter(Boolean).join(' à ')
+    }
+    var notes = []
+    if ((fiche.prestations || []).length) notes.push('Prestations réalisées : ' + fiche.prestations.join(', ') + (fiche.autres_prestation ? ', ' + fiche.autres_prestation : ''))
+    if ((fiche.nuisibles || []).length) notes.push('Nuisibles observés : ' + fiche.nuisibles.join(', ') + (fiche.autres_nuisible ? ', ' + fiche.autres_nuisible : ''))
+    if (fiche.lieu_prestation) notes.push('Zone / lieu : ' + fiche.lieu_prestation)
+    if (prodLignes.length) notes.push('Produits utilisés : ' + prodLignes.join(' ; '))
+    if (duree) notes.push('Durée : ' + duree)
+    if (fiche.remarques) notes.push('Observations du technicien : ' + fiche.remarques)
+    var medNotes = (fiche.medias || []).filter(function(m) { return m && m.note }).map(function(m) { return '- ' + m.note })
+    if (medNotes.length) notes.push('Remarques sur les photos :\n' + medNotes.join('\n'))
+    if (cd.constat) notes.push('Constat : ' + cd.constat)
+    if (cd.recommandations) notes.push('Recommandations terrain : ' + cd.recommandations)
+    return {
+      dateIntervention: fiche.date_passage || '',
+      technicien: fiche.superviseur_nom || fiche.rempli_par || fallbackTech || '',
+      zonesTraitees: fiche.lieu_prestation || '',
+      produitsUtilises: prodLignes.length ? prodLignes.join('\n') : '',
+      dureeIntervention: duree,
+      recommandations: cd.recommandations || '',
+      notesTechnicien: notes.join('\n'),
+    }
+  }
+
   function ouvrirNouveauRapportInterv(devis, client) {
     var technicienStr = ''
     var techNoms = interventionsList
@@ -2940,18 +2985,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       .map(function(i) { return [i.personnel.prenom, i.personnel.nom].filter(Boolean).join(' ') })
     var unique = techNoms.filter(function(n, idx, arr) { return arr.indexOf(n) === idx })
     technicienStr = unique.join(', ')
-    setRapportIntervModal({ devis, client, editingId: null })
+    var pre = ficheVersRapport(devis.id, technicienStr)
+    setRapportIntervModal({ devis, client, editingId: null, fromFiche: !!pre })
     setRapportIntervForm({
-      dateIntervention: new Date().toISOString().split('T')[0],
-      technicien: technicienStr,
-      zonesTraitees: '',
-      produitsUtilises: PRODUITS_DEFAUT_INTERV,
+      dateIntervention: (pre && pre.dateIntervention) || new Date().toISOString().split('T')[0],
+      technicien: (pre && pre.technicien) || technicienStr,
+      zonesTraitees: (pre && pre.zonesTraitees) || '',
+      produitsUtilises: (pre && pre.produitsUtilises) || PRODUITS_DEFAUT_INTERV,
       methodeApplication: '',
-      dureeIntervention: '',
+      dureeIntervention: (pre && pre.dureeIntervention) || '',
       resultats: '',
       observations: '',
-      recommandations: '',
-      notesTechnicien: '',
+      recommandations: (pre && pre.recommandations) || '',
+      notesTechnicien: (pre && pre.notesTechnicien) || '',
       photos: [],
     })
     setRapportIntervPhase('saisie')
@@ -3100,6 +3146,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement('div', { style: { fontSize: '12px', color: '#888', marginTop: '2px' } }, [(client.prenom || ''), client.nom].filter(Boolean).join(' ') + (client.entreprise ? ' · ' + client.entreprise : '') + ' · ' + devis.prestation)
           ),
           React.createElement('button', { onClick: function() { setRapportIntervModal(null) }, style: { background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#888' } }, '×')
+        ),
+
+        rapportIntervModal.fromFiche && React.createElement('div', { style: { background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px', padding: '10px 12px', marginBottom: '16px', fontSize: '12px', color: '#065f46', lineHeight: '1.5' } },
+          '✓ Pré-rempli depuis la fiche de passage du technicien (date, technicien, produits, durée, zone, observations). Complétez puis, au besoin, lancez la rédaction par l\'IA.'
         ),
 
         React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' } },
@@ -3285,6 +3335,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: f.remarques || '',
       datePassage: f.date_passage || '',
       dateFinPassage: f.date_fin_passage || '',
+      clientSignataire: f.client_signataire || ((f.controle_data || {}).clientSignataire) || '',
+      signatureClient: f.signature_client_data_url || ((f.controle_data || {}).signatureDataUrl) || '',
+      signatureTech: f.signature_tech_data_url || '',
       superviseurNom: f.superviseur_nom || '',
       superviseurContact: f.superviseur_contact || '',
       controleData: f.controle_data || {},
@@ -3322,6 +3375,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       remarques: '',
       datePassage: yyyy + '-' + mm + '-' + dd,
       dateFinPassage: '',
+      clientSignataire: '',
+      signatureClient: '',
+      signatureTech: '',
       superviseurNom: '',
       superviseurContact: '',
     })
@@ -3345,6 +3401,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         remarques: ficheForm.remarques,
         date_passage: ficheForm.datePassage,
         date_fin_passage: ficheForm.dateFinPassage || null,
+        client_signataire: ficheForm.clientSignataire || null,
+        signature_client_data_url: ficheForm.signatureClient || null,
+        signature_tech_data_url: ficheForm.signatureTech || null,
         superviseur_nom: ficheForm.superviseurNom,
         superviseur_contact: ficheForm.superviseurContact,
         controle_data: estControle ? (ficheForm.controleData || {}) : null,
@@ -6940,12 +6999,16 @@ function buildFichePassageHtml(form, client, numero, medias) {
 
     '<div>' +
     '<div class="sig-title">Pour le client · Nom & Prénom(s)</div>' +
-    '<div class="sig-zone"></div>' +
+    '<div class="sig-zone">' +
+    (form.signatureClient ? '<img src="' + form.signatureClient + '" alt="Signature client" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
+    (form.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + form.clientSignataire + '</div>' : '') +
+    '</div>' +
     '</div>' +
 
     '<div>' +
     '<div class="sig-title">Pour Global Solutions Entreprise</div>' +
     '<div class="sig-zone">' +
+    (form.signatureTech ? '<img src="' + form.signatureTech + '" alt="Signature technicien" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
     (form.superviseurNom ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + form.superviseurNom + '</div>' : '') +
     (form.superviseurContact ? '<div style="font-size:11px;color:#666;margin-top:2px">' + form.superviseurContact + '</div>' : '') +
     '</div>' +
@@ -7100,13 +7163,14 @@ function buildFicheControleHtml(fiche, client, numero, medias) {
     '<div>' +
     '<div class="sig-title">Pour le client · Nom & Prénom(s)</div>' +
     '<div class="sig-zone">' +
-    (cd.signatureDataUrl ? '<img src="' + cd.signatureDataUrl + '" alt="Signature client" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
-    (cd.clientSignataire ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(cd.clientSignataire) + '</div>' : '') +
+    (((fiche && fiche.signature_client_data_url) || cd.signatureDataUrl) ? '<img src="' + ((fiche && fiche.signature_client_data_url) || cd.signatureDataUrl) + '" alt="Signature client" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
+    (((fiche && fiche.client_signataire) || cd.clientSignataire) ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc((fiche && fiche.client_signataire) || cd.clientSignataire) + '</div>' : '') +
     '</div>' +
     '</div>' +
     '<div>' +
     '<div class="sig-title">Pour Global Solutions Entreprise</div>' +
     '<div class="sig-zone">' +
+    ((fiche && fiche.signature_tech_data_url) ? '<img src="' + fiche.signature_tech_data_url + '" alt="Signature technicien" style="max-height:60px;max-width:100%;display:block;margin-bottom:2px">' : '') +
     ((fiche && fiche.superviseur_nom) ? '<div style="font-weight:700;font-size:12px;color:#0a2e1a">' + esc(fiche.superviseur_nom) + '</div>' : '') +
     ((fiche && fiche.superviseur_contact) ? '<div style="font-size:11px;color:#666;margin-top:2px">' + esc(fiche.superviseur_contact) + '</div>' : '') +
     '</div>' +
