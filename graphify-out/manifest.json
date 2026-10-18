@@ -585,8 +585,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1792231305.4962356,
-    "ast_hash": "e346d77128d9d53903cbe7fdd4356d25",
+    "mtime": 1792328270.3704834,
+    "ast_hash": "82ec4e0f22b4800b900c21994853e968",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -1050,8 +1050,8 @@
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1792327951.751169,
-    "ast_hash": "09ed2b832432fe32c0abe20cfc8e906a",
+    "mtime": 1792329003.2221668,
+    "ast_hash": "a3a52437d3c2186b4f6b6c54be88a436",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {

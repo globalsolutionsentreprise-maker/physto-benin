@@ -72,6 +72,8 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [clientSignataire, setClientSignataire] = useState("")
   const [signatureDataUrl, setSignatureDataUrl] = useState("")
   const [signatureTech, setSignatureTech] = useState("")
+  const [sigAlerte, setSigAlerte] = useState(false)
+  const techSigRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/fiche-terrain?token=" + encodeURIComponent(token))
@@ -259,6 +261,21 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         {info.passage && info.passage.dejaRemplie ? <div style={{ color: OR, fontWeight: 700, marginTop: 6 }}>Déjà renseignée — vous pouvez corriger.</div> : null}
       </div>
 
+      {!estControle && (
+        <div style={{ border: "2px solid " + OR, borderRadius: 10, padding: 14, marginBottom: 18, background: "#fffdf5" }}>
+          <div style={{ fontWeight: 700, color: VERT, fontSize: 15, marginBottom: 4 }}>Fiche de passage à remettre au client</div>
+          <div style={{ fontSize: 13, color: "#6b6b6b", marginBottom: 10, lineHeight: 1.5 }}>
+            Vous pouvez la sortir tout de suite (preuve de passage), sans attendre d'avoir tout rempli. ⚠️ <strong style={{ color: VERT }}>Vous devez d'abord signer votre partie</strong> — c'est votre signature qui vaut preuve de passage.
+          </div>
+          <button type="button"
+            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { telechargerFiche() } }}
+            style={{ width: "100%", background: signatureTech ? VERT : "#fff", color: signatureTech ? OR : VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+            📄 Sortir la fiche de passage{c.bilingue ? " (FR + EN)" : ""}
+          </button>
+          {!signatureTech ? <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 6, lineHeight: 1.5 }}>Signez votre partie (plus bas) pour pouvoir la sortir.</div> : null}
+        </div>
+      )}
+
       <Lbl>Journées d'intervention</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 8px", lineHeight: 1.5 }}>
         Une ligne par jour : la date, puis l'heure de début et de fin de ce jour-là. Ajoutez une journée si l'intervention s'est étalée sur plusieurs jours.
@@ -396,8 +413,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           Signez d'abord votre partie. Si le client veut lire la fiche avant de signer, téléchargez-la et envoyez-la lui (bouton ci-dessous) : votre signature y figure déjà. Le client peut aussi signer directement au doigt ci-dessous.
         </div>
 
-        <Lbl>Signature du technicien ({superviseurNom || "vous"})</Lbl>
-        <SignaturePad value={signatureTech} onChange={setSignatureTech} />
+        <div ref={techSigRef} style={sigAlerte && !signatureTech ? { border: "2px solid #dc2626", borderRadius: 10, padding: 10, margin: "0 -2px" } : undefined}>
+          <Lbl>Signature du technicien ({superviseurNom || "vous"})</Lbl>
+          {sigAlerte && !signatureTech ? <div style={{ color: "#dc2626", fontWeight: 700, fontSize: 13, marginBottom: 6 }}>Signez ici pour pouvoir sortir la fiche de passage.</div> : null}
+          <SignaturePad value={signatureTech} onChange={setSignatureTech} />
+        </div>
 
         <button type="button" onClick={telechargerFiche} disabled={!signatureTech}
           style={{ width: "100%", background: "#fff", color: VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "13px", fontSize: 15, fontWeight: 700, cursor: signatureTech ? "pointer" : "not-allowed", marginTop: 12, opacity: signatureTech ? 1 : 0.5 }}>

@@ -2037,7 +2037,7 @@
       "label": "SignaturePad()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L432",
+      "source_location": "L452",
       "_origin": "ast",
       "id": "token_page_signaturepad",
       "community": 108,
@@ -2047,7 +2047,7 @@
       "label": "Shell()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L518",
+      "source_location": "L538",
       "_origin": "ast",
       "id": "token_page_shell",
       "community": 108,
@@ -2057,7 +2057,7 @@
       "label": "Lbl()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L532",
+      "source_location": "L552",
       "_origin": "ast",
       "id": "token_page_lbl",
       "community": 108,
@@ -2067,7 +2067,7 @@
       "label": "Chips()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L536",
+      "source_location": "L556",
       "_origin": "ast",
       "id": "token_page_chips",
       "community": 108,
@@ -2077,7 +2077,7 @@
       "label": "inp",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L551",
+      "source_location": "L571",
       "_origin": "ast",
       "id": "token_page_inp",
       "community": 108,
@@ -2087,7 +2087,7 @@
       "label": "chip",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L555",
+      "source_location": "L575",
       "_origin": "ast",
       "id": "token_page_chip",
       "community": 108,
@@ -2097,7 +2097,7 @@
       "label": "chipOn",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L559",
+      "source_location": "L579",
       "_origin": "ast",
       "id": "token_page_chipon",
       "community": 108,
@@ -9648,9 +9648,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6838",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "admin_page_clientnomcomplet",
-      "confidence_score": 1.0
+      "target": "admin_page_clientnomcomplet"
     },
     {
       "relation": "contains",
@@ -9813,9 +9813,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_fiche_html",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html"
     },
     {
       "relation": "imports",
@@ -9824,9 +9824,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_fiche_html_buildfichecontrolehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichecontrolehtml"
     },
     {
       "relation": "imports",
@@ -9835,9 +9835,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_fiche_html_buildfichepassagehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichepassagehtml"
     },
     {
       "relation": "imports",
@@ -9846,9 +9846,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -9890,9 +9890,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L2369",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_fiche_html_buildfichecontrolehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichecontrolehtml"
     },
     {
       "relation": "calls",
@@ -9901,9 +9901,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L2370",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_fiche_html_buildfichepassagehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichepassagehtml"
     },
     {
       "relation": "calls",
@@ -9912,9 +9912,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L3748",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -10033,9 +10033,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6794",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_buildcertificathtml",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -10044,9 +10044,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6900",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_buildrapportintervhtml",
-      "target": "admin_page_clientnomcomplet",
-      "confidence_score": 1.0
+      "target": "admin_page_clientnomcomplet"
     },
     {
       "relation": "calls",
@@ -10055,9 +10055,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6846",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_buildrapportvisitehtml",
-      "target": "admin_page_clientnomcomplet",
-      "confidence_score": 1.0
+      "target": "admin_page_clientnomcomplet"
     },
     {
       "relation": "calls",
@@ -10066,9 +10066,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6850",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_buildrapportvisitehtml",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -10077,9 +10077,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L6902",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_buildrapportintervhtml",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -12401,9 +12401,9 @@
       "source_file": "app/fiche/[token]/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_fiche_token_page_tsx_token_page",
-      "target": "lib_fiche_html",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html"
     },
     {
       "relation": "imports",
@@ -12412,9 +12412,9 @@
       "source_file": "app/fiche/[token]/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_fiche_token_page_tsx_token_page",
-      "target": "lib_fiche_html_buildfichecontrolehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichecontrolehtml"
     },
     {
       "relation": "imports",
@@ -12423,9 +12423,9 @@
       "source_file": "app/fiche/[token]/page.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_fiche_token_page_tsx_token_page",
-      "target": "lib_fiche_html_buildfichepassagehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichepassagehtml"
     },
     {
       "relation": "contains",
@@ -14367,9 +14367,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L356",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_buildfichecontrolehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichecontrolehtml"
     },
     {
       "relation": "contains",
@@ -14377,9 +14377,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_buildfichepassagehtml",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_buildfichepassagehtml"
     },
     {
       "relation": "contains",
@@ -14387,9 +14387,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_chk",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_chk"
     },
     {
       "relation": "contains",
@@ -14397,9 +14397,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_esc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_esc"
     },
     {
       "relation": "contains",
@@ -14407,9 +14407,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_hdr",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_hdr"
     },
     {
       "relation": "contains",
@@ -14417,9 +14417,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_nivlabel",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nivlabel"
     },
     {
       "relation": "contains",
@@ -14427,9 +14427,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "contains",
@@ -14437,9 +14437,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_pagefichecontrole",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pagefichecontrole"
     },
     {
       "relation": "contains",
@@ -14447,9 +14447,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_pagefichepassage",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pagefichepassage"
     },
     {
       "relation": "contains",
@@ -14457,9 +14457,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_pick",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pick"
     },
     {
       "relation": "calls",
@@ -14468,9 +14468,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L358",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_buildfichecontrolehtml",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -14479,9 +14479,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L244",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_buildfichepassagehtml",
-      "target": "lib_fiche_html_nomfichierdoc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nomfichierdoc"
     },
     {
       "relation": "calls",
@@ -14490,9 +14490,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L271",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_pick",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pick"
     },
     {
       "relation": "calls",
@@ -14501,9 +14501,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichepassage",
-      "target": "lib_fiche_html_pick",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pick"
     },
     {
       "relation": "calls",
@@ -14512,9 +14512,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L272",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_nivlabel",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_nivlabel"
     },
     {
       "relation": "calls",
@@ -14523,9 +14523,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichepassage",
-      "target": "lib_fiche_html_chk",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_chk"
     },
     {
       "relation": "calls",
@@ -14534,9 +14534,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L283",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_hdr",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_hdr"
     },
     {
       "relation": "calls",
@@ -14545,9 +14545,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichepassage",
-      "target": "lib_fiche_html_hdr",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_hdr"
     },
     {
       "relation": "calls",
@@ -14556,9 +14556,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L289",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_esc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_esc"
     },
     {
       "relation": "calls",
@@ -14567,9 +14567,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_buildfichepassagehtml",
-      "target": "lib_fiche_html_pagefichepassage",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pagefichepassage"
     },
     {
       "relation": "calls",
@@ -14578,9 +14578,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L362",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_buildfichecontrolehtml",
-      "target": "lib_fiche_html_pagefichecontrole",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_pagefichecontrole"
     },
     {
       "relation": "contains",
@@ -19734,5 +19734,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "61532649be81df583910558fd2a4b02e800047cd"
+  "built_at_commit": "28586ee38c723ad2f20a337866ffc2285e5b60cd"
 }
