@@ -6838,6 +6838,11 @@ function buildFichePassageHtml(form, client, numero, medias) {
   var nomClient = form.nomClient || [(client.prenom || ''), client.nom].filter(Boolean).join(' ')
   var dateAff = form.datePassage ? new Date(form.datePassage).toLocaleDateString('fr-FR') : '__________'
   var dateFinAff = form.dateFinPassage ? new Date(form.dateFinPassage).toLocaleDateString('fr-FR') : ''
+  // Intervention multi-jours : on accole le jour (jj/mm) à chaque heure du créneau.
+  var jMulti = !!(dateFinAff && dateFinAff !== dateAff)
+  var ddShort = function(d) { if (!d) return ''; var x = new Date(d); return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0') }
+  var debJour = jMulti ? ' <span style="color:#555;font-size:11px">(' + ddShort(form.datePassage) + ')</span>' : ''
+  var finJour = jMulti ? ' <span style="color:#555;font-size:11px">(' + ddShort(form.dateFinPassage) + ')</span>' : ''
 
   function chk(checked) {
     return '<span style="display:inline-block;width:12px;height:12px;border:1.5px solid #333;border-radius:2px;vertical-align:middle;margin-right:4px;background:' + (checked ? '#0a2e1a' : '#fff') + ';text-align:center;line-height:12px;font-size:9px;color:#fff">' + (checked ? '✓' : '') + '</span>'
@@ -6994,8 +6999,8 @@ function buildFichePassageHtml(form, client, numero, medias) {
     '<div style="margin-bottom:14px">' +
     '<div class="section-title">Durée de prestation</div>' +
     '<div style="display:flex;align-items:baseline;gap:12px;font-size:13px">' +
-    'de <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeDebut || '') + '&nbsp;</span>' +
-    'à <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeFin || '') + '&nbsp;</span>' +
+    'de <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeDebut || '') + debJour + '&nbsp;</span>' +
+    'à <span style="border-bottom:1px solid #999;min-width:120px;display:inline-block;padding-bottom:1px">&nbsp;' + (form.dureeFin || '') + finJour + '&nbsp;</span>' +
     '</div>' +
     '</div>' +
 
