@@ -74,6 +74,11 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [signatureTech, setSignatureTech] = useState("")
   const [sigAlerte, setSigAlerte] = useState(false)
   const techSigRef = useRef<HTMLDivElement>(null)
+  const [uploadingMedia, setUploadingMedia] = useState(false)
+  // Brouillon sauvegardé sur le téléphone : si l'onglet se recharge (ex. après
+  // avoir ouvert la fiche pour l'envoyer), Fabrice retrouve tout son travail.
+  const DRAFT_KEY = "fiche-draft-" + token
+  const draftRestored = useRef(false)
 
   useEffect(() => {
     fetch("/api/fiche-terrain?token=" + encodeURIComponent(token))
@@ -128,6 +133,77 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       .catch((e) => setErreur("Connexion impossible : " + e.message))
       .finally(() => setLoading(false))
   }, [token])
+
+  // Restaure le brouillon local (une fois, après chargement) : la saisie en
+  // cours prime sur le pré-remplissage, pour ne jamais perdre le travail terrain.
+  useEffect(() => {
+    if (loading || draftRestored.current) return
+    draftRestored.current = true
+    let d: any = null
+    try { const raw = localStorage.getItem(DRAFT_KEY); if (raw) d = JSON.parse(raw) } catch {}
+    if (!d) return
+    if (d.typePassage) setTypePassage(d.typePassage)
+    if (Array.isArray(d.prestations)) setPrestations(d.prestations)
+    if (Array.isArray(d.nuisibles)) setNuisibles(d.nuisibles)
+    if (d.produits) setProduits(d.produits)
+    if (Array.isArray(d.produitsCoches)) setProduitsCoches(d.produitsCoches)
+    if (d.dureeDebut) setDureeDebut(d.dureeDebut)
+    if (d.dureeFin) setDureeFin(d.dureeFin)
+    if (typeof d.remarques === "string") setRemarques(d.remarques)
+    if (d.datePassage) setDatePassage(d.datePassage)
+    if (typeof d.dateFinPassage === "string") setDateFinPassage(d.dateFinPassage)
+    if (Array.isArray(d.journees) && d.journees.length) setJournees(d.journees)
+    if (d.superviseurNom) setSuperviseurNom(d.superviseurNom)
+    if (Array.isArray(d.mediasExistants)) setMediasExistants(d.mediasExistants)
+    if (d.postes) setPostes(d.postes)
+    if (d.infestation) setInfestation(d.infestation)
+    if (typeof d.constat === "string") setConstat(d.constat)
+    if (typeof d.recommandations === "string") setRecommandations(d.recommandations)
+    if (d.prochainPassage) setProchainPassage(d.prochainPassage)
+    if (typeof d.clientSignataire === "string") setClientSignataire(d.clientSignataire)
+    if (d.signatureClient) setSignatureDataUrl(d.signatureClient)
+    if (d.signatureTech) setSignatureTech(d.signatureTech)
+  }, [loading])
+
+  // Sauvegarde automatique à chaque changement. On ne garde PAS d'URL blob:
+  // (invalide après rechargement) : la photo reste sur le serveur, son chemin
+  // et sa remarque suffisent, on affiche une vignette « enregistrée » au retour.
+  useEffect(() => {
+    if (loading || done) return
+    try {
+      const mediasSer = mediasExistants.map((m) => ({ path: m.path, type: m.type, name: m.name, note: m.note || "", url: (m.url && m.url.indexOf("blob:") === 0) ? null : m.url }))
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques,
+        datePassage, dateFinPassage, journees, superviseurNom, mediasExistants: mediasSer,
+        postes, infestation, constat, recommandations, prochainPassage,
+        clientSignataire, signatureClient: signatureDataUrl, signatureTech,
+      }))
+    } catch {}
+  }, [loading, done, typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques, datePassage, dateFinPassage, journees, superviseurNom, mediasExistants, postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl, signatureTech])
+
+  // Upload immédiat des photos/vidéos ajoutées : elles sont sur le serveur tout
+  // de suite (durables) et n'attendent plus l'envoi. En cas d'échec réseau, on
+  // garde le fichier en attente (l'envoi final réessaiera) pour ne rien perdre.
+  async function ajouterMedias(add: File[]) {
+    if (!add.length) return
+    setUploadingMedia(true); setErreur(null)
+    try {
+      const r = await fetch("/api/fiche-terrain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "upload-url", files: add.map((f) => ({ name: f.name, type: f.type })) }) })
+      const d = await r.json()
+      if (!r.ok || d.error) throw new Error(d.error || "Préparation impossible")
+      const ok: Media[] = []
+      for (let i = 0; i < d.uploads.length; i++) {
+        const u = d.uploads[i]
+        const up = await sb.storage.from(BUCKET).uploadToSignedUrl(u.path, u.token, add[i])
+        if (up.error) throw new Error(up.error.message)
+        ok.push({ path: u.path, type: u.type, name: u.name, note: "", url: add[i].type.startsWith("image/") ? URL.createObjectURL(add[i]) : null })
+      }
+      setMediasExistants((prev) => prev.concat(ok))
+    } catch (e: any) {
+      setFiles((prev) => prev.concat(add)); setFileNotes((prev) => prev.concat(add.map(() => "")))
+      setErreur("Photo non envoyée (réseau faible). Elle partira à l'envoi de la fiche.")
+    } finally { setUploadingMedia(false) }
+  }
 
   function toggle(list: string[], set: (v: string[]) => void, val: string) {
     set(list.includes(val) ? list.filter((x) => x !== val) : list.concat(val))
@@ -188,6 +264,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       const d2 = await r2.json()
       if (!r2.ok || d2.error) throw new Error(d2.error || "Erreur enregistrement")
       setDone(d2.numero)
+      try { localStorage.removeItem(DRAFT_KEY) } catch {}
     } catch (e: any) {
       setErreur(e.message)
     } finally {
@@ -373,18 +450,21 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
         Ajoutez vos photos, puis écrivez une remarque sous chacune (ce que montre la photo). Les photos et leurs remarques servent au rapport d'intervention, pas à la fiche.
       </div>
-      <label style={{ ...chip, display: "block", textAlign: "center", padding: "14px", border: "2px dashed " + OR, background: "#fffdf5", cursor: "pointer" }}>
-        📷 Ajouter photos / vidéos
-        <input type="file" accept="image/*,video/*" multiple capture="environment" style={{ display: "none" }}
-          onChange={(e) => { const add = Array.from(e.target.files || []); setFiles(files.concat(add)); setFileNotes(fileNotes.concat(add.map(() => ""))) }} />
+      <label style={{ ...chip, display: "block", textAlign: "center", padding: "14px", border: "2px dashed " + OR, background: "#fffdf5", cursor: uploadingMedia ? "wait" : "pointer", opacity: uploadingMedia ? 0.6 : 1 }}>
+        {uploadingMedia ? "⏳ Envoi en cours…" : "📷 Ajouter photos / vidéos"}
+        <input type="file" accept="image/*,video/*" multiple capture="environment" disabled={uploadingMedia} style={{ display: "none" }}
+          onChange={(e) => { const add = Array.from(e.target.files || []); ajouterMedias(add); (e.target as HTMLInputElement).value = "" }} />
       </label>
+      <div style={{ fontSize: 12, color: "#8a8a8a", marginTop: 4 }}>Chaque photo est enregistrée aussitôt : rien n'est perdu même si la page se recharge.</div>
       {mediasExistants.length ? (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
           {mediasExistants.map((m, i) => (
             <div key={"ex" + i} style={{ width: 120 }}>
               {String(m.type || "").startsWith("image/") && m.url
                 ? <img src={m.url} alt="" style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 8 }} />
-                : <div style={{ width: 120, height: 120, borderRadius: 8, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>🎬</div>}
+                : <div style={{ width: 120, height: 120, borderRadius: 8, background: "#eef2ee", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontSize: 22, color: VERT }}>
+                    {String(m.type || "").startsWith("image/") ? <><span>📷</span><span style={{ fontSize: 10, marginTop: 2 }}>enregistrée</span></> : <span>🎬</span>}
+                  </div>}
               <input value={m.note || ""} onChange={(e) => setMediasExistants(mediasExistants.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)))} placeholder="Remarque sur cette photo…" style={{ ...inp, marginTop: 4, fontSize: 13, padding: "6px 8px" }} />
             </div>
           ))}

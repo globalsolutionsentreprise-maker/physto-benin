@@ -1,7 +1,7 @@
-# Graph Report - gse-site  (2026-10-18)
+# Graph Report - gse-site  (2026-10-19)
 
 ## Corpus Check
-- 206 files · ~786,364 words
+- 206 files · ~787,175 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f2933531`
+- Built from commit: `891596a4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

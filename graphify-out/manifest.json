@@ -1050,8 +1050,8 @@
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1792329003.2221668,
-    "ast_hash": "a3a52437d3c2186b4f6b6c54be88a436",
+    "mtime": 1792397994.5326815,
+    "ast_hash": "a980321899ce6148ec01ae3c5673dbfe",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {
