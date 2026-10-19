@@ -1100,8 +1100,8 @@
     "semantic_hash": ""
   },
   "app/api/weekly-prospects/route.js": {
-    "mtime": 1792402388.0847962,
-    "ast_hash": "4b4996be845f1843d64ad70ac26f96c5",
+    "mtime": 1792406223.9541876,
+    "ast_hash": "98400b44d1aa7c28ad8c2bd45c442993",
     "semantic_hash": ""
   },
   "vercel.json": {

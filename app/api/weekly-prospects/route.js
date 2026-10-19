@@ -70,9 +70,16 @@ export async function GET(req) {
     .join("")
 
   const semaine = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })
+  // Bouton unique vers la page de suivi de Fabrice (lien secret, pas un par lead).
+  const suiviSecret = process.env.SUIVI_SECRET
+  const suiviUrl = suiviSecret ? `https://www.phyto-benin.com/suivi/${suiviSecret}` : null
+  const boutonSuivi = suiviUrl
+    ? `<p style="margin:0 0 16px;"><a href="${suiviUrl}" style="display:inline-block;background:#0a2e1a;color:#d4a920;text-decoration:none;font-weight:700;font-size:15px;padding:13px 22px;border-radius:8px;">▶ Faire le suivi des leads</a></p>`
+    : ""
   const html = `<div style="font-family:Arial,sans-serif;max-width:720px;color:#111;">
     <h2 style="color:#0a2e1a;margin:0 0 4px;">Suivi commercial — prospects</h2>
     <p style="color:#888;font-size:13px;margin:0 0 14px;">Semaine du ${semaine} · ${list.length} prospect(s), dont <b>${aContacter} à contacter</b>.</p>
+    ${boutonSuivi}
     <table style="border-collapse:collapse;font-size:13px;width:100%;">
       <thead>
         <tr style="background:#0a2e1a;color:#d4a920;text-align:left;">
@@ -87,7 +94,7 @@ export async function GET(req) {
       </thead>
       <tbody>${lignes || `<tr><td colspan="7" style="padding:14px;color:#888;">Aucun prospect enregistré.</td></tr>`}</tbody>
     </table>
-    <p style="margin-top:18px;font-size:12px;color:#888;">Appelle en priorité les « À contacter ». Mets à jour le suivi dans le back-office → CRM → 🎯 Prospection.</p>
+    <p style="margin-top:18px;font-size:12px;color:#888;">Appelle en priorité les « À contacter ».${suiviUrl ? ` Après chaque appel, note le résultat (relance, RDV, devis, perdu) directement ici : <a href="${suiviUrl}" style="color:#0a2e1a;font-weight:600;">faire le suivi</a>.` : ""}</p>
   </div>`
 
   // Envoi via Resend (non bloquant pour le retour cron, mais remonté dans la réponse).
