@@ -122,7 +122,31 @@ function LeadCard({ lead, token, ouvert, onToggle, onDone }: {
   const [rappel, setRappel] = useState<string>(lead.rappel_le || "")
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [localOpen, setLocalOpen] = useState(false)
 
+  // Brouillon inperdable : ce que Fabrice tape est gardé sur CE téléphone en
+  // continu. S'il quitte la page ou recharge avant d'enregistrer, il retrouve
+  // tout (et la carte se rouvre automatiquement). Effacé une fois enregistré.
+  const DRAFT_KEY = "suivi-draft-" + lead.id
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (!raw) return
+      const d = JSON.parse(raw)
+      if (d.statut) setStatut(d.statut)
+      if (d.note) setNote(d.note)
+      if (d.rappel) setRappel(d.rappel)
+      setLocalOpen(true)
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    try {
+      if (statut || note || rappel) localStorage.setItem(DRAFT_KEY, JSON.stringify({ statut, note, rappel }))
+    } catch {}
+  }, [statut, note, rappel, DRAFT_KEY])
+
+  const open = ouvert || localOpen
   const tel = telLink(lead.telephone)
   const wa = waLink(lead.telephone)
 
@@ -138,6 +162,8 @@ function LeadCard({ lead, token, ouvert, onToggle, onDone }: {
       })
       const d = await r.json()
       if (d.error) { setMsg(d.error); setSaving(false); return }
+      try { localStorage.removeItem(DRAFT_KEY) } catch {}
+      setLocalOpen(false)
       onDone()
     } catch {
       setMsg("Échec de l'enregistrement. Réessayez.")
@@ -177,11 +203,11 @@ function LeadCard({ lead, token, ouvert, onToggle, onDone }: {
         {wa && <a href={wa} target="_blank" rel="noreferrer" style={btn("#25D366", "#fff")}>💬 WhatsApp</a>}
       </div>
 
-      <button onClick={onToggle} style={{ marginTop: 10, width: "100%", background: "none", border: "1px dashed #d7d2c4", color: "#8a7a4a", borderRadius: 8, padding: "9px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-        {ouvert ? "▲ Fermer" : "✍️ Résultat de l'appel"}
+      <button onClick={() => { setLocalOpen(false); onToggle() }} style={{ marginTop: 10, width: "100%", background: "none", border: "1px dashed #d7d2c4", color: "#8a7a4a", borderRadius: 8, padding: "9px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+        {open ? "▲ Fermer" : "✍️ Résultat de l'appel"}
       </button>
 
-      {ouvert && (
+      {open && (
         <div style={{ marginTop: 12, borderTop: "1px solid #f0ede4", paddingTop: 12 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: "#555", marginBottom: 6 }}>C'est quoi la suite ?</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -217,6 +243,7 @@ function LeadCard({ lead, token, ouvert, onToggle, onDone }: {
             style={{ width: "100%", marginTop: 12, background: saving ? "#999" : OR, color: VERT, border: "none", borderRadius: 10, padding: "13px", fontSize: 15, fontWeight: 800, cursor: saving ? "default" : "pointer", fontFamily: "inherit" }}>
             {saving ? "Enregistrement…" : "✓ Enregistrer"}
           </button>
+          {(statut || note || rappel) && <div style={{ fontSize: 11, color: "#8a7a4a", marginTop: 7, textAlign: "center" }}>💾 Brouillon gardé sur ce téléphone, rien n'est perdu si vous quittez.</div>}
         </div>
       )}
     </div>

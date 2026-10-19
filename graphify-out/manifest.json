@@ -1230,8 +1230,8 @@
     "semantic_hash": ""
   },
   "app/suivi/[token]/page.tsx": {
-    "mtime": 1792404682.732582,
-    "ast_hash": "26ee56754a3106a526af2ee40d9a8e1b",
+    "mtime": 1792405401.8618636,
+    "ast_hash": "d35e6c265441a553f91cc0c8b501a01c",
     "semantic_hash": ""
   },
   "app/suivi/layout.tsx": {
