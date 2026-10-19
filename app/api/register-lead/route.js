@@ -37,7 +37,7 @@ export async function POST(req) {
       const resendKey = process.env.RESEND_API_KEY
       const notifyTo = process.env.LEAD_NOTIFY_EMAIL || "contact@phyto-benin.com"
       // Équipe commerciale (Fabrice) en copie des leads entrants, comme le compte global.
-      const equipeCommerciale = ["babatoundefab@yahoo.com", "babatoundea67@gmail.com"]
+      const equipeCommerciale = ["adossoub1@gmail.com"]
       if (resendKey) {
         const rows = [
           ["Nom", nom],

@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js"
 export const dynamic = "force-dynamic"
 
 // Destinataires du suivi commercial hebdomadaire (Fabrice).
-const EQUIPE_COMMERCIALE = ["babatoundefab@yahoo.com", "babatoundea67@gmail.com"]
+const EQUIPE_COMMERCIALE = ["adossoub1@gmail.com"]
 
 const esc = (v) =>
   String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")

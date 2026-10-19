@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "app/api/register-lead/route.js": {
-    "mtime": 1792157618.9561877,
-    "ast_hash": "b45e250a944d191002ae8a9c58383f68",
+    "mtime": 1792402394.025146,
+    "ast_hash": "66157116f987139640a506d36a0c5a09",
     "semantic_hash": ""
   },
   "app/api/rh-data/route.js": {
@@ -1100,8 +1100,8 @@
     "semantic_hash": ""
   },
   "app/api/weekly-prospects/route.js": {
-    "mtime": 1792157658.0783577,
-    "ast_hash": "fafe8e0a8efafc4db87795a841b8a4d2",
+    "mtime": 1792402388.0847962,
+    "ast_hash": "4b4996be845f1843d64ad70ac26f96c5",
     "semantic_hash": ""
   },
   "vercel.json": {
