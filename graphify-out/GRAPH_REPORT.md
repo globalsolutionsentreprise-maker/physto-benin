@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-19)
 
 ## Corpus Check
-- 207 files · ~787,527 words
+- 211 files · ~789,431 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 952 nodes · 1029 edges · 117 communities (77 shown, 40 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
+- 971 nodes · 1055 edges · 119 communities (78 shown, 41 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `64e5c2a7`
+- Built from commit: `719f7773`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -119,6 +119,8 @@
 - [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 118|Community 118]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 16 edges
@@ -147,7 +149,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (117 total, 40 thin omitted)
+## Communities (119 total, 41 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -366,8 +368,8 @@ Cohesion: 0.50
 Nodes (3): Entrées, Format, Lessons — Journal d'apprentissage
 
 ### Community 100 - "Community 100"
-Cohesion: 0.12
-Nodes (17): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(), ProspectionPage(), S (+9 more)
+Cohesion: 0.09
+Nodes (24): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(), ProspectionPage(), S (+16 more)
 
 ### Community 101 - "Community 101"
 Cohesion: 0.60
@@ -405,18 +407,22 @@ Nodes (5): db(), GET(), passageFromToken(), POST(), signMedias()
 Cohesion: 0.70
 Nodes (4): build(), fiche(), hdr(), li()
 
+### Community 117 - "Community 117"
+Cohesion: 0.60
+Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
+
 ## Knowledge Gaps
-- **520 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+515 more)
+- **524 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+519 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _520 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _524 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**

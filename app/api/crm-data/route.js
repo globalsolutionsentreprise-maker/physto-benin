@@ -93,7 +93,7 @@ export async function GET(req) {
   if (action === "get_leads") {
     const { data: leads } = await supabase
       .from("leads")
-      .select("id, nom, telephone, email, nuisible, ville, message, urgence, created_at")
+      .select("id, nom, telephone, email, nuisible, ville, message, urgence, created_at, suivi_statut, suivi_note, rappel_le, dernier_contact")
       .eq("traite", false)
       .order("created_at", { ascending: false })
       .limit(20)

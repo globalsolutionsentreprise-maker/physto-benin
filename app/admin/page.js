@@ -6570,7 +6570,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("div", null,
               React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, lead.nom),
               React.createElement("div", { style: { fontSize: "11px", color: "#666", marginTop: "2px" } }, [lead.telephone, lead.email, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
-              lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0885a", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null
+              lead.created_at ? React.createElement("div", { style: { fontSize: "10px", color: "#b0885a", marginTop: "3px", fontWeight: "600" } }, "📅 Reçu le " + finFmtD(lead.created_at.split("T")[0])) : null,
+              // Résultat du dernier appel de Fabrice (saisi depuis la page /suivi) : Kabir voit que le lead est suivi.
+              lead.dernier_contact ? React.createElement("div", { style: { fontSize: "10px", color: "#0a2e1a", marginTop: "3px", fontWeight: "700" } },
+                "📞 " + ({ a_relancer: "À relancer", rdv: "RDV pris", devis: "Devis à faire" }[lead.suivi_statut] || "Contacté")
+                  + (lead.rappel_le ? " le " + finFmtD(lead.rappel_le) : "")
+                  + (lead.suivi_note ? " · " + lead.suivi_note : "")) : null
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", flexShrink: 0, marginLeft: "10px" } },
               React.createElement("button", {

@@ -10,13 +10,13 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1791844083.2446918,
-    "ast_hash": "0f1df9816fd6b213c25a3a1ade65b620",
+    "mtime": 1792402865.6700032,
+    "ast_hash": "5461ad202dd3404e730a4e0d4d4dfefe",
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792332574.2140985,
-    "ast_hash": "3ca31bc9dc51564c1da83e895bba4a35",
+    "mtime": 1792404476.6326904,
+    "ast_hash": "ca43bd96ad0d8ee907ae301aa09a2b93",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1791816153.8973007,
-    "ast_hash": "e09d91a01c5b43ad8cd6976bc732a00e",
+    "mtime": 1792404461.2689605,
+    "ast_hash": "64f9404c7a6368ec39a103b9668a4382",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "public/robots.txt": {
-    "mtime": 1791670275.1463997,
-    "ast_hash": "16526c1f3c49b8b6e9f49429462d206b",
+    "mtime": 1792404499.5250323,
+    "ast_hash": "54e5a224a21b9fce6dad3ec30bc034b4",
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
@@ -1222,6 +1222,26 @@
   "supabase/migrations/20261019120000_fiche_draft.sql": {
     "mtime": 1792399396.2359567,
     "ast_hash": "f49d009a56371854b0fca471cd18b87d",
+    "semantic_hash": ""
+  },
+  "app/api/lead-suivi/route.js": {
+    "mtime": 1792404401.4274282,
+    "ast_hash": "f5f0879bfe7f4341e9091d5b46b51b9f",
+    "semantic_hash": ""
+  },
+  "app/suivi/[token]/page.tsx": {
+    "mtime": 1792404456.4045076,
+    "ast_hash": "91d6b555a4b61fe69b9e3d1e49ecf14c",
+    "semantic_hash": ""
+  },
+  "app/suivi/layout.tsx": {
+    "mtime": 1792404406.5946155,
+    "ast_hash": "ff35cb94ea7aed9a7f339f458a4e8450",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261019130000_leads_suivi.sql": {
+    "mtime": 1792404383.9836433,
+    "ast_hash": "2cbf0470a91b75f270b89a1bbb3be24e",
     "semantic_hash": ""
   }
 }
