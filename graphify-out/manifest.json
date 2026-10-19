@@ -1045,13 +1045,13 @@
     "semantic_hash": ""
   },
   "app/api/fiche-terrain/route.js": {
-    "mtime": 1792327343.4882572,
-    "ast_hash": "f6ca696a1b1d8195e77cb9ddd0e5c033",
+    "mtime": 1792399414.2445536,
+    "ast_hash": "8bf3dfaf8661b91c22b6941c6ee8310a",
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1792397994.5326815,
-    "ast_hash": "a980321899ce6148ec01ae3c5673dbfe",
+    "mtime": 1792399543.2359898,
+    "ast_hash": "26b9cb7bc7421832be19b0f9e4a8c389",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {
@@ -1217,6 +1217,11 @@
   "lib/doc-bilingue.js": {
     "mtime": 1792334414.1730824,
     "ast_hash": "36d2a64c8897c59ca9f3a5762a98b6e6",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261019120000_fiche_draft.sql": {
+    "mtime": 1792399396.2359567,
+    "ast_hash": "f49d009a56371854b0fca471cd18b87d",
     "semantic_hash": ""
   }
 }

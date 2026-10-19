@@ -22,7 +22,7 @@ async function passageFromToken(sb, token) {
   if (!token || typeof token !== "string") return null
   const { data } = await sb
     .from("interventions")
-    .select("id, devis_id, date_intervention, type_passage, client_nom, adresse, notes, fiche_remplie_at")
+    .select("id, devis_id, date_intervention, type_passage, client_nom, adresse, notes, fiche_remplie_at, fiche_draft")
     .eq("fiche_token", token)
     .maybeSingle()
   return data || null
@@ -72,6 +72,7 @@ export async function GET(req) {
       prestationsDevis,
       fiche: fiche || null,
       medias,
+      draft: p.fiche_draft || null,
     })
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 })
@@ -98,6 +99,16 @@ export async function POST(req) {
         uploads.push({ path, token: data.token, signedUrl: data.signedUrl, type: (f && f.type) || "", name: (f && f.name) || "" })
       }
       return Response.json({ ok: true, uploads })
+    }
+
+    // 1bis) Brouillon serveur : la saisie en cours est sauvegardée à chaque
+    //       modification, pour la retrouver après un rechargement (appareil
+    //       photo, navigateur WhatsApp) ou sur un autre appareil.
+    if (body.action === "save_draft") {
+      const draft = body.draft && typeof body.draft === "object" ? body.draft : null
+      const { error } = await sb.from("interventions").update({ fiche_draft: draft }).eq("id", p.id)
+      if (error) return Response.json({ error: error.message }, { status: 500 })
+      return Response.json({ ok: true })
     }
 
     // 2) Soumission de la fiche (upsert par passage : ré-ouverture = mise à jour).
@@ -154,7 +165,7 @@ export async function POST(req) {
     }
 
     // Passage marqué fait (la frise lit statut === "terminee") + horodatage terrain.
-    await sb.from("interventions").update({ statut: "terminee", fiche_remplie_at: new Date().toISOString() }).eq("id", p.id)
+    await sb.from("interventions").update({ statut: "terminee", fiche_remplie_at: new Date().toISOString(), fiche_draft: null }).eq("id", p.id)
 
     return Response.json({ ok: true, numero })
   } catch (e) {

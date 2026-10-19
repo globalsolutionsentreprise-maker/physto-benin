@@ -129,19 +129,18 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           setJournees([{ date: (d.passage && d.passage.date) || new Date().toISOString().slice(0, 10), debut: "", fin: "" }])
         }
         setMediasExistants(d.medias || [])
+        // Brouillon serveur : la saisie en cours est restaurée en priorité
+        // (survit à un rechargement total, au navigateur WhatsApp, à un autre tél).
+        if (d.draft && typeof d.draft === "object") { applyDraft(d.draft); draftRestored.current = true }
       })
       .catch((e) => setErreur("Connexion impossible : " + e.message))
       .finally(() => setLoading(false))
   }, [token])
 
-  // Restaure le brouillon local (une fois, après chargement) : la saisie en
-  // cours prime sur le pré-remplissage, pour ne jamais perdre le travail terrain.
-  useEffect(() => {
-    if (loading || draftRestored.current) return
-    draftRestored.current = true
-    let d: any = null
-    try { const raw = localStorage.getItem(DRAFT_KEY); if (raw) d = JSON.parse(raw) } catch {}
-    if (!d) return
+  // Applique un brouillon (serveur en priorité, sinon local) : la saisie en
+  // cours prime sur le pré-remplissage, pour ne jamais perdre le travail.
+  function applyDraft(d: any) {
+    if (!d || typeof d !== "object") return
     if (d.typePassage) setTypePassage(d.typePassage)
     if (Array.isArray(d.prestations)) setPrestations(d.prestations)
     if (Array.isArray(d.nuisibles)) setNuisibles(d.nuisibles)
@@ -163,22 +162,43 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     if (typeof d.clientSignataire === "string") setClientSignataire(d.clientSignataire)
     if (d.signatureClient) setSignatureDataUrl(d.signatureClient)
     if (d.signatureTech) setSignatureTech(d.signatureTech)
+  }
+
+  // Brouillon sérialisable (sans URL blob: invalide après rechargement : la
+  // photo reste sur le serveur, son chemin et sa remarque suffisent).
+  function buildDraft() {
+    const mediasSer = mediasExistants.map((m) => ({ path: m.path, type: m.type, name: m.name, note: m.note || "", url: (m.url && m.url.indexOf("blob:") === 0) ? null : m.url }))
+    return {
+      typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques,
+      datePassage, dateFinPassage, journees, superviseurNom, mediasExistants: mediasSer,
+      postes, infestation, constat, recommandations, prochainPassage,
+      clientSignataire, signatureClient: signatureDataUrl, signatureTech,
+    }
+  }
+
+  // Repli : si le serveur n'a pas renvoyé de brouillon, restaure celui du
+  // téléphone (une fois, après chargement).
+  useEffect(() => {
+    if (loading || draftRestored.current) return
+    draftRestored.current = true
+    try { const raw = localStorage.getItem(DRAFT_KEY); if (raw) applyDraft(JSON.parse(raw)) } catch {}
   }, [loading])
 
-  // Sauvegarde automatique à chaque changement. On ne garde PAS d'URL blob:
-  // (invalide après rechargement) : la photo reste sur le serveur, son chemin
-  // et sa remarque suffisent, on affiche une vignette « enregistrée » au retour.
+  // Sauvegarde LOCALE immédiate (secours instantané sur le téléphone).
   useEffect(() => {
     if (loading || done) return
-    try {
-      const mediasSer = mediasExistants.map((m) => ({ path: m.path, type: m.type, name: m.name, note: m.note || "", url: (m.url && m.url.indexOf("blob:") === 0) ? null : m.url }))
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques,
-        datePassage, dateFinPassage, journees, superviseurNom, mediasExistants: mediasSer,
-        postes, infestation, constat, recommandations, prochainPassage,
-        clientSignataire, signatureClient: signatureDataUrl, signatureTech,
-      }))
-    } catch {}
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(buildDraft())) } catch {}
+  }, [loading, done, typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques, datePassage, dateFinPassage, journees, superviseurNom, mediasExistants, postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl, signatureTech])
+
+  // Sauvegarde SERVEUR (blindée) : le brouillon est poussé au bureau après une
+  // courte pause de saisie. Récupérable après un rechargement total, dans le
+  // navigateur WhatsApp, ou sur un autre téléphone.
+  useEffect(() => {
+    if (loading || done) return
+    const t = setTimeout(() => {
+      fetch("/api/fiche-terrain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "save_draft", draft: buildDraft() }) }).catch(() => {})
+    }, 1200)
+    return () => clearTimeout(t)
   }, [loading, done, typePassage, prestations, nuisibles, produits, produitsCoches, dureeDebut, dureeFin, remarques, datePassage, dateFinPassage, journees, superviseurNom, mediasExistants, postes, infestation, constat, recommandations, prochainPassage, clientSignataire, signatureDataUrl, signatureTech])
 
   // Upload immédiat des photos/vidéos ajoutées : elles sont sur le serveur tout
@@ -352,6 +372,10 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           {!signatureTech ? <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 6, lineHeight: 1.5 }}>Signez votre partie (plus bas) pour pouvoir la sortir.</div> : null}
         </div>
       )}
+
+      <div style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 8, padding: "8px 12px", margin: "0 0 14px", fontSize: 12.5, color: "#065f46", lineHeight: 1.5 }}>
+        💾 Votre saisie est enregistrée automatiquement. Même si la page se recharge (photos, WhatsApp…), vous retrouverez tout en rouvrant ce lien.
+      </div>
 
       <Lbl>Journées d'intervention</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 8px", lineHeight: 1.5 }}>
