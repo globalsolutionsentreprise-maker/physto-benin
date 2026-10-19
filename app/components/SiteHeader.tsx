@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 // comme WhatsAppFloat se masque sur l'admin.
 export default function SiteHeader() {
   const pathname = usePathname() || ""
-  if (pathname.startsWith("/fiche") || pathname.startsWith("/album")) return null
+  if (pathname.startsWith("/fiche") || pathname.startsWith("/album") || pathname.startsWith("/suivi")) return null
   return (
     <>
       {/* NAVBAR */}

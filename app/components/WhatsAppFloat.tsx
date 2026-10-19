@@ -9,7 +9,7 @@ const WA_MSG = encodeURIComponent("Bonjour Phyto Bénin, je souhaite un devis / 
 
 export default function WhatsAppFloat() {
   const pathname = usePathname() || ""
-  if (pathname.startsWith("/admin") || pathname.startsWith("/fiche") || pathname.startsWith("/album")) return null
+  if (pathname.startsWith("/admin") || pathname.startsWith("/fiche") || pathname.startsWith("/album") || pathname.startsWith("/suivi")) return null
   return (
     <a
       href={`https://wa.me/${WA_NUMBER}?text=${WA_MSG}`}
