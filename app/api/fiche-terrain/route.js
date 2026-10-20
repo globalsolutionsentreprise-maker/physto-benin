@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
+import { buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 
 export const dynamic = "force-dynamic"
 
@@ -37,6 +38,66 @@ async function signMedias(sb, medias) {
   return out
 }
 
+// Rend la fiche (passage ou contrôle) en HTML autonome, servie par le serveur à
+// une URL partageable : Fabrice envoie CE LIEN au client (pas un fichier local
+// qui casse sur mobile → ERR_FILE_NOT_FOUND). On rend l'état finalisé si la fiche
+// est soumise, sinon le brouillon en cours (la page terrain sauvegarde en continu).
+// Mêmes builders que le téléphone (lib/fiche-html.js), donc rendu identique.
+function ficheDocHtml({ fiche, draft, client, lieu, passage }, origin) {
+  const c = client || {}
+  const d = draft || {}
+  const sub = fiche || null
+  const s = sub ? {
+    typePassage: sub.type_passage || "Contrôle", prestations: sub.prestations || [], nuisibles: sub.nuisibles || [],
+    produits: sub.produits || {}, produitsCoches: Object.keys(sub.produits || {}),
+    dureeDebut: sub.duree_debut || "", dureeFin: sub.duree_fin || "",
+    datePassage: sub.date_passage || "", dateFinPassage: sub.date_fin_passage || "",
+    journees: Array.isArray(sub.journees) ? sub.journees : [], superviseurNom: sub.superviseur_nom || "Fabrice",
+    clientSignataire: sub.client_signataire || "", signatureClient: sub.signature_client_data_url || "",
+    signatureTech: sub.signature_tech_data_url || "", autresPrestation: sub.autres_prestation || "", autresNuisible: sub.autres_nuisible || "",
+    controle: sub.controle_data || {},
+  } : {
+    typePassage: d.typePassage || "Contrôle", prestations: d.prestations || [], nuisibles: d.nuisibles || [],
+    produits: d.produits || {}, produitsCoches: Array.isArray(d.produitsCoches) ? d.produitsCoches : Object.keys(d.produits || {}),
+    dureeDebut: d.dureeDebut || "", dureeFin: d.dureeFin || "",
+    datePassage: d.datePassage || "", dateFinPassage: d.dateFinPassage || "",
+    journees: Array.isArray(d.journees) ? d.journees : [], superviseurNom: d.superviseurNom || "Fabrice",
+    clientSignataire: d.clientSignataire || "", signatureClient: d.signatureClient || "",
+    signatureTech: d.signatureTech || "", autresPrestation: "", autresNuisible: "",
+    controle: { postes: d.postes, infestation: d.infestation, constat: d.constat, recommandations: d.recommandations, prochainPassage: d.prochainPassage },
+  }
+  const estControle = (passage && passage.type_passage === "controle") || s.typePassage === "Contrôle"
+  const numero = (sub && sub.numero_unique) || "—"
+  const jrs = (s.journees || []).filter((j) => j && (j.date || j.debut || j.fin))
+  const jr0 = jrs[0] || { date: s.datePassage, debut: s.dureeDebut, fin: s.dureeFin }
+  const dpass = jr0.date || s.datePassage
+  const dfin = jrs.length > 1 ? jrs[jrs.length - 1].date : ""
+  const bilingue = !!c.bilingue
+  let html
+  if (estControle) {
+    const f = {
+      controle_data: Object.assign({}, s.controle, { signatureDataUrl: s.signatureClient, clientSignataire: s.clientSignataire }),
+      date_passage: dpass, date_fin_passage: dfin, lieu_prestation: lieu || "",
+      signature_client_data_url: s.signatureClient, client_signataire: s.clientSignataire,
+      signature_tech_data_url: s.signatureTech, superviseur_nom: s.superviseurNom, superviseur_contact: "",
+    }
+    html = buildFicheControleHtml(f, { entreprise: c.entreprise, nom: c.nom, adresse: c.adresse }, numero, [], { bilingue })
+  } else {
+    const form = {
+      nomClient: c.entreprise || c.nom || "", adresse: c.adresse || "", tel: c.tel || "", mob: "",
+      typePassage: s.typePassage, prestations: s.prestations, nuisibles: s.nuisibles, produits: s.produits, produitsCoches: s.produitsCoches,
+      autresPrestation: s.autresPrestation, autresNuisible: s.autresNuisible,
+      lieuPrestation: lieu || "", journees: jrs,
+      dureeDebut: jr0.debut || "", dureeFin: jr0.fin || "", datePassage: dpass, dateFinPassage: dfin,
+      clientSignataire: s.clientSignataire, signatureClient: s.signatureClient, signatureTech: s.signatureTech,
+      superviseurNom: s.superviseurNom, superviseurContact: "",
+    }
+    html = buildFichePassageHtml(form, { entreprise: c.entreprise, nom: c.nom }, numero, [], { bilingue })
+  }
+  // <base> absolu : le logo (chemin racine) se résout même ouvert hors de notre origine.
+  return html.replace("<head>", '<head><base href="' + origin + '/">')
+}
+
 export async function GET(req) {
   try {
     const sb = db()
@@ -58,17 +119,30 @@ export async function GET(req) {
       ? devis.prestations
       : (devis && devis.prestation ? [devis.prestation] : [])
 
+    const clientInfo = {
+      nom: [client && client.prenom, client && client.nom].filter(Boolean).join(" ") || p.client_nom || "",
+      entreprise: (client && client.entreprise) || "",
+      adresse: (devis && devis.etablissement_adresse) || (client && client.adresse) || p.adresse || "",
+      tel: (client && client.telephone) || "",
+      bilingue: !!(client && client.bilingue),
+    }
+    const lieu = (devis && devis.etablissement_nom) || ""
+
+    // ?doc=1 : rend la fiche en PAGE HTML partageable (lien à envoyer au client),
+    // au lieu du JSON. Lien stable, pas de fichier local qui casse sur mobile.
+    if (new URL(req.url).searchParams.get("doc")) {
+      const html = ficheDocHtml(
+        { fiche: fiche || null, draft: p.fiche_draft || null, client: clientInfo, lieu, passage: p },
+        new URL(req.url).origin
+      )
+      return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } })
+    }
+
     return Response.json({
       ok: true,
       passage: { type_passage: p.type_passage, date: p.date_intervention, dejaRemplie: !!p.fiche_remplie_at },
-      client: {
-        nom: [client && client.prenom, client && client.nom].filter(Boolean).join(" ") || p.client_nom || "",
-        entreprise: (client && client.entreprise) || "",
-        adresse: (devis && devis.etablissement_adresse) || (client && client.adresse) || p.adresse || "",
-        tel: (client && client.telephone) || "",
-        bilingue: !!(client && client.bilingue),
-      },
-      lieu: (devis && devis.etablissement_nom) || "",
+      client: clientInfo,
+      lieu,
       prestationsDevis,
       fiche: fiche || null,
       medias,

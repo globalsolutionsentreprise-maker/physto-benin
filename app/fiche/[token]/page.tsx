@@ -329,6 +329,23 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     window.open(url, "_blank")
   }
 
+  // Lien WEB partageable de la fiche (à envoyer au client), au lieu d'un fichier
+  // téléchargé qui casse sur mobile (ERR_FILE_NOT_FOUND quand on le repartage).
+  // On pousse d'abord le brouillon au serveur pour que la page rende l'état à jour,
+  // puis on copie le lien et on ouvre le partage WhatsApp.
+  const [partageMsg, setPartageMsg] = useState("")
+  async function partagerLien() {
+    setPartageMsg("Préparation du lien…")
+    try {
+      await fetch("/api/fiche-terrain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "save_draft", draft: buildDraft() }) })
+    } catch {}
+    const lien = window.location.origin + "/api/fiche-terrain?token=" + encodeURIComponent(token) + "&doc=1"
+    let copie = false
+    try { await navigator.clipboard.writeText(lien); copie = true } catch {}
+    setPartageMsg(copie ? "Lien copié. Collez-le au client dans WhatsApp." : lien)
+    window.open("https://wa.me/?text=" + encodeURIComponent("Votre fiche de passage GSE :\n" + lien), "_blank")
+  }
+
   if (loading) return <Shell><p style={{ padding: 24, textAlign: "center" }}>Chargement…</p></Shell>
   if (erreur && !info) return <Shell><p style={{ padding: 24, textAlign: "center", color: "#991b1b" }}>{erreur}</p></Shell>
   if (done) return (
@@ -365,11 +382,17 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
             Vous pouvez la sortir tout de suite (preuve de passage), sans attendre d'avoir tout rempli. ⚠️ <strong style={{ color: VERT }}>Vous devez d'abord signer votre partie</strong> — c'est votre signature qui vaut preuve de passage.
           </div>
           <button type="button"
-            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { telechargerFiche() } }}
+            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { partagerLien() } }}
             style={{ width: "100%", background: signatureTech ? VERT : "#fff", color: signatureTech ? OR : VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
-            📄 Sortir la fiche de passage{c.bilingue ? " (FR + EN)" : ""}
+            🔗 Envoyer la fiche au client (lien)
           </button>
-          {!signatureTech ? <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 6, lineHeight: 1.5 }}>Signez votre partie (plus bas) pour pouvoir la sortir.</div> : null}
+          <button type="button"
+            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { telechargerFiche() } }}
+            style={{ width: "100%", background: "#fff", color: VERT, border: "1px solid " + VERT, borderRadius: 10, padding: "11px", fontSize: 14, fontWeight: 600, cursor: "pointer", marginTop: 8 }}>
+            📄 Ou télécharger le PDF{c.bilingue ? " (FR + EN)" : ""}
+          </button>
+          {partageMsg ? <div style={{ fontSize: 12.5, color: VERT, marginTop: 8, lineHeight: 1.5, wordBreak: "break-all" }}>{partageMsg}</div> : null}
+          {!signatureTech ? <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 6, lineHeight: 1.5 }}>Signez votre partie (plus bas) pour pouvoir l'envoyer.</div> : null}
         </div>
       )}
 
