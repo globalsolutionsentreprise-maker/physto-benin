@@ -1408,6 +1408,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [contratsList, setContratsList] = React.useState([])
   const [contratOuvert, setContratOuvert] = React.useState({})
   const [contratFiltreStatut, setContratFiltreStatut] = React.useState("tous")
+  const [afficheForm, setAfficheForm] = React.useState({ nom: "", lieu: "" })
   const [rapportsVisite, setRapportsVisite] = React.useState([])
   const [rapportsInterv, setRapportsInterv] = React.useState([])
   const [rapportVisiteModal, setRapportVisiteModal] = React.useState(null)
@@ -6356,6 +6357,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           signes.length > 0 ? e("button", { onClick: function() { var v = !tousOuverts; setContratOuvert(function() { var n = {}; signesFiltres.forEach(function(d) { n[d.id] = v }); return n }) }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, tousOuverts ? "▸ Tout replier" : "▾ Tout déplier") : null
         )
       ),
+      e("div", { style: { backgroundColor: "#fff", border: "1px solid #e0ddd6", borderLeft: "3px solid #c7a252", borderRadius: "10px", padding: "12px 16px", marginBottom: "16px" } },
+        e("div", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a", marginBottom: "8px" } }, "🪧 Affiche « Établissement protégé » (autocollant devanture, A6)"),
+        e("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" } },
+          e("input", { list: "affiche-clients", value: afficheForm.nom, onChange: function(ev) { setAfficheForm(Object.assign({}, afficheForm, { nom: ev.target.value })) }, placeholder: "Nom de l'établissement", style: { padding: "7px 9px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit", minWidth: "210px", boxSizing: "border-box" } }),
+          e("datalist", { id: "affiche-clients" }, (clients || []).map(function(c) { return e("option", { key: c.id, value: c.nom }) })),
+          e("input", { value: afficheForm.lieu, onChange: function(ev) { setAfficheForm(Object.assign({}, afficheForm, { lieu: ev.target.value })) }, placeholder: "Quartier (optionnel)", style: { padding: "7px 9px", border: "1.5px solid #e0ddd6", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit", width: "170px", boxSizing: "border-box" } }),
+          e("button", { onClick: function() { var nom = (afficheForm.nom || "").trim(); if (!nom) { alert("Entrez le nom de l'établissement."); return } ouvrirDocImprimable(buildAfficheHtml(nom, (afficheForm.lieu || "").trim()), 460, 720) }, style: { backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "🖨️ Générer l'affiche")
+        )
+      ),
       signes.length > 0 ? e("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "16px" } },
         FILTRES_CONTRAT.map(function(f) {
           var actif = contratFiltreStatut === f[0]
@@ -6787,6 +6797,46 @@ function gseSigs() {
 
 function gseFooter() {
   return '<div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA-26-026/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · direction@phyto-benin.com · Cotonou, Bénin</div>'
+}
+
+// Affiche "Établissement protégé" (autocollant devanture A6) pour un client sous contrat.
+function buildAfficheHtml(nom, lieu) {
+  var esc = function(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+  return '<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Affiche etablissement protege - ' + esc(nom) + '</title><style>'
+    + '@page{size:105mm 148mm;margin:0}'
+    + '*{box-sizing:border-box;margin:0;padding:0}'
+    + ':root{--vert:#1a4731;--or:#c7a252;--or-d:#9c7a2e;--ink:#1b1b1b}'
+    + 'html,body{width:105mm;height:148mm}'
+    + 'body{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--ink);line-height:1.2;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    + '.panB{width:105mm;height:148mm;background:#fff;display:flex;flex-direction:column;border:1.4mm solid var(--vert);position:relative;overflow:hidden}'
+    + '.panB::after{content:"";position:absolute;inset:2.3mm;border:.4mm solid var(--or);pointer-events:none}'
+    + '.hd{flex-direction:column;text-align:center;gap:1.5mm;padding:4mm 5mm 1mm;color:var(--vert);display:flex;align-items:center}'
+    + '.hd img{width:15mm;height:15mm;border-radius:50%;background:#fff;object-fit:contain}'
+    + '.hd .n{font-weight:800;font-size:12pt}'
+    + '.hd .n small{display:block;font-weight:400;font-size:6.5pt;color:var(--or-d);margin-top:.6mm}'
+    + '.seal{color:var(--or-d);font-size:6.5pt;letter-spacing:.14em;text-transform:uppercase;font-weight:700}'
+    + '.center{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1mm}'
+    + '.cert{text-align:center;color:var(--vert);font-size:15pt;font-weight:800;padding:1mm 4mm}'
+    + '.site{text-align:center;margin:2mm 6mm;padding:3mm;background:var(--vert);border-radius:1mm;box-shadow:inset 0 0 0 .5mm var(--or)}'
+    + '.site .lbl{font-size:6.5pt;letter-spacing:.18em;text-transform:uppercase;color:var(--or);font-weight:700}'
+    + '.site .nm{font-size:17pt;font-weight:800;color:#fff;margin-top:1.2mm;text-transform:uppercase;line-height:1.1}'
+    + '.site .lieu{font-size:8pt;font-weight:700;color:var(--or);margin-top:1mm;text-transform:uppercase;letter-spacing:.12em}'
+    + '.cbody{text-align:center;font-size:7.5pt;color:#444;padding:1mm 8mm 2mm;line-height:1.5}'
+    + '.consignes{list-style:none;font-size:6.8pt;color:#333;padding:2mm 9mm;text-align:left}'
+    + '.consignes li{margin:1mm 0}'
+    + '.legal{margin-top:auto;background:#f3f5f3;border-top:2px solid var(--or);font-size:6pt;color:#555;padding:3mm 5mm;text-align:center;line-height:1.35}'
+    + '.legal b{color:var(--vert)}'
+    + '</style></head><body>'
+    + '<div class="panB">'
+    + '<div class="hd"><img src="/logo-gse.png" alt=""><div class="n">GSE Phyto-Bénin<small>Global Solutions Entreprise</small></div><div class="seal">Applicateur Agréé</div></div>'
+    + '<div class="center">'
+    + '<div class="cert">ÉTABLISSEMENT PROTÉGÉ</div>'
+    + '<div class="site"><div class="lbl">Établissement</div><div class="nm">' + esc(nom) + '</div>' + (lieu ? '<div class="lieu">' + esc(lieu) + '</div>' : '') + '</div>'
+    + '<div class="cbody">Ce site fait l\'objet d\'un <b>contrat de lutte anti-nuisibles</b> assuré par GSE selon un plan de prévention et des passages réguliers.</div>'
+    + '<ul class="consignes"><li>• Ne pas déplacer ni ouvrir les postes d\'appâtage.</li><li>• Appâts rodenticides anticoagulants, antidote : vitamine&nbsp;K1.</li><li>• Tenir hors de portée des enfants et des animaux.</li><li>• En cas d\'ingestion : SAMU Bénin 112 (Cotonou 01 95 36 11 04).</li></ul>'
+    + '</div>'
+    + '<div class="legal">☎ 01 53 04 79 50 · direction@phyto-benin.com · phyto-benin.com<br><b>Agrément APA-26-026/CNGP-BEN</b> · RCCM RB/COT/24 B 38910 · IFU 3202420126111 · Assurance N° 3901/7010000035</div>'
+    + '</div></body></html>'
 }
 
 function buildCertificatHtml(type, form) {
