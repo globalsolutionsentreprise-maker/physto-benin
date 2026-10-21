@@ -815,7 +815,7 @@ export default function Admin() {
                 { cle: "agrement", label: "NUMERO D AGREMENT OFFICIEL", placeholder: "N AGREMENT-BENIN-XXXXX" },
                 { cle: "telephone", label: "TELEPHONE", placeholder: "+229 XX XX XX XX" },
                 { cle: "whatsapp", label: "NUMERO WHATSAPP (sans +)", placeholder: "22901234567" },
-                { cle: "email", label: "EMAIL", placeholder: "contact@phyto-benin.com" },
+                { cle: "email", label: "EMAIL", placeholder: "direction@phyto-benin.com" },
                 { cle: "adresse", label: "ADRESSE", placeholder: "Cotonou, Benin" },
               ].map(function(p) {
                 return (
@@ -2301,7 +2301,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ),
 
         React.createElement('div', { style: { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', fontSize: '11px', color: '#065f46' } },
-          '✅ Observations fixes sur le certificat : Agrément APA/26-025/CNGP-BEN'
+          '✅ Observations fixes sur le certificat : Agrément APA-26-026/CNGP-BEN'
         ),
 
         React.createElement('div', { style: { display: 'flex', gap: '10px', flexWrap: 'wrap' } },
@@ -3871,7 +3871,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           "</div>" +
           "</div>"
       })() +
-      "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · contact@phyto-benin.com</div>" +
+      "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · direction@phyto-benin.com</div>" +
       gseSigs() +
       "</div>" +
       gseFooter() +
@@ -6775,7 +6775,7 @@ function gseHeader(title, ref) {
     '<img src="/logo-gse.png" alt="GSE" style="width:56px;height:56px;object-fit:contain;border-radius:4px;background:#fff;padding:3px">' +
     '<div class="hdr-right"><div class="title">' + title + '</div>' + (ref ? '<div class="ref">' + ref + '</div>' : '') + '</div>' +
     '</div>' +
-    '<div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>'
+    '<div class="agr">✅ Agrément APA-26-026/CNGP-BEN &nbsp;·&nbsp; Police d\'assurance N°:3901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>'
 }
 
 function gseSigs() {
@@ -6786,7 +6786,7 @@ function gseSigs() {
 }
 
 function gseFooter() {
-  return '<div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · contact@phyto-benin.com · Cotonou, Bénin</div>'
+  return '<div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA-26-026/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 · IFU: 3202420126111 · direction@phyto-benin.com · Cotonou, Bénin</div>'
 }
 
 function buildCertificatHtml(type, form) {
@@ -6808,15 +6808,15 @@ function buildCertificatHtml(type, form) {
     var cellStyle = 'border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line'
     var agrtStyle = 'border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600'
     var rowDes = (form.matieres || '').trim()
-      ? '<tr><td style="' + cellStyle + '"><strong>Désinsectisation :</strong><br>' + (form.matieres || '') + '</td><td style="' + agrtStyle + '">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      ? '<tr><td style="' + cellStyle + '"><strong>Désinsectisation :</strong><br>' + (form.matieres || '') + '</td><td style="' + agrtStyle + '">Agrément APA-26-026/CNGP-BEN</td></tr>'
       : ''
     var rowRat = (form.matieresDerat || '').trim()
-      ? '<tr><td style="' + cellStyle + '"><strong>Dératisation :</strong><br>' + (form.matieresDerat || '') + '</td><td style="' + agrtStyle + '">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      ? '<tr><td style="' + cellStyle + '"><strong>Dératisation :</strong><br>' + (form.matieresDerat || '') + '</td><td style="' + agrtStyle + '">Agrément APA-26-026/CNGP-BEN</td></tr>'
       : ''
     rowsHtml = rowDes + rowRat
   } else {
     rowsHtml = (form.matieres || '').trim()
-      ? '<tr><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line">' + (form.matieres || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600">Agrément APA/26-025/CNGP-BEN</td></tr>'
+      ? '<tr><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;white-space:pre-line">' + (form.matieres || '') + '</td><td style="border:1px solid #bbb;padding:9px 10px;vertical-align:middle;color:#1a4731;font-weight:600">Agrément APA-26-026/CNGP-BEN</td></tr>'
       : ''
   }
 
@@ -6835,7 +6835,7 @@ function buildCertificatHtml(type, form) {
     '<div class="body">' +
 
     '<p style="margin-bottom:14px;line-height:1.75">La Société <strong>Global Solutions Entreprise (GSE)</strong>, agissant en qualité d\'<strong>Applicateur Agréé</strong>.<br>' +
-    'Référence <strong>APA/26-025/CNGP-BEN</strong> dont police d\'assurance <strong>N°:13901/7010000035</strong></p>' +
+    'Référence <strong>APA-26-026/CNGP-BEN</strong> dont police d\'assurance <strong>N°:3901/7010000035</strong></p>' +
 
     '<p style="margin-bottom:18px;line-height:1.75"><strong>Certifie</strong> conformément à la <strong>loi 91-004 du 11 Février 1991</strong> portant réglementation Phytosanitaire en République du Bénin, et ceux sous la supervision des structures Compétentes du Ministère de l\'Agriculture, de l\'Élevage et de la Pêche (MAEP), de l\'exécution de l\'opération de <strong>' + operationType + '</strong> des locaux appartenant à :</p>' +
 

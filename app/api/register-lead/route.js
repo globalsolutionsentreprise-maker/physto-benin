@@ -35,7 +35,7 @@ export async function POST(req) {
     // Notification e-mail à GSE (non bloquant — n'échoue jamais l'enregistrement du lead)
     try {
       const resendKey = process.env.RESEND_API_KEY
-      const notifyTo = process.env.LEAD_NOTIFY_EMAIL || "contact@phyto-benin.com"
+      const notifyTo = process.env.LEAD_NOTIFY_EMAIL || "direction@phyto-benin.com"
       // Équipe commerciale (Fabrice) en copie des leads entrants, comme le compte global.
       const equipeCommerciale = ["adossoub1@gmail.com"]
       if (resendKey) {
@@ -54,7 +54,7 @@ export async function POST(req) {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
           body: JSON.stringify({
-            from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
+            from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
             to: [notifyTo, ...equipeCommerciale],
             ...(email ? { reply_to: email } : {}),
             subject: `🌱 Nouveau lead : ${nom}${urgence ? " (URGENT)" : ""}`,

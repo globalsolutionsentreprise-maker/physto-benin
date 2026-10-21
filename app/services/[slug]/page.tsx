@@ -65,7 +65,7 @@ const SERVICES: Record<string, {
     mots: "désinfection Cotonou, assainissement locaux Bénin, certificat hygiène Bénin, désinfection restaurant Cotonou, désinfection hôtel Bénin",
     faqs: [
       { q: "À quelle fréquence faut-il désinfecter ses locaux ?", r: "Pour un restaurant ou un hôtel, une fois par mois c'est la base. Pour une clinique ou une pharmacie, ça peut être hebdomadaire selon votre activité." },
-      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui, notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA/26-025/CNGP-BEN). Il est accepté par les autorités sanitaires et les inspecteurs." },
+      { q: "Le certificat d'hygiène remis est-il reconnu officiellement ?", r: "Oui, notre certificat est émis par une entreprise agréée par l'État béninois (agrément APA-26-026/CNGP-BEN). Il est accepté par les autorités sanitaires et les inspecteurs." },
       { q: "Faut-il vider les locaux avant la désinfection ?", r: "Pas grand chose à faire de votre côté, juste retirer les denrées alimentaires exposées. On vous envoie un protocole précis avant de passer." },
       { q: "Vos produits protègent-ils contre les virus et bactéries ?", r: "Oui, on travaille avec des produits virucides à large spectre homologués OMS : bactéries, virus, champignons, moisissures. Tout est couvert." },
     ],

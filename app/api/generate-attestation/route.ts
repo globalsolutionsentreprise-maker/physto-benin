@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await resend.emails.send({
-      from: "GSE Phyto Bénin <contact@phyto-benin.com>",
+      from: "GSE Phyto Bénin <direction@phyto-benin.com>",
       to: client.email,
       subject: `✅ Attestation de traitement ${numero} — GSE Phyto Bénin`,
       html: buildEmailHtml({ att, client, numero, verifyUrl, attUrl }),
@@ -126,7 +126,7 @@ function buildEmailHtml({ att, client, numero, verifyUrl, attUrl }: any) {
     <p style="color:#888;font-size:12px;margin:0;">🔒 Vérifier l'authenticité : <a href="${verifyUrl}" style="color:#0a2e1a;">${verifyUrl}</a></p>
   </div>
   <div style="background:#f0ede6;padding:16px 32px;border-radius:0 0 8px 8px;border:1px solid #e8e6e0;border-top:none;text-align:center;">
-    <p style="margin:0;font-size:11px;color:#999;">Global Solutions Entreprise · Cotonou, Bénin · contact@phyto-benin.com</p>
+    <p style="margin:0;font-size:11px;color:#999;">Global Solutions Entreprise · Cotonou, Bénin · direction@phyto-benin.com</p>
     <p style="margin:4px 0 0;font-size:11px;color:#999;">RCCM : RB/COT/24 B 38910 · IFU : 3202420126111</p>
   </div>
 </div>

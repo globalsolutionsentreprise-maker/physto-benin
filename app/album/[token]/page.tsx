@@ -90,8 +90,8 @@ export default function AlbumPage({ params }: { params: Promise<{ token: string 
       </div>
 
       <div style={{ background: "#f0ede6", borderTop: "1px solid #e0ddd6", padding: "12px 18px", textAlign: "center", fontSize: 11, color: "#888", lineHeight: 1.6 }}>
-        Phyto Bénin by GSE (Global Solutions Entreprise) · Applicateur Agréé · Réf. APA/26-025/CNGP-BEN<br />
-        contact@phyto-benin.com · Cotonou, Bénin
+        Phyto Bénin by GSE (Global Solutions Entreprise) · Applicateur Agréé · Réf. APA-26-026/CNGP-BEN<br />
+        direction@phyto-benin.com · Cotonou, Bénin
       </div>
 
       {zoom && (

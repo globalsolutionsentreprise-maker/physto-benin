@@ -93,7 +93,7 @@ export default function AttestationPage() {
                 <div>RCCM : RB/COT/24 B 38910</div>
                 <div>IFU : 3202420126111</div>
                 <div>Cotonou, Bénin · +229 01 53 04 79 50</div>
-                <div>contact@phyto-benin.com</div>
+                <div>direction@phyto-benin.com</div>
               </div>
             </div>
             <div style={{ textAlign: "right" }}>

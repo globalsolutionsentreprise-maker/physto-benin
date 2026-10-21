@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "logo": "https://www.phyto-benin.com/logo-gse.png",
           "image": "https://www.phyto-benin.com/images/hero-bg.jpg",
           "telephone": "+2290153047950",
-          "email": "contact@phyto-benin.com",
+          "email": "direction@phyto-benin.com",
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Cotonou",

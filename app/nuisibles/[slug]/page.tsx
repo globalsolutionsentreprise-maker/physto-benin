@@ -120,7 +120,7 @@ export default async function NuisiblePage({ params }: { params: Promise<{ slug:
       <section style={{ padding: "48px 40px", backgroundColor: "#0a2e1a", textAlign: "center" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
           <h2 style={{ fontSize: "24px", fontWeight: 700, color: "#fff", marginBottom: "12px" }}>Un problème de {n.nom.toLowerCase()} ?</h2>
-          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "14px", marginBottom: "24px" }}>Diagnostic gratuit, techniciens agréés par l'État béninois (APA/26-025/CNGP-BEN). Intervention rapide à Cotonou et dans tout le Bénin.</p>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "14px", marginBottom: "24px" }}>Diagnostic gratuit, techniciens agréés par l'État béninois (APA-26-026/CNGP-BEN). Intervention rapide à Cotonou et dans tout le Bénin.</p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }} className="cta-btns">
             <a href="/contact" style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontWeight: 700, fontSize: "14px", padding: "14px 28px", borderRadius: "6px", textDecoration: "none" }}>Demander un devis</a>
             <a href={WA} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: "#25D366", color: "#fff", fontWeight: 700, fontSize: "14px", padding: "14px 24px", borderRadius: "6px", textDecoration: "none" }}>Écrire sur WhatsApp</a>

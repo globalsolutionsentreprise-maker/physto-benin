@@ -4,7 +4,7 @@ import { useState } from "react"
 export default function ContactForm() {
 
   const FORMSPREE_URL = "https://formspree.io/f/mreorevl"
-  const EMAIL = "contact@phyto-benin.com"
+  const EMAIL = "direction@phyto-benin.com"
 
   const [statut, setStatut] = useState("idle")
   const [formulaire, setFormulaire] = useState({

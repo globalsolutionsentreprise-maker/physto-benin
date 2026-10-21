@@ -70,7 +70,7 @@ export default function VerifierPage() {
             <p style={{ color: "#666", fontSize: "14px", lineHeight: "1.7", margin: 0 }}>
               Ce document ne figure pas dans notre registre officiel ou a été annulé.<br />
               Si vous pensez qu'il s'agit d'une erreur, contactez-nous à<br />
-              <a href="mailto:contact@phyto-benin.com" style={{ color: "#0a2e1a", fontWeight: "600" }}>contact@phyto-benin.com</a>
+              <a href="mailto:direction@phyto-benin.com" style={{ color: "#0a2e1a", fontWeight: "600" }}>direction@phyto-benin.com</a>
             </p>
           </div>
         ) : (
@@ -139,7 +139,7 @@ export default function VerifierPage() {
                 RCCM : RB/COT/24 B 38910<br />
                 IFU : 3202420126111<br />
                 Cotonou, Bénin<br />
-                contact@phyto-benin.com
+                direction@phyto-benin.com
               </div>
               <div style={{ textAlign: "right", fontSize: "12px", color: "#888" }}>
                 <div style={{ background: "#0a2e1a", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontWeight: "700", marginBottom: "4px", fontSize: "11px" }}>

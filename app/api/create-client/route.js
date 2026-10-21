@@ -147,7 +147,7 @@ export async function POST(req) {
     </div>
 
     <p style="color:#999;font-size:12px;border-top:1px solid #f0ede6;padding-top:20px;">
-      Besoin d'aide ? Contactez-nous à <a href="mailto:contact@phyto-benin.com" style="color:#0a2e1a;">contact@phyto-benin.com</a>
+      Besoin d'aide ? Contactez-nous à <a href="mailto:direction@phyto-benin.com" style="color:#0a2e1a;">direction@phyto-benin.com</a>
     </p>
   </div>
   <div style="background:#0a2e1a;padding:20px 40px;text-align:center;">
@@ -164,7 +164,7 @@ export async function POST(req) {
         "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
+        from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
         to: [email],
         subject: "Vos accès à l'espace client GSE",
         html,

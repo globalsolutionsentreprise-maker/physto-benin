@@ -74,7 +74,7 @@ const VILLES: Record<string, Ville> = {
     faqs: [
       { q: "Traitez-vous les administrations et bureaux à Porto-Novo ?", r: "Oui, avec des interventions planifiées hors heures d'ouverture et un certificat officiel remis. Nous protégeons aussi les archives contre les termites et les rongeurs." },
       { q: "Mon bâtiment est ancien, est-ce un problème pour le traitement anti-termites ?", r: "Au contraire, c'est là que le traitement est le plus utile. Nous traitons les constructions existantes par injection dans les menuiseries et fondations, sans travaux lourds." },
-      { q: "Proposez-vous un certificat d'hygiène pour les restaurants ?", r: "Oui. Après désinfection, nous remettons un certificat d'hygiène officiel (agrément APA/26-025/CNGP-BEN), accepté par les autorités sanitaires." },
+      { q: "Proposez-vous un certificat d'hygiène pour les restaurants ?", r: "Oui. Après désinfection, nous remettons un certificat d'hygiène officiel (agrément APA-26-026/CNGP-BEN), accepté par les autorités sanitaires." },
     ],
     metaTitle: "Désinsectisation, Dératisation & Désinfection Porto-Novo | Phyto Bénin",
     metaDesc: "Anti-nuisibles à Porto-Novo : désinsectisation, dératisation, désinfection, anti-termites. Certificat d'hygiène officiel, techniciens agréés. Devis gratuit.",
@@ -193,7 +193,7 @@ const VILLES: Record<string, Ville> = {
     ],
     faqs: [
       { q: "Traitez-vous les commerces et entrepôts du marché de Bohicon ?", r: "Oui. Au carrefour commercial du Zou, nous dératisons marchés et entrepôts, sécurisons les points d'entrée et assurons un suivi régulier." },
-      { q: "Proposez-vous un certificat d'hygiène pour les restaurants ?", r: "Oui, un certificat d'hygiène officiel (agrément APA/26-025/CNGP-BEN) est remis après désinfection, valable pour vos clients comme pour les inspections." },
+      { q: "Proposez-vous un certificat d'hygiène pour les restaurants ?", r: "Oui, un certificat d'hygiène officiel (agrément APA-26-026/CNGP-BEN) est remis après désinfection, valable pour vos clients comme pour les inspections." },
       { q: "Intervenez-vous à Bohicon le jour même ?", r: "Dans la plupart des cas oui, et 24h/24 pour les urgences (serpents notamment). Un diagnostic gratuit précède chaque intervention." },
     ],
     metaTitle: "Dératisation, Désinsectisation & Anti-termites Bohicon | Phyto Bénin",

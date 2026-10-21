@@ -36,7 +36,7 @@ export async function POST(req) {
       </a>
     </div>
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:14px;font-size:12px;color:#92400e;">
-      Ce devis est valable 30 jours · <a href="mailto:contact@phyto-benin.com" style="color:#0a2e1a;">contact@phyto-benin.com</a>
+      Ce devis est valable 30 jours · <a href="mailto:direction@phyto-benin.com" style="color:#0a2e1a;">direction@phyto-benin.com</a>
     </div>
   </div>
   <div style="background:#0a2e1a;padding:20px 40px;text-align:center;">
@@ -58,7 +58,7 @@ export async function POST(req) {
         "Authorization": `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
+        from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
         to: [clientEmail],
         subject: `Votre devis ${devisNumero} — Global Solutions Entreprise`,
         html,

@@ -343,7 +343,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       <div class="ref">Réf. ${esc(contratRef)}</div>
     </div>
   </div>
-  <div class="agr">✅ Agrément APA/26-025/CNGP-BEN &nbsp;·&nbsp; Police d'assurance N°:13901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>
+  <div class="agr">✅ Agrément APA-26-026/CNGP-BEN &nbsp;·&nbsp; Police d'assurance N°:3901/7010000035 &nbsp;·&nbsp; RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111</div>
 
   <div class="body">
 
@@ -357,12 +357,12 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
       <div class="party-box">
         <div class="party-title">Prestataire</div>
         <div class="party-row"><span class="party-key">Société :</span><span class="party-val">Global Solutions Entreprise (GSE)</span></div>
-        <div class="party-row"><span class="party-key">Agrément :</span><span class="party-val">N° APA-26-025/CNGP-BEN</span></div>
+        <div class="party-row"><span class="party-key">Agrément :</span><span class="party-val">N° APA-26-026/CNGP-BEN</span></div>
         <div class="party-row"><span class="party-key">RCCM :</span><span class="party-val">RB/COT/24 B 38910</span></div>
         <div class="party-row"><span class="party-key">IFU :</span><span class="party-val">3202420126111</span></div>
         <div class="party-row"><span class="party-key">Adresse :</span><span class="party-val">Ilot 3535, Cotonou, Bénin</span></div>
         <div class="party-row"><span class="party-key">Téléphone :</span><span class="party-val">+229 01 53 04 79 50</span></div>
-        <div class="party-row"><span class="party-key">Email :</span><span class="party-val">contact@phyto-benin.com</span></div>
+        <div class="party-row"><span class="party-key">Email :</span><span class="party-val">direction@phyto-benin.com</span></div>
       </div>
       <div class="party-box">
         <div class="party-title">Client</div>
@@ -539,7 +539,7 @@ ul.clauses li { margin-bottom: 5px; font-size: 12px; line-height: 1.55; }
 
   </div>
 
-  <div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA/26-025/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; contact@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
+  <div class="gse-footer">Phyto Bénin by GSE (Global Solutions Entreprise) | Applicateur Agréé | Réf. APA-26-026/CNGP-BEN<br>RCCM: RB/COT/24 B 38910 &nbsp;·&nbsp; IFU: 3202420126111 &nbsp;·&nbsp; direction@phyto-benin.com &nbsp;·&nbsp; Cotonou, Bénin</div>
 
 </div>
 </body>

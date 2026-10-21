@@ -105,7 +105,7 @@ export async function GET(req) {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${resendKey}` },
     body: JSON.stringify({
-      from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
+      from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
       to: EQUIPE_COMMERCIALE,
       subject: `📋 Prospects à suivre — ${aContacter} à contacter (semaine du ${semaine})`,
       html,

@@ -75,7 +75,7 @@ const FAQS = [
   { q: "Comment se passe l'audit gratuit ?", r: "Un technicien certifié passe sur votre site, inspecte les zones sensibles et vous remet un rapport photo des points critiques. Sans frais et sans engagement. Vous décidez ensuite en connaissance de cause." },
   { q: "Puis-je payer au mois ?", r: "Oui. Nos contrats se règlent mensuellement pour lisser la dépense, plutôt qu'en une seule facture annuelle." },
   { q: "Suis-je engagé longtemps ?", r: "Le contrat est annuel et renouvelable. Les modalités précises (durée, préavis) sont fixées ensemble après l'audit, selon votre établissement." },
-  { q: "Le certificat est-il valable pour mon inspection sanitaire ?", r: "Oui. Phyto Bénin est agréé par l'État béninois (APA/26-025/CNGP-BEN) et chaque passage donne lieu à un certificat officiel, opposable lors de vos contrôles HACCP et audits clients." },
+  { q: "Le certificat est-il valable pour mon inspection sanitaire ?", r: "Oui. Phyto Bénin est agréé par l'État béninois (APA-26-026/CNGP-BEN) et chaque passage donne lieu à un certificat officiel, opposable lors de vos contrôles HACCP et audits clients." },
 ]
 
 export default function ContratConformite() {
@@ -256,7 +256,7 @@ export default function ContratConformite() {
       <section style={{ backgroundColor: "#f7f7f5", padding: "72px 60px" }} className="section-padding">
         <div style={{ maxWidth: "1000px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px", textAlign: "center" }} className="grid-4">
           {[
-            { v: "Agréé", l: "par l'État béninois (APA/26-025/CNGP-BEN)" },
+            { v: "Agréé", l: "par l'État béninois (APA-26-026/CNGP-BEN)" },
             { v: "+50", l: "établissements protégés" },
             { v: "24h/24", l: "urgences assurées, 7j/7" },
             { v: "100%", l: "des passages certifiés" },

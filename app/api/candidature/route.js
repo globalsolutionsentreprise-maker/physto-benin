@@ -74,7 +74,7 @@ export async function POST(req) {
         method: "POST",
         headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: "GSE Phyto-Bénin <contact@phyto-benin.com>",
+          from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
           to: [to],
           subject: `Nouvelle candidature : ${nom}`,
           html,
