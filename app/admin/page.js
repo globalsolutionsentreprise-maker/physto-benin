@@ -2230,7 +2230,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var baseEnt = cl.entreprise ? cl.entreprise : [cl.prenom || '', cl.nom || ''].filter(Boolean).join(' ')
     var entSite = d.etablissement_nom ? (baseEnt ? baseEnt + ' · ' + d.etablissement_nom : d.etablissement_nom) : baseEnt
     setCertForm({
-      ref: form.ref || '',
+      ref: form.ref || nextCertRef(cert.type),
       dateJour: form.dateJour || '',
       dateMois: form.dateMois || '',
       entreprise: form.entreprise || form.client || entSite || '',
