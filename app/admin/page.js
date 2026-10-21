@@ -2223,15 +2223,21 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
 
   function rouvrirCertModal(cert, devis, client) {
     var form = cert.form_data || {}
+    var d = devis || {}
+    var cl = client || {}
+    // Bénéficiaire : le form_data sauvegardé prime, puis l'établissement du devis,
+    // puis le client. On mappe aussi les anciennes clés (client / adresse).
+    var baseEnt = cl.entreprise ? cl.entreprise : [cl.prenom || '', cl.nom || ''].filter(Boolean).join(' ')
+    var entSite = d.etablissement_nom ? (baseEnt ? baseEnt + ' · ' + d.etablissement_nom : d.etablissement_nom) : baseEnt
     setCertForm({
       ref: form.ref || '',
       dateJour: form.dateJour || '',
       dateMois: form.dateMois || '',
-      entreprise: form.entreprise || (client && client.entreprise) || '',
-      ifu: form.ifu || '',
-      rccm: form.rccm || '',
+      entreprise: form.entreprise || form.client || entSite || '',
+      ifu: form.ifu || d.etablissement_ifu || cl.ifu || '',
+      rccm: form.rccm || d.etablissement_rccm || cl.rccm || '',
       locaux: form.locaux || '',
-      situation: form.situation || '',
+      situation: form.situation || form.adresse || d.etablissement_adresse || d.lieu_intervention || cl.adresse || '',
       dateDebut: form.dateDebut || '',
       dateFin: form.dateFin || '',
       matieres: form.matieres || [form.matiere1, form.matiere2, form.matiere3].filter(Boolean).join('\n') || '',
