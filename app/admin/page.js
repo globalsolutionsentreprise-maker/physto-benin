@@ -3943,6 +3943,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try { await db.from("clients").update({ type_client: next }).eq("id", c.id) }
     catch (e) { setMsg("Erreur : mise à jour du segment client") }
   }
+  // Pastille indicateur (non cliquable) du segment, pour les cartes (contrats…).
+  function segBadge(seg) {
+    var ent = seg === "entreprise"
+    return React.createElement("span", { style: { flexShrink: 0, fontSize: "10px", fontWeight: "700", padding: "2px 8px", borderRadius: "20px", border: "1px solid " + (ent ? "#bbf7d0" : "#e0ddd6"), background: ent ? "#f0fdf4" : "#f5f5f4", color: ent ? "#166534" : "#555" } }, ent ? "🏢 Entreprise" : "🏠 Particulier")
+  }
 
   var filtresDevis = vue === "devis-client"
     ? devisList.filter(function(d) { return d.client_id === (clientDetail && clientDetail.id) })
@@ -6228,7 +6233,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         // En-tête cliquable : replie/déplie la carte (compact par défaut).
         e("div", { onClick: function() { setContratOuvert(function(p) { var n = Object.assign({}, p); n[d.id] = !p[d.id]; return n }) }, style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", cursor: "pointer" } },
           e("div", { style: { minWidth: 0 } },
-            e("div", { style: { fontSize: "14px", fontWeight: "700", color: "#0a2e1a" } }, (ouvert ? "▾ " : "▸ ") + nomAff),
+            e("div", { style: { fontSize: "14px", fontWeight: "700", color: "#0a2e1a", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" } },
+              e("span", null, (ouvert ? "▾ " : "▸ ") + nomAff), segBadge(segmentClient(d))),
             e("div", { style: { fontSize: "12px", color: "#888", marginTop: "2px" } },
               d.numero + " · " + (d.frequence_intervention || "trimestrielle") + " · " + Number(d.montant_net || 0).toLocaleString("fr-FR") + " FCFA"),
             !ouvert ? e("div", { style: { fontSize: "11px", color: nbRetard > 0 ? "#991b1b" : "#555", marginTop: "3px" } }, resumeLigne) : null
@@ -6378,7 +6384,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       return e("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e9d5ff", borderRadius: "10px", padding: "14px 16px", marginBottom: "10px" } },
         e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" } },
           e("div", null,
-            e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#6b21a8" } }, (cl && cl.nom) || "Client inconnu"),
+            e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#6b21a8", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" } },
+              e("span", null, (cl && cl.nom) || "Client inconnu"), segBadge(segmentClient(d || cl))),
             e("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, c.reference + " · PDF généré le " + fmtJ(c.date_generation ? String(c.date_generation).slice(0, 10) : null))
           ),
           e("div", { style: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" } },
