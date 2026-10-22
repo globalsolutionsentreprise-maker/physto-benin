@@ -1389,6 +1389,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [segmentCRM, setSegmentCRM] = React.useState("tous")
   const [devisList, setDevisList] = React.useState([])
   const [clients, setClients] = React.useState([])
+  const [clientsLoaded, setClientsLoaded] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
   const [msg, setMsg] = React.useState("")
   const [filtre, setFiltre] = React.useState("tous")
@@ -1637,7 +1638,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         // segment en tête) au lieu de jeter la réponse : évite le flash « 0 client ».
         var r = await fetch("/api/crm-data?action=get_clients", { headers: { "Authorization": "Bearer " + t } })
         var j = await r.json()
-        if (j && j.clients) setClients(j.clients)
+        if (j && j.clients) { setClients(j.clients); setClientsLoaded(true) }
       } catch (e) {}
       charger()
     })()
@@ -1677,6 +1678,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     }).then(function(results) {
       setLeads(results[0].leads || [])
       setClients(results[1].clients || [])
+      setClientsLoaded(true)
     }).catch(function() {})
   }
 
@@ -5206,9 +5208,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         )
       )
     }
+    // Tant que les clients ne sont pas chargés (get_clients ~ qq s), afficher « … »
+    // plutôt que « 0 client » : un « 0 » ne doit vouloir dire qu'un vrai zéro.
+    var sousPart = clientsLoaded ? nbPart + " client" + (nbPart > 1 ? "s" : "") : "…"
+    var sousEnt = clientsLoaded ? nbEnt + " client" + (nbEnt > 1 ? "s" : "") : "…"
     return e("div", { style: { display: "flex", gap: "10px", marginBottom: "18px", flexWrap: "wrap", alignItems: "stretch" } },
-      opt("particulier", "🏠", "Particuliers", nbPart + " client" + (nbPart > 1 ? "s" : "")),
-      opt("entreprise", "🏢", "Entreprises", nbEnt + " client" + (nbEnt > 1 ? "s" : "")),
+      opt("particulier", "🏠", "Particuliers", sousPart),
+      opt("entreprise", "🏢", "Entreprises", sousEnt),
       opt("tous", "▣", "Tous", null)
     )
   }
