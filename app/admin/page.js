@@ -4065,6 +4065,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var today = new Date(); today.setHours(0, 0, 0, 0)
     return finInterventionDates(c).find(function(d) { return new Date(d + "T00:00:00") >= today }) || null
   }
+  // Date de fin d'un contrat = début + durée (mois). Sert aux relances d'échéance.
+  function finContratFin(c) {
+    if (c.typeContrat !== "contrat" || !c.dateDebutContrat) return null
+    var d = new Date(c.dateDebutContrat + "T00:00:00")
+    d.setMonth(d.getMonth() + (c.dureeContratMois || 12))
+    return d
+  }
   function finMontantParInter(c) {
     var freq = finFreqMois(c.frequenceIntervention)
     var nb = (c.dureeContratMois || 12) / freq
@@ -4299,9 +4306,23 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   // cross-segment), indépendamment du filtre segment en tête du CRM.
   function renderObjectifsBloc() {
     var e = React.createElement
-    var r = calcObjectifs((finData && finData.clients) || [])
+    var all = (finData && finData.clients) || []
+    var r = calcObjectifs(all)
     var o = objectifs
     var txEnc = r.facture > 0 ? Math.round(r.encaisse / r.facture * 100) : 0
+    // Conversion par segment (converti / total affaires du segment).
+    function convSeg(seg) {
+      var a = all.filter(function(c) { return segmentClient(c) === seg })
+      var cv = a.filter(function(c) { return c.statut === "converti" }).length
+      return { total: a.length, conv: cv, pct: a.length ? Math.round(cv / a.length * 100) : 0 }
+    }
+    var cvEnt = convSeg("entreprise"), cvPart = convSeg("particulier")
+    // Renouvellements : contrats actifs dont la fin tombe dans <= 90 jours (ou échus).
+    var today0 = new Date(); today0.setHours(0, 0, 0, 0)
+    var renew = all.filter(function(c) { return c.typeContrat === "contrat" && c.statut !== "echec" && finContratFin(c) })
+      .map(function(c) { var fin = finContratFin(c); return { c: c, fin: fin, jours: Math.round((fin - today0) / 86400000) } })
+      .filter(function(x) { return x.jours <= 90 })
+      .sort(function(a, b) { return a.jours - b.jours })
     function ligne(label, real, obj, col) {
       var pct = obj > 0 ? Math.round(real / obj * 100) : 0
       return e("div", { style: { marginBottom: "12px" } },
@@ -4341,8 +4362,40 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       e("div", { style: { marginTop: "12px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" } },
         e("span", { style: { fontSize: "12px", color: "#555" } }, "Taux d'encaissement global ", e("span", { style: { color: "#999" } }, "(encaissé / facturé : " + finFmt(r.encaisse) + " / " + finFmt(r.facture) + " F)")),
         e("span", { style: { fontSize: "15px", fontWeight: "700", color: txEnc >= 80 ? "#1D9E75" : txEnc >= 50 ? "#BA7517" : "#E24B4A" } }, txEnc + "%")
+      ),
+      e("div", { style: { display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "12px" } },
+        bloc("📈 Conversion par segment", "Part des affaires converties, pour arbitrer où pousser l'effort commercial.",
+          convRow("Entreprises", cvEnt),
+          convRow("Particuliers", cvPart)
+        ),
+        bloc("🔔 Renouvellements à venir", "Contrats actifs dont l'échéance tombe dans 90 jours : à relancer avant qu'ils ne tombent.",
+          renew.length === 0
+            ? e("div", { style: { fontSize: "12px", color: "#999", padding: "6px 0" } }, "Aucun renouvellement dans les 90 jours.")
+            : e("div", null, renew.map(function(x) {
+                var echu = x.jours < 0
+                return e("div", { key: (x.c.id || x.c.client) + "-r", style: { display: "flex", alignItems: "center", gap: "8px", padding: "7px 0", borderBottom: "1px solid #f0efe9" } },
+                  segBadge(segmentClient(x.c)),
+                  e("div", { style: { flex: 1, minWidth: 0 } },
+                    e("div", { style: { fontSize: "12px", fontWeight: "600", color: "#333", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, x.c.client),
+                    e("div", { style: { fontSize: "10px", color: "#999" } }, "Fin le " + x.fin.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) + " · " + finFmt(arrOf(x.c)) + " F/an")
+                  ),
+                  e("span", { style: { flexShrink: 0, fontSize: "10px", fontWeight: "700", padding: "2px 8px", borderRadius: "20px", background: echu ? "#fde8e8" : x.jours <= 30 ? "#fff0c4" : "#eef4fb", color: echu ? "#c0392b" : x.jours <= 30 ? "#8a6d00" : "#185FA5" } }, echu ? "échu +" + Math.abs(x.jours) + "j" : "dans " + x.jours + "j")
+                )
+              }))
+        )
       )
     )
+    function convRow(label, d) {
+      return e("div", { style: { marginBottom: "12px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" } },
+          e("span", { style: { fontWeight: "600", color: "#333" } }, label),
+          e("span", { style: { color: "#888" } }, d.conv + "/" + d.total + " · ", e("b", { style: { color: d.pct >= 20 ? "#1D9E75" : "#BA7517" } }, d.pct + "%"))
+        ),
+        e("div", { style: { background: "#f0efe9", borderRadius: "5px", height: "14px", overflow: "hidden" } },
+          e("div", { style: { width: Math.min(d.pct, 100) + "%", background: d.pct >= 20 ? "#1D9E75" : "#BA7517", height: "100%", transition: "width .3s" } })
+        )
+      )
+    }
   }
 
   function renderDepModal() {
