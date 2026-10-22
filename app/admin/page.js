@@ -1640,7 +1640,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   async function charger() {
     setLoading(true)
     const [{ data: devis }, { data: cls }, { data: certs }, { data: fiches }, { data: rVisite }, { data: rInterv }, { data: intervs }, { data: contrats }, { data: perso }] = await Promise.all([
-      db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm, adresse)").order("created_at", { ascending: false }),
+      db.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm, adresse, type_client)").order("created_at", { ascending: false }),
       Promise.resolve({ data: [] }),
       db.from("certificats").select("*").order("created_at", { ascending: false }),
       db.from("fiches_passage").select("*").order("created_at", { ascending: false }),
@@ -3923,12 +3923,25 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function segmentClient(c) {
     if (!c) return "particulier"
     var s = c.clients || c
-    return (s.entreprise || s.ifu || s.rccm) ? "entreprise" : "particulier"
+    // Marqueur explicite prioritaire (défini au clic depuis la liste Clients).
+    if (s.type_client === "entreprise" || s.type_client === "particulier") return s.type_client
+    // Repli heuristique si non classé : raison sociale / IFU / RCCM sur la fiche,
+    // ou établissement renseigné sur le devis (c = ligne devis, champs à plat).
+    var pro = s.entreprise || s.ifu || s.rccm || c.etablissement_ifu || c.etablissement_rccm || c.etablissement_nom
+    return pro ? "entreprise" : "particulier"
   }
   // Filtre une liste selon le segment actif du CRM (« tous » = pas de filtre).
   function segFiltre(arr) {
     if (segmentCRM === "tous") return arr || []
     return (arr || []).filter(function(x) { return segmentClient(x) === segmentCRM })
+  }
+  // Bascule le segment d'un client (particulier <-> entreprise) en un clic depuis
+  // la liste. Écrit type_client ; maj optimiste pour un retour immédiat.
+  async function basculerSegment(c) {
+    var next = segmentClient(c) === "entreprise" ? "particulier" : "entreprise"
+    setClients(function(prev) { return (prev || []).map(function(x) { return x.id === c.id ? Object.assign({}, x, { type_client: next }) : x }) })
+    try { await db.from("clients").update({ type_client: next }).eq("id", c.id) }
+    catch (e) { setMsg("Erreur : mise à jour du segment client") }
   }
 
   var filtresDevis = vue === "devis-client"
@@ -5305,7 +5318,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
                 React.createElement("div", null,
                   React.createElement("div", { style: { fontWeight: "600", color: "#0a2e1a", fontSize: "15px", marginBottom: "3px" } }, [(c.prenom || ""), c.nom].filter(Boolean).join(" ") + (c.entreprise ? " · " + c.entreprise : "")),
-                  React.createElement("div", { style: { fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap" } },
+                  React.createElement("div", { style: { fontSize: "12px", color: "#888", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" } },
+                    (function() {
+                      var ent = segmentClient(c) === "entreprise"
+                      return React.createElement("span", { onClick: function(ev) { ev.stopPropagation(); basculerSegment(c) }, title: "Cliquer pour changer : particulier / entreprise",
+                        style: { cursor: "pointer", fontWeight: "700", fontSize: "11px", padding: "2px 9px", borderRadius: "20px", border: "1px solid " + (ent ? "#bbf7d0" : "#e0ddd6"), background: ent ? "#f0fdf4" : "#f5f5f4", color: ent ? "#166534" : "#555", userSelect: "none" } },
+                        ent ? "🏢 Entreprise" : "🏠 Particulier")
+                    })(),
                     c.email ? React.createElement("span", null, c.email) : null,
                     c.telephone ? React.createElement("span", null, c.telephone) : null,
                     React.createElement("span", { style: { color: "#0a2e1a", fontWeight: "600" } }, nbDevis + " devis · " + nbDocs + " docs")

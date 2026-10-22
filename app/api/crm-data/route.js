@@ -136,7 +136,7 @@ export async function GET(req) {
   await expirerDevisEnRetard(supabase)
 
   const [{ data: devisList }, { data: depenses }, { data: interventions }, { data: depDevis }, { data: personnelList }, { data: chargesFixesRaw }] = await Promise.all([
-    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm)").order("created_at", { ascending: false }),
+    supabase.from("devis").select("*, clients(id, nom, prenom, entreprise, email, telephone, ifu, rccm, type_client)").order("created_at", { ascending: false }),
     supabase.from("depenses_globales").select("*").order("created_at"),
     supabase.from("interventions").select("devis_id, montant_prestataire").gt("montant_prestataire", 0),
     supabase.from("depenses_devis").select("*").order("created_at"),
@@ -217,6 +217,10 @@ export async function GET(req) {
       depensesPrestataires: prestByDevis[d.id] || 0,
       ifu: cl.ifu || "",
       rccm: cl.rccm || "",
+      type_client: cl.type_client || "",
+      etablissement_ifu: d.etablissement_ifu || "",
+      etablissement_rccm: d.etablissement_rccm || "",
+      etablissement_nom: d.etablissement_nom || "",
       numero: d.numero || "",
       email: cl.email || "",
       telephone: cl.telephone || "",
