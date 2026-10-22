@@ -100,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Punaises de lit", "description": "Traitement des punaises de lit par méthode thermique et chimique." } }
             ]
           },
-          "sameAs": ["https://www.facebook.com/MadeinBeninbyUs", "https://www.linkedin.com/company/105831348/"]
+          "sameAs": ["https://www.facebook.com/MadeinBeninbyUs", "https://www.linkedin.com/company/105831348/", "https://g.page/r/CR4Hh9eOOpMDEBM"]
         })}} />
 
         {/* Schema.org WebSite (entité site, pour désambiguïsation par les IA) */}
