@@ -100,7 +100,9 @@ export async function POST(req) {
     ctx.photosCount = (photos || []).length
     ctx.videosCount = videosCount
 
-    const promptText = type === "visite" ? buildPromptVisite(notes, ctx) : buildPromptIntervention(notes, ctx)
+    const promptText = type === "dictee" ? buildPromptDictee(notes, ctx)
+      : type === "visite" ? buildPromptVisite(notes, ctx)
+      : buildPromptIntervention(notes, ctx)
     const parts = [{ text: promptText }, ...mediaParts]
 
     let geminiRes
@@ -158,6 +160,33 @@ function blocCaptures(ctx) {
   const champ = `,
   "capturesVideo": [{ "videoIndex": 0, "instants": [12.5], "legende": "Description courte de ce que montre l'image" }]`
   return { instr, champ }
+}
+
+// Dictée terrain : le technicien parle (note vocale), Gemini TRANSCRIT fidèlement
+// et met au propre en français pro pour le champ « Observations libres » de la
+// fiche. Aucun rapport structuré, aucune invention : le technicien relit ensuite.
+function buildPromptDictee(notes, ctx) {
+  return `Tu assistes un technicien de terrain de Global Solutions Entreprise (GSE), société de dératisation, désinsectisation et désinfection à Cotonou, Bénin. Il t'envoie une NOTE VOCALE (jointe) décrivant son intervention. Transcris-la et mets-la au propre pour le champ « Observations » de sa fiche.
+
+CONTEXTE (indicatif, ne pas l'inventer dans le texte) :
+- Client : ${ctx?.clientNom || "Non précisé"}
+- Adresse : ${ctx?.adresse || "Non précisée"}
+- Date : ${ctx?.date || "Non précisée"}
+- Technicien : ${ctx?.technicien || "Non précisé"}
+- Prestation : ${ctx?.prestation || "Non précisée"}
+${notes ? `\nNOTES DÉJÀ SAISIES (à compléter, ne pas répéter) :\n${notes}\n` : ""}
+RÈGLES STRICTES :
+- Transcris FIDÈLEMENT ce qui est dit. Corrige l'orthographe, la grammaire et la ponctuation, reformule en français professionnel clair.
+- N'INVENTE RIEN : aucun nuisible, produit, zone, quantité, chiffre ou action qui n'est pas dans la voix. Ne complète pas, ne déduis pas.
+- Garde toutes les informations techniques (zones traitées, produits, quantités, constats, difficultés, conseils) exactement comme énoncées.
+- Structure en phrases courtes ; utilise de courtes puces (préfixe «- ») si plusieurs points distincts.
+- Si un passage est inaudible ou ambigu, écris [inaudible] à cet endroit plutôt que de deviner.
+- Pas de formule d'introduction ni de conclusion ajoutée, pas de titre. Uniquement les observations.
+
+Réponds UNIQUEMENT avec ce JSON, sans markdown :
+{
+  "observations": "Le texte mis au propre, prêt à relire par le technicien"
+}`
 }
 
 function buildPromptVisite(notes, ctx) {

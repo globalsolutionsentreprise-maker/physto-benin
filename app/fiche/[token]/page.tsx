@@ -75,6 +75,16 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
   const [sigAlerte, setSigAlerte] = useState(false)
   const techSigRef = useRef<HTMLDivElement>(null)
   const [uploadingMedia, setUploadingMedia] = useState(false)
+  // Dictée vocale des observations : enregistre la voix (MediaRecorder natif),
+  // l'envoie à l'IA (Gemini) qui transcrit + met au propre, puis Fabrice relit.
+  const [recording, setRecording] = useState(false)
+  const [transcribing, setTranscribing] = useState(false)
+  const [recSecs, setRecSecs] = useState(0)
+  const [dicteeErr, setDicteeErr] = useState("")
+  const mediaRecRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+  const recTimerRef = useRef<any>(null)
+  const recStreamRef = useRef<MediaStream | null>(null)
   // Brouillon sauvegardé sur le téléphone : si l'onglet se recharge (ex. après
   // avoir ouvert la fiche pour l'envoyer), Fabrice retrouve tout son travail.
   const DRAFT_KEY = "fiche-draft-" + token
@@ -346,6 +356,74 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     window.open("https://wa.me/?text=" + encodeURIComponent("Votre fiche de passage GSE :\n" + lien), "_blank")
   }
 
+  // ── Dictée vocale des observations ────────────────────────────────────────
+  function pickAudioMime() {
+    const cands = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/aac", "audio/ogg;codecs=opus"]
+    for (const c of cands) { try { if ((window as any).MediaRecorder && MediaRecorder.isTypeSupported(c)) return c } catch {} }
+    return ""
+  }
+  function stopRecTimer() { if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null } }
+  function cleanupStream() { try { recStreamRef.current?.getTracks().forEach((t) => t.stop()) } catch {} recStreamRef.current = null }
+  async function demarrerDictee() {
+    setDicteeErr("")
+    if (!navigator.mediaDevices || !(window as any).MediaRecorder) { setDicteeErr("Enregistrement non supporté par ce navigateur. Mettez à jour Chrome / Safari."); return }
+    let stream: MediaStream
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }) }
+    catch { setDicteeErr("Micro refusé. Autorisez l'accès au micro, puis réessayez."); return }
+    recStreamRef.current = stream
+    const mime = pickAudioMime()
+    let rec: MediaRecorder
+    try { rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined) } catch { rec = new MediaRecorder(stream) }
+    mediaRecRef.current = rec
+    chunksRef.current = []
+    rec.ondataavailable = (e) => { if (e.data && e.data.size) chunksRef.current.push(e.data) }
+    rec.onstop = () => { cleanupStream(); transcrireDictee(new Blob(chunksRef.current, { type: rec.mimeType || mime || "audio/webm" })) }
+    rec.start()
+    setRecording(true); setRecSecs(0)
+    const start = Date.now()
+    recTimerRef.current = setInterval(() => {
+      const secs = Math.floor((Date.now() - start) / 1000)
+      setRecSecs(secs)
+      if (secs >= 240) arreterDictee()  // cap 4 min (limite de taille de la requête)
+    }, 1000)
+  }
+  function arreterDictee() {
+    stopRecTimer(); setRecording(false)
+    try { if (mediaRecRef.current && mediaRecRef.current.state !== "inactive") mediaRecRef.current.stop(); else cleanupStream() } catch { cleanupStream() }
+  }
+  async function transcrireDictee(blob: Blob) {
+    if (!blob || !blob.size) { setDicteeErr("Rien n'a été enregistré."); return }
+    if (blob.size > 4_000_000) { setDicteeErr("Note trop longue. Refaites-en une plus courte."); return }
+    setTranscribing(true); setDicteeErr("")
+    try {
+      const data: string = await new Promise((res, rej) => {
+        const fr = new FileReader()
+        fr.onload = () => res(String(fr.result).split(",")[1] || "")
+        fr.onerror = () => rej(new Error("lecture audio"))
+        fr.readAsDataURL(blob)
+      })
+      const r = await fetch("/api/analyze-rapport", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "dictee",
+          notes: remarques || "",
+          audios: [{ mimeType: blob.type || "audio/webm", data }],
+          context: {
+            clientNom: (info && info.passage && info.passage.client_nom) || "",
+            adresse: (info && info.passage && info.passage.adresse) || "",
+            date: datePassage, technicien: superviseurNom, prestation: prestations.join(", "),
+          },
+        }),
+      })
+      const out = await r.json().catch(() => ({} as any))
+      if (!r.ok || out.error) { setDicteeErr(out.error || "Échec de la transcription. Réessayez."); return }
+      const texte = (out.rapport && out.rapport.observations) || ""
+      if (!texte) { setDicteeErr("Transcription vide. Réessayez en parlant plus près du micro."); return }
+      setRemarques((prev) => (prev && prev.trim()) ? prev.trim() + "\n" + texte : texte)
+    } catch (e: any) { setDicteeErr("Erreur : " + (e?.message || "transcription")) }
+    finally { setTranscribing(false) }
+  }
+
   if (loading) return <Shell><p style={{ padding: 24, textAlign: "center" }}>Chargement…</p></Shell>
   if (erreur && !info) return <Shell><p style={{ padding: 24, textAlign: "center", color: "#991b1b" }}>{erreur}</p></Shell>
   if (done) return (
@@ -488,9 +566,25 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
 
       <Lbl>Observations libres (pour le rapport)</Lbl>
       <div style={{ fontSize: 13, color: "#6b6b6b", margin: "-2px 0 2px", lineHeight: 1.5 }}>
-        Écrivez librement tout ce que vous notez : constat, zones traitées, difficultés, conseils au client… Ces notes servent à rédiger le rapport d'intervention (elles ne figurent pas telles quelles sur la fiche).
+        Écrivez, ou <b>dictez à voix haute</b> : l'IA transcrit et met au propre, vous relisez et corrigez avant d'envoyer. Ces notes servent à rédiger le rapport d'intervention (elles ne figurent pas telles quelles sur la fiche).
       </div>
-      <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={4} placeholder="Écrivez ici…" style={{ ...inp, resize: "vertical" }} />
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, margin: "4px 0 8px" }}>
+        {!recording ? (
+          <button type="button" onClick={demarrerDictee} disabled={transcribing}
+            style={{ ...chip, background: transcribing ? "#eee" : "#fffdf5", border: "2px solid " + OR, color: VERT, fontWeight: 700, cursor: transcribing ? "wait" : "pointer", padding: "10px 16px" }}>
+            {transcribing ? "⏳ Transcription…" : "🎤 Dicter mes observations"}
+          </button>
+        ) : (
+          <button type="button" onClick={arreterDictee}
+            style={{ ...chip, background: "#991b1b", border: "2px solid #991b1b", color: "#fff", fontWeight: 700, padding: "10px 16px" }}>
+            ⏹ Arrêter ({Math.floor(recSecs / 60)}:{String(recSecs % 60).padStart(2, "0")})
+          </button>
+        )}
+        {recording ? <span style={{ fontSize: 12.5, color: "#991b1b", fontWeight: 600 }}>● Enregistrement… parlez, puis Arrêter</span> : null}
+      </div>
+      {dicteeErr ? <div style={{ fontSize: 12.5, color: "#991b1b", margin: "0 0 6px", fontWeight: 600 }}>{dicteeErr}</div> : null}
+      {transcribing ? <div style={{ fontSize: 12.5, color: VERT, margin: "0 0 6px" }}>L'IA met vos observations au propre… vous pourrez les relire et corriger.</div> : null}
+      <textarea value={remarques} onChange={(e) => setRemarques(e.target.value)} rows={4} placeholder="Écrivez ici, ou utilisez le bouton Dicter ci-dessus…" style={{ ...inp, resize: "vertical" }} />
       </>)}
 
       <Lbl>Photos / Vidéos (pour le rapport)</Lbl>
