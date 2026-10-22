@@ -1633,7 +1633,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       try {
         var s = await db.auth.getSession()
         var t = (s.data.session && s.data.session.access_token) || ""
-        await fetch("/api/crm-data?action=get_clients", { headers: { "Authorization": "Bearer " + t } })
+        // Peupler les clients dès ce premier appel (sert les compteurs d'encarts
+        // segment en tête) au lieu de jeter la réponse : évite le flash « 0 client ».
+        var r = await fetch("/api/crm-data?action=get_clients", { headers: { "Authorization": "Bearer " + t } })
+        var j = await r.json()
+        if (j && j.clients) setClients(j.clients)
       } catch (e) {}
       charger()
     })()
@@ -1653,7 +1657,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       db.from("personnel").select("id, nom, prenom, poste").order("nom"),
     ])
     setDevisList(devis || [])
-    setClients(cls || [])
+    // Ne pas écraser les clients ici : `cls` est toujours vide (chargés via l'API
+    // get_clients, préchargée au mount + rechargée plus bas). Les blanchir ferait
+    // clignoter les compteurs d'encarts à « 0 » pendant le chargement.
     setCertsList(certs || [])
     setFichesList(fiches || [])
     setRapportsVisite(rVisite || [])
