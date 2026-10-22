@@ -1384,6 +1384,9 @@ export default function Admin() {
 function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState(vueInitiale || "devis")
+  // Segment actif du CRM : « tous » (défaut, vue globale), « particulier » ou
+  // « entreprise ». Filtre toutes les vues (clients, finances, analyse, pipeline…).
+  const [segmentCRM, setSegmentCRM] = React.useState("tous")
   const [devisList, setDevisList] = React.useState([])
   const [clients, setClients] = React.useState([])
   const [loading, setLoading] = React.useState(true)
@@ -3914,9 +3917,23 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     )
   }
 
+  // Segment d'un client/affaire : « entreprise » si raison sociale, IFU ou RCCM
+  // renseigné, sinon « particulier ». Marche sur les 3 formes de données du CRM :
+  // client global + affaire finData (champs à plat) et devis (champs sous .clients).
+  function segmentClient(c) {
+    if (!c) return "particulier"
+    var s = c.clients || c
+    return (s.entreprise || s.ifu || s.rccm) ? "entreprise" : "particulier"
+  }
+  // Filtre une liste selon le segment actif du CRM (« tous » = pas de filtre).
+  function segFiltre(arr) {
+    if (segmentCRM === "tous") return arr || []
+    return (arr || []).filter(function(x) { return segmentClient(x) === segmentCRM })
+  }
+
   var filtresDevis = vue === "devis-client"
     ? devisList.filter(function(d) { return d.client_id === (clientDetail && clientDetail.id) })
-    : devisList.filter(function(d) { return filtre === "tous" || d.statut === filtre })
+    : segFiltre(devisList.filter(function(d) { return filtre === "tous" || d.statut === filtre }))
 
   function renderCompteurs() {
     var auj = new Date().toISOString().slice(0, 10)
@@ -4280,7 +4297,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderVueFinances() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement des finances…")
-    var cls = finData.clients || []
+    var cls = segFiltre(finData.clients || [])
     var depGlob = finData.depenses || []
     var tp = cls.reduce(function(s, c) { return s + (c.paiementsRecus || 0) }, 0)
     // Investissement (matériel durable) : suivi à part, HORS résultat d'exploitation.
@@ -4504,7 +4521,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   function renderVueAnalyse() {
     var e = React.createElement
     if (finLoading || !finData) return e("div", { style: { padding: "40px", textAlign: "center", color: "#888", fontSize: "13px" } }, "Chargement de l'analyse…")
-    var cls = finData.clients || []
+    var cls = segFiltre(finData.clients || [])
     var depGlob = finData.depenses || []
     var total = cls.length
     var conv = cls.filter(function(c) { return c.statut === "converti" })
@@ -4802,7 +4819,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var movesForLane = estCommercial
       ? ETAPES.filter(function(x) { return x.lane === "commercial" }).concat([ETAPE_PERDU])
       : ETAPES.filter(function(x) { return x.lane === "execution" }).concat([ETAPE_PERDU])
-    var cls = finData.clients || []
+    var cls = segFiltre(finData.clients || [])
     var devisMap = {}
     devisList.forEach(function(d) { devisMap[d.id] = d })
 
@@ -5033,6 +5050,33 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
 
+  // Sélecteur de segment en tête du CRM : deux encarts Particuliers / Entreprises
+  // (+ « Tous » pour la vue globale). Pilote segmentCRM, qui filtre toutes les vues.
+  function renderSegmentCRM() {
+    var e = React.createElement
+    var nbPart = (clients || []).filter(function(c) { return segmentClient(c) === "particulier" }).length
+    var nbEnt = (clients || []).filter(function(c) { return segmentClient(c) === "entreprise" }).length
+    var opt = function(key, emoji, titre, sousTitre) {
+      var on = segmentCRM === key
+      var mini = key === "tous"
+      return e("button", { key: key, onClick: function() { setSegmentCRM(key) },
+        style: { flex: mini ? "0 0 auto" : "1", minWidth: mini ? "auto" : "150px", textAlign: "left", cursor: "pointer", fontFamily: "inherit",
+          border: "2px solid " + (on ? "#0a2e1a" : "#e8e6e0"), background: on ? "#0a2e1a" : "#fff", color: on ? "#fff" : "#0a2e1a",
+          borderRadius: "10px", padding: mini ? "10px 16px" : "12px 18px", display: "flex", alignItems: "center", gap: "10px" } },
+        e("span", { style: { fontSize: mini ? "15px" : "22px" } }, emoji),
+        e("span", null,
+          e("div", { style: { fontSize: mini ? "13px" : "15px", fontWeight: "800" } }, titre),
+          sousTitre ? e("div", { style: { fontSize: "11px", fontWeight: "600", opacity: on ? 0.85 : 0.55, marginTop: "1px" } }, sousTitre) : null
+        )
+      )
+    }
+    return e("div", { style: { display: "flex", gap: "10px", marginBottom: "18px", flexWrap: "wrap", alignItems: "stretch" } },
+      opt("particulier", "🏠", "Particuliers", nbPart + " client" + (nbPart > 1 ? "s" : "")),
+      opt("entreprise", "🏢", "Entreprises", nbEnt + " client" + (nbEnt > 1 ? "s" : "")),
+      opt("tous", "▣", "Tous", null)
+    )
+  }
+
   function renderOnglets() {
     var docsEnAttente = certsList.filter(function(c) { return !c.envoye }).length + fichesList.filter(function(f) { return !f.envoye }).length
     return React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "24px", borderBottom: "2px solid #e8e6e0", paddingBottom: "0" } },
@@ -5223,9 +5267,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   function renderVueClients() {
+    var clientsSeg = segFiltre(clients)
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
-        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clients.length + " client(s)"),
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clientsSeg.length + " client(s)"),
         React.createElement("div", { style: { display: "flex", gap: "8px" } },
           React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
           React.createElement("button", { onClick: ouvrirAjoutClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau client")
@@ -5252,9 +5297,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ),
       loading
         ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...")
-        : clients.length === 0
+        : clientsSeg.length === 0
           ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun client.")
-          : React.createElement("div", null, clients.map(function(c) {
+          : React.createElement("div", null, clientsSeg.map(function(c) {
               var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
               var nbDocs = certsList.filter(function(cert) { return cert.client_id === c.id }).length + fichesList.filter(function(f) { return f.client_id === c.id }).length
               return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
@@ -6126,11 +6171,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var estPerduD = function(d) { return !!d && (d.etape === "perdu" || d.crm_statut === "echec") }
     var perduIds = {}
     devisList.forEach(function(d) { if (estPerduD(d)) perduIds[d.id] = true })
-    var signes = devisList.filter(function(d) { return (d.type_crm === "contrat" || d.date_debut_contrat) && !estPerduD(d) })
+    // Filtre segment (particulier/entreprise) : les contrats suivent le segment actif.
+    var devisListSeg = segFiltre(devisList)
+    var segIds = {}
+    devisListSeg.forEach(function(d) { segIds[d.id] = true })
+    var signes = devisListSeg.filter(function(d) { return (d.type_crm === "contrat" || d.date_debut_contrat) && !estPerduD(d) })
     // PDF générés dont le devis n'est pas marqué signé : ils ne sont pas des contrats.
     var idsSignes = {}
     signes.forEach(function(d) { idsSignes[d.id] = true })
-    var aSigner = (contratsList || []).filter(function(c) { return !idsSignes[c.devis_id] && !perduIds[c.devis_id] })
+    var aSigner = (contratsList || []).filter(function(c) { return !idsSignes[c.devis_id] && !perduIds[c.devis_id] && (segmentCRM === "tous" || segIds[c.devis_id]) })
 
     var ST_CONTRAT = {
       actif:        { libelle: "Actif",         bg: "#f0fdf4", tc: "#065f46", bord: "#bbf7d0" },
@@ -6638,7 +6687,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       ),
       React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" } },
         ["tous", "envoye", "accepte", "modification_demandee", "en_cours", "termine", "annule"].map(function(st) {
-          var count = st === "tous" ? devisList.length : devisList.filter(function(d) { return d.statut === st }).length
+          var devisSeg = segFiltre(devisList)
+          var count = st === "tous" ? devisSeg.length : devisSeg.filter(function(d) { return d.statut === st }).length
           return React.createElement("button", { key: st, onClick: function() { setFiltre(st) }, style: { padding: "5px 12px", borderRadius: "20px", fontSize: "11px", cursor: "pointer", border: "none", fontFamily: "inherit", backgroundColor: filtre === st ? "#0a2e1a" : "#f0ede6", color: filtre === st ? "#fff" : "#444", fontWeight: filtre === st ? "700" : "400" } },
             (st === "tous" ? "Tous" : (STATUTS[st] ? STATUTS[st].label : st)) + " (" + count + ")"
           )
@@ -6664,6 +6714,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       msg,
       React.createElement("span", { onClick: function() { setMsg("") }, style: { cursor: "pointer", opacity: 0.5 } }, "×")
     ) : null,
+    renderSegmentCRM(),
     renderOnglets(),
     vue === "clients" ? renderVueClients() : null,
     vue === "devis-client" ? renderVueDevisClient() : null,
