@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1792654643.8869612,
-    "ast_hash": "7e3d9671b7cb45c01679ec6f1785e78d",
+    "mtime": 1792679505.3196006,
+    "ast_hash": "8b0510df274df6abf21f6e008a3ae89e",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {

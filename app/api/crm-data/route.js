@@ -75,9 +75,11 @@ async function expirerDevisEnRetard(supabase) {
       const ref = d.date_envoi || d.created_at
       return ref && ref < cutoff
     })
-    for (const d of toExpire) {
-      await supabase.from("devis").update({ etape: "perdu", crm_statut: "echec", motif_echec: "Dépassement du délai" }).eq("id", d.id)
-    }
+    // Updates indépendants (un devis chacun) : en parallèle, pas en série,
+    // pour ne pas enchaîner N allers-retours Supabase sur le chargement principal.
+    await Promise.all(toExpire.map(d =>
+      supabase.from("devis").update({ etape: "perdu", crm_statut: "echec", motif_echec: "Dépassement du délai" }).eq("id", d.id)
+    ))
     return toExpire.length
   } catch (e) {
     return 0
@@ -111,7 +113,10 @@ export async function GET(req) {
   }
 
   if (action === "get_clients") {
-    await expirerDevisEnRetard(supabase)
+    // Pas d'expiration des devis ici : get_clients ne sert qu'à lister les clients
+    // (compteurs des encarts segment). expirerDevisEnRetard fait 2 selects pleins +
+    // N updates série et ne touche que `devis` ; l'expiration tourne déjà sur le
+    // chargement crm-data principal. L'enlever retire ~qq s de la latence d'ouverture.
     const { data: clients } = await supabase.from("clients").select("*").order("created_at", { ascending: false })
     return Response.json({ clients: clients || [] })
   }
