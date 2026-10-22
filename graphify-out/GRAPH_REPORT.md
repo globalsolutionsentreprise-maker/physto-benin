@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-10-19)
+# Graph Report - gse-site  (2026-10-22)
 
 ## Corpus Check
-- 211 files · ~789,431 words
+- 212 files · ~794,028 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 971 nodes · 1055 edges · 119 communities (78 shown, 41 thin omitted)
+- 974 nodes · 1065 edges · 118 communities (77 shown, 41 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `719f7773`
+- Built from commit: `7ed41bf3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -113,7 +113,6 @@
 - [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
@@ -149,7 +148,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (119 total, 41 thin omitted)
+## Communities (118 total, 41 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -224,8 +223,8 @@ Cohesion: 0.40
 Nodes (4): QA checklist for CRM module (crm.html), QA checklist for RH module (rh.html), Reporting, Test targets
 
 ### Community 19 - "Community 19"
-Cohesion: 0.54
-Nodes (7): blocCaptures(), blocVisuels(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST(), uploadVideoToGemini()
+Cohesion: 0.47
+Nodes (8): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST(), uploadVideoToGemini()
 
 ### Community 22 - "Community 22"
 Cohesion: 0.33
@@ -396,12 +395,8 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.07
-Nodes (42): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+34 more)
-
-### Community 109 - "Community 109"
-Cohesion: 0.67
-Nodes (5): db(), GET(), passageFromToken(), POST(), signMedias()
+Cohesion: 0.06
+Nodes (48): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+40 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70

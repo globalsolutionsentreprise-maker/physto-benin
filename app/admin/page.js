@@ -1456,17 +1456,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
   const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
   const [depSaving, setDepSaving] = React.useState(false)
-  const [objectifCA, setObjectifCA] = React.useState(0)
+  const [objectifs, setObjectifs] = React.useState({ arrEnt: 0, arrPart: 0, ponctEnt: 0, ponctPart: 0 })
   const [objModal, setObjModal] = React.useState(false)
-  const [objInput, setObjInput] = React.useState("")
+  const [objForm, setObjForm] = React.useState({ arrEnt: "", arrPart: "", ponctEnt: "", ponctPart: "" })
   const [objSaving, setObjSaving] = React.useState(false)
   React.useEffect(function() {
     if ((vue === "finances" || vue === "analyse" || vue === "prospection" || vue === "execution") && !finData && !finLoading) chargerFinances()
     if (vue === "analyse") chargerLeadsTraites()   // pour l'encart « Leads perdus »
   }, [vue])
   React.useEffect(function() {
-    db.from("parametres").select("valeur").eq("cle", "objectif_ca").maybeSingle().then(function(res) {
-      if (res && res.data && res.data.valeur) setObjectifCA(parseFloat(res.data.valeur) || 0)
+    db.from("parametres").select("valeur").eq("cle", "objectifs").maybeSingle().then(function(res) {
+      if (res && res.data && res.data.valeur) {
+        try { var o = JSON.parse(res.data.valeur); setObjectifs({ arrEnt: o.arrEnt || 0, arrPart: o.arrPart || 0, ponctEnt: o.ponctEnt || 0, ponctPart: o.ponctPart || 0 }) } catch (e) {}
+      }
     }).catch(function() {})
   }, [])
   const [analysingContrat, setAnalysingContrat] = React.useState(false)
@@ -4029,6 +4031,22 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   var FREQ_LABEL = { mensuelle: "Mensuelle", bimestrielle: "Bimestrielle", trimestrielle: "Trimestrielle", semestrielle: "Semestrielle", annuelle: "Annuelle" }
   function finFmt(n) { return Math.round(n || 0).toLocaleString("fr-FR") }
   function finFmtD(d) { return d ? new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" }) : "·" }
+  // Revenu annualisé d'un contrat : montant du contrat ramené à 12 mois.
+  function arrOf(c) { var d = c.dureeContratMois || 12; return d > 0 ? Math.round((c.montantDevis || 0) * 12 / d) : (c.montantDevis || 0) }
+  // Réalisé des objectifs par cellule : contrats mesurés en ARR engagé (actifs),
+  // ponctuel mesuré en encaissé réel, + facturé/encaissé global pour le taux.
+  function calcObjectifs(arr) {
+    var out = { arrEnt: 0, arrPart: 0, ponctEnt: 0, ponctPart: 0, facture: 0, encaisse: 0 }
+    ;(arr || []).forEach(function(c) {
+      if (c.statut === "echec") return
+      var ent = segmentClient(c) === "entreprise"
+      if (c.typeContrat === "contrat") { if (ent) out.arrEnt += arrOf(c); else out.arrPart += arrOf(c) }
+      else { if (ent) out.ponctEnt += (c.paiementsRecus || 0); else out.ponctPart += (c.paiementsRecus || 0) }
+      out.facture += (c.montantFacture || 0)
+      out.encaisse += (c.paiementsRecus || 0)
+    })
+    return out
+  }
   function finFreqMois(k) { return FREQ_MOIS[k] || 3 }
   function finInterventionDates(c) {
     if (c.typeContrat !== "contrat" || !c.dateDebutContrat) return []
@@ -4219,37 +4237,110 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
 
   function openObjModal() {
-    setObjInput(objectifCA ? String(objectifCA) : "")
+    setObjForm({
+      arrEnt: objectifs.arrEnt ? String(objectifs.arrEnt) : "",
+      arrPart: objectifs.arrPart ? String(objectifs.arrPart) : "",
+      ponctEnt: objectifs.ponctEnt ? String(objectifs.ponctEnt) : "",
+      ponctPart: objectifs.ponctPart ? String(objectifs.ponctPart) : ""
+    })
     setObjModal(true)
   }
   async function enregistrerObjectif() {
-    var val = parseFloat(objInput) || 0
+    var o = { arrEnt: parseFloat(objForm.arrEnt) || 0, arrPart: parseFloat(objForm.arrPart) || 0, ponctEnt: parseFloat(objForm.ponctEnt) || 0, ponctPart: parseFloat(objForm.ponctPart) || 0 }
     setObjSaving(true)
     try {
-      await db.from("parametres").upsert({ cle: "objectif_ca", valeur: String(val) }, { onConflict: "cle" })
-      setObjectifCA(val)
+      await db.from("parametres").upsert({ cle: "objectifs", valeur: JSON.stringify(o) }, { onConflict: "cle" })
+      setObjectifs(o)
       setObjModal(false)
-      setMsg("Objectif CA enregistré")
-    } catch (e) { setMsg("Erreur enregistrement objectif") }
+      setMsg("Objectifs enregistrés")
+    } catch (e) { setMsg("Erreur enregistrement objectifs") }
     setObjSaving(false)
   }
   function renderObjModal() {
     if (!objModal) return null
     var e = React.createElement
     var inpS = { width: "100%", padding: "9px 11px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "13px", fontFamily: "inherit", boxSizing: "border-box" }
+    function champ(key, label) {
+      return e("div", { style: { marginBottom: "12px" } },
+        e("label", { style: { display: "block", fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "5px" } }, label),
+        e("input", { type: "number", min: "0", value: objForm[key], placeholder: "Ex: 2000000", onChange: function(ev) { var v = ev.target.value; setObjForm(function(p) { var n = Object.assign({}, p); n[key] = v; return n }) }, style: inpS })
+      )
+    }
+    function section(titre, sous, a, b) {
+      return e("div", { style: { marginBottom: "16px" } },
+        e("div", { style: { fontSize: "12px", fontWeight: "700", color: "#0a2e1a" } }, titre),
+        e("div", { style: { fontSize: "11px", color: "#999", margin: "2px 0 10px" } }, sous),
+        a, b
+      )
+    }
     return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setObjModal(false) } },
-      e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "420px", maxWidth: "92vw" } },
+      e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "460px", maxWidth: "92vw", maxHeight: "90vh", overflowY: "auto" } },
         e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
-          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Objectif CA annuel"),
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Objectifs annuels par segment"),
           e("button", { onClick: function() { setObjModal(false) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
         ),
-        e("label", { style: { display: "block", fontSize: "11px", fontWeight: "600", color: "#666", marginBottom: "5px" } }, "Objectif de chiffre d'affaires annuel (FCFA)"),
-        e("input", { type: "number", min: "0", value: objInput, placeholder: "Ex: 2000000", onChange: function(ev) { setObjInput(ev.target.value) }, style: inpS }),
-        e("p", { style: { fontSize: "11px", color: "#999", margin: "6px 0 20px" } }, "Utilisé pour afficher votre taux de progression."),
-        e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
+        section("🔁 Le Moteur · revenu récurrent engagé (ARR)", "Valeur annualisée des contrats actifs que vous visez par segment.",
+          champ("arrEnt", "Contrats Entreprises (FCFA/an)"),
+          champ("arrPart", "Contrats Particuliers (FCFA/an)")
+        ),
+        section("💵 Le Cash · ponctuel encaissé", "Chiffre d'affaires one-shot réellement encaissé que vous visez par segment.",
+          champ("ponctEnt", "Ponctuel Entreprises (FCFA)"),
+          champ("ponctPart", "Ponctuel Particuliers (FCFA)")
+        ),
+        e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "4px" } },
           e("button", { onClick: function() { setObjModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
           e("button", { onClick: enregistrerObjectif, disabled: objSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: objSaving ? "wait" : "pointer", fontFamily: "inherit" } }, objSaving ? "Enregistrement…" : "Enregistrer")
         )
+      )
+    )
+  }
+  // Tableau de bord objectifs : 2 blocs (Moteur ARR / Cash encaissé) + taux
+  // d'encaissement. Toujours calculé sur TOUTES les affaires (vue stratégique
+  // cross-segment), indépendamment du filtre segment en tête du CRM.
+  function renderObjectifsBloc() {
+    var e = React.createElement
+    var r = calcObjectifs((finData && finData.clients) || [])
+    var o = objectifs
+    var txEnc = r.facture > 0 ? Math.round(r.encaisse / r.facture * 100) : 0
+    function ligne(label, real, obj, col) {
+      var pct = obj > 0 ? Math.round(real / obj * 100) : 0
+      return e("div", { style: { marginBottom: "12px" } },
+        e("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" } },
+          e("span", { style: { fontWeight: "600", color: "#333" } }, label),
+          obj > 0
+            ? e("span", { style: { color: "#888" } }, finFmt(real) + " / " + finFmt(obj) + " F · ", e("b", { style: { color: pct >= 100 ? "#1D9E75" : col } }, pct + "%"))
+            : e("span", { style: { color: "#999" } }, finFmt(real) + " F · ", e("span", { style: { color: "#bbb" } }, "objectif non défini"))
+        ),
+        e("div", { style: { background: "#f0efe9", borderRadius: "5px", height: "14px", overflow: "hidden" } },
+          e("div", { style: { width: Math.min(pct, 100) + "%", background: col, height: "100%", transition: "width .3s" } })
+        )
+      )
+    }
+    function bloc(titre, sous, a, b) {
+      return e("div", { style: { flex: 1, minWidth: "280px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px 18px" } },
+        e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a", marginBottom: "2px" } }, titre),
+        e("div", { style: { fontSize: "11px", color: "#999", marginBottom: "12px" } }, sous),
+        a, b
+      )
+    }
+    return e("div", { style: { marginBottom: "24px" } },
+      e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" } },
+        e("div", { style: { fontSize: "13px", fontWeight: "700", color: "#0a2e1a" } }, "🎯 Objectifs annuels"),
+        e("button", { onClick: openObjModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "Modifier")
+      ),
+      e("div", { style: { display: "flex", gap: "16px", flexWrap: "wrap" } },
+        bloc("🔁 Le Moteur", "Revenu récurrent engagé (contrats actifs, annualisé)",
+          ligne("Entreprises", r.arrEnt, o.arrEnt, "#1a6b38"),
+          ligne("Particuliers", r.arrPart, o.arrPart, "#1a6b38")
+        ),
+        bloc("💵 Le Cash", "Ponctuel encaissé (one-shot réellement payé)",
+          ligne("Entreprises", r.ponctEnt, o.ponctEnt, "#185FA5"),
+          ligne("Particuliers", r.ponctPart, o.ponctPart, "#185FA5")
+        )
+      ),
+      e("div", { style: { marginTop: "12px", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" } },
+        e("span", { style: { fontSize: "12px", color: "#555" } }, "Taux d'encaissement global ", e("span", { style: { color: "#999" } }, "(encaissé / facturé : " + finFmt(r.encaisse) + " / " + finFmt(r.facture) + " F)")),
+        e("span", { style: { fontSize: "15px", fontWeight: "700", color: txEnc >= 80 ? "#1D9E75" : txEnc >= 50 ? "#BA7517" : "#E24B4A" } }, txEnc + "%")
       )
     )
   }
@@ -4396,26 +4487,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       )
     }
 
-    var objPct = objectifCA > 0 ? Math.round(tfa / objectifCA * 100) : 0
-    var objCard = objectifCA > 0
-      ? e("div", { style: { background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "16px 18px", marginBottom: "24px" } },
-          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
-            e("div", null,
-              e("span", { style: { fontSize: "12px", color: "#888" } }, "Objectif CA annuel : "),
-              e("span", { style: { fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, finFmt(objectifCA) + " FCFA")
-            ),
-            e("button", { onClick: openObjModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "Modifier")
-          ),
-          e("div", { style: { background: "#f0efe9", borderRadius: "5px", height: "18px", overflow: "hidden", marginBottom: "6px" } },
-            e("div", { style: { width: Math.min(objPct, 100) + "%", background: objPct >= 100 ? "#1D9E75" : "#185FA5", height: "100%" } })
-          ),
-          e("div", { style: { fontSize: "12px", color: "#555" } }, "Facturé " + finFmt(tfa) + " FCFA · atteint à ", e("b", { style: { color: objPct >= 100 ? "#1D9E75" : "#185FA5" } }, objPct + "%"))
-        )
-      : e("div", { style: { background: "#fafaf8", border: "1px dashed #d8d5cc", borderRadius: "10px", padding: "14px 18px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
-          e("span", { style: { fontSize: "12px", color: "#888" } }, "Aucun objectif de chiffre d'affaires défini."),
-          e("button", { onClick: openObjModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "6px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🎯 Définir un objectif CA")
-        )
-
     return e("div", null,
       renderDepModal(),
       renderObjModal(),
@@ -4425,7 +4496,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         kpiCard("Résultat net (exploitation)", (r >= 0 ? "+" : "") + finFmt(r) + " FCFA", r >= 0 ? "#1D9E75" : "#E24B4A"),
         kpiCard("Investissements (durable)", finFmt(totalInvest) + " FCFA", "#185FA5")
       ),
-      objCard,
+      renderObjectifsBloc(),
       e("div", { style: secS }, "Suivi financier par client"),
       e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
         e("table", { style: { width: "100%", borderCollapse: "collapse" } },
@@ -4570,7 +4641,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var sorted = cls.slice().sort(function(a, b) { return (b.montantDevis || 0) - (a.montantDevis || 0) })
     var top2 = sorted.slice(0, 2).reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0)
     var concPct = totalDevis ? Math.round(top2 / totalDevis * 100) : 0
-    var progPct = objectifCA ? Math.min(Math.round(totalEncaisse / objectifCA * 100), 100) : 0
+    var objR = calcObjectifs((finData && finData.clients) || [])
+    var objTotal = objectifs.arrEnt + objectifs.arrPart + objectifs.ponctEnt + objectifs.ponctPart
+    var objReal = objR.arrEnt + objR.arrPart + objR.ponctEnt + objR.ponctPart
+    var progPct = objTotal > 0 ? Math.min(Math.round(objReal / objTotal * 100), 100) : 0
     var stOrder = ["contact", "devis", "attente", "relance", "converti", "echec"]
     var stCounts = stOrder.map(function(k) { var meta = ST_META[k] || {}; var arr = cls.filter(function(c) { return c.statut === k }); return { key: k, label: meta.label, bg: meta.bg, tc: meta.tc, count: arr.length, montant: arr.reduce(function(s, c) { return s + (c.montantDevis || 0) }, 0) } })
     var maxCount = Math.max.apply(null, stCounts.map(function(s) { return s.count }).concat([1]))
@@ -4608,8 +4682,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     if (bestSrc) insights.push({ type: "info", ico: "📡", title: "Meilleur canal : " + bestSrc[0], txt: "Source la plus productive avec " + finFmt(bestSrc[1].montant) + " FCFA en devis et " + bestSrc[1].count + " prospect" + (bestSrc[1].count > 1 ? "s" : "") + ". Renforcer les actions sur ce canal." })
     if (actifs.length >= 4) insights.push({ type: "info", ico: "🔄", title: actifs.length + " dossiers actifs en cours", txt: "Pipeline en cours estimé à " + finFmt(pipeW) + " FCFA (valeur pondérée). Prioriser les relances sur les dossiers \"En attente\"." })
     if (delaiDF !== null) insights.push({ type: "good", ico: "⏱️", title: "Délai devis → facture : " + delaiDF + " jour" + (delaiDF > 1 ? "s" : ""), txt: "Cycle court sur les clients convertis. Objectif : maintenir sous 7 jours pour optimiser la trésorerie." })
-    if (objectifCA && progPct < 50) insights.push({ type: "warn", ico: "🎯", title: "Progression objectif : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA encaissés sur un objectif de " + finFmt(objectifCA) + " FCFA. Il reste " + finFmt(objectifCA - totalEncaisse) + " FCFA à atteindre." })
-    else if (objectifCA && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Mi-objectif atteint : " + progPct + "%", txt: finFmt(totalEncaisse) + " FCFA sur " + finFmt(objectifCA) + " FCFA · bonne trajectoire." })
+    if (objTotal > 0 && progPct < 50) insights.push({ type: "warn", ico: "🎯", title: "Objectifs annuels : " + progPct + "%", txt: finFmt(objReal) + " FCFA réalisés (ARR engagé + ponctuel encaissé) sur " + finFmt(objTotal) + " FCFA visés. Il reste " + finFmt(Math.max(objTotal - objReal, 0)) + " FCFA." })
+    else if (objTotal > 0 && progPct >= 50) insights.push({ type: "good", ico: "🎯", title: "Objectifs annuels : " + progPct + "%", txt: finFmt(objReal) + " FCFA réalisés sur " + finFmt(objTotal) + " FCFA · bonne trajectoire." })
     // Alertes d'encaissement : un passage de contrat dû/proche et non réglé.
     cls.filter(function(c) { return c.typeContrat === "contrat" || c.dateDebutContrat }).forEach(function(c) {
       var dv = devisList.find(function(x) { return x.id === c.id })
@@ -4665,21 +4739,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       )
     }
 
-    var dash = Math.PI * 80
-    var gauge = objectifCA
-      ? e("div", { style: { display: "flex", flexDirection: "column", alignItems: "center" } },
-          e("svg", { viewBox: "0 0 200 110", style: { width: "100%", maxWidth: "220px" } },
-            e("path", { d: "M20,100 A80,80 0 0,1 180,100", fill: "none", stroke: "#f0efe9", strokeWidth: "18", strokeLinecap: "round" }),
-            e("path", { d: "M20,100 A80,80 0 0,1 180,100", fill: "none", stroke: "#1D9E75", strokeWidth: "18", strokeLinecap: "round", strokeDasharray: dash, strokeDashoffset: dash * (1 - progPct / 100) }),
-            e("text", { x: "100", y: "88", textAnchor: "middle", fontSize: "22", fontWeight: "700", fill: "#111" }, progPct + "%"),
-            e("text", { x: "100", y: "104", textAnchor: "middle", fontSize: "10", fill: "#777" }, "de l'objectif atteint")
-          ),
-          e("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", fontSize: "11px", color: "#777", marginTop: "6px" } }, e("span", null, "Encaissé : ", e("b", { style: { color: "#1D9E75" } }, finFmt(totalEncaisse) + " F")), e("span", null, "Objectif : ", e("b", null, finFmt(objectifCA) + " F"))),
-          e("div", { style: { marginTop: "8px", fontSize: "11px", color: "#999" } }, "Reste à atteindre : ", e("b", { style: { color: "#111" } }, finFmt(Math.max(objectifCA - totalEncaisse, 0)) + " FCFA"))
-        )
-      : e("div", { style: { padding: "24px 0", textAlign: "center", color: "#999", fontSize: "12px" } }, "🎯 Aucun objectif défini. Définissez-le dans l'onglet Finances.")
-
     return e("div", null,
+      renderObjModal(),
       // KPIs
       e("div", { style: { display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "24px" } },
         anKpi(txConv + "%", "Taux de conversion", conv.length + "/" + total + " clients", "#1D9E75"),
@@ -4699,16 +4760,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           )
         })
       ),
-      // Funnel + Objectif
-      grid2(
-        anCard("Funnel pipeline", e("div", null, stCounts.map(function(s) {
+      // Objectifs annuels (bloc stratégique) + Funnel
+      renderObjectifsBloc(),
+      e("div", { style: { marginBottom: "16px" } }, anCard("Funnel pipeline", e("div", null, stCounts.map(function(s) {
           return e("div", { key: s.key, style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" } },
             e("div", { style: { width: "110px", fontSize: "11px", color: "#555", flexShrink: 0 } }, s.label),
             e("div", { style: { flex: 1 } }, e("div", { style: { background: s.bg, color: s.tc, width: Math.max(s.count / maxCount * 100, 8) + "%", borderRadius: "5px", padding: "3px 8px", fontSize: "11px", fontWeight: "600", whiteSpace: "nowrap" } }, s.count + " · " + finFmt(s.montant) + " F"))
           )
-        }))),
-        anCard("Objectif CA annuel", gauge)
-      ),
+        })))),
       // Canal + Répartition pipeline (légende)
       grid2(
         anCard("Performance par canal d'acquisition", e("div", null, srcList.map(function(entry) {
