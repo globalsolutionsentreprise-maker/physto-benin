@@ -70,7 +70,7 @@ Quand la personne choisit → tu as gagné. Confirme nom, adresse, heure, et env
 ### Avant de partir — matériel
 - Lampe torche, téléphone chargé (**photos = notre meilleure arme**).
 - Fiche d'audit (modèle en fin de note) + porte-documents propre.
-- Cartes de visite + plaquette + copie de l'agrément (APA/26-025/CNGP-BEN).
+- Cartes de visite + plaquette + copie de l'agrément (APA-26-026/CNGP-BEN).
 - Polo GSE. **La tenue vend.** On arrive net.
 
 ### Pendant — le parcours d'inspection
