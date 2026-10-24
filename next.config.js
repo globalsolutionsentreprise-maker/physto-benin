@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Chromium (rendu PDF des fiches) : ne pas bundler, le binaire doit rester
+  // résolvable côté fonction serverless.
+  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
   images: {
     // Photos de réalisations stockées dans le bucket public Supabase.
     remotePatterns: [

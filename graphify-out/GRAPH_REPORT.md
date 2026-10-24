@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-10-22)
+# Graph Report - gse-site  (2026-10-24)
 
 ## Corpus Check
-- 212 files · ~794,765 words
+- 211 files · ~795,126 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 974 nodes · 1065 edges · 118 communities (77 shown, 41 thin omitted)
+- 976 nodes · 1070 edges · 117 communities (77 shown, 40 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `195739ff`
+- Built from commit: `7e044989`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -67,7 +67,6 @@
 - [[_COMMUNITY_Community 51|Community 51]]
 - [[_COMMUNITY_Community 52|Community 52]]
 - [[_COMMUNITY_Community 53|Community 53]]
-- [[_COMMUNITY_Community 54|Community 54]]
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
@@ -148,7 +147,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (118 total, 41 thin omitted)
+## Communities (117 total, 40 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -156,7 +155,7 @@ Nodes (17): 10. Journal d'avancement, 1. Objectif, 2. Bonne nouvelle : le backen
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
-Nodes (30): dependencies, docx, next, next-sanity, qrcode, react, react-dom, react-qr-code (+22 more)
+Nodes (32): dependencies, docx, next, next-sanity, puppeteer-core, qrcode, react, react-dom (+24 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.10
@@ -396,7 +395,7 @@ Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
 Cohesion: 0.06
-Nodes (48): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+40 more)
+Nodes (50): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+42 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70
@@ -407,9 +406,9 @@ Cohesion: 0.60
 Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
 
 ## Knowledge Gaps
-- **524 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+519 more)
+- **525 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+520 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -417,11 +416,11 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _524 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _525 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**

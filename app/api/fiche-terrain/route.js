@@ -2,6 +2,40 @@ import { createClient } from "@supabase/supabase-js"
 import { buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 
 export const dynamic = "force-dynamic"
+// Le rendu PDF (Chromium) a besoin du runtime Node et peut durer quelques secondes
+// au démarrage à froid de la fonction.
+export const maxDuration = 60
+
+// Rend un PDF fidèle à partir du HTML de la fiche (mêmes builders que l'écran).
+// Chromium headless : @sparticuz/chromium sur Vercel, Chrome local en dev. Import
+// dynamique pour ne pas charger Chromium sur les appels JSON/HTML courants.
+async function renderPdf(html) {
+  const puppeteer = (await import("puppeteer-core")).default
+  const onServer = !!(process.env.VERCEL || process.env.AWS_REGION || process.env.AWS_LAMBDA_FUNCTION_VERSION)
+  let launch
+  if (onServer) {
+    const chromium = (await import("@sparticuz/chromium")).default
+    launch = { args: chromium.args, executablePath: await chromium.executablePath(), headless: true }
+  } else {
+    const mac = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    launch = { headless: true, executablePath: process.env.CHROME_PATH || mac }
+  }
+  const browser = await puppeteer.launch(launch)
+  try {
+    const page = await browser.newPage()
+    await page.setContent(html, { waitUntil: "networkidle0" })
+    return await page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true })
+  } finally {
+    await browser.close()
+  }
+}
+
+// Nom de fichier propre pour le partage (règle docs : pas de tiret cadratin, pas
+// de caractère interdit par les systèmes de fichiers).
+function nomFichierPdf(numero, client) {
+  const base = ("Fiche GSE " + (numero && numero !== "—" ? numero : "") + " " + (client || "")).trim()
+  return (base || "Fiche GSE").replace(/[\/\\:*?"<>|—–]/g, " ").replace(/\s+/g, " ").trim() + ".pdf"
+}
 
 // Fiche de passage remplie sur site par le technicien (Fabrice) via un lien token.
 // Route PUBLIQUE gardée par le token du passage (interventions.fiche_token) :
@@ -128,13 +162,25 @@ export async function GET(req) {
     }
     const lieu = (devis && devis.etablissement_nom) || ""
 
-    // ?doc=1 : rend la fiche en PAGE HTML partageable (lien à envoyer au client),
-    // au lieu du JSON. Lien stable, pas de fichier local qui casse sur mobile.
-    if (new URL(req.url).searchParams.get("doc")) {
+    // ?doc=1 : rend la fiche en PAGE HTML partageable, ?pdf=1 : en VRAI PDF (même
+    // rendu, via Chromium) que Fabrice partage comme pièce jointe au client.
+    const sp = new URL(req.url).searchParams
+    if (sp.get("doc") || sp.get("pdf")) {
       const html = ficheDocHtml(
         { fiche: fiche || null, draft: p.fiche_draft || null, client: clientInfo, lieu, passage: p },
         new URL(req.url).origin
       )
+      if (sp.get("pdf")) {
+        const pdf = await renderPdf(html)
+        const fname = nomFichierPdf((fiche && fiche.numero_unique) || "", clientInfo.entreprise || clientInfo.nom)
+        return new Response(pdf, {
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `inline; filename="${fname}"`,
+            "Cache-Control": "no-store",
+          },
+        })
+      }
       return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } })
     }
 

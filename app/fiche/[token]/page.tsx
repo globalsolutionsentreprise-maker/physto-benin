@@ -2,7 +2,6 @@
 
 import { use, useEffect, useRef, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
-import { buildFichePassageHtml, buildFicheControleHtml } from "@/lib/fiche-html"
 
 // Fiche de passage terrain, remplie par le technicien sur son téléphone via un
 // lien token (un par passage). Pré-remplie depuis le contrat ; photos/vidéos
@@ -302,58 +301,44 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
     }
   }
 
-  // Télécharge la fiche FINALISÉE (avec les signatures) depuis le téléphone de
-  // Fabrice, pour l'envoyer au client. Bilingue (FR + EN dans le même PDF) si le
-  // client est anglophone. On reconstruit la fiche à partir de l'état saisi, en
-  // dérivant dates/horaires comme à l'enregistrement.
-  function telechargerFiche() {
-    const c = (info && info.client) || {}
-    const bilingue = !!c.bilingue
-    const jrs = journees.filter((j) => j.date || j.debut || j.fin)
-    const jr0 = jrs[0] || { date: datePassage, debut: dureeDebut, fin: dureeFin }
-    const dpass = jr0.date || datePassage
-    const dfin = jrs.length > 1 ? jrs[jrs.length - 1].date : ""
-    const numero = done || "—"
-    let html: string
-    if (estControle) {
-      const fiche = {
-        controle_data: { postes, infestation, constat, recommandations, prochainPassage, signatureDataUrl, clientSignataire },
-        date_passage: dpass, date_fin_passage: dfin, lieu_prestation: (info && info.lieu) || "",
-        signature_client_data_url: signatureDataUrl, client_signataire: clientSignataire,
-        signature_tech_data_url: signatureTech, superviseur_nom: superviseurNom, superviseur_contact: "",
-      }
-      html = buildFicheControleHtml(fiche, { entreprise: c.entreprise, nom: c.nom, adresse: c.adresse }, numero, [], { bilingue })
-    } else {
-      const form = {
-        nomClient: c.entreprise || c.nom || "", adresse: c.adresse || "", tel: c.tel || "", mob: "",
-        typePassage, prestations, nuisibles, produits, produitsCoches, autresPrestation: "", autresNuisible: "",
-        lieuPrestation: (info && info.lieu) || "", journees: jrs,
-        dureeDebut: jr0.debut || "", dureeFin: jr0.fin || "", datePassage: dpass, dateFinPassage: dfin,
-        clientSignataire, signatureClient: signatureDataUrl, signatureTech, superviseurNom, superviseurContact: "",
-      }
-      html = buildFichePassageHtml(form, { entreprise: c.entreprise, nom: c.nom }, numero, [], { bilingue })
-    }
-    // <base> : les chemins racine (logo) ne se résolvent pas dans une URL blob:.
-    html = html.replace("<head>", '<head><base href="' + window.location.origin + '/">')
-    const url = URL.createObjectURL(new Blob([html], { type: "text/html" }))
-    window.open(url, "_blank")
-  }
-
-  // Lien WEB partageable de la fiche (à envoyer au client), au lieu d'un fichier
-  // téléchargé qui casse sur mobile (ERR_FILE_NOT_FOUND quand on le repartage).
-  // On pousse d'abord le brouillon au serveur pour que la page rende l'état à jour,
-  // puis on copie le lien et on ouvre le partage WhatsApp.
+  // Partage le VRAI PDF de la fiche (pièce jointe, pas un lien) via le partage
+  // natif du téléphone (WhatsApp, mail…). Le PDF est rendu par le serveur à partir
+  // des MÊMES builders que l'écran : on pousse d'abord l'état courant (brouillon)
+  // pour que le PDF reflète la saisie, puis on récupère le fichier et on le partage.
   const [partageMsg, setPartageMsg] = useState("")
-  async function partagerLien() {
-    setPartageMsg("Préparation du lien…")
+  async function partagerPdf() {
+    setPartageMsg("Préparation du PDF…")
     try {
-      await fetch("/api/fiche-terrain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "save_draft", draft: buildDraft() }) })
-    } catch {}
-    const lien = window.location.origin + "/api/fiche-terrain?token=" + encodeURIComponent(token) + "&doc=1"
-    let copie = false
-    try { await navigator.clipboard.writeText(lien); copie = true } catch {}
-    setPartageMsg(copie ? "Lien copié. Collez-le au client dans WhatsApp." : lien)
-    window.open("https://wa.me/?text=" + encodeURIComponent("Votre fiche de passage GSE :\n" + lien), "_blank")
+      // Si la fiche n'est pas encore soumise, le serveur rend le brouillon : on le
+      // sauvegarde d'abord pour que le PDF soit à jour.
+      if (!done) {
+        await fetch("/api/fiche-terrain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, action: "save_draft", draft: buildDraft() }) })
+      }
+      const r = await fetch("/api/fiche-terrain?token=" + encodeURIComponent(token) + "&pdf=1")
+      if (!r.ok) throw new Error("Génération du PDF impossible (réessayez).")
+      const blob = await r.blob()
+      const c = (info && info.client) || {}
+      const nom = ("Fiche GSE " + (done || c.entreprise || c.nom || "")).replace(/[\/\\:*?"<>|]/g, " ").replace(/\s+/g, " ").trim() + ".pdf"
+      const file = new File([blob], nom, { type: "application/pdf" })
+      const nav = navigator as any
+      if (nav.canShare && nav.canShare({ files: [file] })) {
+        try {
+          await nav.share({ files: [file], title: "Fiche de passage GSE", text: "Votre fiche de passage GSE." })
+          setPartageMsg("")
+          return
+        } catch (err: any) {
+          if (err && err.name === "AbortError") { setPartageMsg(""); return } // annulé par Fabrice
+          // Activation perdue (PDF trop long à préparer) ou partage refusé : on
+          // bascule sur l'ouverture du PDF, partageable depuis le lecteur.
+        }
+      }
+      const url = URL.createObjectURL(blob)
+      window.open(url, "_blank")
+      setPartageMsg("PDF prêt. Utilisez « Partager » du lecteur PDF pour l'envoyer au client.")
+    } catch (e: any) {
+      setPartageMsg("")
+      setErreur(e.message || "Partage impossible")
+    }
   }
 
   // ── Dictée vocale des observations ────────────────────────────────────────
@@ -432,11 +417,12 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
         <div style={{ fontSize: 48 }}>✅</div>
         <h2 style={{ color: VERT, margin: "12px 0" }}>Fiche envoyée</h2>
         <p style={{ color: "#555" }}>N° {done}. Merci Fabrice, le bureau la reçoit.</p>
-        <button type="button" onClick={telechargerFiche} style={{ background: VERT, color: OR, border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 16, fontWeight: 700, cursor: "pointer", width: "100%", marginTop: 18 }}>
-          📄 Télécharger la fiche{info && info.client && info.client.bilingue ? " (FR + EN)" : ""}
+        <button type="button" onClick={partagerPdf} style={{ background: VERT, color: OR, border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 16, fontWeight: 700, cursor: "pointer", width: "100%", marginTop: 18 }}>
+          📤 Partager la fiche (PDF){info && info.client && info.client.bilingue ? " FR + EN" : ""}
         </button>
+        {partageMsg ? <div style={{ fontSize: 12.5, color: VERT, marginTop: 8, lineHeight: 1.5 }}>{partageMsg}</div> : null}
         <p style={{ color: "#777", fontSize: 13, marginTop: 10, lineHeight: 1.5 }}>
-          La fiche s'ouvre avec les signatures. Enregistrez-la en PDF (menu « Partager » / « Imprimer » du téléphone) puis envoyez-la au client.
+          Le vrai fichier PDF s'ouvre dans le partage du téléphone : choisissez WhatsApp (ou mail) et la cliente le reçoit en pièce jointe.
         </p>
       </div>
     </Shell>
@@ -460,14 +446,9 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
             Vous pouvez la sortir tout de suite (preuve de passage), sans attendre d'avoir tout rempli. ⚠️ <strong style={{ color: VERT }}>Vous devez d'abord signer votre partie</strong> — c'est votre signature qui vaut preuve de passage.
           </div>
           <button type="button"
-            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { partagerLien() } }}
+            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { partagerPdf() } }}
             style={{ width: "100%", background: signatureTech ? VERT : "#fff", color: signatureTech ? OR : VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "14px", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
-            🔗 Envoyer la fiche au client (lien)
-          </button>
-          <button type="button"
-            onClick={() => { if (!signatureTech) { setSigAlerte(true); techSigRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }) } else { telechargerFiche() } }}
-            style={{ width: "100%", background: "#fff", color: VERT, border: "1px solid " + VERT, borderRadius: 10, padding: "11px", fontSize: 14, fontWeight: 600, cursor: "pointer", marginTop: 8 }}>
-            📄 Ou télécharger le PDF{c.bilingue ? " (FR + EN)" : ""}
+            📤 Partager le PDF au client{c.bilingue ? " (FR + EN)" : ""}
           </button>
           {partageMsg ? <div style={{ fontSize: 12.5, color: VERT, marginTop: 8, lineHeight: 1.5, wordBreak: "break-all" }}>{partageMsg}</div> : null}
           {!signatureTech ? <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 6, lineHeight: 1.5 }}>Signez votre partie (plus bas) pour pouvoir l'envoyer.</div> : null}
@@ -640,12 +621,12 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
           <SignaturePad value={signatureTech} onChange={setSignatureTech} />
         </div>
 
-        <button type="button" onClick={telechargerFiche} disabled={!signatureTech}
+        <button type="button" onClick={partagerPdf} disabled={!signatureTech}
           style={{ width: "100%", background: "#fff", color: VERT, border: "2px solid " + VERT, borderRadius: 10, padding: "13px", fontSize: 15, fontWeight: 700, cursor: signatureTech ? "pointer" : "not-allowed", marginTop: 12, opacity: signatureTech ? 1 : 0.5 }}>
-          📄 Télécharger ma fiche signée{info && info.client && info.client.bilingue ? " (FR + EN)" : ""} → envoyer au client
+          📤 Partager ma fiche signée (PDF){info && info.client && info.client.bilingue ? " FR + EN" : ""} → au client
         </button>
         <div style={{ fontSize: 12.5, color: "#8a8a8a", marginTop: 6, lineHeight: 1.5 }}>
-          {signatureTech ? "La fiche s'ouvre avec votre signature. Enregistrez-la en PDF (menu Partager / Imprimer) et envoyez-la au client pour lecture, puis signature." : "Signez votre partie ci-dessus pour activer le téléchargement."}
+          {signatureTech ? "Le vrai PDF part en pièce jointe (WhatsApp / mail) : la cliente le lit, puis signe ci-dessous." : "Signez votre partie ci-dessus pour activer le partage."}
         </div>
 
         <div style={{ height: 16 }} />
