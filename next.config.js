@@ -3,6 +3,11 @@ const nextConfig = {
   // Chromium (rendu PDF des fiches) : ne pas bundler, le binaire doit rester
   // résolvable côté fonction serverless.
   serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
+  // ...et forcer l'inclusion du binaire Chromium (dossier bin/) dans la fonction
+  // /api/fiche-terrain : le file tracing de Next ne l'embarque pas tout seul.
+  outputFileTracingIncludes: {
+    '/api/fiche-terrain': ['./node_modules/@sparticuz/chromium/bin/**'],
+  },
   images: {
     // Photos de réalisations stockées dans le bucket public Supabase.
     remotePatterns: [
