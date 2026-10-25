@@ -2108,7 +2108,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
       } else if (!enLigne) {
         setMsg("✓ Devis modifié")
-        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, lignes: lignesClean, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement, bilingue: cl ? !!cl.bilingue : false }
+        var imprimData = { numero: editingDevis.numero, clientNom: cl ? cl.nom : "", clientPrenom: cl ? (cl.prenom || "") : "", clientEmail: cl ? cl.email : "", clientTelephone: cl ? (cl.telephone || "") : "", clientEntreprise: cl ? (cl.entreprise || "") : "", prestation: prestationStr, lignes: lignesClean, description: formDevis.description, montantBrut: brut, remiseMontant: remiseMontant, remiseLabel: formDevis.remiseType === "pct" ? (remiseVal + "%") : (remiseMontant.toLocaleString("fr-FR") + " FCFA"), montantNet: montantNet, pctAcompte: parseInt(formDevis.pctAcompte) || 60, conditionsPaiement: formDevis.conditionsPaiement, agrement: agrement, bilingue: cl ? !!cl.bilingue : false, estParticulier: cl ? cl.type_client === "particulier" : false }
         imprimerDevis(imprimData)
       } else { setMsg("✓ Devis modifié") }
       setEditingDevis(null)
@@ -3874,6 +3874,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           "<div style=\"display:flex;justify-content:space-between\"><span><strong>" + pS + "% après prestation</strong> (solde)</span><span style=\"font-weight:700\">" + mS.toLocaleString("fr-FR") + " FCFA</span></div>" +
           (d.conditionsPaiement ? "<div style=\"margin-top:10px;font-size:12px;color:#374151;border-top:1px solid #d1fae5;padding-top:10px\">" + d.conditionsPaiement + "</div>" : "") +
           "</div>" +
+          (d.estParticulier ? "" :
           "<div class=\"momo-block\" style=\"flex:1;min-width:0;background:#fff8e1;border:1.5px solid #fde68a;border-radius:8px;padding:14px 16px;\">" +
           "<div class=\"mb-t\" style=\"font-size:10px;color:#b45309;font-weight:700;letter-spacing:0.12em;margin-bottom:10px;\">PAIEMENT PAR MOBILE MONEY</div>" +
           "<div class=\"mb-h\" style=\"display:flex;align-items:center;gap:10px;margin-bottom:10px;\">" +
@@ -3883,7 +3884,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           "<div class=\"mb-u\" style=\"background:#fff;border:1.5px solid #ffe082;border-radius:6px;padding:10px 12px;\">" +
           "<div style=\"font-size:9px;color:#b45309;font-weight:700;letter-spacing:0.1em;margin-bottom:5px;\">CODE USSD À COMPOSER :</div>" +
           "<div class=\"mb-code\" style=\"font-size:15px;font-weight:700;color:#111;letter-spacing:0.02em;font-family:monospace;\">*880*41*893118*<span style=\"color:#b45309;\">" + mA.toLocaleString("fr-FR") + "</span>#</div></div>" +
-          "</div>" +
+          "</div>") +
           "</div>"
       })() +
       "<div class=\"valid\">Ce devis est valable 30 jours · Global Solutions Entreprise · direction@phyto-benin.com</div>" +

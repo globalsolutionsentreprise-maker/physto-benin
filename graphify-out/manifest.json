@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792958803.386812,
-    "ast_hash": "c95caceb61236a7d01965982d5247ee3",
+    "mtime": 1792960757.4985368,
+    "ast_hash": "d5f3710adb7f6e4f202502759cf8844e",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
