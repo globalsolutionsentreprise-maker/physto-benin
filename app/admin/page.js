@@ -1457,6 +1457,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
   const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
   const [depSaving, setDepSaving] = React.useState(false)
+  const [depErr, setDepErr] = React.useState("")
   const [objectifs, setObjectifs] = React.useState({ arrEnt: 0, arrPart: 0, ponctEnt: 0, ponctPart: 0 })
   const [objModal, setObjModal] = React.useState(false)
   const [objForm, setObjForm] = React.useState({ arrEnt: "", arrPart: "", ponctEnt: "", ponctPart: "" })
@@ -4106,12 +4107,17 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   }
   function openDepModal() {
     setDepForm({ categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10), devisId: "" })
+    setDepErr("")
     setDepModal(true)
   }
   async function ajouterDepense() {
-    var libelle = (depForm.libelle || "").trim()
+    // Libellé vide => on reprend le nom de la catégorie (sans l'emoji), pour ne pas
+    // bloquer silencieusement : seul le montant reste obligatoire.
+    var catLabel = ((DEP_CATS.find(function(c) { return c.key === depForm.categorie }) || {}).label || depForm.categorie || "Dépense").replace(/^[^0-9A-Za-zÀ-ÿ]+/, "").trim()
+    var libelle = (depForm.libelle || "").trim() || catLabel
     var montant = parseFloat(depForm.montant) || 0
-    if (!libelle || !montant) { setMsg("Erreur : libellé et montant requis."); return }
+    if (!montant) { setDepErr("Entre un montant supérieur à 0."); return }
+    setDepErr("")
     setDepSaving(true)
     try {
       var sess = await db.auth.getSession()
@@ -4122,7 +4128,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(body) })
       var out = {}
       try { out = await res.json() } catch (e) {}
-      if (!res.ok) { setMsg("Erreur : " + (out.error || "enregistrement dépense")); setDepSaving(false); return }
+      if (!res.ok) { setDepErr(out.error || "Enregistrement impossible."); setDepSaving(false); return }
       setDepModal(false)
       await chargerFinances()
       setMsg(depForm.devisId ? "Dépense rattachée à l'affaire enregistrée." : "Dépense enregistrée.")
@@ -4456,6 +4462,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             e("input", { type: "date", value: depForm.date, onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { date: v }) }) }, style: inpS })
           )
         ),
+        depErr ? e("div", { style: { marginBottom: "12px", padding: "8px 11px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "6px", fontSize: "12px", color: "#991b1b" } }, depErr) : null,
         e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
           e("button", { onClick: function() { setDepModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
           e("button", { onClick: ajouterDepense, disabled: depSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: depSaving ? "wait" : "pointer", fontFamily: "inherit" } }, depSaving ? "Enregistrement…" : "Enregistrer")
