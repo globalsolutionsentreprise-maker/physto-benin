@@ -4762,6 +4762,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       })
     })
 
+    // Alerte : fiche terrain reçue (soumise par le technicien) pas encore
+    // transformée en rapport d'intervention. S'efface d'elle-même dès qu'un rapport
+    // daté >= la fiche existe pour l'affaire. Bornée aux ~60 derniers jours pour ne
+    // pas remonter d'anciennes fiches jamais rapportées.
+    var ilyaLimite = new Date(Date.now() - 60 * 864e5).toISOString().slice(0, 10)
+    var fichesAttente = (fichesList || []).filter(function(f) {
+      if (!f.date_passage || f.date_passage < ilyaLimite) return false
+      var aRapport = (rapportsInterv || []).some(function(r) { return r.devis_id === f.devis_id && r.date_intervention && r.date_intervention >= f.date_passage })
+      return !aRapport
+    })
+    if (fichesAttente.length) {
+      var plur = fichesAttente.length > 1 ? "s" : ""
+      var listeFA = fichesAttente.slice(0, 8).map(function(f) {
+        var dv = devisList.find(function(x) { return x.id === f.devis_id }) || {}
+        var nomCli = dv.client || dv.entreprise || f.client_signataire || "Client"
+        var ctrl = f.type_passage === "Contrôle" || !!f.controle_data
+        return nomCli + " (" + (ctrl ? "contrôle" : "passage") + " du " + finFmtD(f.date_passage) + ")"
+      }).join(" · ")
+      insights.unshift({ type: "warn", ico: "📋", title: fichesAttente.length + " fiche" + plur + " terrain en attente de rapport", txt: "Reçue" + plur + " du technicien, pas encore transformée" + plur + " en rapport : " + listeFA + ". Ouvrez l'affaire du client (CRM), puis « 📊 Rapport interv. » (le formulaire est pré-rempli depuis la fiche)." })
+    }
+
     var thS = { textAlign: "left", padding: "8px 10px", fontSize: "11px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
     var tdS = { padding: "8px 10px", fontSize: "12px", borderBottom: "1px solid #f0efe9", whiteSpace: "nowrap" }
     var secLblS = { fontSize: "12px", fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }
