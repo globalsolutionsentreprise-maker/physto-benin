@@ -5390,6 +5390,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("div", { style: { fontSize: "11px", fontWeight: "700", color: "#065f46", letterSpacing: "0.08em", marginBottom: "12px" } }, "MODALITÉS DE PAIEMENT"),
         React.createElement("div", { style: { marginBottom: "12px" } },
           React.createElement("label", { style: lbl }, "Répartition acompte / solde"),
+          React.createElement("div", { style: { display: "flex", gap: "6px", marginBottom: "10px", flexWrap: "wrap" } },
+            [[60, "60 / 40"], [50, "50 / 50"], [100, "100 %"]].map(function(p) {
+              var actif = (parseInt(formDevis.pctAcompte) || 60) === p[0]
+              return React.createElement("button", {
+                key: p[0], type: "button",
+                onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { pctAcompte: String(p[0]) }) }) },
+                style: { padding: "6px 12px", borderRadius: "999px", border: actif ? "1.5px solid #0a2e1a" : "1.5px solid #bbf7d0", backgroundColor: actif ? "#0a2e1a" : "#fff", color: actif ? "#fff" : "#065f46", cursor: "pointer", fontFamily: "inherit", fontSize: "12px", fontWeight: "700" }
+              }, p[1])
+            })
+          ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px" } },
             React.createElement("div", { style: { flex: 1 } },
               React.createElement("div", { style: { fontSize: "11px", color: "#065f46", marginBottom: "4px", fontWeight: "600" } }, "Acompte à la signature"),
@@ -5416,7 +5426,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 React.createElement("span", { style: { fontSize: "18px", color: "#065f46", fontWeight: "700" } }, "%")
               )
             )
-          )
+          ),
+          (function() {
+            var brutR = baseDevis(formDevis)
+            var remiseR = formDevis.remise ? parseFloat(formDevis.remise) : 0
+            var netR = Math.max(0, brutR - (formDevis.remiseType === "pct" ? Math.round(brutR * remiseR / 100) : Math.round(remiseR)))
+            if (!netR) return null
+            var pA = Math.min(100, Math.max(0, parseInt(formDevis.pctAcompte) || 60))
+            var pS = 100 - pA
+            return React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #bbf7d0", fontSize: "13px", color: "#065f46", fontWeight: "700" } },
+              React.createElement("span", null, "Acompte " + pA + "% = " + Math.round(netR * pA / 100).toLocaleString("fr-FR") + " F"),
+              React.createElement("span", null, "Solde " + pS + "% = " + Math.round(netR * pS / 100).toLocaleString("fr-FR") + " F")
+            )
+          })()
         ),
         React.createElement("div", null,
           React.createElement("label", { style: lbl }, "Conditions de paiement (affiché sur le devis)"),
