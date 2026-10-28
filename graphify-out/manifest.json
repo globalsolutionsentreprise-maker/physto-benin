@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1793191638.375962,
-    "ast_hash": "da2dadc31905526b08c38b0b5ccc10ff",
+    "mtime": 1793192670.1177123,
+    "ast_hash": "2cc39e81c78e4dbf71d7046eb922f018",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1793192065.0955875,
-    "ast_hash": "fad767b9f93941acb5b497a498149a7e",
+    "mtime": 1793192717.2583423,
+    "ast_hash": "7f48f9f995bfd0095d5f85dd71c84cac",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -1185,8 +1185,8 @@
     "semantic_hash": ""
   },
   "lib/fiche-html.js": {
-    "mtime": 1792591537.9824846,
-    "ast_hash": "cdd6a32ca93a91f0a077b6add1c9a0d6",
+    "mtime": 1793192577.7962632,
+    "ast_hash": "d6db641879270a36c7ab6100d59f168f",
     "semantic_hash": ""
   },
   "supabase/migrations/20261018140000_fiche_journees.sql": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793192050.9048414,
-    "ast_hash": "7d5d831161def38d2552289239592cde",
+    "mtime": 1793192708.8381014,
+    "ast_hash": "5585ffa274489712a62aa9e4dc3bd3f7",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {

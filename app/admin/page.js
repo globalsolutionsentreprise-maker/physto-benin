@@ -4152,7 +4152,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_depense", id: id }) })
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_depense", id: id }) })
+      if (!res.ok) { var o = {}; try { o = await res.json() } catch (e2) {} ; setMsg("Erreur suppression : " + (o.error || res.status)); return }
       await chargerFinances()
       setMsg("Dépense supprimée")
     } catch (e) { setMsg("Erreur suppression") }
@@ -4164,7 +4165,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_charge_fixe", libelle: libelle, montant_mensuel: montant, date_debut: chargeForm.dateDebut || null, date_fin: chargeForm.dateFin || null }) })
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "add_charge_fixe", libelle: libelle, montant_mensuel: montant, date_debut: chargeForm.dateDebut || null, date_fin: chargeForm.dateFin || null }) })
+      if (!res.ok) { var o = {}; try { o = await res.json() } catch (e2) {} ; setMsg("Erreur ajout charge fixe : " + (o.error || res.status)); return }
       setChargeForm({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
       await chargerFinances()
       setMsg("Charge fixe ajoutée.")
@@ -4175,7 +4177,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_charge_fixe", id: id }) })
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_charge_fixe", id: id }) })
+      if (!res.ok) { var o = {}; try { o = await res.json() } catch (e2) {} ; setMsg("Erreur suppression charge fixe : " + (o.error || res.status)); return }
       await chargerFinances()
       setMsg("Charge fixe supprimée.")
     } catch (e) { setMsg("Erreur suppression") }
@@ -4204,8 +4207,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, etape: newEtape, motif: motif || null }) })
-    } catch (e) { setMsg("Erreur déplacement") }
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "move", id: devisId, etape: newEtape, motif: motif || null }) })
+      // Échec serveur : l'optimiste ci-dessus ment (carte déplacée à l'écran mais pas
+      // en base). On resynchronise depuis la base pour annuler l'affichage trompeur.
+      if (!res.ok) {
+        var out = {}; try { out = await res.json() } catch (e2) {}
+        setMsg("Échec du déplacement (" + (out.error || res.status) + ") — resynchronisation…")
+        await charger(); await chargerFinances()
+      }
+    } catch (e) { setMsg("Erreur réseau déplacement — resynchronisation…"); await charger(); await chargerFinances() }
   }
   // Passage en « Perdu » : demander le motif avant de déplacer.
   function demanderMotifPerte(devisId, clientNom, type) {

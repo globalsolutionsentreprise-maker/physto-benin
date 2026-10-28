@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-28)
 
 ## Corpus Check
-- 215 files · ~798,654 words
+- 215 files · ~799,080 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 994 nodes · 1103 edges · 116 communities (78 shown, 38 thin omitted)
+- 996 nodes · 1110 edges · 117 communities (79 shown, 38 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3bf4ecbd`
+- Built from commit: `6f0d57b0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -66,6 +66,7 @@
 - [[_COMMUNITY_Community 51|Community 51]]
 - [[_COMMUNITY_Community 52|Community 52]]
 - [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
 - [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
@@ -146,7 +147,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (116 total, 38 thin omitted)
+## Communities (117 total, 38 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -276,6 +277,10 @@ Nodes (5): TYPES, COUVERTURE, FAQS, metadata, PALIERS
 Cohesion: 0.29
 Nodes (3): Nuisible, Ville, VILLES
 
+### Community 54 - "Community 54"
+Cohesion: 0.12
+Nodes (11): Media, chip, chipOn, inp, NIVEAUX_CONSO, NIVEAUX_INFEST, NUISIBLES, PRODUITS_CATS (+3 more)
+
 ### Community 61 - "Community 61"
 Cohesion: 0.13
 Nodes (14): 1. Bannière globale (`app/layout.tsx`), 2. Section homepage (`app/page.tsx`), 3. Badge sur le formulaire de contact (`app/contact/ContactForm.js`), Backend, Ce qui n'est PAS dans le périmètre, CRM (`crm.html`), Flux complet, Frontend — Ce que le client voit (+6 more)
@@ -397,8 +402,8 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.07
-Nodes (45): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+37 more)
+Cohesion: 0.11
+Nodes (36): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+28 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70
