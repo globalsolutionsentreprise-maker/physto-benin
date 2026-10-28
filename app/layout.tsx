@@ -11,8 +11,11 @@ export const metadata: Metadata = {
   description: "Désinsectisation, dératisation, désinfection au Bénin. Techniciens certifiés, produits homologués. Intervention rapide 24h/24 à Cotonou.",
   keywords: "désinsectisation Cotonou, dératisation Bénin, désinfection hôtel, cafards Cotonou, termites Bénin, hygiène sanitaire Bénin, punaises de lit Cotonou",
   metadataBase: new URL("https://www.phyto-benin.com"),
+  // Pas de canonical ici : Next fusionne `alternates` champ par champ, donc un
+  // canonical au layout racine serait hérité par toute page sans le sien → elles
+  // se déclareraient comme étant l'accueil (risque de désindexation). Chaque page
+  // définit son propre canonical (via son layout si elle est "use client").
   alternates: {
-    canonical: "https://www.phyto-benin.com",
     types: {
       "application/rss+xml": "https://www.phyto-benin.com/feed.xml",
     },

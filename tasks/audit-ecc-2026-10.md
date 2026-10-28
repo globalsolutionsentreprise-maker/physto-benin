@@ -37,7 +37,7 @@ Audit lancé via 4 agents ECC (lecture seule) sur le repo : `database-reviewer`,
 
 ## 🔵 P3 — SEO / GEO
 
-- 🔴 **Canonical cassé** — `/services`, `/contact`, `/mentions-legales` héritent du canonical de l'accueil (`layout.tsx:14`) → risque désindexation.
+- ✅ **Canonical** (2026-10-28) — retiré du layout racine ; `/services` (via nouveau `services/layout.tsx`), `/contact`, `/mentions-legales` (+ `robots: noindex`) ont leur propre canonical + openGraph. Accueil : self-canonical.
 - 🟠 **Agrément** — placeholder `AGRÉMENT-BÉNIN-XXXXX` au rendu serveur (`page.tsx:20`) + `llms.txt` dit `APA/26-025` vs `APA-26-026` ailleurs.
 - 🟠 **NAP** — 2 emails qui circulent, pas de `streetAddress`, footer Supabase → tél/adresse vides dans le HTML serveur.
 - 🟡 hero en `next/image`, `provider:{"@id"}` partagé, Parakou/Bohicon dans `areaServed`, `app/not-found.tsx`.

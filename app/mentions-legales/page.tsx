@@ -1,4 +1,8 @@
-export const metadata = { title: "Mentions légales, Phyto Bénin" }
+export const metadata = {
+  title: "Mentions légales, Phyto Bénin",
+  alternates: { canonical: "https://www.phyto-benin.com/mentions-legales" },
+  robots: { index: false, follow: true },
+}
 
 export default function MentionsLegales() {
   const sections = [

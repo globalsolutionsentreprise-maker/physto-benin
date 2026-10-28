@@ -1,8 +1,18 @@
 import ContactForm from "./ContactForm"
 
 export const metadata = {
-  title: "Zones d'intervention et Contact, Phyto Bénin | Cotonou",
-  description: "Contactez Phyto Bénin pour une intervention rapide 24h/24. Disponibles à Cotonou, Porto-Novo, Calavi, Ouidah et dans tout le Bénin.",
+  title: "Contact et devis gratuit, Phyto Bénin | Désinsectisation Cotonou",
+  description: "Contactez Phyto Bénin pour un devis gratuit et une intervention rapide 24h/24 à Cotonou, Porto-Novo, Calavi, Ouidah et dans tout le Bénin.",
+  alternates: { canonical: "https://www.phyto-benin.com/contact" },
+  openGraph: {
+    title: "Contact et devis gratuit, Phyto Bénin by GSE",
+    description: "Devis gratuit et intervention rapide 24h/24 à Cotonou et dans tout le Bénin.",
+    url: "https://www.phyto-benin.com/contact",
+    siteName: "Phyto Bénin by GSE",
+    locale: "fr_FR",
+    type: "website",
+    images: [{ url: "https://www.phyto-benin.com/opengraph-image", width: 1200, height: 630 }],
+  },
 }
 
 export default function Contact() {

@@ -1997,7 +1997,7 @@
       "label": "Contact()",
       "file_type": "code",
       "source_file": "app/contact/page.tsx",
-      "source_location": "L8",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "contact_page_contact",
       "community": 21,
@@ -2240,7 +2240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "app_fiche_token_page_tsx_token_page",
-      "community": 54,
+      "community": 108,
       "norm_label": "page.tsx"
     },
     {
@@ -2250,7 +2250,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "token_page_types_passage",
-      "community": 54,
+      "community": 108,
       "norm_label": "types_passage"
     },
     {
@@ -2260,7 +2260,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "token_page_types_presta",
-      "community": 54,
+      "community": 108,
       "norm_label": "types_presta"
     },
     {
@@ -2270,7 +2270,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "token_page_nuisibles",
-      "community": 54,
+      "community": 108,
       "norm_label": "nuisibles"
     },
     {
@@ -2280,7 +2280,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "token_page_niveaux_conso",
-      "community": 54,
+      "community": 108,
       "norm_label": "niveaux_conso"
     },
     {
@@ -2290,7 +2290,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "token_page_niveaux_infest",
-      "community": 54,
+      "community": 108,
       "norm_label": "niveaux_infest"
     },
     {
@@ -2300,7 +2300,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "token_page_produits_cats",
-      "community": 54,
+      "community": 108,
       "norm_label": "produits_cats"
     },
     {
@@ -2310,7 +2310,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "token_page_sb",
-      "community": 54,
+      "community": 108,
       "norm_label": "sb"
     },
     {
@@ -2320,7 +2320,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "app_fiche_token_page_tsx_token_page_media",
-      "community": 54,
+      "community": 108,
       "norm_label": "media"
     },
     {
@@ -2330,7 +2330,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "token_page_ficheterrain",
-      "community": 54,
+      "community": 108,
       "norm_label": "ficheterrain()"
     },
     {
@@ -2340,7 +2340,7 @@
       "source_location": "L655",
       "_origin": "ast",
       "id": "token_page_signaturepad",
-      "community": 54,
+      "community": 108,
       "norm_label": "signaturepad()"
     },
     {
@@ -2350,7 +2350,7 @@
       "source_location": "L741",
       "_origin": "ast",
       "id": "token_page_shell",
-      "community": 54,
+      "community": 108,
       "norm_label": "shell()"
     },
     {
@@ -2360,7 +2360,7 @@
       "source_location": "L755",
       "_origin": "ast",
       "id": "token_page_lbl",
-      "community": 54,
+      "community": 108,
       "norm_label": "lbl()"
     },
     {
@@ -2370,7 +2370,7 @@
       "source_location": "L759",
       "_origin": "ast",
       "id": "token_page_chips",
-      "community": 54,
+      "community": 108,
       "norm_label": "chips()"
     },
     {
@@ -2380,7 +2380,7 @@
       "source_location": "L774",
       "_origin": "ast",
       "id": "token_page_inp",
-      "community": 54,
+      "community": 108,
       "norm_label": "inp"
     },
     {
@@ -2390,7 +2390,7 @@
       "source_location": "L778",
       "_origin": "ast",
       "id": "token_page_chip",
-      "community": 54,
+      "community": 108,
       "norm_label": "chip"
     },
     {
@@ -2400,7 +2400,7 @@
       "source_location": "L782",
       "_origin": "ast",
       "id": "token_page_chipon",
-      "community": 54,
+      "community": 108,
       "norm_label": "chipon"
     },
     {
@@ -2457,7 +2457,7 @@
       "label": "RootLayout()",
       "file_type": "code",
       "source_file": "app/layout.tsx",
-      "source_location": "L40",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
       "community": 3,
@@ -2517,7 +2517,7 @@
       "label": "MentionsLegales()",
       "file_type": "code",
       "source_file": "app/mentions-legales/page.tsx",
-      "source_location": "L3",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "mentions_legales_page_mentionslegales",
       "community": 40,
@@ -2952,6 +2952,36 @@
       "id": "slug_page_servicepage",
       "community": 20,
       "norm_label": "servicepage()"
+    },
+    {
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "app/services/layout.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "services_layout",
+      "community": 54,
+      "norm_label": "layout.tsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "app/services/layout.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "services_layout_metadata",
+      "community": 54,
+      "norm_label": "metadata"
+    },
+    {
+      "label": "ServicesLayout()",
+      "file_type": "code",
+      "source_file": "app/services/layout.tsx",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "services_layout_serviceslayout",
+      "community": 54,
+      "norm_label": "serviceslayout()"
     },
     {
       "label": "page.tsx",
@@ -11509,9 +11539,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route",
-      "target": "analyze_rapport_route_media_origin",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_media_origin"
     },
     {
       "relation": "contains",
@@ -11519,9 +11549,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route",
-      "target": "analyze_rapport_route_mediaautorisee",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_mediaautorisee"
     },
     {
       "relation": "contains",
@@ -11572,9 +11602,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_post",
-      "target": "analyze_rapport_route_mediaautorisee",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_mediaautorisee"
     },
     {
       "relation": "calls",
@@ -11583,9 +11613,9 @@
       "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "analyze_rapport_route_uploadvideotogemini",
-      "target": "analyze_rapport_route_mediaautorisee",
-      "confidence_score": 1.0
+      "target": "analyze_rapport_route_mediaautorisee"
     },
     {
       "relation": "calls",
@@ -14465,6 +14495,26 @@
       "confidence_score": 1.0,
       "source": "app_services_slug_page_tsx_slug_page",
       "target": "slug_page_services"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/services/layout.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "services_layout",
+      "target": "services_layout_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/services/layout.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "services_layout",
+      "target": "services_layout_serviceslayout",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -21408,5 +21458,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "d657a5339c93115c10af037f7a4bd6fb59c439ba"
+  "built_at_commit": "e6712e174853c78aeb2904f67aade95556e9b694"
 }

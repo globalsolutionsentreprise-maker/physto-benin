@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-28)
 
 ## Corpus Check
-- 215 files · ~799,231 words
+- 216 files · ~799,636 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 998 nodes · 1114 edges · 117 communities (79 shown, 38 thin omitted)
+- 1001 nodes · 1116 edges · 117 communities (78 shown, 39 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d657a533`
+- Built from commit: `e6712e17`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -147,7 +147,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (117 total, 38 thin omitted)
+## Communities (117 total, 39 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -277,10 +277,6 @@ Nodes (5): TYPES, COUVERTURE, FAQS, metadata, PALIERS
 Cohesion: 0.29
 Nodes (3): Nuisible, Ville, VILLES
 
-### Community 54 - "Community 54"
-Cohesion: 0.12
-Nodes (11): Media, chip, chipOn, inp, NIVEAUX_CONSO, NIVEAUX_INFEST, NUISIBLES, PRODUITS_CATS (+3 more)
-
 ### Community 61 - "Community 61"
 Cohesion: 0.13
 Nodes (14): 1. Bannière globale (`app/layout.tsx`), 2. Section homepage (`app/page.tsx`), 3. Badge sur le formulaire de contact (`app/contact/ContactForm.js`), Backend, Ce qui n'est PAS dans le périmètre, CRM (`crm.html`), Flux complet, Frontend — Ce que le client voit (+6 more)
@@ -402,8 +398,8 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.11
-Nodes (36): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+28 more)
+Cohesion: 0.07
+Nodes (47): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+39 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70
@@ -414,19 +410,17 @@ Cohesion: 0.60
 Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
 
 ## Knowledge Gaps
-- **532 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+527 more)
+- **533 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+528 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `verifyAdmin()` connect `Community 38` to `Community 14`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _532 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _533 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -435,3 +429,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.06923076923076923 - nodes in this community are weakly interconnected._
+- **Should `Community 6` be split into smaller, more focused modules?**
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
