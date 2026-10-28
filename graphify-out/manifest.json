@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1793192670.1177123,
-    "ast_hash": "2cc39e81c78e4dbf71d7046eb922f018",
+    "mtime": 1793204069.585194,
+    "ast_hash": "d5a604e9b43466a217c443262d2c0b6e",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793195286.05581,
-    "ast_hash": "b3403c6361a0d5f11a9876fafd967847",
+    "mtime": 1793195593.5065374,
+    "ast_hash": "721fd024e26ce532e0ac58a0ace4838d",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {

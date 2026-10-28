@@ -1382,6 +1382,12 @@ export default function Admin() {
 // COMPOSANT SECTION CLIENTS & DEVIS · VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
 function SectionClientsDevis({ db, agrement, vueInitiale }) {
+  // Helper d'auth local : ce composant reçoit `db` en prop ; le authHeaders du
+  // composant Admin n'est PAS dans sa portée (d'où "authHeaders is not defined").
+  async function authHeaders() {
+    const { data: { session } } = await db.auth.getSession()
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") }
+  }
   const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState(vueInitiale || "devis")
   // Segment actif du CRM : « tous » (défaut, vue globale), « particulier » ou
