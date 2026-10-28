@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1793194494.991591,
-    "ast_hash": "fa6b67006332cd64757e5fffb15f92c5",
+    "mtime": 1793195031.9645996,
+    "ast_hash": "2200268155b56f9ce5243fdd78c0370e",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "app/layout.tsx": {
-    "mtime": 1793194489.327248,
-    "ast_hash": "9d97157f276c2706d0c8b6aeb8a66cdb",
+    "mtime": 1793195029.2930288,
+    "ast_hash": "e07984ffa75c066bba0c644ad20d94fe",
     "semantic_hash": ""
   },
   "app/lib/supabase.js": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "app/mentions-legales/page.tsx": {
-    "mtime": 1793194050.153754,
-    "ast_hash": "33b74505151128ba270cbe991ec8af61",
+    "mtime": 1793195035.2086396,
+    "ast_hash": "6f263df7510673918b70557b1ca4d640",
     "semantic_hash": ""
   },
   "app/not-found.tsx": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793194546.1480715,
-    "ast_hash": "ebeb3d993b852b7224bf89d8e6d139ca",
+    "mtime": 1793195112.9184813,
+    "ast_hash": "ba4bf201a6d54ee8a619cb8242d606ca",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {
@@ -1267,6 +1267,11 @@
   "app/services/layout.tsx": {
     "mtime": 1793194043.6743317,
     "ast_hash": "c72d2ce6d41c86d914b450a8e5077730",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261028130000_indexes.sql": {
+    "mtime": 1793195078.8002234,
+    "ast_hash": "ec67870e6f4365f7e6884dec8b8101fc",
     "semantic_hash": ""
   }
 }

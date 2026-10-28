@@ -29,7 +29,7 @@ Audit lancé via 4 agents ECC (lecture seule) sur le repo : `database-reviewer`,
 
 ## 🟡 P2 — Perf & correction
 
-- **Index manquants** *(database)* — aucun sur FK/colonnes filtrées : `devis(client_id)`, `interventions(devis_id)` (24 usages), `leads(traite,created_at)`, `clients(user_id)`… → migration `CREATE INDEX IF NOT EXISTS` (confirmer prod d'abord).
+- ✅ **Index manquants** (2026-10-28) — migration `20261028130000_indexes.sql` (`CREATE INDEX IF NOT EXISTS`, idempotent) sur devis/clients/interventions/fiches_passage/stock/certificats/paiements/leads. **À appliquer via `supabase db push`.**
 - **`select("*")` non bornés** rechargés à chaque ouverture CRM/RH → `.limit()`, selects explicites, compteurs `head:true`.
 - **`verifyAdmin` ignore `role`** *(security + database)* — compte `lecture` peut tout supprimer. Exiger `role==="admin"` sur POST.
 - **Bug `''` vs NULL** migration `type_client` (déjà en prod) — backfill à rattraper.
@@ -39,7 +39,7 @@ Audit lancé via 4 agents ECC (lecture seule) sur le repo : `database-reviewer`,
 
 - ✅ **Canonical** (2026-10-28) — retiré du layout racine ; `/services` (via nouveau `services/layout.tsx`), `/contact`, `/mentions-legales` (+ `robots: noindex`) ont leur propre canonical + openGraph. Accueil : self-canonical.
 - ✅ **Agrément** (2026-10-28) — accueil rend le vrai `N° APA-26-026/CNGP-BEN` au server-render (plus de placeholder) ; coquille `APA/26-025` corrigée dans `llms.txt`.
-- ✅ **NAP** (2026-10-28, partiel) — `streetAddress` ajouté au JSON-LD + areaServed complété (Sèmè-Kpodji, Parakou, Bohicon) ; footer rend désormais tél + adresse côté serveur. **RESTE (décision utilisateur) :** unifier l'email public — `direction@` (schema/footer/légal) vs `contact@` (llms.txt/ai.txt) — dire lequel est l'officiel.
+- ✅ **NAP** (2026-10-28, partiel) — `streetAddress` ajouté au JSON-LD + areaServed complété (Sèmè-Kpodji, Parakou, Bohicon) ; footer rend désormais tél + adresse côté serveur. Email unifié sur **`contact@phyto-benin.com`** (2026-10-28, schema/footer/mentions alignés sur les fichiers IA ; `contact@` arrive bien sur la boîte GSE).
 - 🟡 hero en `next/image`, `provider:{"@id"}` partagé, Parakou/Bohicon dans `areaServed`, `app/not-found.tsx`.
 
 ---

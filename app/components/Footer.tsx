@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { supabase } from "../lib/supabase"
 export default function Footer() {
   const pathname = usePathname() || ""
-  const [coord, setCoord] = useState({ email: "direction@phyto-benin.com", telephone: "+229 01 53 04 79 50", adresse: "Ilot 3535, Houéyiho, Cotonou", whatsapp: "" })
+  const [coord, setCoord] = useState({ email: "contact@phyto-benin.com", telephone: "+229 01 53 04 79 50", adresse: "Ilot 3535, Houéyiho, Cotonou", whatsapp: "" })
   useEffect(function() {
     supabase.from("parametres").select("cle, valeur").then(function({ data }: { data: any }) {
       if (data) {
