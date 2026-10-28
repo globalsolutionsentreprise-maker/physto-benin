@@ -260,6 +260,13 @@ export async function GET(req) {
   return Response.json({ clients, depenses: dep, membres, chargesFixes, chargesFixesMensuel, chargesFixesCumul })
 }
 
+// supabase-js ne lève jamais : il renvoie { error }. Les écritures qui ne le
+// lisaient pas renvoyaient { ok:true } même en échec → l'UI affichait un succès
+// et la carte/le montant revenait au rechargement. fail() centralise le 500.
+function fail(error, status = 500) {
+  return Response.json({ error: (error && error.message) || "Erreur base de données" }, { status })
+}
+
 export async function POST(req) {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   const adminUser = await verifyAdmin(req)
@@ -304,7 +311,8 @@ export async function POST(req) {
     if (paiementsParPassages(ivsParcours)) {
       updateData.paiements_recus = (ivsParcours || []).reduce((s, r) => s + ((Number(r.montant_du) || 0) > 0 ? (Number(r.montant_paye) || 0) : 0), 0)
     }
-    await supabase.from("devis").update(updateData).eq("id", body.id)
+    const { error: eMove } = await supabase.from("devis").update(updateData).eq("id", body.id)
+    if (eMove) return fail(eMove)
     // Journal : tracer le changement d'étape (qui / quand / de → vers), hors no-op.
     const ancienne = cur && cur.etape
     if (ancienne !== etape) {
@@ -340,12 +348,14 @@ export async function POST(req) {
     const patch = { traite: !!body.traite }
     if (body.traite) { if (body.motif !== undefined) patch.motif = body.motif || null }
     else { patch.motif = null }
-    await supabase.from("leads").update(patch).eq("id", body.id)
+    const { error } = await supabase.from("leads").update(patch).eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
   if (action === "delete_lead") {
-    await supabase.from("leads").delete().eq("id", body.id)
+    const { error } = await supabase.from("leads").delete().eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
@@ -362,7 +372,8 @@ export async function POST(req) {
       const enc = d.parcours && d.parcours.encaissement && d.parcours.encaissement.done
       const facture = d.montant_facture_crm || d.montant_net || 0
       if (enc && facture > 0 && (d.paiements_recus || 0) < facture) {
-        await supabase.from("devis").update({ paiements_recus: facture }).eq("id", d.id)
+        const { error } = await supabase.from("devis").update({ paiements_recus: facture }).eq("id", d.id)
+        if (error) return fail(error)
         count++
       }
     }
@@ -390,12 +401,14 @@ export async function POST(req) {
       date_debut_contrat: dateDebutContrat || null,
     }
     if (typePrestation && typePrestation !== "—") devisUpdate.prestation = typePrestation
-    await supabase.from("devis").update(devisUpdate).eq("id", id)
+    const { error: eDevis } = await supabase.from("devis").update(devisUpdate).eq("id", id)
+    if (eDevis) return fail(eDevis)
     const { data: devisRow } = await supabase.from("devis").select("client_id").eq("id", id).single()
     if (devisRow?.client_id) {
       const clientUpdate = { ifu: body.ifu ?? null, rccm: body.rccm ?? null }
       if (client) clientUpdate.nom = client
-      await supabase.from("clients").update(clientUpdate).eq("id", devisRow.client_id)
+      const { error: eCli } = await supabase.from("clients").update(clientUpdate).eq("id", devisRow.client_id)
+      if (eCli) return fail(eCli)
     }
     return Response.json({ ok: true })
   }
@@ -462,18 +475,21 @@ export async function POST(req) {
   }
 
   if (action === "del_client") {
-    await supabase.from("devis").delete().eq("id", body.id)
+    const { error } = await supabase.from("devis").delete().eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
   if (action === "add_depense") {
     const { libelle, montant, date, categorie } = body
-    const { data: dep } = await supabase.from("depenses_globales").insert({ libelle, montant, date: date || null, categorie: categorie || "autre" }).select().single()
+    const { data: dep, error } = await supabase.from("depenses_globales").insert({ libelle, montant, date: date || null, categorie: categorie || "autre" }).select().single()
+    if (error || !dep) return fail(error)
     return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, categorie: dep.categorie || "autre", date: dep.date || dep.created_at?.split("T")[0] || "" } })
   }
 
   if (action === "del_depense") {
-    await supabase.from("depenses_globales").delete().eq("id", body.id)
+    const { error } = await supabase.from("depenses_globales").delete().eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
@@ -486,12 +502,14 @@ export async function POST(req) {
   }
 
   if (action === "del_charge_fixe") {
-    await supabase.from("charges_fixes").delete().eq("id", body.id)
+    const { error } = await supabase.from("charges_fixes").delete().eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
   if (action === "toggle_charge_fixe") {
-    await supabase.from("charges_fixes").update({ actif: body.actif }).eq("id", body.id)
+    const { error } = await supabase.from("charges_fixes").update({ actif: body.actif }).eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
@@ -509,7 +527,8 @@ export async function POST(req) {
   }
 
   if (action === "del_dep_client") {
-    await supabase.from("depenses_devis").delete().eq("id", body.id)
+    const { error } = await supabase.from("depenses_devis").delete().eq("id", body.id)
+    if (error) return fail(error)
     return Response.json({ ok: true })
   }
 
@@ -523,7 +542,8 @@ export async function POST(req) {
       return Response.json({ error: "Renseignez une date de début de contrat avant de générer le planning." }, { status: 400 })
 
     // Supprimer les anciennes dates planifiées pour ce contrat
-    await supabase.from("interventions").delete().eq("devis_id", devisId).eq("statut", "planifiee")
+    const { error: eDel } = await supabase.from("interventions").delete().eq("devis_id", devisId).eq("statut", "planifiee")
+    if (eDel) return fail(eDel)
 
     const freqMap = { mensuelle: 1, bimestrielle: 2, trimestrielle: 3, semestrielle: 6, annuelle: 12 }
     const intervalMois = freqMap[devis.frequence_intervention] || 3

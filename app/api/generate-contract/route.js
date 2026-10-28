@@ -1,9 +1,45 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { createClient } from "@supabase/supabase-js"
 import { offresContrat } from "@/lib/contrat-analyse.mjs"
 import { appendEnglishPage, CONTRAT_EN } from "@/lib/doc-bilingue"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
+
+// Le contrat s'ouvre via window.open (GET, aucun header possible). Pour qu'un GET
+// non authentifié ne puisse pas lire les données client ni imposer un prix
+// arbitraire, l'admin fait d'abord SIGNER la query (POST authentifié) ; le GET
+// vérifie la signature HMAC + l'expiration. Secret dédié, repli sur service-role.
+const SIGN_SECRET = process.env.CONTRACT_SIGN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+
+function canonical(sp) {
+  const entries = []
+  for (const [k, v] of sp.entries()) { if (k !== "sig") entries.push(k + "=" + v) }
+  entries.sort()
+  return entries.join("&")
+}
+function signQuery(sp) {
+  return crypto.createHmac("sha256", SIGN_SECRET).update(canonical(sp)).digest("hex")
+}
+function signatureValide(sp) {
+  const sig = sp.get("sig"), exp = parseInt(sp.get("exp") || "0", 10)
+  if (!SIGN_SECRET || !sig || !exp || exp < Date.now()) return false
+  const attendu = signQuery(sp)
+  if (sig.length !== attendu.length) return false
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(attendu))
+}
+
+// Signe une query de contrat (réservé admin). L'admin ouvre ensuite
+// /api/generate-contract?<query>&exp=..&sig=.. via window.open.
+export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  const { query } = await req.json()
+  const sp = new URLSearchParams(query || "")
+  sp.delete("sig"); sp.delete("exp")
+  sp.set("exp", String(Date.now() + 5 * 60 * 1000))
+  return NextResponse.json({ exp: sp.get("exp"), sig: signQuery(sp) })
+}
 
 export async function GET(req) {
   const supabase = createClient(
@@ -12,6 +48,9 @@ export async function GET(req) {
   )
   try {
     const url              = new URL(req.url)
+    if (!signatureValide(url.searchParams)) {
+      return NextResponse.json({ error: "Lien de contrat non signé ou expiré" }, { status: 401 })
+    }
     const devisId          = url.searchParams.get("devisId")
     let   prixAnnuel       = parseInt(url.searchParams.get("prixAnnuel") || "200000")
     let   prixTrim         = parseInt(url.searchParams.get("prixTrimestre") || "50000")

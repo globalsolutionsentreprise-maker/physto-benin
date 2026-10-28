@@ -267,7 +267,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7011",
+      "source_location": "L7022",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 108,
@@ -277,7 +277,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7017",
+      "source_location": "L7028",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 108,
@@ -287,7 +287,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7034",
+      "source_location": "L7045",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 108,
@@ -297,7 +297,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7043",
+      "source_location": "L7054",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 108,
@@ -307,7 +307,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7050",
+      "source_location": "L7061",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 108,
@@ -317,7 +317,7 @@
       "label": "buildAfficheHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7055",
+      "source_location": "L7066",
       "_origin": "ast",
       "id": "admin_page_buildaffichehtml",
       "community": 108,
@@ -327,7 +327,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7094",
+      "source_location": "L7105",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 108,
@@ -337,7 +337,7 @@
       "label": "clientNomComplet()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7175",
+      "source_location": "L7186",
       "_origin": "ast",
       "id": "admin_page_clientnomcomplet",
       "community": 108,
@@ -347,7 +347,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7182",
+      "source_location": "L7193",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 108,
@@ -357,7 +357,7 @@
       "label": "qrSvg()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7239",
+      "source_location": "L7250",
       "_origin": "ast",
       "id": "admin_page_qrsvg",
       "community": 108,
@@ -367,7 +367,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7255",
+      "source_location": "L7266",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 108,
@@ -377,7 +377,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7311",
+      "source_location": "L7322",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 108,
@@ -387,7 +387,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7317",
+      "source_location": "L7328",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -717,7 +717,7 @@
       "label": "callGeminiWithRetry()",
       "file_type": "code",
       "source_file": "app/api/analyze-contract/route.js",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "analyze_contract_route_callgeminiwithretry",
       "community": 14,
@@ -727,7 +727,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/analyze-contract/route.js",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "analyze_contract_route_post",
       "community": 14,
@@ -740,87 +740,97 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "analyze_rapport_route",
-      "community": 19,
+      "community": 38,
       "norm_label": "route.js"
     },
     {
       "label": "callGeminiWithRetry()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "analyze_rapport_route_callgeminiwithretry",
-      "community": 19,
+      "community": 38,
       "norm_label": "callgeminiwithretry()"
     },
     {
       "label": "uploadVideoToGemini()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L33",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "analyze_rapport_route_uploadvideotogemini",
-      "community": 19,
+      "community": 38,
       "norm_label": "uploadvideotogemini()"
+    },
+    {
+      "label": "ficheTokenValide()",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L69",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_fichetokenvalide",
+      "community": 38,
+      "norm_label": "fichetokenvalide()"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L65",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "analyze_rapport_route_post",
-      "community": 19,
+      "community": 38,
       "norm_label": "post()"
     },
     {
       "label": "blocVisuels()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L142",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "analyze_rapport_route_blocvisuels",
-      "community": 19,
+      "community": 38,
       "norm_label": "blocvisuels()"
     },
     {
       "label": "blocCaptures()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L157",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "analyze_rapport_route_bloccaptures",
-      "community": 19,
+      "community": 38,
       "norm_label": "bloccaptures()"
     },
     {
       "label": "buildPromptDictee()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L168",
+      "source_location": "L182",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptdictee",
-      "community": 19,
+      "community": 38,
       "norm_label": "buildpromptdictee()"
     },
     {
       "label": "buildPromptVisite()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L192",
+      "source_location": "L206",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptvisite",
-      "community": 19,
+      "community": 38,
       "norm_label": "buildpromptvisite()"
     },
     {
       "label": "buildPromptIntervention()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L222",
+      "source_location": "L236",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptintervention",
-      "community": 19,
+      "community": 38,
       "norm_label": "buildpromptintervention()"
     },
     {
@@ -830,7 +840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "candidature_route",
-      "community": 108,
+      "community": 38,
       "norm_label": "route.js"
     },
     {
@@ -840,7 +850,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "candidature_route_esc",
-      "community": 108,
+      "community": 38,
       "norm_label": "esc()"
     },
     {
@@ -850,7 +860,27 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "candidature_route_post",
-      "community": 108,
+      "community": 38,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/client-devis/route.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "client_devis_route",
+      "community": 19,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/client-devis/route.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "client_devis_route_post",
+      "community": 19,
       "norm_label": "post()"
     },
     {
@@ -860,27 +890,27 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "create_client_route",
-      "community": 46,
+      "community": 38,
       "norm_label": "route.js"
     },
     {
       "label": "creerBrouillonDevis()",
       "file_type": "code",
       "source_file": "app/api/create-client/route.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "create_client_route_creerbrouillondevis",
-      "community": 46,
+      "community": 38,
       "norm_label": "creerbrouillondevis()"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/create-client/route.js",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "create_client_route_post",
-      "community": 46,
+      "community": 38,
       "norm_label": "post()"
     },
     {
@@ -954,10 +984,20 @@
       "norm_label": "get()"
     },
     {
+      "label": "fail()",
+      "file_type": "code",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L266",
+      "_origin": "ast",
+      "id": "crm_data_route_fail",
+      "community": 14,
+      "norm_label": "fail()"
+    },
+    {
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/crm-data/route.js",
-      "source_location": "L263",
+      "source_location": "L270",
       "_origin": "ast",
       "id": "crm_data_route_post",
       "community": 14,
@@ -1067,7 +1107,7 @@
       "label": "callGeminiWithRetry()",
       "file_type": "code",
       "source_file": "app/api/generate-article/route.js",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "generate_article_route_callgeminiwithretry",
       "community": 38,
@@ -1077,7 +1117,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/generate-article/route.js",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "generate_article_route_post",
       "community": 38,
@@ -1120,17 +1160,57 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "generate_contract_route",
-      "community": 108,
+      "community": 38,
       "norm_label": "route.js"
+    },
+    {
+      "label": "canonical()",
+      "file_type": "code",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "generate_contract_route_canonical",
+      "community": 38,
+      "norm_label": "canonical()"
+    },
+    {
+      "label": "signQuery()",
+      "file_type": "code",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "generate_contract_route_signquery",
+      "community": 38,
+      "norm_label": "signquery()"
+    },
+    {
+      "label": "signatureValide()",
+      "file_type": "code",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "generate_contract_route_signaturevalide",
+      "community": 38,
+      "norm_label": "signaturevalide()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "generate_contract_route_post",
+      "community": 38,
+      "norm_label": "post()"
     },
     {
       "label": "GET()",
       "file_type": "code",
       "source_file": "app/api/generate-contract/route.js",
-      "source_location": "L8",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "generate_contract_route_get",
-      "community": 108,
+      "community": 38,
       "norm_label": "get()"
     },
     {
@@ -1550,17 +1630,17 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_devis_route",
-      "community": 58,
+      "community": 38,
       "norm_label": "route.js"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/send-devis/route.js",
-      "source_location": "L3",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "send_devis_route_post",
-      "community": 58,
+      "community": 38,
       "norm_label": "post()"
     },
     {
@@ -2237,7 +2317,7 @@
       "label": "SignaturePad()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L654",
+      "source_location": "L655",
       "_origin": "ast",
       "id": "token_page_signaturepad",
       "community": 108,
@@ -2247,7 +2327,7 @@
       "label": "Shell()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L740",
+      "source_location": "L741",
       "_origin": "ast",
       "id": "token_page_shell",
       "community": 108,
@@ -2257,7 +2337,7 @@
       "label": "Lbl()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L754",
+      "source_location": "L755",
       "_origin": "ast",
       "id": "token_page_lbl",
       "community": 108,
@@ -2267,7 +2347,7 @@
       "label": "Chips()",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L758",
+      "source_location": "L759",
       "_origin": "ast",
       "id": "token_page_chips",
       "community": 108,
@@ -2277,7 +2357,7 @@
       "label": "inp",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L773",
+      "source_location": "L774",
       "_origin": "ast",
       "id": "token_page_inp",
       "community": 108,
@@ -2287,7 +2367,7 @@
       "label": "chip",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L777",
+      "source_location": "L778",
       "_origin": "ast",
       "id": "token_page_chip",
       "community": 108,
@@ -2297,7 +2377,7 @@
       "label": "chipOn",
       "file_type": "code",
       "source_file": "app/fiche/[token]/page.tsx",
-      "source_location": "L781",
+      "source_location": "L782",
       "_origin": "ast",
       "id": "token_page_chipon",
       "community": 108,
@@ -3816,7 +3896,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_doc_bilingue",
-      "community": 108,
+      "community": 38,
       "norm_label": "doc-bilingue.js"
     },
     {
@@ -3826,7 +3906,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_doc_bilingue_translate",
-      "community": 108,
+      "community": 38,
       "norm_label": "translate()"
     },
     {
@@ -3836,7 +3916,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "lib_doc_bilingue_appendenglishpage",
-      "community": 108,
+      "community": 38,
       "norm_label": "appendenglishpage()"
     },
     {
@@ -3968,6 +4048,26 @@
       "id": "lib_supabase_client_supabase",
       "community": 3,
       "norm_label": "supabase"
+    },
+    {
+      "label": "verify-admin.js",
+      "file_type": "code",
+      "source_file": "lib/verify-admin.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_verify_admin",
+      "community": 38,
+      "norm_label": "verify-admin.js"
+    },
+    {
+      "label": "verifyAdmin()",
+      "file_type": "code",
+      "source_file": "lib/verify-admin.js",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "lib_verify_admin_verifyadmin",
+      "community": 38,
+      "norm_label": "verifyadmin()"
     },
     {
       "label": "next.config.js",
@@ -9370,6 +9470,86 @@
       "norm_label": "11. impact / fichiers touches"
     },
     {
+      "label": "audit-ecc-2026-10.md",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10",
+      "community": 46,
+      "norm_label": "audit-ecc-2026-10.md"
+    },
+    {
+      "label": "Audit ECC \u2014 2026-10-28",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "community": 46,
+      "norm_label": "audit ecc \u2014 2026-10-28"
+    },
+    {
+      "label": "\ud83d\udd34 P0 \u2014 S\u00e9curit\u00e9 & argent",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_p0_s\u00e9curit\u00e9_argent",
+      "community": 46,
+      "norm_label": "\ud83d\udd34 p0 \u2014 securite & argent"
+    },
+    {
+      "label": "\ud83d\udfe0 P1 \u2014 Int\u00e9grit\u00e9 des donn\u00e9es",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_p1_int\u00e9grit\u00e9_des_donn\u00e9es",
+      "community": 46,
+      "norm_label": "\ud83d\udfe0 p1 \u2014 integrite des donnees"
+    },
+    {
+      "label": "\ud83d\udfe1 P2 \u2014 Perf & correction",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_p2_perf_correction",
+      "community": 46,
+      "norm_label": "\ud83d\udfe1 p2 \u2014 perf & correction"
+    },
+    {
+      "label": "\ud83d\udd35 P3 \u2014 SEO / GEO",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_p3_seo_geo",
+      "community": 46,
+      "norm_label": "\ud83d\udd35 p3 \u2014 seo / geo"
+    },
+    {
+      "label": "Notes transverses",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_notes_transverses",
+      "community": 46,
+      "norm_label": "notes transverses"
+    },
+    {
+      "label": "Suivi",
+      "file_type": "document",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "tasks_audit_ecc_2026_10_suivi",
+      "community": 46,
+      "norm_label": "suivi"
+    },
+    {
       "label": "lessons-archive.md",
       "file_type": "document",
       "source_file": "tasks/lessons-archive.md",
@@ -11049,6 +11229,28 @@
       "target": "lib_contrat_analyse_verifiercoherenceoffres"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-contract/route.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "analyze_contract_route",
+      "target": "lib_verify_admin"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-contract/route.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "analyze_contract_route",
+      "target": "lib_verify_admin_verifyadmin"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -11255,6 +11457,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_fichetokenvalide",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -11270,6 +11482,28 @@
       "confidence_score": 1.0,
       "source": "analyze_rapport_route",
       "target": "analyze_rapport_route_uploadvideotogemini"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "lib_verify_admin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "lib_verify_admin_verifyadmin",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -11292,6 +11526,17 @@
       "confidence_score": 1.0,
       "source": "analyze_rapport_route_post",
       "target": "analyze_rapport_route_uploadvideotogemini"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_post",
+      "target": "analyze_rapport_route_fichetokenvalide",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -11415,6 +11660,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "app/api/client-devis/route.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "client_devis_route",
+      "target": "client_devis_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "app/api/create-client/route.js",
       "source_location": "L6",
       "weight": 1.0,
@@ -11431,6 +11686,28 @@
       "confidence_score": 1.0,
       "source": "create_client_route",
       "target": "create_client_route_post"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/create-client/route.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "create_client_route",
+      "target": "lib_verify_admin"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/create-client/route.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "create_client_route",
+      "target": "lib_verify_admin_verifyadmin"
     },
     {
       "relation": "calls",
@@ -11462,6 +11739,16 @@
       "confidence_score": 1.0,
       "source": "crm_data_route",
       "target": "crm_data_route_expirerdevisenretard"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L266",
+      "weight": 1.0,
+      "source": "crm_data_route",
+      "target": "crm_data_route_fail",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11590,6 +11877,17 @@
       "confidence_score": 1.0,
       "source": "crm_data_route_get",
       "target": "crm_data_route_expirerdevisenretard"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/crm-data/route.js",
+      "source_location": "L315",
+      "weight": 1.0,
+      "source": "crm_data_route_post",
+      "target": "crm_data_route_fail",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -11879,6 +12177,28 @@
       "target": "generate_article_route_post"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-article/route.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "generate_article_route",
+      "target": "lib_verify_admin"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-article/route.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "generate_article_route",
+      "target": "lib_verify_admin_verifyadmin"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -11924,11 +12244,51 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "generate_contract_route_canonical",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "generate_contract_route",
       "target": "generate_contract_route_get"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "generate_contract_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "generate_contract_route_signaturevalide",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "generate_contract_route_signquery",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -11973,6 +12333,72 @@
       "confidence_score": 1.0,
       "source": "generate_contract_route",
       "target": "lib_doc_bilingue_appendenglishpage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "lib_verify_admin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "generate_contract_route",
+      "target": "lib_verify_admin_verifyadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "generate_contract_route_signquery",
+      "target": "generate_contract_route_canonical",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "generate_contract_route_post",
+      "target": "generate_contract_route_signquery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "generate_contract_route_signaturevalide",
+      "target": "generate_contract_route_signquery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/generate-contract/route.js",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "generate_contract_route_get",
+      "target": "generate_contract_route_signaturevalide",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -12480,6 +12906,28 @@
       "confidence_score": 1.0,
       "source": "rh_frame_route",
       "target": "rh_frame_route_get"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/send-devis/route.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "send_devis_route",
+      "target": "lib_verify_admin"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/send-devis/route.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "send_devis_route",
+      "target": "lib_verify_admin_verifyadmin"
     },
     {
       "relation": "contains",
@@ -15570,6 +16018,16 @@
       "confidence_score": 1.0,
       "source": "lib_supabase_client",
       "target": "lib_supabase_client_supabase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/verify-admin.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_verify_admin",
+      "target": "lib_verify_admin_verifyadmin"
     },
     {
       "relation": "contains",
@@ -20354,6 +20812,76 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10",
+      "target": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_notes_transverses"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_p0_s\u00e9curit\u00e9_argent"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_p1_int\u00e9grit\u00e9_des_donn\u00e9es"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_p2_perf_correction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_p3_seo_geo"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tasks/audit-ecc-2026-10.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tasks_audit_ecc_2026_10_audit_ecc_2026_10_28",
+      "target": "tasks_audit_ecc_2026_10_suivi"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "tasks/lessons-archive.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -20723,5 +21251,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b50ba805089fa166731ea67d4780fba5b412b1d8"
+  "built_at_commit": "3bf4ecbd7e4712c564617a3ac22c791f6cc7e171"
 }

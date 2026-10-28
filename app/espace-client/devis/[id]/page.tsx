@@ -53,25 +53,39 @@ export default function DevisPage() {
 
   async function accepterDevis() {
     setSubmitting(true)
-    await supabase.from("devis").update({
-      statut: "accepte",
-      date_acceptation: new Date().toISOString(),
-    }).eq("id", devisId)
-    setDevis((prev: any) => ({ ...prev, statut: "accepte" }))
-    setAction("payer60")
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch("/api/client-devis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + (session?.access_token || "") },
+      body: JSON.stringify({ action: "accepter", devisId }),
+    })
+    if (res.ok) {
+      setDevis((prev: any) => ({ ...prev, statut: "accepte" }))
+      setAction("payer60")
+    } else {
+      const d = await res.json().catch(() => ({}))
+      setMsgResult("Erreur : " + (d.error || "action impossible"))
+    }
     setSubmitting(false)
   }
 
   async function demanderModification() {
     if (!motifModif.trim()) return
     setSubmitting(true)
-    await supabase.from("devis").update({
-      statut: "modification_demandee",
-      notes_modification: motifModif,
-    }).eq("id", devisId)
-    setDevis((prev: any) => ({ ...prev, statut: "modification_demandee", notes_modification: motifModif }))
-    setAction("none")
-    setMsgResult("Votre demande de modification a été envoyée à GSE. Vous serez notifié dès la mise à jour.")
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch("/api/client-devis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + (session?.access_token || "") },
+      body: JSON.stringify({ action: "demander_modification", devisId, motif: motifModif }),
+    })
+    if (res.ok) {
+      setDevis((prev: any) => ({ ...prev, statut: "modification_demandee", notes_modification: motifModif }))
+      setAction("none")
+      setMsgResult("Votre demande de modification a été envoyée à GSE. Vous serez notifié dès la mise à jour.")
+    } else {
+      const d = await res.json().catch(() => ({}))
+      setMsgResult("Erreur : " + (d.error || "action impossible"))
+    }
     setSubmitting(false)
   }
 

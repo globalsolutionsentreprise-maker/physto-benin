@@ -975,7 +975,7 @@ export default function Admin() {
                       setGeneratingArticle(true)
                       setArticleGenMsg("")
                       try {
-                        const res = await fetch("/api/generate-article", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sujet: sujetArticle }) })
+                        const res = await fetch("/api/generate-article", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ sujet: sujetArticle }) })
                         const d = await res.json()
                         if (!d.ok) { setArticleGenMsg("❌ " + (d.error || "Erreur IA")); return }
                         const a = d.article
@@ -1688,8 +1688,19 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
   // contrat n'apparaissait nulle part tant qu'on ne cliquait pas « Recharger ».
   // ponytail: délai fixe 3s, largement suffisant pour une insertion d'1 ligne ;
   // remplacer par un vrai signal serveur seulement si l'insert devient plus lent.
-  function ouvrirContrat(url) {
-    window.open(url, "_blank")
+  async function ouvrirContrat(url) {
+    // Fenêtre ouverte SYNCHRONE (dans le geste de clic, sinon bloquée par le
+    // navigateur), puis on fait signer la query (POST authentifié) avant de
+    // poser l'URL signée : le GET public exige désormais exp + sig valides.
+    var win = window.open("", "_blank")
+    try {
+      var qs = url.split("?")[1] || ""
+      var res = await fetch("/api/generate-contract", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ query: qs }) })
+      var d = await res.json()
+      if (!res.ok || !d.sig) { if (win) win.close(); setMsg("Erreur: " + ((d && d.error) || "signature du contrat")); return }
+      var full = url + "&exp=" + encodeURIComponent(d.exp) + "&sig=" + encodeURIComponent(d.sig)
+      if (win) win.location = full; else window.open(full, "_blank")
+    } catch (e) { if (win) win.close(); setMsg("Erreur réseau: " + e.message); return }
     setTimeout(function() { charger() }, 3000)
   }
 
@@ -1903,7 +1914,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         }
         const res = await fetch("/api/create-client", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: await authHeaders(),
           body: JSON.stringify(Object.assign({}, formClientNorm, { leadDescription: leadDescription }))
         })
         const data = await res.json()
@@ -2103,7 +2114,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       if (error) { setMsg("Erreur: " + error.message); return }
       if (enLigne && cl && cl.email) {
         try {
-          await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: editingDevis.numero, prestation: prestationStr, montant: montantClient, description: formDevis.description }) })
+          await fetch("/api/send-devis", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: editingDevis.numero, prestation: prestationStr, montant: montantClient, description: formDevis.description }) })
           setMsg("✓ Devis modifié et renvoyé à " + cl.email)
         } catch(e) { setMsg("✓ Devis modifié (email non envoyé)") }
       } else if (!enLigne) {
@@ -2130,7 +2141,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     var cl = d.clients || clients.find(function(c) { return c.id === d.client_id })
     if (!cl || !cl.email) { setMsg("Ce client n'a pas d'email."); return }
     try {
-      var res = await fetch("/api/send-devis", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: d.numero, prestation: d.prestation, montant: d.montant_total, description: d.description || "" }) })
+      var res = await fetch("/api/send-devis", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: d.numero, prestation: d.prestation, montant: d.montant_total, description: d.description || "" }) })
       var data = await res.json()
       if (data.success) { setMsg("✓ Email renvoyé à " + cl.email) }
       else { setMsg("Erreur: " + (data.error || "Échec envoi")) }
@@ -2636,7 +2647,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           type: 'visite',
           notes: rapportVisiteForm.notesTechnicien,
@@ -3105,7 +3116,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       }
       var res = await fetch('/api/analyze-rapport', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders(),
         body: JSON.stringify({
           type: 'intervention',
           notes: rapportIntervForm.notesTechnicien,
@@ -5864,7 +5875,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var res = await fetch("/api/analyze-contract", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authHeaders(),
         body: JSON.stringify({
           devisId: contratModal.id,
           phase: "questions",
@@ -5899,7 +5910,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     try {
       var res = await fetch("/api/analyze-contract", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authHeaders(),
         body: JSON.stringify({
           devisId: contratModal.id,
           phase: "analyse",

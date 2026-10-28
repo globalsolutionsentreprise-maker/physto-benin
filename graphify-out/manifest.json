@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1792960757.4985368,
-    "ast_hash": "d5f3710adb7f6e4f202502759cf8844e",
+    "mtime": 1793191638.375962,
+    "ast_hash": "da2dadc31905526b08c38b0b5ccc10ff",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -25,18 +25,18 @@
     "semantic_hash": ""
   },
   "app/api/analyze-contract/route.js": {
-    "mtime": 1785352119.9779959,
-    "ast_hash": "24345f4d9a8fa197788f09b08b25f286",
+    "mtime": 1793191213.6870704,
+    "ast_hash": "352b31f18c30e81fc814ab4ce66aecf5",
     "semantic_hash": ""
   },
   "app/api/analyze-rapport/route.js": {
-    "mtime": 1792656839.2667644,
-    "ast_hash": "db814e2bde854b3b15c1c4dbba637bce",
+    "mtime": 1793191605.4554477,
+    "ast_hash": "25a157a8a3ce8bf9bef58be93f7edffa",
     "semantic_hash": ""
   },
   "app/api/create-client/route.js": {
-    "mtime": 1792589549.310602,
-    "ast_hash": "b302244e0e693ec9102088b9ec2c33ab",
+    "mtime": 1793191206.0139437,
+    "ast_hash": "35fd10d7a688cfab04a54d12cd3f61a8",
     "semantic_hash": ""
   },
   "app/api/create-payment/route.ts": {
@@ -45,13 +45,13 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1792679505.3196006,
-    "ast_hash": "8b0510df274df6abf21f6e008a3ae89e",
+    "mtime": 1793192029.957002,
+    "ast_hash": "6a709cf381fa22d717a8fe716fc6afe5",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
-    "mtime": 1780356222.8570845,
-    "ast_hash": "c0cd6a7b9c7076d439f8d3d2361c0576",
+    "mtime": 1793191217.1412313,
+    "ast_hash": "7cf8f1862abf60b2b52aebf61e8ce7de",
     "semantic_hash": ""
   },
   "app/api/generate-attestation/route.ts": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "app/api/generate-contract/route.js": {
-    "mtime": 1792591537.976968,
-    "ast_hash": "d62df654c16c7dfd0ac8e819c523c6b4",
+    "mtime": 1793191633.057724,
+    "ast_hash": "52858e1549c8f2c819ee5670d131b396",
     "semantic_hash": ""
   },
   "app/api/meteo-cotonou/route.js": {
@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "app/api/send-devis/route.js": {
-    "mtime": 1792589549.2985716,
-    "ast_hash": "5797d03292d3fd93b3d1b65fe33f0708",
+    "mtime": 1793191201.8612108,
+    "ast_hash": "843c6025a52cd9609c7ff06183393a3a",
     "semantic_hash": ""
   },
   "app/blog/[slug]/page.tsx": {
@@ -140,8 +140,8 @@
     "semantic_hash": ""
   },
   "app/espace-client/devis/[id]/page.tsx": {
-    "mtime": 1778496020.6766226,
-    "ast_hash": "fe8ca55e66d0401ab129501e45b6de20",
+    "mtime": 1793191833.504423,
+    "ast_hash": "f74d2309803c58296be949bc37e1eee2",
     "semantic_hash": ""
   },
   "app/espace-client/page.tsx": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1792867358.4055054,
-    "ast_hash": "9af9919af3ae658071e507d51fe8443b",
+    "mtime": 1793192065.0955875,
+    "ast_hash": "fad767b9f93941acb5b497a498149a7e",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -1045,8 +1045,8 @@
     "semantic_hash": ""
   },
   "app/fiche/[token]/page.tsx": {
-    "mtime": 1792866778.815073,
-    "ast_hash": "4e02ae657a2fb670871bf3e9883ea10b",
+    "mtime": 1793191607.0153542,
+    "ast_hash": "670de1a2992a146a19353b7e110f077f",
     "semantic_hash": ""
   },
   "supabase/migrations/20261010120000_fiche_terrain.sql": {
@@ -1242,6 +1242,26 @@
   "supabase/migrations/20261022120000_clients_type_client.sql": {
     "mtime": 1792654568.339677,
     "ast_hash": "57dd07d6465b837d7c9a562c3bb6a4a6",
+    "semantic_hash": ""
+  },
+  "lib/verify-admin.js": {
+    "mtime": 1793191196.2260082,
+    "ast_hash": "de89e348224b0ef31e553b929a32940b",
+    "semantic_hash": ""
+  },
+  "tasks/audit-ecc-2026-10.md": {
+    "mtime": 1793192050.9048414,
+    "ast_hash": "7d5d831161def38d2552289239592cde",
+    "semantic_hash": ""
+  },
+  "app/api/client-devis/route.js": {
+    "mtime": 1793191813.1800778,
+    "ast_hash": "6fd67694e467138db8502519fa7e21a7",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261028120000_rls_hardening.sql": {
+    "mtime": 1793191824.188336,
+    "ast_hash": "4a156faf4aeb8b25f362093f7c301635",
     "semantic_hash": ""
   }
 }

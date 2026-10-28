@@ -390,6 +390,7 @@ export default function FicheTerrain({ params }: { params: Promise<{ token: stri
       const r = await fetch("/api/analyze-rapport", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ficheToken: token,
           type: "dictee",
           notes: remarques || "",
           audios: [{ mimeType: blob.type || "audio/webm", data }],

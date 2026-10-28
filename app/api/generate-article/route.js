@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
@@ -25,6 +26,7 @@ async function callGeminiWithRetry(body, maxRetries = 3) {
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   const { sujet } = await req.json()
   if (!sujet) return NextResponse.json({ error: "Sujet requis" }, { status: 400 })
 

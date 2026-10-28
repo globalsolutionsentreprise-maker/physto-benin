@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 const GEMINI_FILES_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files"
@@ -62,9 +64,21 @@ async function uploadVideoToGemini(url) {
   return file.state === "ACTIVE" ? { mimeType: file.mimeType || mimeType, fileUri: file.uri } : null
 }
 
+// Accès : admin authentifié, OU token de passage valide (page publique
+// technicien /fiche/[token]). Une erreur de lecture ferme l'accès.
+async function ficheTokenValide(token) {
+  if (!token || typeof token !== "string") return false
+  const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  const { data, error } = await sb.from("interventions").select("id").eq("fiche_token", token).maybeSingle()
+  return !error && !!data
+}
+
 export async function POST(req) {
   try {
-    const { type, notes, photos, audios, videos, context } = await req.json()
+    const { type, notes, photos, audios, videos, context, ficheToken } = await req.json()
+    if (!await verifyAdmin(req) && !await ficheTokenValide(ficheToken)) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+    }
     const ctx = Object.assign({}, context)
 
     const mediaParts = []

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { construireSocleDevis, parseFrequenceClient, appliquerContraintes, blocRapport, plancherPour, montantNegocie, PASSAGES_DEFAUT, scoreCommercial, niveauContrat, verifierCoherenceOffres, divergencePrestations, offresContrat, passagesPourDuree } from "@/lib/contrat-analyse.mjs"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
 
@@ -27,6 +28,7 @@ async function callGeminiWithRetry(body, maxRetries = 3) {
 }
 
 export async function POST(req) {
+  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

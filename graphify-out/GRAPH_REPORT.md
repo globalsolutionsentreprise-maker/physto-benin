@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-10-25)
+# Graph Report - gse-site  (2026-10-28)
 
 ## Corpus Check
-- 211 files · ~795,708 words
+- 215 files · ~798,654 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 976 nodes · 1070 edges · 117 communities (77 shown, 40 thin omitted)
+- 994 nodes · 1103 edges · 116 communities (78 shown, 38 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b50ba805`
+- Built from commit: `3bf4ecbd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,6 @@
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
@@ -137,17 +136,17 @@
   app/admin/page.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `resumeContrat()`  [EXTRACTED]
   app/admin/page.js → lib/contrat-analyse.mjs
-- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
-  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `appendEnglishPage()`  [EXTRACTED]
   app/admin/page.js → lib/doc-bilingue.js
+- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
+  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `buildFicheControleHtml()`  [EXTRACTED]
   app/admin/page.js → lib/fiche-html.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (117 total, 40 thin omitted)
+## Communities (116 total, 38 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -207,7 +206,7 @@ Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill rou
 
 ### Community 14 - "Community 14"
 Cohesion: 0.11
-Nodes (43): callGeminiWithRetry(), POST(), expirerDevisEnRetard(), GET(), POST(), verifyAdmin(), appliquerContraintes(), blocRapport() (+35 more)
+Nodes (44): callGeminiWithRetry(), POST(), expirerDevisEnRetard(), fail(), GET(), POST(), verifyAdmin(), appliquerContraintes() (+36 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -220,10 +219,6 @@ Nodes (5): d, SUJETS, supabase, mois, texte
 ### Community 18 - "Community 18"
 Cohesion: 0.40
 Nodes (4): QA checklist for CRM module (crm.html), QA checklist for RH module (rh.html), Reporting, Test targets
-
-### Community 19 - "Community 19"
-Cohesion: 0.47
-Nodes (8): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), POST(), uploadVideoToGemini()
 
 ### Community 22 - "Community 22"
 Cohesion: 0.33
@@ -264,6 +259,14 @@ Nodes (16): (a) Prompt d'analyse declare le plancher a l'IA, (b) Avertissement p
 ### Community 33 - "Community 33"
 Cohesion: 0.12
 Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue — Remise automatique 10% — Implementation Plan, Partie A — Charger les leads au démarrage, Partie B — Panneau leads en haut de l'interface, Partie C — Pré-remplir remise dans ouvrirEditionDevis, Partie D — Badge remise bienvenue dans la liste des devis, Partie E — generate-contract : remise fallback depuis remise_bienvenue (+8 more)
+
+### Community 38 - "Community 38"
+Cohesion: 0.11
+Nodes (23): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), POST() (+15 more)
+
+### Community 46 - "Community 46"
+Cohesion: 0.25
+Nodes (7): Audit ECC — 2026-10-28, Notes transverses, 🔴 P0 — Sécurité & argent, 🟠 P1 — Intégrité des données, 🟡 P2 — Perf & correction, 🔵 P3 — SEO / GEO, Suivi
 
 ### Community 48 - "Community 48"
 Cohesion: 0.22
@@ -394,8 +397,8 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.06
-Nodes (50): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+42 more)
+Cohesion: 0.07
+Nodes (45): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+37 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70
@@ -406,17 +409,17 @@ Cohesion: 0.60
 Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
 
 ## Knowledge Gaps
-- **525 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+520 more)
+- **531 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+526 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _525 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _531 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
