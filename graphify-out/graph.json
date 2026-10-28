@@ -744,10 +744,30 @@
       "norm_label": "route.js"
     },
     {
+      "label": "MEDIA_ORIGIN",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_media_origin",
+      "community": 38,
+      "norm_label": "media_origin"
+    },
+    {
+      "label": "mediaAutorisee()",
+      "file_type": "code",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "analyze_rapport_route_mediaautorisee",
+      "community": 38,
+      "norm_label": "mediaautorisee()"
+    },
+    {
       "label": "callGeminiWithRetry()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L12",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "analyze_rapport_route_callgeminiwithretry",
       "community": 38,
@@ -757,7 +777,7 @@
       "label": "uploadVideoToGemini()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L35",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "analyze_rapport_route_uploadvideotogemini",
       "community": 38,
@@ -767,7 +787,7 @@
       "label": "ficheTokenValide()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L69",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "analyze_rapport_route_fichetokenvalide",
       "community": 38,
@@ -777,7 +797,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L76",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "analyze_rapport_route_post",
       "community": 38,
@@ -787,7 +807,7 @@
       "label": "blocVisuels()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L156",
+      "source_location": "L166",
       "_origin": "ast",
       "id": "analyze_rapport_route_blocvisuels",
       "community": 38,
@@ -797,7 +817,7 @@
       "label": "blocCaptures()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L171",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "analyze_rapport_route_bloccaptures",
       "community": 38,
@@ -807,7 +827,7 @@
       "label": "buildPromptDictee()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L182",
+      "source_location": "L192",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptdictee",
       "community": 38,
@@ -817,7 +837,7 @@
       "label": "buildPromptVisite()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L206",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptvisite",
       "community": 38,
@@ -827,7 +847,7 @@
       "label": "buildPromptIntervention()",
       "file_type": "code",
       "source_file": "app/api/analyze-rapport/route.js",
-      "source_location": "L236",
+      "source_location": "L246",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptintervention",
       "community": 38,
@@ -9523,7 +9543,7 @@
       "label": "\ud83d\udfe0 P1 \u2014 Int\u00e9grit\u00e9 des donn\u00e9es",
       "file_type": "document",
       "source_file": "tasks/audit-ecc-2026-10.md",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "tasks_audit_ecc_2026_10_p1_int\u00e9grit\u00e9_des_donn\u00e9es",
       "community": 46,
@@ -9533,7 +9553,7 @@
       "label": "\ud83d\udfe1 P2 \u2014 Perf & correction",
       "file_type": "document",
       "source_file": "tasks/audit-ecc-2026-10.md",
-      "source_location": "L28",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "tasks_audit_ecc_2026_10_p2_perf_correction",
       "community": 46,
@@ -9543,7 +9563,7 @@
       "label": "\ud83d\udd35 P3 \u2014 SEO / GEO",
       "file_type": "document",
       "source_file": "tasks/audit-ecc-2026-10.md",
-      "source_location": "L36",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "tasks_audit_ecc_2026_10_p3_seo_geo",
       "community": 46,
@@ -9553,7 +9573,7 @@
       "label": "Notes transverses",
       "file_type": "document",
       "source_file": "tasks/audit-ecc-2026-10.md",
-      "source_location": "L45",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "tasks_audit_ecc_2026_10_notes_transverses",
       "community": 46,
@@ -9563,7 +9583,7 @@
       "label": "Suivi",
       "file_type": "document",
       "source_file": "tasks/audit-ecc-2026-10.md",
-      "source_location": "L49",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "tasks_audit_ecc_2026_10_suivi",
       "community": 46,
@@ -11487,6 +11507,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_media_origin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "analyze_rapport_route",
+      "target": "analyze_rapport_route_mediaautorisee",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -11524,6 +11564,28 @@
       "confidence_score": 1.0,
       "source": "analyze_rapport_route",
       "target": "lib_verify_admin_verifyadmin"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L97",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_post",
+      "target": "analyze_rapport_route_mediaautorisee",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/analyze-rapport/route.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "analyze_rapport_route_uploadvideotogemini",
+      "target": "analyze_rapport_route_mediaautorisee",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15864,9 +15926,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_imgdata",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_imgdata"
     },
     {
       "relation": "contains",
@@ -15924,9 +15986,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html",
-      "target": "lib_fiche_html_safeurl",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_safeurl"
     },
     {
       "relation": "calls",
@@ -16034,9 +16096,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichepassage",
-      "target": "lib_fiche_html_esc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_esc"
     },
     {
       "relation": "calls",
@@ -16045,9 +16107,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_safeurl",
-      "target": "lib_fiche_html_esc",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_esc"
     },
     {
       "relation": "calls",
@@ -16056,9 +16118,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L340",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_imgdata",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_imgdata"
     },
     {
       "relation": "calls",
@@ -16067,9 +16129,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L171",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichepassage",
-      "target": "lib_fiche_html_imgdata",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_imgdata"
     },
     {
       "relation": "calls",
@@ -16078,9 +16140,9 @@
       "source_file": "lib/fiche-html.js",
       "source_location": "L328",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_fiche_html_pagefichecontrole",
-      "target": "lib_fiche_html_safeurl",
-      "confidence_score": 1.0
+      "target": "lib_fiche_html_safeurl"
     },
     {
       "relation": "calls",
@@ -21346,5 +21408,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6f0d57b0ea25b6d6ed917bb46147ed9dce43a454"
+  "built_at_commit": "d657a5339c93115c10af037f7a4bd6fb59c439ba"
 }

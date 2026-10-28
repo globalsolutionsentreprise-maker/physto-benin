@@ -1,16 +1,16 @@
 # Graph Report - gse-site  (2026-10-28)
 
 ## Corpus Check
-- 215 files · ~799,080 words
+- 215 files · ~799,231 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 996 nodes · 1110 edges · 117 communities (79 shown, 38 thin omitted)
+- 998 nodes · 1114 edges · 117 communities (79 shown, 38 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6f0d57b0`
+- Built from commit: `d657a533`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -263,7 +263,7 @@ Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue �
 
 ### Community 38 - "Community 38"
 Cohesion: 0.11
-Nodes (23): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), POST() (+15 more)
+Nodes (25): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), MEDIA_ORIGIN (+17 more)
 
 ### Community 46 - "Community 46"
 Cohesion: 0.25
@@ -414,7 +414,7 @@ Cohesion: 0.60
 Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
 
 ## Knowledge Gaps
-- **531 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+526 more)
+- **532 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+527 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -423,8 +423,10 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `verifyAdmin()` connect `Community 38` to `Community 14`?**
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _531 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _532 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -433,5 +435,3 @@ _Questions this graph is uniquely positioned to answer:_
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.06923076923076923 - nodes in this community are weakly interconnected._
-- **Should `Community 6` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._

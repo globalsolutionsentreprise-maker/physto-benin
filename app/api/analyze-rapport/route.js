@@ -9,6 +9,14 @@ const GEMINI_FILES = "https://generativelanguage.googleapis.com/v1beta"
 export const dynamic = "force-dynamic"
 export const maxDuration = 300 // lecture vidéo (upload + traitement Gemini) peut prendre > 60s
 
+// Anti-SSRF : on ne télécharge QUE les médias hébergés sur le Storage Supabase du
+// projet (URLs signées). Toute autre URL fournie par l'appelant est ignorée, pour
+// empêcher d'atteindre des endpoints internes/cloud via cette route.
+const MEDIA_ORIGIN = (() => { try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin } catch { return "" } })()
+function mediaAutorisee(u) {
+  try { const x = new URL(u); return !!MEDIA_ORIGIN && x.origin === MEDIA_ORIGIN && x.pathname.startsWith("/storage/") } catch { return false }
+}
+
 async function callGeminiWithRetry(body, maxRetries = 3) {
   let lastErr
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -33,6 +41,7 @@ async function callGeminiWithRetry(body, maxRetries = 3) {
 // Télécharge la vidéo (depuis Supabase Storage) puis la pousse à la Files API Gemini,
 // qui l'analyse nativement (image + piste audio). Attend l'état ACTIVE avant usage.
 async function uploadVideoToGemini(url) {
+  if (!mediaAutorisee(url)) return null
   const key = process.env.GEMINI_API_KEY
   let vRes
   try { vRes = await fetch(url, { signal: AbortSignal.timeout(25000) }) } catch { return null }
@@ -85,6 +94,7 @@ export async function POST(req) {
 
     // Photos (+ frames déjà extraites) en inline data (max 12)
     for (const url of (photos || []).slice(0, 12)) {
+      if (!mediaAutorisee(url)) continue
       try {
         const imgRes = await fetch(url, { signal: AbortSignal.timeout(8000) })
         if (!imgRes.ok) continue
