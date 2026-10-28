@@ -588,22 +588,25 @@ async function saveMembre(){
     contratDureeMois:parseInt(g("mcm"))||0,cipNumero:g("mcip"),cipExpiration:g("mcipx")||null,notes:g("mno")};
   if(!d.nom){alert("Le nom est obligatoire.");return;}
   if(editMembreId){
-    await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_personnel",id:editMembreId,...d})});
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_personnel",id:editMembreId,...d})});
+    if(!res.ok){toast("Échec de l'enregistrement");return;}
     const i=membres.findIndex(m=>m.id===editMembreId);
     if(i>=0)membres[i]={...membres[i],...d};
     toast("Membre mis à jour");
   }else{
     const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_personnel",...d})});
-    const r=await res.json();
-    if(r.id)membres.push({id:r.id,...d});
+    const r=await res.json().catch(()=>({}));
+    if(!res.ok||!r.id){toast("Échec de l'ajout");return;}
+    membres.push({id:r.id,...d});
     toast("Membre ajouté");
   }
   closeModal();render();
 }
 
-function delMembre(id){
+async function delMembre(id){
   if(confirm("Supprimer ce membre ? Ses interventions resteront mais ne seront plus assignées.")){
-    fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_personnel",id})}).catch(()=>{});
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_personnel",id})}).catch(()=>null);
+    if(!res||!res.ok){toast("Échec de la suppression");return;}
     membres=membres.filter(m=>m.id!==id);
     plannings.forEach(p=>{if(p.personnelId===id)p.personnelId=null;});
     closeModal();render();toast("Membre supprimé");
@@ -686,7 +689,8 @@ async function saveInterv(){
   if(!d.clientNom){alert("Le nom du client est obligatoire.");return;}
   if(!d.dateIntervention){alert("La date est obligatoire.");return;}
   if(editIntervId){
-    await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_intervention",id:editIntervId,...d})});
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save_intervention",id:editIntervId,...d})});
+    if(!res.ok){toast("Échec de l'enregistrement");return;}
     const i=plannings.findIndex(p=>p.id===editIntervId);
     if(i>=0){
       const pers=membres.find(m=>m.id===d.personnelId);
@@ -695,19 +699,19 @@ async function saveInterv(){
     toast("Intervention mise à jour");
   }else{
     const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"add_intervention",...d})});
-    const r=await res.json();
-    if(r.id){
-      const pers=membres.find(m=>m.id===d.personnelId);
-      plannings.push({id:r.id,...d,personnel:pers?{id:pers.id,nom:[pers.prenom,pers.nom].filter(Boolean).join(" "),poste:pers.poste}:null});
-    }
+    const r=await res.json().catch(()=>({}));
+    if(!res.ok||!r.id){toast("Échec de la planification");return;}
+    const pers=membres.find(m=>m.id===d.personnelId);
+    plannings.push({id:r.id,...d,personnel:pers?{id:pers.id,nom:[pers.prenom,pers.nom].filter(Boolean).join(" "),poste:pers.poste}:null});
     toast("Intervention planifiée");
   }
   closeModal();render();
 }
 
-function delInterv(id){
+async function delInterv(id){
   if(confirm("Supprimer cette intervention ?")){
-    fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_intervention",id})}).catch(()=>{});
+    const res=await fetch("/api/rh-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"del_intervention",id})}).catch(()=>null);
+    if(!res||!res.ok){toast("Échec de la suppression");return;}
     plannings=plannings.filter(p=>p.id!==id);
     closeModal();render();toast("Intervention supprimée");
   }

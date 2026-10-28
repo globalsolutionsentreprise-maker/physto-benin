@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "public/rh.html": {
-    "mtime": 1792749003.988941,
-    "ast_hash": "bda01f1fdffc6d37d7a62868008b915f",
+    "mtime": 1793195256.0564146,
+    "ast_hash": "5638afaf272537d5f7d7b89ea0915dda",
     "semantic_hash": ""
   },
   "public/robots.txt": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793195112.9184813,
-    "ast_hash": "ba4bf201a6d54ee8a619cb8242d606ca",
+    "mtime": 1793195286.05581,
+    "ast_hash": "b3403c6361a0d5f11a9876fafd967847",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {
