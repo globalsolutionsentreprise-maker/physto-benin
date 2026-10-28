@@ -169,56 +169,63 @@ export async function POST(req) {
 
   if (action === "add_personnel") {
     const { nom, prenom, poste, telephone, email, statut, dateEmbauche, contratDate, contratDureeMois, cipNumero, cipExpiration, notes } = body
-    const { data } = await supabase.from("personnel").insert({
+    const { data, error } = await supabase.from("personnel").insert({
       nom, prenom, poste, telephone, email, statut: statut || "actif",
       date_embauche: dateEmbauche || null, contrat_date: contratDate || null,
       contrat_duree_mois: contratDureeMois || 0, cip_numero: cipNumero,
       cip_expiration: cipExpiration || null, notes,
     }).select().single()
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true, id: data?.id })
   }
 
   if (action === "save_personnel") {
     const { id, nom, prenom, poste, telephone, email, statut, dateEmbauche, contratDate, contratDureeMois, cipNumero, cipExpiration, notes } = body
-    await supabase.from("personnel").update({
+    const { error } = await supabase.from("personnel").update({
       nom, prenom, poste, telephone, email, statut: statut || "actif",
       date_embauche: dateEmbauche || null, contrat_date: contratDate || null,
       contrat_duree_mois: contratDureeMois || 0, cip_numero: cipNumero,
       cip_expiration: cipExpiration || null, notes,
     }).eq("id", id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }
 
   if (action === "del_personnel") {
-    await supabase.from("interventions").update({ personnel_id: null }).eq("personnel_id", body.id)
-    await supabase.from("personnel").delete().eq("id", body.id)
+    const { error: eDetach } = await supabase.from("interventions").update({ personnel_id: null }).eq("personnel_id", body.id)
+    if (eDetach) return Response.json({ error: eDetach.message }, { status: 500 })
+    const { error } = await supabase.from("personnel").delete().eq("id", body.id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }
 
   if (action === "add_intervention") {
     const { devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes, montantPrestataire } = body
-    const { data } = await supabase.from("interventions").insert({
+    const { data, error } = await supabase.from("interventions").insert({
       devis_id: devisId || null, personnel_id: personnelId || null,
       date_intervention: dateIntervention, heure_debut: heureDebut || "08:00",
       statut: statut || "planifiee", client_nom: clientNom, adresse, notes,
       montant_prestataire: montantPrestataire || 0,
     }).select().single()
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true, id: data?.id })
   }
 
   if (action === "save_intervention") {
     const { id, devisId, personnelId, dateIntervention, heureDebut, statut, clientNom, adresse, notes, montantPrestataire } = body
-    await supabase.from("interventions").update({
+    const { error } = await supabase.from("interventions").update({
       devis_id: devisId || null, personnel_id: personnelId || null,
       date_intervention: dateIntervention, heure_debut: heureDebut || "08:00",
       statut: statut || "planifiee", client_nom: clientNom, adresse, notes,
       montant_prestataire: montantPrestataire || 0,
     }).eq("id", id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }
 
   if (action === "del_intervention") {
-    await supabase.from("interventions").delete().eq("id", body.id)
+    const { error } = await supabase.from("interventions").delete().eq("id", body.id)
+    if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ ok: true })
   }
 
@@ -299,7 +306,8 @@ export async function POST(req) {
           .select("montant_du, montant_paye").eq("devis_id", passage.devis_id)
         // Passages payants uniquement (montant_du > 0), cohérent avec l'encaissé de la frise.
         const total = (rows || []).reduce((s, r) => s + ((Number(r.montant_du) || 0) > 0 ? (Number(r.montant_paye) || 0) : 0), 0)
-        await supabase.from("devis").update({ paiements_recus: total }).eq("id", passage.devis_id)
+        const { error: eRec } = await supabase.from("devis").update({ paiements_recus: total }).eq("id", passage.devis_id)
+        if (eRec) return Response.json({ error: eRec.message }, { status: 500 })
       }
     }
     return Response.json({ ok: true })

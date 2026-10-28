@@ -80,8 +80,8 @@
     "semantic_hash": ""
   },
   "app/api/rh-data/route.js": {
-    "mtime": 1791659617.878938,
-    "ast_hash": "0af97e1664c79a1e121e29d621eb16c0",
+    "mtime": 1793193769.8794253,
+    "ast_hash": "f447640775a3d8e063cf3a27408c9398",
     "semantic_hash": ""
   },
   "app/api/rh-frame/route.js": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793193686.1293359,
-    "ast_hash": "4d5bfc3de3ad40959deaf294c8d306a0",
+    "mtime": 1793193811.537457,
+    "ast_hash": "da00e7cbf7cb03b8a726ee4992c65cca",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {
