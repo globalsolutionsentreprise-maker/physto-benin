@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1792589549.2961116,
-    "ast_hash": "035ab2ee4567e65ac2d8efa15f024358",
+    "mtime": 1793194494.991591,
+    "ast_hash": "fa6b67006332cd64757e5fffb15f92c5",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "app/layout.tsx": {
-    "mtime": 1793194038.4807928,
-    "ast_hash": "20570643162a7015015d358666555873",
+    "mtime": 1793194489.327248,
+    "ast_hash": "9d97157f276c2706d0c8b6aeb8a66cdb",
     "semantic_hash": ""
   },
   "app/lib/supabase.js": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "app/page.tsx": {
-    "mtime": 1792589960.3926249,
-    "ast_hash": "d12d4edfc17d7b8f9fbaf6ccf27de2dc",
+    "mtime": 1793194484.9414413,
+    "ast_hash": "627f86e4ee142774b63b14e684554289",
     "semantic_hash": ""
   },
   "app/qui-sommes-nous/page.tsx": {
@@ -1035,8 +1035,8 @@
     "semantic_hash": ""
   },
   "public/llms.txt": {
-    "mtime": 1791301444.1067588,
-    "ast_hash": "8537dbb86aad6e6c98c1d1bf6ab906e4",
+    "mtime": 1793194540.2023354,
+    "ast_hash": "91c81fead7f7b74ef21af355594967be",
     "semantic_hash": ""
   },
   "app/api/fiche-terrain/route.js": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793194091.3789334,
-    "ast_hash": "cba718cb8fed5088c4e779495eacf6d6",
+    "mtime": 1793194546.1480715,
+    "ast_hash": "ebeb3d993b852b7224bf89d8e6d139ca",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {

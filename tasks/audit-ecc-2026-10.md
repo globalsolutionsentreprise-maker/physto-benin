@@ -38,8 +38,8 @@ Audit lancé via 4 agents ECC (lecture seule) sur le repo : `database-reviewer`,
 ## 🔵 P3 — SEO / GEO
 
 - ✅ **Canonical** (2026-10-28) — retiré du layout racine ; `/services` (via nouveau `services/layout.tsx`), `/contact`, `/mentions-legales` (+ `robots: noindex`) ont leur propre canonical + openGraph. Accueil : self-canonical.
-- 🟠 **Agrément** — placeholder `AGRÉMENT-BÉNIN-XXXXX` au rendu serveur (`page.tsx:20`) + `llms.txt` dit `APA/26-025` vs `APA-26-026` ailleurs.
-- 🟠 **NAP** — 2 emails qui circulent, pas de `streetAddress`, footer Supabase → tél/adresse vides dans le HTML serveur.
+- ✅ **Agrément** (2026-10-28) — accueil rend le vrai `N° APA-26-026/CNGP-BEN` au server-render (plus de placeholder) ; coquille `APA/26-025` corrigée dans `llms.txt`.
+- ✅ **NAP** (2026-10-28, partiel) — `streetAddress` ajouté au JSON-LD + areaServed complété (Sèmè-Kpodji, Parakou, Bohicon) ; footer rend désormais tél + adresse côté serveur. **RESTE (décision utilisateur) :** unifier l'email public — `direction@` (schema/footer/légal) vs `contact@` (llms.txt/ai.txt) — dire lequel est l'officiel.
 - 🟡 hero en `next/image`, `provider:{"@id"}` partagé, Parakou/Bohicon dans `areaServed`, `app/not-found.tsx`.
 
 ---

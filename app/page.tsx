@@ -17,7 +17,7 @@ export default function Accueil() {
     { id: 3, init: "M.B", nom: "M. Bello", role: "Responsable logistique, Bénin", texte: "Un problème de termites réglé en une seule intervention. Le certificat fourni nous a permis de rassurer nos partenaires." },
   ])
 
-  const [agrement, setAgrement] = useState("N° AGRÉMENT-BÉNIN-XXXXX")
+  const [agrement, setAgrement] = useState("N° APA-26-026/CNGP-BEN")
   const [charge, setCharge] = useState(false)
   const [realisations, setRealisations] = useState<any[]>([])
 

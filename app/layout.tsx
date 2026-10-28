@@ -69,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "email": "direction@phyto-benin.com",
           "address": {
             "@type": "PostalAddress",
+            "streetAddress": "Ilot 3535, Houéyiho",
             "addressLocality": "Cotonou",
             "addressRegion": "Littoral",
             "addressCountry": "BJ"
@@ -89,6 +90,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             { "@type": "City", "name": "Abomey-Calavi" },
             { "@type": "City", "name": "Porto-Novo" },
             { "@type": "City", "name": "Ouidah" },
+            { "@type": "City", "name": "Sèmè-Kpodji" },
+            { "@type": "City", "name": "Parakou" },
+            { "@type": "City", "name": "Bohicon" },
             { "@type": "Country", "name": "Bénin" }
           ],
           "hasOfferCatalog": {
