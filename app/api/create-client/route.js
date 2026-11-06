@@ -28,6 +28,22 @@ async function creerBrouillonDevis(supabase, clientId, description) {
   }
 }
 
+// Recherche EXHAUSTIVE d'un compte Auth par email : listUsers() est paginé
+// (~50/page), on boucle jusqu'à une page vide. On ne présume pas que le serveur
+// honore perPage → condition d'arrêt = page vide, pas « moins que perPage ».
+async function findAuthUserId(supabase, email) {
+  const target = email.toLowerCase()
+  for (let page = 1; page <= 200; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page })
+    if (error) return { error }
+    const users = data?.users || []
+    const hit = users.find((u) => u.email?.toLowerCase() === target)
+    if (hit) return { id: hit.id }
+    if (users.length === 0) break
+  }
+  return { id: null }
+}
+
 export async function POST(req) {
   if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   const supabase = createClient(
@@ -35,7 +51,10 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    const { nom, prenom, email, telephone, entreprise, adresse, leadDescription } = await req.json()
+    let { nom, prenom, email, telephone, entreprise, adresse, leadDescription } = await req.json()
+    // Normaliser l'email (Supabase Auth stocke en minuscules) → match fiable en
+    // .eq() et pas de doublon de fiche par simple différence de casse/espaces.
+    email = email ? String(email).trim().toLowerCase() : email
 
     if (!nom) {
       return NextResponse.json({ error: "Le nom est obligatoire" }, { status: 400 })
@@ -43,6 +62,7 @@ export async function POST(req) {
 
     let userId = null
     let motDePasse = null
+    let accountExisted = false
 
     // Créer un compte Auth uniquement si un email est fourni
     if (email) {
@@ -55,12 +75,21 @@ export async function POST(req) {
       })
 
       if (authError) {
-        if (!authError.message.includes("already been registered")) {
+        if (authError.message.includes("already been registered")) {
+          // Compte déjà inscrit : NE PAS réinitialiser son mot de passe, NE PAS envoyer
+          // d'identifiants bidon. On récupère son vrai id pour PRÉSERVER le lien fiche ↔ compte
+          // (sinon l'update ci-dessous écrivait user_id=null et détachait le client de ses devis RLS).
+          accountExisted = true
+          motDePasse = null
+          const found = await findAuthUserId(supabase, email)
+          if (found.error) return NextResponse.json({ error: "Erreur Auth: " + found.error.message }, { status: 500 })
+          userId = found.id || null
+        } else {
           return NextResponse.json({ error: "Erreur Auth: " + authError.message }, { status: 500 })
         }
+      } else {
+        userId = authData?.user?.id || null
       }
-
-      userId = authData?.user?.id || null
     }
 
     // Créer ou mettre à jour le client dans la table clients
@@ -68,12 +97,18 @@ export async function POST(req) {
     if (email) {
       const { data: existingClient } = await supabase
         .from("clients")
-        .select("id")
+        .select("id, user_id")
         .eq("email", email)
-        .single()
+        .maybeSingle()
 
       if (existingClient) {
-        await supabase.from("clients").update({ user_id: userId, nom, prenom, telephone, entreprise, adresse }).eq("email", email)
+        // Ne jamais écraser user_id par null : garder le lien existant si on n'a pas
+        // (re)trouvé d'id Auth. On ne met user_id que si on a un id valide.
+        const fields = { nom, prenom, telephone, entreprise, adresse }
+        const linkId = userId || existingClient.user_id || null
+        if (linkId) fields.user_id = linkId
+        const { error: updErr } = await supabase.from("clients").update(fields).eq("email", email)
+        if (updErr) return NextResponse.json({ error: "Erreur client: " + updErr.message }, { status: 500 })
         clientId = existingClient.id
       } else {
         const { data: newClient, error: clientError } = await supabase
@@ -101,6 +136,18 @@ export async function POST(req) {
         clientId,
         emailEnvoye: false,
         message: "Client créé (sans email — devis envoyable par WhatsApp)"
+      })
+    }
+
+    // Compte déjà inscrit : mot de passe inchangé → ne JAMAIS envoyer d'identifiants
+    // (on n'a pas le vrai mot de passe et on ne le réinitialise pas).
+    if (accountExisted) {
+      return NextResponse.json({
+        success: true,
+        clientId,
+        emailEnvoye: false,
+        accountExisted: true,
+        message: "Fiche client mise à jour. Le compte existait déjà : mot de passe inchangé, aucun email d'accès envoyé."
       })
     }
 
