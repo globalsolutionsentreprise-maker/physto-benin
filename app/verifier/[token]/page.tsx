@@ -1,12 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export default function VerifierPage() {
   const params = useParams()
@@ -17,16 +11,17 @@ export default function VerifierPage() {
 
   useEffect(() => {
     async function load() {
-      const { data, error } = await supabase
-        .from("attestations")
-        .select("*, clients(nom, prenom, entreprise)")
-        .eq("qr_token", token)
-        .eq("statut", "valide")
-        .single()
-
-      if (error || !data) { setNotFound(true); setLoading(false); return }
-      setAtt(data)
-      setLoading(false)
+      try {
+        const res = await fetch(`/api/verifier/${encodeURIComponent(token)}`, { cache: "no-store" })
+        const json = await res.json().catch(() => null)
+        if (!res.ok || !json?.valid || !json?.attestation) {
+          setNotFound(true); setLoading(false); return
+        }
+        setAtt(json.attestation)
+        setLoading(false)
+      } catch {
+        setNotFound(true); setLoading(false)
+      }
     }
     if (token) load()
   }, [token])
@@ -145,7 +140,7 @@ export default function VerifierPage() {
                 <div style={{ background: "#0a2e1a", color: "#fff", padding: "6px 12px", borderRadius: "4px", fontWeight: "700", marginBottom: "4px", fontSize: "11px" }}>
                   DOCUMENT VALIDE
                 </div>
-                <div>Registre GSE #{att.id?.slice(0, 8)}</div>
+                <div>Registre GSE #{att.ref}</div>
               </div>
             </div>
           </div>
