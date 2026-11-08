@@ -1,7 +1,7 @@
 // app/api/valider-paiement/route.js
 // Lot A — Vérification comptable + confirmation administrative d'un règlement hors site.
 // RÉSERVÉ aux admins (rôle). 'confirmer' => la ligne compte dans le solde ; si le devis est
-// alors intégralement réglé, l'attestation est émise (remplace le déclencheur webhook FedaPay).
+// alors intégralement réglé, l'attestation est émise automatiquement.
 // 'rejeter' => statut 'rejete' + motif (libère l'échéance pour une nouvelle déclaration).
 import { createClient } from "@supabase/supabase-js"
 import { verifyAdminWrite } from "@/lib/verify-admin"

@@ -46,8 +46,6 @@ graphify-out/cache/
 
 # Artefacts de test transpilés (régénérés par run.sh)
 app/api/_secure-routes-test/gen.mjs
-app/api/_secure-routes-test/pay.mjs
-app/api/_secure-routes-test/logic.mjs
 app/api/_secure-routes-test/declarer.mjs
 app/api/_secure-routes-test/valider.mjs
 app/api/_secure-routes-test/paiements-data.mjs

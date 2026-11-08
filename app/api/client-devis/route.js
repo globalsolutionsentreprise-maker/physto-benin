@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 // Remplace les UPDATE directs de l'espace-client sur `devis`. La policy RLS
 // devis_own_update autorisait un client à modifier N'IMPORTE QUELLE colonne de
 // son devis (dont montant_total/net → il pouvait baisser son prix avant de
-// payer, cf. create-payment qui lit montant_total). Ici on vérifie que le devis
+// payer, cf. declarer-paiement qui recalcule le montant côté serveur). Ici on vérifie que le devis
 // appartient bien au client (via son JWT) et on n'écrit que des champs non
 // financiers whitelistés. La policy est supprimée par la migration rls_hardening.
 export async function POST(req) {
