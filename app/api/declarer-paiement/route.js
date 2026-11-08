@@ -41,10 +41,16 @@ export async function POST(req) {
   if (mode !== "cheque" && mode !== "mobile_money") {
     return Response.json({ error: "mode invalide (cheque | mobile_money)" }, { status: 400 })
   }
+  // Le justificatif (facultatif) doit être rattaché À CE devis : le chemin de stockage
+  // est préfixé par devisId (cf. justificatif-upload). Empêche d'attacher le fichier d'un
+  // autre devis/client. Son absence reste autorisée (déclaration sans justificatif).
+  if (justificatifUrl && !String(justificatifUrl).startsWith(devisId + "/")) {
+    return Response.json({ error: "Justificatif non rattaché à ce devis." }, { status: 400 })
+  }
 
   const { data: devis, error: devisError } = await supabase
     .from("devis")
-    .select("id, client_id, montant_total, pct_acompte")
+    .select("id, client_id, montant_total, pct_acompte, statut")
     .eq("id", devisId)
     .single()
   if (devisError || !devis) {
@@ -62,10 +68,46 @@ export async function POST(req) {
     if (!owner) return Response.json({ error: "Accès refusé à ce devis" }, { status: 403 })
   }
 
-  // Montant recalculé serveur (jamais pris du client).
+  // Étape de règlement : une déclaration n'a de sens que sur un devis accepté (acompte)
+  // ou en cours (solde). Bloque brouillon/envoye/modification_demandee/termine/annule
+  // (devis annulé, non encore accepté, ou déjà soldé).
+  const STATUTS_REGLEMENT = ["accepte", "en_cours"]
+  if (!STATUTS_REGLEMENT.includes(devis.statut)) {
+    return Response.json(
+      { error: `Déclaration impossible : le devis n'est pas à une étape de règlement (statut ${devis.statut}).` },
+      { status: 409 }
+    )
+  }
+
+  // Montant recalculé serveur (jamais pris du client), selon la MODALITÉ du devis :
+  // pct_acompte = 100 -> paiement intégral ; 50 -> fractionné 50/50 ; 60 -> ancien 60/40.
+  // "60" = acompte (pct_acompte %), "40" = solde (100 - pct_acompte %).
   const pctAcompte = devis.pct_acompte || 60
   const pct = typeVersement === "60" ? pctAcompte : 100 - pctAcompte
   const montant = Math.round(Number(devis.montant_total || 0) * pct / 100)
+
+  // Échéances déjà CONFIRMÉES du devis -> montant réellement restant dû.
+  const { data: existants } = await supabase
+    .from("paiements").select("type_versement, montant, statut").eq("devis_id", devisId)
+  const confirmes = (existants || []).filter((p) => p.statut === "confirme")
+  const dejaConfirme = confirmes.reduce((s, p) => s + Number(p.montant || 0), 0)
+  const restantDu = Number(devis.montant_total || 0) - dejaConfirme
+
+  // Rien à régler pour cette échéance (ex. "solde" d'un paiement intégral, ou devis déjà soldé).
+  if (montant <= 0) {
+    return Response.json({ error: "Aucun montant à régler pour cette échéance." }, { status: 409 })
+  }
+  // Ne JAMAIS déclarer plus que le restant réellement dû.
+  if (montant > restantDu) {
+    return Response.json({ error: "Le montant déclaré dépasse le montant restant dû.", restantDu }, { status: 409 })
+  }
+  // Fractionné : le solde ne peut être déclaré qu'APRÈS confirmation de l'acompte.
+  if (typeVersement === "40" && pctAcompte < 100) {
+    const acompteConfirme = confirmes.some((p) => p.type_versement === "60")
+    if (!acompteConfirme) {
+      return Response.json({ error: "Réglez d'abord l'acompte : le solde ne peut être déclaré qu'après validation de l'acompte." }, { status: 409 })
+    }
+  }
 
   const { data: paiement, error: insErr } = await supabase
     .from("paiements")

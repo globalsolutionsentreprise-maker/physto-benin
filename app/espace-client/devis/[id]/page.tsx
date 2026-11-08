@@ -26,6 +26,9 @@ export default function DevisPage() {
   const [motifModif, setMotifModif] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [msgResult, setMsgResult] = useState<string | null>(null)
+  // Déclaration de règlement hors site (chèque / Mobile Money). Une déclaration n'est
+  // JAMAIS un paiement validé : GSE vérifie puis confirme.
+  const [declForm, setDeclForm] = useState<{ open: null | "60" | "40"; mode: string; reference: string; file: File | null }>({ open: null, mode: "", reference: "", file: null })
 
   useEffect(() => {
     async function load() {
@@ -89,19 +92,38 @@ export default function DevisPage() {
     setSubmitting(false)
   }
 
-  async function lancerPaiement(type: "60" | "40") {
+  async function declarerPaiement(type: "60" | "40") {
     setSubmitting(true)
+    setMsgResult(null)
     try {
-      const res = await fetch("/api/create-payment", {
+      const { data: { session } } = await supabase.auth.getSession()
+      const auth: Record<string, string> = session?.access_token ? { Authorization: "Bearer " + session.access_token } : {}
+
+      // Justificatif FACULTATIF : si absent, la déclaration se fait quand même.
+      let justificatifUrl: string | null = null
+      if (declForm.file) {
+        const fd = new FormData()
+        fd.append("devisId", devisId)
+        fd.append("file", declForm.file)
+        const up = await fetch("/api/justificatif-upload", { method: "POST", headers: auth, body: fd })
+        const upd = await up.json().catch(() => ({}))
+        if (!up.ok) { setMsgResult("Justificatif refusé : " + (upd.error || "réessayez sans fichier")); setSubmitting(false); return }
+        justificatifUrl = upd.path
+      }
+
+      const res = await fetch("/api/declarer-paiement", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ devisId, typeVersement: type }),
+        headers: { "Content-Type": "application/json", ...auth },
+        body: JSON.stringify({ devisId, typeVersement: type, mode: declForm.mode, reference: declForm.reference || null, justificatifUrl }),
       })
-      const data = await res.json()
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        setDeclForm({ open: null, mode: "", reference: "", file: null })
+        setMsgResult("Déclaration enregistrée. GSE va vérifier votre règlement avant de le valider — ce n'est pas encore un paiement confirmé. Votre attestation sera émise une fois le paiement intégralement confirmé.")
+        const { data: paies } = await supabase.from("paiements").select("*").eq("devis_id", devisId).order("created_at")
+        setPaiements(paies || [])
       } else {
-        setMsgResult("Erreur lors de la création du paiement. Contactez GSE.")
+        setMsgResult("Erreur : " + (data.error || "déclaration impossible"))
       }
     } catch {
       setMsgResult("Erreur réseau. Réessayez.")
@@ -117,8 +139,73 @@ export default function DevisPage() {
   const pctSolde = 100 - pctAcompte
   const montant60 = Math.round(devis.montant_total * pctAcompte / 100)
   const montant40 = Math.round(devis.montant_total * pctSolde / 100)
-  const paie60 = paiements.find(p => p.type_versement === "60" && p.statut === "confirme")
-  const paie40 = paiements.find(p => p.type_versement === "40" && p.statut === "confirme")
+  const p60 = paiements.find(p => p.type_versement === "60")
+  const p40 = paiements.find(p => p.type_versement === "40")
+  const paie60 = !!p60 && p60.statut === "confirme"
+  const paie40 = !!p40 && p40.statut === "confirme"
+  const declare60 = !!p60 && p60.statut === "declare"
+  const declare40 = !!p40 && p40.statut === "declare"
+
+  // Bloc de déclaration de règlement hors site (réutilisé pour l'acompte et le solde).
+  function blocDeclaration(type: "60" | "40", montant: number, titre: string, intro: string, couleur: string) {
+    const ouvert = declForm.open === type
+    return (
+      <div style={{ backgroundColor: "#fefce8", borderRadius: "10px", border: `2px solid ${couleur}`, padding: "24px" }}>
+        <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "8px" }}>{titre}</div>
+        <p style={{ fontSize: "13px", color: "#666", marginBottom: "16px", lineHeight: "1.6" }}>
+          {intro} <strong>{montant.toLocaleString("fr-FR")} FCFA</strong>, puis déclarez-le ci-dessous. GSE vérifie chaque règlement avant validation.
+        </p>
+        {!ouvert ? (
+          <button onClick={() => setDeclForm({ open: type, mode: "", reference: "", file: null })}
+            style={{ width: "100%", padding: "14px", backgroundColor: couleur === "#d4a920" ? "#d4a920" : "#0a2e1a", color: couleur === "#d4a920" ? "#0a2e1a" : "#fff", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
+            Déclarer mon règlement
+          </button>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#555", marginBottom: "4px" }}>Mode de règlement *</label>
+              <select value={declForm.mode} onChange={e => setDeclForm({ ...declForm, mode: e.target.value })}
+                style={{ width: "100%", padding: "12px", border: "1.5px solid #e0ddd6", borderRadius: "8px", fontSize: "14px", boxSizing: "border-box", background: "#fff" }}>
+                <option value="">— choisir —</option>
+                <option value="mobile_money">Mobile Money (MTN)</option>
+                <option value="cheque">Chèque</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#555", marginBottom: "4px" }}>Référence (facultatif)</label>
+              <input value={declForm.reference} onChange={e => setDeclForm({ ...declForm, reference: e.target.value })}
+                placeholder="N° transaction Mobile Money / n° de chèque"
+                style={{ width: "100%", padding: "12px", border: "1.5px solid #e0ddd6", borderRadius: "8px", fontSize: "14px", boxSizing: "border-box" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#555", marginBottom: "4px" }}>Justificatif (facultatif)</label>
+              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf"
+                onChange={e => setDeclForm({ ...declForm, file: e.target.files?.[0] || null })}
+                style={{ fontSize: "13px" }} />
+              <div style={{ fontSize: "11px", color: "#888", marginTop: "4px" }}>Facultatif — capture Mobile Money ou photo du chèque (JPEG/PNG/PDF, max 4 Mo). Vous pouvez déclarer sans fichier.</div>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button disabled={submitting || !declForm.mode} onClick={() => declarerPaiement(type)}
+                style={{ flex: 1, padding: "14px", backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: "700", cursor: "pointer", opacity: (!declForm.mode || submitting) ? 0.5 : 1 }}>
+                {submitting ? "Envoi..." : "Envoyer ma déclaration"}
+              </button>
+              <button onClick={() => setDeclForm({ open: null, mode: "", reference: "", file: null })}
+                style={{ padding: "14px 20px", backgroundColor: "#fff", border: "1px solid #e0ddd6", borderRadius: "8px", fontSize: "14px", cursor: "pointer" }}>Annuler</button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function blocEnAttente(label: string) {
+    return (
+      <div style={{ backgroundColor: "#fffbeb", borderRadius: "10px", border: "1px solid #fcd34d", padding: "20px" }}>
+        <div style={{ fontSize: "14px", fontWeight: "700", color: "#92400e", marginBottom: "4px" }}>⏳ Déclaration enregistrée</div>
+        <p style={{ fontSize: "13px", color: "#78350f", margin: 0, lineHeight: 1.6 }}>{label} GSE vérifie votre règlement. Ce n'est pas encore un paiement confirmé — vous serez notifié dès la validation.</p>
+      </div>
+    )
+  }
 
   return (
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif", backgroundColor: "#f7f7f5", minHeight: "100vh" }}>
@@ -269,42 +356,22 @@ export default function DevisPage() {
           </div>
         )}
 
-        {/* Payer 60% après acceptation */}
+        {/* Acompte (ou paiement intégral) — déclaration hors site après acceptation.
+            Les pourcentages suivent la modalité du devis (pct_acompte : 100 % intégral, 50/50, 60/40). */}
         {(devis.statut === "accepte" || action === "payer60") && !paie60 && (
-          <div style={{ backgroundColor: "#fefce8", borderRadius: "10px", border: "2px solid #d4a920", padding: "24px" }}>
-            <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "8px" }}>
-              Paiement du premier versement (60%)
-            </div>
-            <p style={{ fontSize: "13px", color: "#666", marginBottom: "20px", lineHeight: "1.6" }}>
-              Votre devis est accepté. Pour démarrer la prestation, effectuez le paiement du premier versement de <strong>{montant60.toLocaleString("fr-FR")} FCFA</strong> via Feday Pay.
-            </p>
-            <button
-              onClick={() => lancerPaiement("60")}
-              disabled={submitting}
-              style={{ width: "100%", padding: "16px", backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-            >
-              {submitting ? "Redirection..." : `Payer ${montant60.toLocaleString("fr-FR")} FCFA via Feday Pay`}
-            </button>
-          </div>
+          declare60
+            ? blocEnAttente(pctAcompte === 100 ? "Votre paiement intégral a été déclaré." : `Votre acompte (${pctAcompte} %) a été déclaré.`)
+            : blocDeclaration("60", montant60,
+                pctAcompte === 100 ? "Paiement intégral (100 %)" : `Acompte (${pctAcompte} %)`,
+                pctAcompte === 100 ? "Votre devis est accepté. Réglez l'intégralité de" : "Votre devis est accepté. Réglez l'acompte de",
+                "#d4a920")
         )}
 
-        {/* Payer 40% (déclenché par admin) */}
-        {devis.statut === "en_cours" && paie60 && !paie40 && (
-          <div style={{ backgroundColor: "#f0fdf4", borderRadius: "10px", border: "2px solid #22c55e", padding: "24px" }}>
-            <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a2e1a", marginBottom: "8px" }}>
-              Prestation terminée — Solde final (40%)
-            </div>
-            <p style={{ fontSize: "13px", color: "#666", marginBottom: "20px", lineHeight: "1.6" }}>
-              GSE a validé la livraison de votre prestation. Réglez le solde de <strong>{montant40.toLocaleString("fr-FR")} FCFA</strong> pour recevoir votre attestation de traitement.
-            </p>
-            <button
-              onClick={() => lancerPaiement("40")}
-              disabled={submitting}
-              style={{ width: "100%", padding: "16px", backgroundColor: "#0a2e1a", color: "#ffffff", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-            >
-              {submitting ? "Redirection..." : `Payer le solde — ${montant40.toLocaleString("fr-FR")} FCFA`}
-            </button>
-          </div>
+        {/* Solde — uniquement en cas de paiement fractionné, après livraison validée par GSE */}
+        {devis.statut === "en_cours" && paie60 && !paie40 && pctSolde > 0 && (
+          declare40
+            ? blocEnAttente(`Votre solde (${pctSolde} %) a été déclaré.`)
+            : blocDeclaration("40", montant40, `Solde (${pctSolde} %)`, "GSE a validé la livraison. Réglez le solde de", "#22c55e")
         )}
 
         {/* Attestation disponible */}

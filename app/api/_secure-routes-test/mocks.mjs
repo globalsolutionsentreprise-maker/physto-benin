@@ -30,7 +30,10 @@ export function createClient(_url, key) {
       };
       return b;
     },
-    storage: { from() { return { async upload() { return { error: null }; } }; } },
+    storage: { from() { return {
+      async upload(path) { log.inserts.push({ table: "storage", obj: { path } }); return { data: { path }, error: sc.uploadErr || null }; },
+      async createSignedUrl(p) { return { data: { signedUrl: "https://signed/" + p }, error: null }; },
+    }; } },
   };
 }
 function term(b, table) {

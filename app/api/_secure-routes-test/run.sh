@@ -11,10 +11,13 @@ esb ../generate-attestation/route.ts   gen.mjs
 esb ../create-payment/route.ts         pay.mjs
 esb ../declarer-paiement/route.js      declarer.mjs
 esb ../valider-paiement/route.js       valider.mjs
+esb ../paiements-data/route.js         paiements-data.mjs
+esb ../justificatif-upload/route.js    justif-upload.mjs
 esb ../../../supabase/functions/fedapay-webhook/fedapay-logic.ts logic.mjs
 
 node --import tsx --test \
   routes.test.mjs \
   webhook-sig.test.mjs \
   webhook-logic.test.mjs \
-  hors-site.test.mjs
+  hors-site.test.mjs \
+  lot-b.test.mjs

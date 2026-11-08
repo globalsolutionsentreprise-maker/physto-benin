@@ -19,7 +19,7 @@ function req(headers, body) {
   const h = headers || {};
   return { headers: { get: (k) => h[k] ?? h[k.toLowerCase()] ?? null }, async json() { return body || {}; } };
 }
-const DEVIS = { id: "d1", client_id: "c1", montant_total: 500000, prestation: "T", pct_acompte: 60, clients: { email: "c@x", prenom: "A", nom: "B", adresse: "X" } };
+const DEVIS = { id: "d1", client_id: "c1", montant_total: 500000, prestation: "T", pct_acompte: 60, statut: "accepte", clients: { email: "c@x", prenom: "A", nom: "B", adresse: "X" } };
 
 // ---------- declarer-paiement ----------
 test("DP1 client sans jeton -> 401", async () => {
@@ -49,10 +49,10 @@ test("DP3 devis d'un AUTRE client -> 403", async () => {
 
 test("DP4 admin déclare pour n'importe quel devis (sans propriété)", async () => {
   __config({ isAdmin: true, db: { devis: DEVIS } }); __reset();
-  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "40", mode: "cheque", reference: "CHQ-7" }));
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque", reference: "CHQ-7" }));
   const body = await r.json();
   assert.equal(r.status, 200);
-  assert.equal(body.montant, 200000); // 40% de 500000
+  assert.equal(body.montant, 300000); // acompte 60% de 500000
 });
 
 test("DP5 mode invalide -> 400", async () => {
@@ -65,10 +65,96 @@ test("DP6 doublon (23505) sur échéance déjà réglée -> 409", async () => {
   __config({
     isAdmin: true, db: { devis: DEVIS },
     insertErr: { paiements: { code: "23505" } },
-    dbQueue: { paiements: [{ id: "p-actif", statut: "confirme" }] },
+    // 1re lecture = échéances existantes (vide) ; après 23505 = le paiement gagnant confirmé.
+    dbQueue: { paiements: [[], { id: "p-actif", statut: "confirme" }] },
   }); __reset();
   const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
   assert.equal(r.status, 409);
+});
+
+test("DP7 devis ANNULÉ -> 409, aucune déclaration", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, statut: "annule" } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
+  assert.equal(r.status, 409);
+  assert.equal(__log().inserts.length, 0);
+});
+
+test("DP8 devis BROUILLON (pas à l'étape de règlement) -> 409", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, statut: "brouillon" } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
+  assert.equal(r.status, 409);
+});
+
+test("DP9 justificatif rattaché à un AUTRE devis -> 400", async () => {
+  __config({ isAdmin: true, db: { devis: DEVIS } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque", justificatifUrl: "autre-devis/x.png" }));
+  assert.equal(r.status, 400);
+  assert.equal(__log().inserts.length, 0);
+});
+
+test("DP10 solde EN_COURS avec acompte confirmé -> déclaration acceptée", async () => {
+  __config({ isAdmin: true, db: {
+    devis: { ...DEVIS, statut: "en_cours" }, // pct_acompte 60 -> solde 40% = 200000
+    paiements: [{ type_versement: "60", montant: 300000, statut: "confirme" }],
+  } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "40", mode: "mobile_money", justificatifUrl: "d1/recu.png" }));
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.statut, "declare");
+  assert.equal(body.montant, 200000);
+});
+
+// ---------- Modalités : 50/50 et 100 % ----------
+test("DP11 fractionné 50/50 — acompte -> montant = 50 %", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, pct_acompte: 50 } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.montant, 250000); // 50% de 500000
+});
+
+test("DP12 fractionné 50/50 — solde AVANT acompte confirmé -> 409", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, pct_acompte: 50, statut: "en_cours" } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "40", mode: "cheque" }));
+  assert.equal(r.status, 409);
+  assert.equal(__log().inserts.length, 0);
+});
+
+test("DP13 fractionné 50/50 — solde APRÈS acompte confirmé -> 200", async () => {
+  __config({ isAdmin: true, db: {
+    devis: { ...DEVIS, pct_acompte: 50, statut: "en_cours" },
+    paiements: [{ type_versement: "60", montant: 250000, statut: "confirme" }],
+  } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "40", mode: "mobile_money" }));
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.montant, 250000); // solde 50%
+});
+
+test("DP14 paiement INTÉGRAL 100 % — acompte = montant total -> 200", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, pct_acompte: 100 } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
+  const body = await r.json();
+  assert.equal(r.status, 200);
+  assert.equal(body.montant, 500000); // 100%
+});
+
+test("DP15 INTÉGRAL 100 % — tentative de 'solde' (0 FCFA) -> 409", async () => {
+  __config({ isAdmin: true, db: { devis: { ...DEVIS, pct_acompte: 100, statut: "en_cours" } } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "40", mode: "cheque" }));
+  assert.equal(r.status, 409); // montant 0 -> rien à régler
+  assert.equal(__log().inserts.length, 0);
+});
+
+test("DP16 déclaration dépassant le restant dû -> 409", async () => {
+  // Déjà 400000 confirmés ; acompte 50% = 250000 > restant 100000.
+  __config({ isAdmin: true, db: {
+    devis: { ...DEVIS, pct_acompte: 50 },
+    paiements: [{ type_versement: "40", montant: 400000, statut: "confirme" }],
+  } }); __reset();
+  const r = await DECLARER(req({ authorization: "Bearer admin" }, { devisId: "d1", typeVersement: "60", mode: "cheque" }));
+  assert.equal(r.status, 409);
+  assert.equal(__log().inserts.length, 0);
 });
 
 // ---------- valider-paiement ----------

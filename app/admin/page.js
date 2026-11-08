@@ -530,6 +530,7 @@ export default function Admin() {
       { id: "rh", label: "👥 Planning & RH" },
       { id: "recrutement", label: "🧑‍💼 Recrutement" },
       { id: "stock", label: "📦 Stock produits" },
+      { id: "paiements", label: "💳 Paiements déclarés" },
     ] },
     { titre: "Site web", items: [
       { id: "chiffres", label: "Chiffres cles" },
@@ -1126,7 +1127,7 @@ export default function Admin() {
           {onglet === "crm" && (
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM · Clients & Devis</h2>
-              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients, finances et paiements FedaPay.</p>
+              <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients et finances.</p>
               <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="prospection" />
             </div>
           )}
@@ -1142,6 +1143,8 @@ export default function Admin() {
           )}
 
           {onglet === "recrutement" && (<SectionRecrutement />)}
+
+          {onglet === "paiements" && (<SectionPaiements canWrite={currentUser?.role === "admin"} />)}
 
           {onglet === "acces" && currentUser?.role === "admin" && (
             <div>
@@ -1388,7 +1391,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
     const { data: { session } } = await db.auth.getSession()
     return { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") }
   }
-  const COMMISSION_FEDAPAY = 0.0185
   const [vue, setVue] = React.useState(vueInitiale || "devis")
   // Segment actif du CRM : « tous » (défaut, vue globale), « particulier » ou
   // « entreprise ». Filtre toutes les vues (clients, finances, analyse, pipeline…).
@@ -2075,7 +2077,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
       : Math.round(remiseVal)
     var montantNet = Math.max(0, brut - remiseMontant)
     var enLigne = formDevis.modeTransmission === "email"
-    var montantClient = enLigne ? Math.round(montantNet * (1 + COMMISSION_FEDAPAY)) : Math.round(montantNet)
+    // Règlement hors site : plus de surcharge. Le montant client = montant net (nouveaux devis).
+    var montantClient = Math.round(montantNet)
     var superficieVal = formDevis.superficie ? parseFloat(formDevis.superficie) : null
     var prixM2Val = formDevis.prixM2 ? parseFloat(formDevis.prixM2) : null
 
@@ -5379,8 +5382,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         var remiseMontant = formDevis.remiseType === "pct" ? Math.round(brut * remiseVal / 100) : Math.round(remiseVal)
         var montantNetCalc = Math.max(0, brut - remiseMontant)
         var enLigne = formDevis.modeTransmission === "email"
-        var fraisFeda = enLigne ? Math.round(montantNetCalc * COMMISSION_FEDAPAY) : 0
-        var montantTotalCalc = montantNetCalc + fraisFeda
+        var montantTotalCalc = montantNetCalc // plus de surcharge FedaPay
         if (!brut) return null
         return React.createElement("div", { style: { marginBottom: "14px", padding: "16px", backgroundColor: "#f8f7f4", border: "1px solid #e0ddd6", borderRadius: "8px" } },
           React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px" } }, React.createElement("span", null, "Prix de base"), React.createElement("span", null, brut.toLocaleString("fr-FR") + " FCFA")),
@@ -5389,7 +5391,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
             React.createElement("span", null, "− " + remiseMontant.toLocaleString("fr-FR") + " FCFA")
           ),
           React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px", borderTop: "1px solid #e0ddd6", paddingTop: "8px", marginTop: "4px" } }, React.createElement("span", null, "Montant net (GSE reçoit)"), React.createElement("span", { style: { fontWeight: "700" } }, montantNetCalc.toLocaleString("fr-FR") + " FCFA")),
-          enLigne && React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#555", marginBottom: "4px" } }, React.createElement("span", null, "Frais FedaPay (1.85%)"), React.createElement("span", null, "+ " + fraisFeda.toLocaleString("fr-FR") + " FCFA")),
           React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: "15px", fontWeight: "700", color: "#0a2e1a", borderTop: "1px solid #e0ddd6", paddingTop: "8px", marginTop: "8px" } }, React.createElement("span", null, "Total client"), React.createElement("span", null, montantTotalCalc.toLocaleString("fr-FR") + " FCFA")),
           enLigne && (function() {
             var pctA = Math.min(100, Math.max(1, parseInt(formDevis.pctAcompte) || 60))
@@ -5406,7 +5407,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("div", { style: { display: "flex", gap: "10px" } },
           React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { modeTransmission: "email" }) }) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "email" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "email" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
             React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "email" ? "#0a2e1a" : "#555" } }, "✉ Envoyer par email"),
-            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Paiement en ligne via FedaPay")
+            React.createElement("div", { style: { fontSize: "11px", color: "#888", marginTop: "2px" } }, "Accès espace client · déclaration du règlement")
           ),
           React.createElement("button", { type: "button", onClick: function() { setFormDevis(function(prev) { return Object.assign({}, prev, { modeTransmission: "impression" }) }) }, style: { flex: 1, padding: "12px 14px", borderRadius: "6px", border: formDevis.modeTransmission === "impression" ? "2px solid #0a2e1a" : "2px solid #e0ddd6", backgroundColor: formDevis.modeTransmission === "impression" ? "#f0fdf4" : "#fff", cursor: "pointer", fontFamily: "inherit", textAlign: "left" } },
             React.createElement("div", { style: { fontSize: "13px", fontWeight: "700", color: formDevis.modeTransmission === "impression" ? "#0a2e1a" : "#555" } }, "🖨️ Imprimer le devis"),
@@ -7332,6 +7333,112 @@ function buildRapportIntervHtml(form, client, devis) {
     '</div>' +
     gseFooter() +
     '</div></body></html>'
+}
+
+// ---- Onglet Paiements déclarés : règlements hors site (chèque / Mobile Money) ----
+// Lecture via /api/paiements-data ; confirmation/rejet via /api/valider-paiement (Lot A).
+// Une déclaration n'est JAMAIS un paiement validé tant qu'un admin ne l'a pas confirmée.
+function SectionPaiements({ canWrite }) {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [busyId, setBusyId] = useState(null)
+  const [rejetId, setRejetId] = useState(null)
+  const [motif, setMotif] = useState("")
+  const [msg, setMsg] = useState(null)
+
+  async function authHeaders() {
+    const { data: { session } } = await supabase.auth.getSession()
+    return { "Content-Type": "application/json", "Authorization": "Bearer " + (session?.access_token || "") }
+  }
+  async function charger() {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/paiements-data", { headers: await authHeaders() })
+      const data = await res.json()
+      setRows(res.ok ? (data.paiements || []) : [])
+      if (!res.ok) setMsg("Erreur : " + (data.error || "lecture impossible"))
+    } catch { setMsg("Erreur réseau.") }
+    setLoading(false)
+  }
+  useEffect(() => { charger() }, [])
+
+  async function valider(paiementId, action, note) {
+    setBusyId(paiementId); setMsg(null)
+    try {
+      const res = await fetch("/api/valider-paiement", {
+        method: "POST", headers: await authHeaders(),
+        body: JSON.stringify({ paiementId, action, note: note || null }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        if (action === "confirmer") {
+          setMsg(data.solde ? "Règlement confirmé — devis soldé, attestation émise." : "Règlement confirmé (acompte). Solde restant à régler.")
+        } else {
+          setMsg("Règlement rejeté.")
+        }
+        setRejetId(null); setMotif("")
+        await charger()
+      } else {
+        setMsg("Erreur : " + (data.error || "action impossible"))
+      }
+    } catch { setMsg("Erreur réseau.") }
+    setBusyId(null)
+  }
+
+  const badge = (s) => {
+    const map = { declare: ["#92400e", "#fffbeb", "Déclaré"], confirme: ["#065f46", "#f0fdf4", "Confirmé"], rejete: ["#991b1b", "#fef2f2", "Rejeté"] }
+    const [c, bg, lbl] = map[s] || ["#555", "#f3f4f6", s]
+    return React.createElement("span", { style: { color: c, background: bg, padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" } }, lbl)
+  }
+  const fmt = (n) => Number(n || 0).toLocaleString("fr-FR") + " FCFA"
+  const modeLbl = (m) => m === "mobile_money" ? "Mobile Money" : m === "cheque" ? "Chèque" : (m || "—")
+
+  const th = { textAlign: "left", padding: "8px 10px", fontSize: "11px", color: "#888", fontWeight: "700", borderBottom: "1px solid #e8e6e0", whiteSpace: "nowrap" }
+  const td = { padding: "8px 10px", fontSize: "12px", color: "#333", borderBottom: "1px solid #f0ede6", verticalAlign: "top" }
+  const btn = (bg, col) => ({ padding: "6px 12px", backgroundColor: bg, color: col, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" })
+
+  return React.createElement("div", null,
+    React.createElement("h2", { style: { fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" } }, "Paiements déclarés"),
+    React.createElement("p", { style: { fontSize: "13px", color: "#888", marginBottom: "20px" } }, "Règlements hors site (chèque / Mobile Money). Vérifiez via les notifications MTN et les informations de transaction, puis confirmez ou rejetez. L'attestation est émise automatiquement au solde complet."),
+    msg && React.createElement("div", { style: { padding: "10px 14px", background: "#f0f8f3", border: "1px solid #cfe8d8", borderRadius: "8px", fontSize: "13px", color: "#0a2e1a", marginBottom: "16px" } }, msg),
+    loading
+      ? React.createElement("div", { style: { color: "#888", fontSize: "13px" } }, "Chargement...")
+      : rows.length === 0
+        ? React.createElement("div", { style: { color: "#888", fontSize: "13px" } }, "Aucun règlement déclaré.")
+        : React.createElement("div", { style: { overflowX: "auto" } },
+          React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", minWidth: "860px" } },
+            React.createElement("thead", null, React.createElement("tr", null,
+              ["Client", "Devis", "Versement", "Montant", "Mode", "Référence", "Justificatif", "Date", "Statut", canWrite ? "Actions" : ""].map((h, i) =>
+                React.createElement("th", { key: i, style: th }, h)))),
+            React.createElement("tbody", null, rows.map((p) => {
+              const cl = p.clients || {}; const dv = p.devis || {}
+              const enRejet = rejetId === p.id
+              return React.createElement("tr", { key: p.id },
+                React.createElement("td", { style: td }, (cl.prenom ? cl.prenom + " " : "") + (cl.nom || "—")),
+                React.createElement("td", { style: td }, (dv.numero || "—") + (dv.montant_total ? " · " + fmt(dv.montant_total) : "")),
+                React.createElement("td", { style: td }, p.type_versement === "60" ? "Acompte 60 %" : p.type_versement === "40" ? "Solde 40 %" : p.type_versement),
+                React.createElement("td", { style: { ...td, fontWeight: "700", whiteSpace: "nowrap" } }, fmt(p.montant)),
+                React.createElement("td", { style: td }, modeLbl(p.mode)),
+                React.createElement("td", { style: td }, p.reference || "—"),
+                React.createElement("td", { style: td }, p.justificatifSignedUrl
+                  ? React.createElement("a", { href: p.justificatifSignedUrl, target: "_blank", rel: "noopener noreferrer", style: { color: "#1a6b38", fontWeight: "600" } }, "Voir")
+                  : "—"),
+                React.createElement("td", { style: { ...td, whiteSpace: "nowrap" } }, p.created_at ? new Date(p.created_at).toLocaleDateString("fr-FR") : "—"),
+                React.createElement("td", { style: td }, badge(p.statut), p.verif_note ? React.createElement("div", { style: { fontSize: "10px", color: "#991b1b", marginTop: "4px" } }, "Motif : " + p.verif_note) : null),
+                canWrite ? React.createElement("td", { style: td },
+                  p.statut !== "declare"
+                    ? React.createElement("span", { style: { color: "#aaa", fontSize: "11px" } }, "—")
+                    : enRejet
+                      ? React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "6px", minWidth: "180px" } },
+                        React.createElement("input", { value: motif, onChange: (e) => setMotif(e.target.value), placeholder: "Motif du rejet", style: { padding: "6px 8px", border: "1px solid #e0ddd6", borderRadius: "6px", fontSize: "12px" } }),
+                        React.createElement("div", { style: { display: "flex", gap: "6px" } },
+                          React.createElement("button", { disabled: busyId === p.id, onClick: () => valider(p.id, "rejeter", motif), style: btn("#991b1b", "#fff") }, "Confirmer le rejet"),
+                          React.createElement("button", { onClick: () => { setRejetId(null); setMotif("") }, style: btn("#fff", "#555") }, "Annuler")))
+                      : React.createElement("div", { style: { display: "flex", gap: "6px" } },
+                        React.createElement("button", { disabled: busyId === p.id, onClick: () => valider(p.id, "confirmer"), style: btn("#0a2e1a", "#d4a920") }, busyId === p.id ? "..." : "Confirmer"),
+                        React.createElement("button", { disabled: busyId === p.id, onClick: () => { setRejetId(p.id); setMotif("") }, style: btn("#fff", "#991b1b") }, "Rejeter")))
+                  : null)
+            })))))
 }
 
 // ---- Onglet Recrutement : candidatures reçues + gestion des offres ----
