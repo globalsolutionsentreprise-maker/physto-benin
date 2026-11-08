@@ -1138,7 +1138,7 @@ export default function Admin() {
             <div>
               <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "8px" }}>CRM · Clients & Devis</h2>
               <p style={{ fontSize: "13px", color: "#888", marginBottom: "28px" }}>Pipeline commercial, devis, clients et finances.</p>
-              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="prospection" />
+              <SectionClientsDevis db={supabase} agrement={parametres.agrement || ""} vueInitiale="prospection" canWrite={currentUser?.role === "admin"} />
             </div>
           )}
 
@@ -1396,7 +1396,10 @@ export default function Admin() {
 // ══════════════════════════════════════════════════
 // COMPOSANT SECTION CLIENTS & DEVIS · VERSION COMPLÈTE
 // ══════════════════════════════════════════════════
-function SectionClientsDevis({ db, agrement, vueInitiale }) {
+function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
+  // P2 : masque les actions d'ÉCRITURE pour le rôle "lecture" (défense en profondeur ;
+  // le serveur refuse déjà toute écriture en 403). canWrite indéfini => affiché (admin).
+  const roHide = canWrite === false ? { display: "none" } : null
   // Helper d'auth local : ce composant reçoit `db` en prop ; le authHeaders du
   // composant Admin n'est PAS dans sa portée (d'où "authHeaders is not defined").
   async function authHeaders() {
@@ -3952,10 +3955,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           clientObj && React.createElement("button", { onClick: function() { voirDevisClient(clientObj) }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "📊 Dashboard"),
           d.statut === "en_cours" && React.createElement("button", { onClick: function() { validerLivraison(d.id) }, disabled: validating === d.id, style: { backgroundColor: "#d4a920", color: "#0a2e1a", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, validating === d.id ? "..." : "✓ Valider"),
           d.statut === "modification_demandee"
-            ? React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "✏️ Modifier")
+            ? React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "✏️ Modifier")
             : React.createElement("button", { onClick: function() { ouvrirEditionDevis(d) }, style: { background: "none", border: "1px solid #d1d5db", color: "#374151", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
           cl && cl.email && React.createElement("button", { onClick: function() { renvoyerEmail(d) }, style: { background: "none", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "✉"),
-          React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+          React.createElement("button", { onClick: function() { supprimerDevis(d.id, d.numero) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
         )
       )
     )
@@ -4353,7 +4356,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         ),
         e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "4px" } },
           e("button", { onClick: function() { setObjModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
-          e("button", { onClick: enregistrerObjectif, disabled: objSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: objSaving ? "wait" : "pointer", fontFamily: "inherit" } }, objSaving ? "Enregistrement…" : "Enregistrer")
+          e("button", { onClick: enregistrerObjectif, disabled: objSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: objSaving ? "wait" : "pointer", fontFamily: "inherit", ...roHide } }, objSaving ? "Enregistrement…" : "Enregistrer")
         )
       )
     )
@@ -4508,7 +4511,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         depErr ? e("div", { style: { marginBottom: "12px", padding: "8px 11px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "6px", fontSize: "12px", color: "#991b1b" } }, depErr) : null,
         e("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" } },
           e("button", { onClick: function() { setDepModal(false) }, style: { padding: "9px 16px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Annuler"),
-          e("button", { onClick: ajouterDepense, disabled: depSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: depSaving ? "wait" : "pointer", fontFamily: "inherit" } }, depSaving ? "Enregistrement…" : "Enregistrer")
+          e("button", { onClick: ajouterDepense, disabled: depSaving, style: { padding: "9px 18px", border: "none", background: "#0a2e1a", color: "#d4a920", borderRadius: "6px", fontSize: "13px", fontWeight: "700", cursor: depSaving ? "wait" : "pointer", fontFamily: "inherit", ...roHide } }, depSaving ? "Enregistrement…" : "Enregistrer")
         )
       )
     )
@@ -4665,7 +4668,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 e("td", { style: tdS }, c.dateFin ? finFmtD(c.dateFin) : "en cours"),
                 e("td", { style: tdS }, c.mois),
                 e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "600" }) }, finFmt(c.cumul) + " FCFA"),
-                e("td", { style: tdS }, e("button", { onClick: function() { supprimerChargeFixe(c.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑"))
+                e("td", { style: tdS }, e("button", { onClick: function() { supprimerChargeFixe(c.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑"))
               )
             }),
             cf.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 7 }, "Aucune charge fixe. Ajoute par exemple le salaire de Fabrice (50 000 / mois).")) : null,
@@ -4694,7 +4697,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal" }) }, d.libelle),
                 e("td", { style: tdS }, finFmtD(d.date)),
                 e("td", { style: Object.assign({}, tdS, { color: "#E24B4A", fontWeight: "500" }) }, finFmt(d.montant) + " FCFA"),
-                e("td", { style: tdS }, e("button", { onClick: function() { supprimerDepense(d.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑"))
+                e("td", { style: tdS }, e("button", { onClick: function() { supprimerDepense(d.id) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑"))
               )
             }),
             depGlob.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 5 }, "Aucune dépense générale.")) : null,
@@ -5187,10 +5190,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         c.typeContrat === "contrat" ? e("div", { style: { display: "inline-block", background: "#f0f8f3", color: "#1a6b38", borderRadius: "5px", padding: "2px 7px", fontSize: "11px", marginTop: "4px", fontWeight: "500" } }, "🔁 Contrat · " + (FREQ_LABEL[c.frequenceIntervention] || "Trimestrielle")) : null,
         ni ? e("div", { style: { fontSize: "11px", marginTop: "4px", color: niSoon ? "#BA7517" : "#888" } }, (niSoon ? "⚠ " : "") + "Intervention : " + finFmtD(ni)) : null,
         c.commentaire ? e("div", { style: { fontSize: "11px", color: "#777", marginTop: "4px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, title: c.commentaire }, c.commentaire) : null,
-        prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, ACTION_LABEL[colId] || ("Avancer → " + (ETAPE_LABEL[prochaine] || prochaine))) : null,
+        prochaine ? e("button", { onClick: function() { deplacerCarte(c.id, prochaine) }, style: { width: "100%", marginTop: "8px", background: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", ...roHide } }, ACTION_LABEL[colId] || ("Avancer → " + (ETAPE_LABEL[prochaine] || prochaine))) : null,
         boutonContrat,
         e("div", { style: { display: "flex", gap: "6px", marginTop: "8px", alignItems: "center" } },
-          e("select", { value: "", onChange: function(ev) { var v = ev.target.value; if (v === "perdu") { demanderMotifPerte(c.id, c.client) } else { deplacerCarte(c.id, v) } }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff" } },
+          e("select", { value: "", onChange: function(ev) { var v = ev.target.value; if (v === "perdu") { demanderMotifPerte(c.id, c.client) } else { deplacerCarte(c.id, v) } }, style: { flex: 1, fontSize: "11px", padding: "5px 6px", border: "1px solid #e0ddd6", borderRadius: "6px", fontFamily: "inherit", cursor: "pointer", background: "#fff", ...roHide } },
             [e("option", { key: "_", value: "" }, "Déplacer vers…")].concat(movesForLane.map(function(m) { return e("option", { key: m.id, value: m.id }, m.label) }))
           ),
           e("button", { onClick: function() { ouvrirDossierCommercial(c.id) }, title: "Ouvrir le dossier (documents, rapports)", style: { flexShrink: 0, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "5px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "📁 Dossier")
@@ -5214,7 +5217,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           e("div", { style: { fontSize: "11px", color: "#888", marginBottom: "2px" } }, [lead.telephone, lead.nuisible, lead.ville].filter(Boolean).join(" · ")),
           lead.created_at ? e("div", { style: { fontSize: "10px", color: "#b0885a", marginBottom: "6px" } }, "📅 " + finFmtD(lead.created_at.split("T")[0])) : null,
           e("div", { style: { display: "flex", gap: "6px" } },
-            e("button", { onClick: function() { convertirLead(lead) }, style: { flex: 1, background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "Convertir →"),
+            e("button", { onClick: function() { convertirLead(lead) }, style: { flex: 1, background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "Convertir →"),
             e("button", { onClick: function() { demanderMotifPerte(lead.id, lead.nom, "lead") }, title: "Marquer ce lead comme perdu (avec motif)", style: { flexShrink: 0, background: "#fff", color: "#991b1b", border: "1px solid #f0d5d5", borderRadius: "6px", padding: "6px 10px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "❌ Perdu")
           )
         )
@@ -5302,8 +5305,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           t[1], badge
         )
       }),
-      React.createElement("a", { key: "demarchage", href: "/admin/prospection", title: "Prospects froids (démarchage) : liste, WhatsApp/appel 1 clic, relances", style: { marginLeft: "auto", marginBottom: "6px", background: "#0a2e1a", border: "1px solid #0a2e1a", color: "#fff", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center", textDecoration: "none", fontWeight: "600" } }, "🌱 Démarchage"),
-      React.createElement("button", { key: "export-csv", onClick: exporterCSV, title: "Exporter le pipeline en CSV", style: { marginLeft: "10px", marginBottom: "6px", background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center" } }, "⬇ Export CSV")
+      React.createElement("a", { key: "demarchage", href: "/admin/prospection", title: "Prospects froids (démarchage) : liste, WhatsApp/appel 1 clic, relances", style: { marginLeft: "auto", marginBottom: "6px", background: "#0a2e1a", border: "1px solid #0a2e1a", color: "#fff", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center", textDecoration: "none", fontWeight: "600", ...roHide } }, "🌱 Démarchage"),
+      React.createElement("button", { key: "export-csv", onClick: exporterCSV, title: "Exporter le pipeline en CSV", style: { marginLeft: "10px", marginBottom: "6px", background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", alignSelf: "center", ...roHide } }, "⬇ Export CSV")
     )
   }
 
@@ -5363,7 +5366,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                   var total = arr.reduce(function(s, x) { return s + montantLigne(x) }, 0)
                   return Object.assign({}, prev, { lignes: arr, montantBrut: total > 0 ? String(total) : "" })
                 })
-              }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+              }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
             )
           }),
           React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", borderTop: "1px solid #e0ddd6", backgroundColor: "#f8f7f4" } },
@@ -5506,7 +5509,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
         React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clientsSeg.length + " client(s)"),
         React.createElement("div", { style: { display: "flex", gap: "8px" } },
           React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
-          React.createElement("button", { onClick: ouvrirAjoutClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "+ Nouveau client")
+          React.createElement("button", { onClick: ouvrirAjoutClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "+ Nouveau client")
         )
       ),
       showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
@@ -5553,7 +5556,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 React.createElement("div", { style: { display: "flex", gap: "6px" } },
                   React.createElement("button", { onClick: function() { voirDevisClient(c) }, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } }, "📊 Tableau de bord"),
                   React.createElement("button", { onClick: function() { ouvrirEditionClient(c) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "✏️"),
-                  React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+                  React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
                 )
               )
             }))
@@ -5857,11 +5860,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
           devisClient.length > 0 && React.createElement('button', {
             onClick: function() { ajouterEtablissement(cl) },
             title: "Créer un nouveau site (établissement) sous ce client, pré-rempli depuis son dernier contrat",
-            style: { backgroundColor: '#f4f7f4', color: '#1a6b38', border: '1.5px solid #bcd6c3', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+            style: { backgroundColor: '#f4f7f4', color: '#1a6b38', border: '1.5px solid #bcd6c3', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', ...roHide }
           }, '🏢 + Ajouter un établissement'),
           React.createElement('button', {
             onClick: function() { setShowNouveauDevis(function(v) { return !v }); setNouveauDevisPresta([]) },
-            style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit' }
+            style: { backgroundColor: '#0a2e1a', color: '#d4a920', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', ...roHide }
           }, showNouveauDevis ? '× Annuler' : '+ Nouveau devis')
         )
       ),
@@ -6702,7 +6705,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
               ),
               e("div", { style: { display: "flex", gap: "6px", flexWrap: "wrap" } },
                 ctr ? e("button", { onClick: function() { ouvrirContratExistant(ctr) }, style: { background: "#fffbeb", color: "#92400e", border: "1px solid #fde68a", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "600" } }, "📄 Voir le contrat") : null,
-                e("button", { onClick: function() { deplacerCarte(d.id, "relance") }, title: "Remettre en relance (efface le motif de perte)", style: { background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700" } }, "↩ Relancer")
+                e("button", { onClick: function() { deplacerCarte(d.id, "relance") }, title: "Remettre en relance (efface le motif de perte)", style: { background: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "6px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: "700", ...roHide } }, "↩ Relancer")
               )
             )
           })
@@ -6894,7 +6897,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                 },
                 style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
               }, "Traiter →"),
-              React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+              React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
             )
           )
         })
@@ -6920,7 +6923,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale }) {
                       onClick: function() { restaurerLead(lead) },
                       style: { background: "none", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }
                     }, "↩ Remettre"),
-                    React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" } }, "🗑")
+                    React.createElement("button", { onClick: function() { supprimerLead(lead) }, title: "Supprimer ce lead", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 9px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
                   )
                 )
               })
