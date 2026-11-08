@@ -11,7 +11,11 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    const { email } = await req.json()
+    const { email, hp } = await req.json()
+
+    // Honeypot anti-spam : un bot remplit le champ caché -> rejet silencieux
+    // (faux succès), sans insertion en base.
+    if (hp) return NextResponse.json({ ok: true })
 
     if (!email || typeof email !== "string" || !EMAIL_REGEX.test(email.trim())) {
       return NextResponse.json({ error: "Email invalide" }, { status: 400 })

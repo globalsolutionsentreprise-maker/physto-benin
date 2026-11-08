@@ -17,6 +17,7 @@ export default function AuditForm() {
   const [type, setType] = useState(TYPES[0])
   const [etat, setEtat] = useState<"idle" | "envoi" | "ok" | "erreur">("idle")
   const [erreur, setErreur] = useState("")
+  const [hp, setHp] = useState("")  // honeypot anti-spam (invisible pour un humain)
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault()
@@ -38,6 +39,7 @@ export default function AuditForm() {
           nuisible: "Audit conformité 3D",
           message: `Demande d'audit de conformité gratuit, Établissement : ${type}`,
           urgence: false,
+          hp,
         }),
       })
       if (!res.ok) {
@@ -88,6 +90,12 @@ export default function AuditForm() {
 
   return (
     <form onSubmit={envoyer} style={{ backgroundColor: "#0a2e1a", border: "2px solid #d4a920", borderRadius: "12px", padding: "32px" }}>
+      {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+      <input
+        type="text" name="hp" value={hp} onChange={(e) => setHp(e.target.value)}
+        tabIndex={-1} autoComplete="off" aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
       <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#ffffff", marginBottom: "6px" }}>
         Réserver mon audit gratuit
       </h3>

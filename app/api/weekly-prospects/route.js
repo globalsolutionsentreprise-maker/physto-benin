@@ -24,14 +24,13 @@ function statutLead(l) {
 }
 
 export async function GET(req) {
-  // Déclenché par le cron Vercel (Authorization: Bearer CRON_SECRET). En prod,
-  // CRON_SECRET doit être défini : toute requête sans le bon secret est rejetée.
+  // Déclenché par le cron Vercel (Authorization: Bearer CRON_SECRET). Fail-closed :
+  // si CRON_SECRET est absent OU si l'en-tête ne correspond pas, on rejette (401).
+  // Le secret n'est jamais journalisé ni renvoyé dans la réponse.
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
-    const auth = req.headers.get("authorization") || ""
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
+  const auth = req.headers.get("authorization") || ""
+  if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   }
 
   const supabase = createClient(

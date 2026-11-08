@@ -3,13 +3,23 @@ import { createClient } from "@supabase/supabase-js"
 
 export const dynamic = "force-dynamic"
 
+// Échappe toute donnée saisie avant interpolation dans le HTML de l'email de
+// notification (sinon injection de contenu/liens de phishing dans la boîte GSE).
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+}
+
 export async function POST(req) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    const { nom, telephone, email, nuisible, ville, message, urgence } = await req.json()
+    const { nom, telephone, email, nuisible, ville, message, urgence, hp } = await req.json()
+    // Honeypot anti-spam : un bot remplit le champ caché -> rejet silencieux
+    // (faux succès), sans insertion en base ni envoi d'email.
+    if (hp) return NextResponse.json({ ok: true })
     if (!nom) return NextResponse.json({ error: "nom requis" }, { status: 400 })
 
     // Dédup : même téléphone dans les dernières 24h → ignorer
@@ -48,7 +58,7 @@ export async function POST(req) {
           ["Message", message],
           ["Urgence", urgence ? "⚠️ Oui" : "Non"],
         ].filter((r) => r[1]).map((r) =>
-          `<tr><td style="padding:4px 12px 4px 0;color:#666;font-weight:600;white-space:nowrap;">${r[0]}</td><td style="padding:4px 0;">${String(r[1])}</td></tr>`
+          `<tr><td style="padding:4px 12px 4px 0;color:#666;font-weight:600;white-space:nowrap;">${r[0]}</td><td style="padding:4px 0;">${esc(r[1])}</td></tr>`
         ).join("")
         await fetch("https://api.resend.com/emails", {
           method: "POST",

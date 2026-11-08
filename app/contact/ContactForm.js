@@ -8,7 +8,7 @@ export default function ContactForm() {
 
   const [statut, setStatut] = useState("idle")
   const [formulaire, setFormulaire] = useState({
-    nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false,
+    nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false, hp: "",
   })
 
   function handleChange(e) {
@@ -36,7 +36,7 @@ export default function ContactForm() {
       })
       if (res.ok) {
         setStatut("succes")
-        setFormulaire({ nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false })
+        setFormulaire({ nom: "", telephone: "", email: "", nuisible: "", ville: "", message: "", urgence: false, hp: "" })
       } else { setStatut("erreur") }
     } catch(err) { setStatut("erreur") }
   }
@@ -104,6 +104,13 @@ export default function ContactForm() {
         )}
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
+          {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+          <input
+            type="text" name="hp" value={formulaire.hp} onChange={handleChange}
+            tabIndex={-1} autoComplete="off" aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+          />
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px" }}>
             <div>

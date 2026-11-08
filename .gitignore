@@ -56,3 +56,6 @@ app/api/_secure-routes-test/recrutement.mjs
 app/api/_secure-routes-test/prospection.mjs
 app/api/_secure-routes-test/admin-auth.mjs
 app/api/_secure-routes-test/create-client.mjs
+app/api/_secure-routes-test/register-lead.mjs
+app/api/_secure-routes-test/newsletter.mjs
+app/api/_secure-routes-test/weekly.mjs
