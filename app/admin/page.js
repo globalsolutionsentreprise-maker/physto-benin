@@ -581,14 +581,16 @@ export default function Admin() {
     if (!stockForm.nom || !stockForm.nom.trim()) return
     setStockSaving(true)
     var data = { nom: stockForm.nom.trim(), unite: stockForm.unite || 'unité', seuil_alerte: parseFloat(stockForm.seuil_alerte) || 0, updated_at: new Date().toISOString() }
+    var res
     if (stockModal.produit) {
-      await supabase.from('stock_produits').update(data).eq('id', stockModal.produit.id)
+      res = await supabase.from('stock_produits').update(data).eq('id', stockModal.produit.id)
     } else {
-      await supabase.from('stock_produits').insert(Object.assign({}, data, { quantite: 0 }))
+      res = await supabase.from('stock_produits').insert(Object.assign({}, data, { quantite: 0 }))
     }
+    setStockSaving(false)
+    if (res.error) { alert('Erreur enregistrement stock : ' + res.error.message); return }
     setStockModal(null)
     await rechargerStock()
-    setStockSaving(false)
   }
   async function appliquerMouvementStock() {
     var delta = parseFloat(stockForm.qte) || 0
@@ -598,7 +600,9 @@ export default function Admin() {
     var isSortie = stockModal.mode === 'sortie'
     var newQte = parseFloat(p.quantite) + (isSortie ? -delta : delta)
     if (newQte < 0) newQte = 0
-    await Promise.all([
+    // ponytail: 2 écritures non atomiques (pas de transaction côté client) ; sur échec
+    // partiel on resynchronise et on alerte. Passer par une RPC transactionnelle si besoin.
+    var [mvRes, pdRes] = await Promise.all([
       supabase.from('stock_mouvements').insert({
         produit_id: p.id, type: stockModal.mode, quantite: delta,
         client_id: (isSortie && stockForm.clientId) ? stockForm.clientId : null,
@@ -606,13 +610,16 @@ export default function Admin() {
       }),
       supabase.from('stock_produits').update({ quantite: newQte, updated_at: new Date().toISOString() }).eq('id', p.id),
     ])
+    setStockSaving(false)
+    var mvErr = mvRes.error || pdRes.error
+    if (mvErr) { await rechargerStock(); alert('Erreur mouvement stock : ' + mvErr.message + '\nLa quantité affichée a été resynchronisée, vérifiez-la.'); return }
     setStockModal(null)
     await rechargerStock()
-    setStockSaving(false)
   }
   async function supprimerStockProduit(id) {
     if (!window.confirm('Supprimer ce produit du stock ?')) return
-    await supabase.from('stock_produits').delete().eq('id', id)
+    var { error } = await supabase.from('stock_produits').delete().eq('id', id)
+    if (error) { alert('Erreur suppression stock : ' + error.message); return }
     await rechargerStock()
   }
   function renderStockModal() {
@@ -2372,13 +2379,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
 
   async function toggleCertEnvoye(cert) {
     var newVal = !cert.envoye
-    await db.from('certificats').update({ envoye: newVal, envoye_at: newVal ? new Date().toISOString() : null }).eq('id', cert.id)
+    var { error } = await db.from('certificats').update({ envoye: newVal, envoye_at: newVal ? new Date().toISOString() : null }).eq('id', cert.id)
+    if (error) { setMsg('Erreur mise à jour « envoyé » : ' + error.message); return }
     await charger()
   }
 
   async function toggleFicheEnvoye(fiche) {
     var newVal = !fiche.envoye
-    await db.from('fiches_passage').update({ envoye: newVal, envoye_at: newVal ? new Date().toISOString() : null }).eq('id', fiche.id)
+    var { error } = await db.from('fiches_passage').update({ envoye: newVal, envoye_at: newVal ? new Date().toISOString() : null }).eq('id', fiche.id)
+    if (error) { setMsg('Erreur mise à jour « envoyé » : ' + error.message); return }
     await charger()
   }
 
@@ -2434,7 +2443,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
 
   async function supprimerFiche(id) {
     if (!window.confirm('Supprimer cette fiche ?')) return
-    await db.from('fiches_passage').delete().eq('id', id)
+    var { error } = await db.from('fiches_passage').delete().eq('id', id)
+    if (error) { setMsg('Erreur suppression fiche : ' + error.message); return }
     await charger()
   }
 
@@ -2736,12 +2746,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       dates_proposees: rapportVisiteForm.datesProposees || [],
     }
     if (editingId) {
-      await db.from('rapports_visite').update(data).eq('id', editingId)
+      var upd = await db.from('rapports_visite').update(data).eq('id', editingId)
+      if (upd.error) { setMsg('Erreur : ' + upd.error.message); setSavingRapportVisite(false); return }
     } else {
       var now = new Date()
       var num = 'RV-' + now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
       data.numero_unique = num
-      await db.from('rapports_visite').insert(data)
+      var ins = await db.from('rapports_visite').insert(data)
+      if (ins.error) { setMsg('Erreur : ' + ins.error.message); setSavingRapportVisite(false); return }
       // Créer automatiquement la mission dans le planning si technicien + date renseignés
       if (rapportVisiteForm.technicien && rapportVisiteForm.dateVisite) {
         var dejaPlanning = interventionsList.some(function(i) { return i.devis_id === devis.id })
@@ -2776,7 +2788,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
 
   async function supprimerRapportVisite(id) {
     if (!window.confirm('Supprimer ce rapport de visite ?')) return
-    await db.from('rapports_visite').delete().eq('id', id)
+    var { error } = await db.from('rapports_visite').delete().eq('id', id)
+    if (error) { setMsg('Erreur suppression : ' + error.message); return }
     await charger()
   }
 
@@ -3188,14 +3201,16 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var editingId = rapportIntervModal?.editingId
     if (!editingId) return
     if (!window.confirm('Supprimer ce rapport d\'intervention définitivement ?')) return
-    await db.from('rapports_intervention').delete().eq('id', editingId)
+    var { error } = await db.from('rapports_intervention').delete().eq('id', editingId)
+    if (error) { setMsg('Erreur suppression : ' + error.message); return }
     setRapportIntervModal(null)
     await charger()
   }
 
   async function supprimerRapportIntervById(id) {
     if (!window.confirm('Supprimer ce rapport d\'intervention ?')) return
-    await db.from('rapports_intervention').delete().eq('id', id)
+    var { error } = await db.from('rapports_intervention').delete().eq('id', id)
+    if (error) { setMsg('Erreur suppression : ' + error.message); return }
     await charger()
   }
 
@@ -3219,12 +3234,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       photos: rapportIntervForm.photos || [],
     }
     if (editingId) {
-      await db.from('rapports_intervention').update(data).eq('id', editingId)
+      var upd = await db.from('rapports_intervention').update(data).eq('id', editingId)
+      if (upd.error) { setMsg('Erreur : ' + upd.error.message); setSavingRapportInterv(false); return }
     } else {
       var now = new Date()
       var num = 'RI-' + now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
       data.numero_unique = num
-      await db.from('rapports_intervention').insert(data)
+      var ins = await db.from('rapports_intervention').insert(data)
+      if (ins.error) { setMsg('Erreur : ' + ins.error.message); setSavingRapportInterv(false); return }
     }
     await charger()
     setSavingRapportInterv(false)
