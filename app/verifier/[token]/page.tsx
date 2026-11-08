@@ -1,46 +1,41 @@
-"use client"
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+// Page de vérification d'attestation — rendu SERVEUR (SSR). La validité est résolue
+// côté serveur via l'API /api/verifier (source de vérité inchangée) : la page affiche
+// immédiatement « valide » ou « invalide » sans dépendre de JavaScript.
+import { headers } from "next/headers"
 
-export default function VerifierPage() {
-  const params = useParams()
-  const token = params.token as string
-  const [att, setAtt] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+export const dynamic = "force-dynamic"
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`/api/verifier/${encodeURIComponent(token)}`, { cache: "no-store" })
-        const json = await res.json().catch(() => null)
-        if (!res.ok || !json?.valid || !json?.attestation) {
-          setNotFound(true); setLoading(false); return
-        }
-        setAtt(json.attestation)
-        setLoading(false)
-      } catch {
-        setNotFound(true); setLoading(false)
-      }
-    }
-    if (token) load()
-  }, [token])
+type Att = {
+  numero_unique?: string | null; numero?: string | null; prestation?: string | null
+  date_traitement?: string | null; generated_at?: string | null; lieu_intervention?: string | null
+  clients?: { nom?: string | null; prenom?: string | null; entreprise?: string | null } | null
+  ref?: string | null
+}
 
-  const dateFormatee = att?.date_traitement
-    ? new Date(att.date_traitement).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    : att?.generated_at
-    ? new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    : ", "
+async function fetchValidite(token: string): Promise<{ valid: boolean; att: Att | null }> {
+  try {
+    const h = await headers()
+    const host = h.get("host")
+    const proto = h.get("x-forwarded-proto") || "https"
+    if (!host) return { valid: false, att: null }
+    const res = await fetch(`${proto}://${host}/api/verifier/${encodeURIComponent(token)}`, { cache: "no-store" })
+    const json = await res.json().catch(() => null)
+    if (res.ok && json?.valid && json?.attestation) return { valid: true, att: json.attestation }
+  } catch {}
+  return { valid: false, att: null }
+}
 
-  const generatedAt = att?.generated_at
-    ? new Date(att.generated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
-    : ", "
+function fmtDate(d: string | null | undefined): string {
+  if (!d) return "—"
+  try { return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) } catch { return "—" }
+}
 
-  if (loading) return (
-    <div style={{ minHeight: "100vh", background: "#f7f7f5", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif", color: "#888" }}>
-      Vérification en cours…
-    </div>
-  )
+export default async function VerifierPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params
+  const { valid, att } = await fetchValidite(token)
+  const dateFormatee = fmtDate(att?.date_traitement || att?.generated_at)
+  const generatedAt = fmtDate(att?.generated_at)
+  const verifieLe = fmtDate(new Date().toISOString())
 
   return (
     <div style={{ minHeight: "100vh", background: "#f7f7f5", fontFamily: "system-ui, sans-serif", padding: "40px 24px" }}>
@@ -58,13 +53,13 @@ export default function VerifierPage() {
         </div>
 
         {/* Statut */}
-        {notFound ? (
+        {(!valid || !att) ? (
           <div style={{ background: "#fff", border: "1px solid #e8e6e0", borderTop: "none", borderRadius: "0 0 8px 8px", padding: "40px 32px", textAlign: "center" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>❌</div>
-            <h2 style={{ color: "#c0392b", margin: "0 0 12px", fontSize: "20px" }}>Document non trouvé</h2>
+            <h2 style={{ color: "#c0392b", margin: "0 0 12px", fontSize: "20px" }}>Document invalide</h2>
             <p style={{ color: "#666", fontSize: "14px", lineHeight: "1.7", margin: 0 }}>
-              Ce document ne figure pas dans notre registre officiel ou a été annulé.<br />
-              Si vous pensez qu'il s'agit d'une erreur, contactez-nous à<br />
+              {"Ce document ne figure pas dans notre registre officiel ou a été annulé."}<br />
+              {"Si vous pensez qu'il s'agit d'une erreur, contactez-nous à"}<br />
               <a href="mailto:direction@phyto-benin.com" style={{ color: "#0a2e1a", fontWeight: "600" }}>direction@phyto-benin.com</a>
             </p>
           </div>
@@ -76,7 +71,7 @@ export default function VerifierPage() {
               <div style={{ fontSize: "28px" }}>✅</div>
               <div>
                 <div style={{ color: "#1b5e20", fontWeight: "700", fontSize: "15px" }}>Document authentique et valide</div>
-                <div style={{ color: "#388e3c", fontSize: "12px", marginTop: "2px" }}>Vérifié le {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} dans le registre GSE</div>
+                <div style={{ color: "#388e3c", fontSize: "12px", marginTop: "2px" }}>Vérifié le {verifieLe} dans le registre GSE</div>
               </div>
             </div>
 
@@ -123,7 +118,7 @@ export default function VerifierPage() {
             {/* Déclaration légale */}
             <div style={{ borderLeft: "3px solid #d4a920", paddingLeft: "16px", marginBottom: "24px" }}>
               <p style={{ color: "#444", fontSize: "13px", lineHeight: "1.7", margin: 0, fontStyle: "italic" }}>
-                "Global Solutions Entreprise (GSE) atteste que les prestations mentionnées ci-dessus ont été réalisées conformément aux normes professionnelles en vigueur en République du Bénin, avec des produits homologués par les autorités sanitaires compétentes."
+                {"“Global Solutions Entreprise (GSE) atteste que les prestations mentionnées ci-dessus ont été réalisées conformément aux normes professionnelles en vigueur en République du Bénin, avec des produits homologués par les autorités sanitaires compétentes.”"}
               </p>
             </div>
 
