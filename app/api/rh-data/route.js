@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import { randomUUID } from "crypto"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 // Préfixes de numéro par type (alignés sur generate_certificat_numero en base).
 const CERT_PREFIX = { desinsect: "CERT-DES", derat: "CERT-RAT", double: "CERT-DBL" }
@@ -79,29 +80,9 @@ const supabase = createClient(
 
 export const dynamic = "force-dynamic"
 
-// Un jeton Supabase valide ne suffit PAS : les clients de l'espace client ont
-// eux aussi un compte Supabase. Sans le contrôle sur admin_acces ci-dessous,
-// n'importe lequel d'entre eux pouvait lire tout le CRM et toute la RH avec le
-// jeton de sa propre session. Le contrôle existait uniquement côté navigateur,
-// donc il ne protégeait rien.
-async function verifyAdmin(req) {
-  const token = req.headers.get("authorization")?.replace("Bearer ", "")
-  if (!token) return null
-  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: { user } } = await anon.auth.getUser(token)
-  if (!user || !user.email) return null
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: acces, error } = await admin
-    .from("admin_acces")
-    .select("email, actif")
-    .eq("email", user.email)
-    .maybeSingle()
-  // En cas d'erreur de lecture, on refuse : une panne ne doit jamais ouvrir
-  // l'accès, elle doit le fermer.
-  if (error || !acces || acces.actif !== true) return null
-  return user
-}
-
+// Auth : verifyAdmin/verifyAdminWrite (lib/verify-admin). Un jeton Supabase valide
+// ne suffit pas (les clients de l'espace client ont aussi un compte) : la lib
+// vérifie l'appartenance active à admin_acces et le rôle métier.
 export async function GET(req) {
   if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const [{ data: personnel }, { data: interventions }, { data: devisList }, { data: tousDevis }] = await Promise.all([
@@ -152,7 +133,13 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  if (!await verifyAdmin(req)) return Response.json({ error: "Non autorisé" }, { status: 401 })
+  // Toutes les actions POST de rh-data sont des écritures (personnel, interventions,
+  // passages, fiches) → rôle "admin" strict. Le rôle "lecture" consulte via GET.
+  const adminUser = await verifyAdmin(req)
+  if (!adminUser) return Response.json({ error: "Non autorisé" }, { status: 401 })
+  if (adminUser.acces_role !== "admin") {
+    return Response.json({ error: "Droits insuffisants : compte en lecture seule." }, { status: 403 })
+  }
   const body = await req.json()
   const { action } = body
 

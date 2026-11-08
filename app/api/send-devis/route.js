@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
-import { verifyAdmin } from "@/lib/verify-admin"
+import { verifyAdminWrite } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
 
 export async function POST(req) {
-  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  if (!await verifyAdminWrite(req)) return NextResponse.json({ error: "Droits insuffisants (admin requis)." }, { status: 403 })
   try {
     const { clientEmail, clientNom, clientPrenom, devisNumero, prestation, montant, description } = await req.json()
     const montantFormate = Number(montant).toLocaleString("fr-FR")

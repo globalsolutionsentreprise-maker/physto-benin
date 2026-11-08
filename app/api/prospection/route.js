@@ -1,25 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
-
-// Même modèle de sécurité que crm-data : un jeton Supabase valide ne suffit pas
-// (les clients de l'espace client ont aussi un compte), on vérifie l'appartenance
-// à admin_acces.
-async function verifyAdmin(req) {
-  const token = req.headers.get("authorization")?.replace("Bearer ", "")
-  if (!token) return null
-  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: { user } } = await anon.auth.getUser(token)
-  if (!user || !user.email) return null
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: acces, error } = await admin
-    .from("admin_acces")
-    .select("email, actif")
-    .eq("email", user.email)
-    .maybeSingle()
-  if (error || !acces || acces.actif !== true) return null
-  return user
-}
 
 const STATUTS = ["a_contacter", "contacte", "relance", "rdv", "gagne", "perdu"]
 const PRESTATION_DEFAUT = "Désinsectisation, Dératisation, Désinfection"
@@ -71,6 +53,11 @@ export async function POST(req) {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   const adminUser = await verifyAdmin(req)
   if (!adminUser) return Response.json({ error: "Non autorisé" }, { status: 401 })
+  // Toutes les actions POST de prospection écrivent (CRUD prospects, import,
+  // conversion) → rôle "admin" strict. Le rôle "lecture" consulte via GET list.
+  if (adminUser.acces_role !== "admin") {
+    return Response.json({ error: "Droits insuffisants : compte en lecture seule." }, { status: 403 })
+  }
   const body = await req.json()
   const { action } = body
 

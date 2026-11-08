@@ -1,30 +1,14 @@
 import { createClient } from "@supabase/supabase-js"
+import { verifyAdmin } from "@/lib/verify-admin"
 import { datesPassages, planifierPassages, montantDuPassage, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
 
-// Un jeton Supabase valide ne suffit PAS : les clients de l'espace client ont
-// eux aussi un compte Supabase. Sans le contrôle sur admin_acces ci-dessous,
-// n'importe lequel d'entre eux pouvait lire tout le CRM et toute la RH avec le
-// jeton de sa propre session. Le contrôle existait uniquement côté navigateur,
-// donc il ne protégeait rien.
-async function verifyAdmin(req) {
-  const token = req.headers.get("authorization")?.replace("Bearer ", "")
-  if (!token) return null
-  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: { user } } = await anon.auth.getUser(token)
-  if (!user || !user.email) return null
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: acces, error } = await admin
-    .from("admin_acces")
-    .select("email, actif")
-    .eq("email", user.email)
-    .maybeSingle()
-  // En cas d'erreur de lecture, on refuse : une panne ne doit jamais ouvrir
-  // l'accès, elle doit le fermer.
-  if (error || !acces || acces.actif !== true) return null
-  return user
-}
+// Actions de LECTURE accessibles au rôle "lecture" (consultation).
+// Toute action hors de cet ensemble = écriture/suppression/argent → rôle "admin" requis.
+const CRM_READ_ACTIONS = new Set([
+  "get_leads", "get_leads_traites", "get_clients", "get_encaissement_desync", "get_journal",
+])
 
 function mapStatut(statut) {
   return { brouillon: "contact", envoye: "devis", accepte: "attente", modification_demandee: "relance", en_cours: "attente", termine: "converti", annule: "echec" }[statut] || "contact"
@@ -273,6 +257,11 @@ export async function POST(req) {
   if (!adminUser) return Response.json({ error: "Non autorisé" }, { status: 401 })
   const body = await req.json()
   const { action } = body
+
+  // Séparation des rôles : "lecture" consulte, seul "admin" écrit/supprime/touche l'argent.
+  if (!CRM_READ_ACTIONS.has(action) && adminUser.acces_role !== "admin") {
+    return Response.json({ error: "Droits insuffisants : compte en lecture seule." }, { status: 403 })
+  }
 
   if (action === "move") {
     // Déplacement unifié : le front envoie une `etape` (source de vérité pipeline).

@@ -50,3 +50,9 @@ app/api/_secure-routes-test/declarer.mjs
 app/api/_secure-routes-test/valider.mjs
 app/api/_secure-routes-test/paiements-data.mjs
 app/api/_secure-routes-test/justif-upload.mjs
+app/api/_secure-routes-test/crm-data.mjs
+app/api/_secure-routes-test/rh-data.mjs
+app/api/_secure-routes-test/recrutement.mjs
+app/api/_secure-routes-test/prospection.mjs
+app/api/_secure-routes-test/admin-auth.mjs
+app/api/_secure-routes-test/create-client.mjs

@@ -112,13 +112,13 @@ test("6. nom manquant → 400", async () => {
   assert.equal(res.status, 400);
 });
 
-// 7 — Non authentifié → 401 (aucune écriture).
-test("7. Non admin → 401", async () => {
+// 7 — Non admin (verifyAdminWrite échoue) → 403 (aucune écriture).
+test("7. Non admin → 403", async () => {
   process.env.__TEST_ADMIN_OK = "0";
   __config({});
   const res = await call({ nom: "Doe" });
   process.env.__TEST_ADMIN_OK = "1";
-  assert.equal(res.status, 401);
+  assert.equal(res.status, 403);
   assert.equal(__log().createUserCalls, 0);
 });
 

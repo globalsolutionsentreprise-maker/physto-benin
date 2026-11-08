@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { verifyAdmin } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
 
-// Réservé à l'admin : jeton Bearer + appartenance à admin_acces (comme rh-data).
-async function verifyAdmin(req) {
-  const token = req.headers.get("authorization")?.replace("Bearer ", "")
-  if (!token) return null
-  const anon = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: { user } } = await anon.auth.getUser(token)
-  if (!user || !user.email) return null
-  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  const { data: acces, error } = await admin.from("admin_acces").select("email, actif").eq("email", user.email).maybeSingle()
-  if (error || !acces || acces.actif !== true) return null
-  return user
-}
+// Actions POST de LECTURE (consultation) accessibles au rôle "lecture".
+// Le reste (statut candidature, suppression, CRUD annonces) = rôle "admin".
+const RECRUT_READ_ACTIONS = new Set(["cv_url"])
 
 function sb() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
@@ -43,10 +35,16 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  const adminUser = await verifyAdmin(req)
+  if (!adminUser) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
   const db = sb()
   const body = await req.json()
   const { action } = body
+
+  // Séparation des rôles : "lecture" peut consulter un CV, pas modifier/supprimer.
+  if (!RECRUT_READ_ACTIONS.has(action) && adminUser.acces_role !== "admin") {
+    return NextResponse.json({ error: "Droits insuffisants : compte en lecture seule." }, { status: 403 })
+  }
 
   if (action === "set_candidature_statut") {
     const ok = ["nouveau", "rappeler", "entretien", "retenu", "ecarte"]

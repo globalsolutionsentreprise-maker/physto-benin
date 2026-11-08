@@ -3,7 +3,7 @@ import crypto from "crypto"
 import { createClient } from "@supabase/supabase-js"
 import { offresContrat } from "@/lib/contrat-analyse.mjs"
 import { appendEnglishPage, CONTRAT_EN } from "@/lib/doc-bilingue"
-import { verifyAdmin } from "@/lib/verify-admin"
+import { verifyAdminWrite } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
 
@@ -33,7 +33,9 @@ function signatureValide(sp) {
 // Signe une query de contrat (réservé admin). L'admin ouvre ensuite
 // /api/generate-contract?<query>&exp=..&sig=.. via window.open.
 export async function POST(req) {
-  if (!await verifyAdmin(req)) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  // Le POST signe l'URL qui déclenche le GET ; or le GET INSÈRE la ligne contrats
+  // à la 1re génération → écriture. Seul "admin" peut donc signer (lecture = 403).
+  if (!await verifyAdminWrite(req)) return NextResponse.json({ error: "Droits insuffisants (admin requis)." }, { status: 403 })
   const { query } = await req.json()
   const sp = new URLSearchParams(query || "")
   sp.delete("sig"); sp.delete("exp")

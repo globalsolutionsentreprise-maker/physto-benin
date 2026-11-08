@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
-import { verifyAdmin } from "@/lib/verify-admin"
+import { verifyAdminWrite } from "@/lib/verify-admin"
 
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 const GEMINI_FILES_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files"
@@ -85,7 +85,9 @@ async function ficheTokenValide(token) {
 export async function POST(req) {
   try {
     const { type, notes, photos, audios, videos, context, ficheToken } = await req.json()
-    if (!await verifyAdmin(req) && !await ficheTokenValide(ficheToken)) {
+    // Admin (rôle "admin") OU token technicien valide (page publique /fiche/[token]).
+    // Le rôle "lecture" sans token est refusé (évite la conso IA côté consultation).
+    if (!await verifyAdminWrite(req) && !await ficheTokenValide(ficheToken)) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
     }
     const ctx = Object.assign({}, context)

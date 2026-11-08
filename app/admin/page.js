@@ -519,10 +519,14 @@ export default function Admin() {
   const card = { backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: "10px", padding: "20px", marginBottom: "12px" }
   const cardVert = Object.assign({}, card, { borderLeft: "3px solid #1a6b38" })
   const cardOr = Object.assign({}, card, { borderLeft: "3px solid #d4a920", backgroundColor: "#fffdf5" })
-  const btnSuppr = { fontSize: "11px", color: "#991b1b", background: "none", border: "1px solid #991b1b", padding: "6px 12px", borderRadius: "5px", cursor: "pointer", fontFamily: "inherit" }
-  const btnSave = { fontSize: "11px", color: "#1a6b38", background: "none", border: "1px solid #1a6b38", padding: "6px 12px", borderRadius: "5px", cursor: "pointer", fontFamily: "inherit", marginRight: "8px" }
-  const btnAjouter = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "13px", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: "inherit" }
-  const btnSauvegarder = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "12px", padding: "10px 16px", borderRadius: "6px", border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }
+  // Rôle "lecture" : masquer les boutons d'écriture (Sauvegarder/Supprimer/Ajouter)
+  // du back-office contenu. Ces 4 styles sont partagés → masquage centralisé.
+  // La sécurité réelle reste côté serveur (verifyAdminWrite) ; ceci est l'UX.
+  const roMasque = currentUser?.role === "admin" ? null : { display: "none" }
+  const btnSuppr = { fontSize: "11px", color: "#991b1b", background: "none", border: "1px solid #991b1b", padding: "6px 12px", borderRadius: "5px", cursor: "pointer", fontFamily: "inherit", ...roMasque }
+  const btnSave = { fontSize: "11px", color: "#1a6b38", background: "none", border: "1px solid #1a6b38", padding: "6px 12px", borderRadius: "5px", cursor: "pointer", fontFamily: "inherit", marginRight: "8px", ...roMasque }
+  const btnAjouter = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "13px", padding: "10px 20px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: "inherit", ...roMasque }
+  const btnSauvegarder = { backgroundColor: "#0a2e1a", color: "#d4a920", fontWeight: "700", fontSize: "12px", padding: "10px 16px", borderRadius: "6px", border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", ...roMasque }
 
   const menuGroupes = [
     { titre: "Gestion", items: [
@@ -767,6 +771,12 @@ export default function Admin() {
         </div>
 
         <div style={{ padding: "32px", overflowY: "auto" }}>
+
+          {currentUser && currentUser.role !== "admin" && (
+            <div style={{ backgroundColor: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", fontSize: "13px", fontWeight: "600" }}>
+              👁️ Mode lecture seule — vous pouvez consulter les données, mais pas les modifier. Les actions d'écriture sont réservées aux administrateurs.
+            </div>
+          )}
 
           {onglet === "chiffres" && (
             <div>
@@ -1142,7 +1152,7 @@ export default function Admin() {
             </div>
           )}
 
-          {onglet === "recrutement" && (<SectionRecrutement />)}
+          {onglet === "recrutement" && (<SectionRecrutement canWrite={currentUser?.role === "admin"} />)}
 
           {onglet === "paiements" && (<SectionPaiements canWrite={currentUser?.role === "admin"} />)}
 
@@ -1300,7 +1310,7 @@ export default function Admin() {
                   <h2 style={{ fontSize: "20px", fontWeight: "700", color: "#111", marginBottom: "4px" }}>📦 Stock produits</h2>
                   <p style={{ fontSize: "13px", color: "#888" }}>Suivi des niveaux de stock. Les achats continuent de s'enregistrer dans les dépenses comme avant.</p>
                 </div>
-                <button onClick={ouvrirAjoutStock} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>+ Nouveau produit</button>
+                {currentUser?.role === "admin" && <button onClick={ouvrirAjoutStock} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>+ Nouveau produit</button>}
               </div>
 
               {stockProduits.length === 0 ? (
@@ -1359,6 +1369,7 @@ export default function Admin() {
                           </div>
                         )}
 
+                        {currentUser?.role === "admin" && (<>
                         <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
                           <button onClick={function() { ouvrirMouvementStock(p, "entree") }} style={{ flex: 1, backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", color: "#1a6b38", borderRadius: "6px", padding: "8px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>➕ Entrée</button>
                           <button onClick={function() { ouvrirMouvementStock(p, "sortie") }} style={{ flex: 1, backgroundColor: "#fef2f2", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "8px", fontSize: "12px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" }}>➖ Sortie</button>
@@ -1367,6 +1378,7 @@ export default function Admin() {
                           <button onClick={function() { ouvrirEditStock(p) }} style={{ flex: 1, background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>✏️ Modifier</button>
                           <button onClick={function() { supprimerStockProduit(p.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>
                         </div>
+                        </>)}
                       </div>
                     )
                   })}
@@ -7448,7 +7460,7 @@ const OFFRE_VIDE = {
   salaire_min: "", salaire_max: "", salaire_devise: "FCFA", salaire_periode: "mois", salaire_visible: true,
   est_stage: false, stage_duree: "", stage_gratifie: false, stage_montant: "", stage_profil: "",
 }
-function SectionRecrutement() {
+function SectionRecrutement({ canWrite }) {
   const [data, setData] = useState({ candidatures: [], offres: [] })
   const [loading, setLoading] = useState(true)
   const [showOffre, setShowOffre] = useState(false)
@@ -7532,7 +7544,7 @@ function SectionRecrutement() {
       <div style={{ marginBottom: "36px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
           <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a" }}>Offres d'emploi</h3>
-          <button onClick={function () { showOffre ? annulerOffre() : ouvrirNouvelleOffre() }} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{showOffre ? "Annuler" : "+ Nouvelle offre"}</button>
+          {canWrite && <button onClick={function () { showOffre ? annulerOffre() : ouvrirNouvelleOffre() }} style={{ backgroundColor: "#0a2e1a", color: "#d4a920", border: "none", borderRadius: "6px", padding: "8px 16px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>{showOffre ? "Annuler" : "+ Nouvelle offre"}</button>}
         </div>
         {showOffre && (
           <div style={{ backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", padding: "20px", marginBottom: "16px", display: "grid", gap: "12px" }}>
@@ -7590,9 +7602,9 @@ function SectionRecrutement() {
               <div key={o.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", marginBottom: "8px" }}>
                 <span style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: o.actif ? "#0a2e1a" : "#aaa" }}>{o.titre}{o.lieu ? " · " + o.lieu : ""}</span>
                 <span style={{ fontSize: "10px", fontWeight: 700, color: o.actif ? "#065f46" : "#991b1b", backgroundColor: o.actif ? "#ecfdf5" : "#fef2f2", padding: "3px 8px", borderRadius: "20px" }}>{o.actif ? "Active" : "Fermée"}</span>
-                <button onClick={function () { modifierOffre(o) }} style={{ background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>✏️ Modifier</button>
-                <button onClick={function () { toggleOffre(o) }} style={{ background: "none", border: "1px solid #ccc", color: "#555", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>{o.actif ? "Fermer" : "Rouvrir"}</button>
-                <button onClick={function () { supprimerOffre(o.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>
+                {canWrite && <button onClick={function () { modifierOffre(o) }} style={{ background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>✏️ Modifier</button>}
+                {canWrite && <button onClick={function () { toggleOffre(o) }} style={{ background: "none", border: "1px solid #ccc", color: "#555", borderRadius: "6px", padding: "4px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>{o.actif ? "Fermer" : "Rouvrir"}</button>}
+                {canWrite && <button onClick={function () { supprimerOffre(o.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑</button>}
               </div>
             )
           })
@@ -7611,7 +7623,7 @@ function SectionRecrutement() {
                     <div style={{ fontSize: "15px", fontWeight: 700, color: "#0a2e1a" }}>{c.nom}</div>
                     <div style={{ fontSize: "11px", color: "#888" }}>{offreTitre(c.offre_id)} · {fmtDate(c.created_at)}</div>
                   </div>
-                  <select value={c.statut} onChange={function (e) { setStatut(c.id, e.target.value) }} style={Object.assign({}, inp, { width: "auto", fontWeight: 700, color: ST_COLOR[c.statut] || "#333" })}>
+                  <select value={c.statut} disabled={!canWrite} onChange={function (e) { setStatut(c.id, e.target.value) }} style={Object.assign({}, inp, { width: "auto", fontWeight: 700, color: ST_COLOR[c.statut] || "#333" })}>
                     {STATUTS.map(function (s) { return <option key={s[0]} value={s[0]}>{s[1]}</option> })}
                   </select>
                 </div>
@@ -7624,7 +7636,7 @@ function SectionRecrutement() {
                 {c.motivation && <div style={{ fontSize: "13px", color: "#333", lineHeight: 1.6, backgroundColor: "#faf9f6", borderRadius: "6px", padding: "10px 12px", marginBottom: "8px" }}>{c.motivation}</div>}
                 <div style={{ display: "flex", gap: "8px" }}>
                   {c.cv_path && <button onClick={function () { voirCv(c.cv_path) }} style={{ background: "#faf5ff", border: "1px solid #e9d5ff", color: "#6b21a8", borderRadius: "6px", padding: "5px 12px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>📄 Voir le CV</button>}
-                  <button onClick={function () { supprimerCand(c.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑 Supprimer</button>
+                  {canWrite && <button onClick={function () { supprimerCand(c.id) }} style={{ background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit" }}>🗑 Supprimer</button>}
                 </div>
               </div>
             )
