@@ -1425,6 +1425,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   const [filtre, setFiltre] = React.useState("tous")
 
   const [validating, setValidating] = React.useState(null)
+  const [savingDevis, setSavingDevis] = React.useState(false)
   const [certModal, setCertModal] = React.useState(null)
   const [certForm, setCertForm] = React.useState({})
   const [certSaving, setCertSaving] = React.useState(false)
@@ -1752,7 +1753,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       paiementChange = nowEncaisse ? (d.montant_facture_crm || d.montant_net || 0) : 0
       update.paiements_recus = paiementChange
     }
-    await db.from('devis').update(update).eq('id', devisId)
+    var rP = await db.from('devis').update(update).eq('id', devisId)
+    if (rP.error) { setMsg('Erreur enregistrement parcours : ' + rP.error.message); await charger(); return }
     setDevisList(function(prev) {
       return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { parcours: newParcours, etape: etapeDerivee }, paiementChange !== undefined ? { paiements_recus: paiementChange } : {}) : x })
     })
@@ -1896,7 +1898,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var actuelle = d.etape || "prospect"
     if (ETAPE_IDS.indexOf(cibleEtape) <= ETAPE_IDS.indexOf(actuelle)) return
     var parcours = Object.assign({}, d.parcours || {}, parcoursForEtape(cibleEtape))
-    await db.from("devis").update({ etape: cibleEtape, parcours: parcours, crm_statut: ETAPE_CRM[cibleEtape] || "converti" }).eq("id", devisId)
+    var rA = await db.from("devis").update({ etape: cibleEtape, parcours: parcours, crm_statut: ETAPE_CRM[cibleEtape] || "converti" }).eq("id", devisId)
+    if (rA.error) return  // avancement best-effort : on n'avance pas l'UI si la base a refusé (le charger() de l'appelant resynchronise)
     setDevisList(function(prev) { return prev.map(function(x) { return x.id === devisId ? Object.assign({}, x, { etape: cibleEtape, parcours: parcours }) : x }) })
   }
 
@@ -1970,8 +1973,10 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
     var msgConfirm = nbDevis > 0 ? "Ce client a " + nbDevis + " devis. Supprimer quand même ?" : "Supprimer " + (c.prenom || "") + " " + c.nom + " ?"
     if (!window.confirm(msgConfirm)) return
-    await db.from("devis").delete().eq("client_id", c.id)
-    await db.from("clients").delete().eq("id", c.id)
+    var dDevis = await db.from("devis").delete().eq("client_id", c.id)
+    if (dDevis.error) { setMsg("Erreur suppression des devis du client : " + dDevis.error.message); await charger(); return }
+    var dClient = await db.from("clients").delete().eq("id", c.id)
+    if (dClient.error) { setMsg("Erreur suppression client : " + dClient.error.message); await charger(); return }
     setMsg("✓ Client supprimé")
     await charger()
   }
@@ -2117,6 +2122,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     }
 
     if (editingDevis) {
+      if (savingDevis) return  // anti-double-soumission (évite double update + double email)
+      setSavingDevis(true)
       var cl = clients.find(function(c) { return c.id === editingDevis.client_id })
       var { error } = await db.from("devis").update({
         prestation: prestationStr,
@@ -2142,7 +2149,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         // reculer une carte déjà convertie/en exécution.
         etape: (!editingDevis.etape || editingDevis.etape === "prospect") ? "devis" : editingDevis.etape
       }).eq("id", editingDevis.id)
-      if (error) { setMsg("Erreur: " + error.message); return }
+      if (error) { setMsg("Erreur: " + error.message); setSavingDevis(false); return }
       if (enLigne && cl && cl.email) {
         try {
           await fetch("/api/send-devis", { method: "POST", headers: await authHeaders(), body: JSON.stringify({ clientEmail: cl.email, clientNom: cl.nom, clientPrenom: cl.prenom || "", devisNumero: editingDevis.numero, prestation: prestationStr, montant: montantClient, description: formDevis.description }) })
@@ -2157,13 +2164,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       viderForm()
       remonterEnHaut()
       await charger()
+      setSavingDevis(false)
       return
     }
   }
 
   async function validerLivraison(id) {
     setValidating(id)
-    await db.from("devis").update({ statut: "en_cours" }).eq("id", id)
+    var rL = await db.from("devis").update({ statut: "en_cours" }).eq("id", id)
+    if (rL.error) { setMsg("Erreur validation livraison : " + rL.error.message); setValidating(null); return }
     setMsg("✓ Livraison validée · le client peut payer le solde")
     await charger(); setValidating(null)
   }
@@ -2181,7 +2190,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
 
   async function supprimerDevis(id, numero) {
     if (!window.confirm("Supprimer le devis " + numero + " ?")) return
-    await db.from("devis").delete().eq("id", id)
+    var { error } = await db.from("devis").delete().eq("id", id)
+    if (error) { setMsg("Erreur suppression : " + error.message); return }
     setMsg("✓ Devis supprimé")
     await charger()
   }
@@ -4003,9 +4013,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   // la liste. Écrit type_client ; maj optimiste pour un retour immédiat.
   async function basculerSegment(c) {
     var next = segmentClient(c) === "entreprise" ? "particulier" : "entreprise"
+    var prevType = c.type_client  // pour rollback si la base refuse
     setClients(function(prev) { return (prev || []).map(function(x) { return x.id === c.id ? Object.assign({}, x, { type_client: next }) : x }) })
-    try { await db.from("clients").update({ type_client: next }).eq("id", c.id) }
-    catch (e) { setMsg("Erreur : mise à jour du segment client") }
+    var r
+    try { r = await db.from("clients").update({ type_client: next }).eq("id", c.id) }
+    catch (e) { r = { error: e } }
+    if (r.error) {
+      setClients(function(prev) { return (prev || []).map(function(x) { return x.id === c.id ? Object.assign({}, x, { type_client: prevType }) : x }) })
+      setMsg("Erreur : mise à jour du segment client (" + r.error.message + ")")
+    }
   }
   // Pastille indicateur (non cliquable) du segment, pour les cartes (contrats…).
   function segBadge(seg) {
@@ -5511,8 +5527,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         React.createElement("textarea", { value: formDevis.description, rows: 3, onChange: function(e) { var v = e.target.value; setFormDevis(function(prev) { return Object.assign({}, prev, { description: v }) }) }, placeholder: "Surface, zones, délais...", style: Object.assign({}, inp, { resize: "vertical" }) })
       ),
       React.createElement("div", { style: { display: "flex", gap: "10px" } },
-        React.createElement("button", { onClick: creerDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit" } },
-          formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer"
+        React.createElement("button", { onClick: creerDevis, disabled: savingDevis, style: { backgroundColor: "#7c3aed", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 22px", fontSize: "13px", fontWeight: "700", cursor: savingDevis ? "wait" : "pointer", fontFamily: "inherit", opacity: savingDevis ? 0.7 : 1 } },
+          savingDevis ? "Enregistrement…" : (formDevis.modeTransmission === "email" ? "✏️ Modifier et renvoyer" : "✏️ Modifier et imprimer")
         ),
         React.createElement("button", { onClick: function() { setEditingDevis(null); setFormDevis({ clientId: "", prenom: "", nom: "", email: "", telephone: "", entreprise: "", prestation: "", prestations: [], lignes: [{ prestation: "", secteur: "", superficie: "", prixM2: "" }], superficie: "", prixM2: "", prixParPrestation: {}, superficieParPrestation: {}, description: "", montantBrut: "", remise: "", remiseType: "pct", modeTransmission: "email", pctAcompte: "60", conditionsPaiement: "Le règlement du solde peut se faire jusqu'à 2 semaines après l'intervention." }); if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" }) }, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "10px 18px", fontSize: "13px", cursor: "pointer", fontFamily: "inherit" } }, "Annuler")
       )
