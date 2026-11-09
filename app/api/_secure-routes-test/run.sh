@@ -31,4 +31,5 @@ node --import tsx --test \
   p2-permissions.test.mjs \
   public-forms.test.mjs \
   documents.test.mjs \
-  client-documents.test.mjs
+  client-documents.test.mjs \
+  crm-rpc.test.mjs

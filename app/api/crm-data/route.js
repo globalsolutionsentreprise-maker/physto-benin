@@ -530,10 +530,6 @@ export async function POST(req) {
     if (!devis?.date_debut_contrat)
       return Response.json({ error: "Renseignez une date de début de contrat avant de générer le planning." }, { status: 400 })
 
-    // Supprimer les anciennes dates planifiées pour ce contrat
-    const { error: eDel } = await supabase.from("interventions").delete().eq("devis_id", devisId).eq("statut", "planifiee")
-    if (eDel) return fail(eDel)
-
     const freqMap = { mensuelle: 1, bimestrielle: 2, trimestrielle: 3, semestrielle: 6, annuelle: 12 }
     const intervalMois = freqMap[devis.frequence_intervention] || 3
     const duree = devis.duree_contrat_mois || 12
@@ -574,9 +570,11 @@ export async function POST(req) {
       }
     }
 
-    const { data: inserted, error } = await supabase.from("interventions").insert(toInsert).select()
+    // Remplacement ATOMIQUE (DELETE planifiées + INSERT) via RPC transactionnelle :
+    // si l'INSERT échoue, l'ancien planning n'est PAS perdu (cf. rpc_replace_planning).
+    const { data: count, error } = await supabase.rpc("rpc_replace_planning", { p_devis_id: devisId, p_rows: toInsert })
     if (error) return Response.json({ error: error.message }, { status: 500 })
-    return Response.json({ ok: true, count: inserted.length })
+    return Response.json({ ok: true, count: count ?? 0 })
   }
 
   if (action === "add_devis") {

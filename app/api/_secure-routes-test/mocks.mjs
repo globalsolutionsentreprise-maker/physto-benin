@@ -1,9 +1,9 @@
 // Mocks pour tester generate-attestation + create-payment (chemins de rejet).
 let sc = {};
 export function __config(c) { sc = c || {}; }
-let log = { updates: [], inserts: [], removes: [], deletes: [] };
+let log = { updates: [], inserts: [], removes: [], deletes: [], rpcCalls: [] };
 export function __log() { return log; }
-export function __reset() { log = { updates: [], inserts: [], removes: [], deletes: [] }; }
+export function __reset() { log = { updates: [], inserts: [], removes: [], deletes: [], rpcCalls: [] }; }
 
 // --- @supabase/supabase-js ---
 export function createClient(_url, key) {
@@ -12,7 +12,7 @@ export function createClient(_url, key) {
       admin: {},
       async getUser(_t) { return { data: { user: sc.user ?? null }, error: null }; },
     },
-    async rpc(_n) { return { data: "ATT-TEST-0001", error: null }; },
+    async rpc(name, args) { log.rpcCalls.push({ name, args }); return { data: sc.rpcReturn !== undefined ? sc.rpcReturn : "ATT-TEST-0001", error: sc.rpcErr || null }; },
     from(table) {
       const b = {
         _t: table, _op: "select", _obj: null,
