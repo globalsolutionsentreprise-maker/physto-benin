@@ -404,41 +404,40 @@ export async function POST(req) {
 
   if (action === "add_client") {
     const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat, offreBienvenue, leadId } = body
-    const { data: newClient } = await supabase.from("clients").insert({ nom: client, prenom: null, email: null, telephone: null, ifu: body.ifu || null, rccm: body.rccm || null }).select().single()
-    if (!newClient) return Response.json({ error: "Erreur création client" }, { status: 500 })
     const numero = "DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase()
-    const { data: newDevis, error: devisErr } = await supabase.from("devis").insert({
-      client_id: newClient.id,
-      numero,
-      prestation: typePrestation || "—",
-      description: commentaire || "",
-      montant_net: montantDevis || 0,
-      montant_total: montantDevis || 0,
-      statut: "brouillon",
-      crm_statut: statut || "contact",
-      provenance,
-      zone,
-      categorie,
-      motif_echec: motifEchec,
-      paiements_recus: paiementsRecus || 0,
-      date_contact: dateContact || null,
-      attestation_crm: attestation || "non",
-      date_facture_crm: dateFacture || null,
-      montant_facture_crm: montantFacture || 0,
-      type_crm: typeContrat || "ponctuel",
-      duree_contrat_mois: dureeContratMois || 12,
-      frequence_intervention: frequenceIntervention || "trimestrielle",
-      date_debut_contrat: dateDebutContrat || null,
-    }).select().single()
-    if (devisErr) return Response.json({ error: "Erreur insertion devis: " + devisErr.message + " | code: " + devisErr.code }, { status: 500 })
-    if (offreBienvenue && newDevis?.id) {
-      const { error: discountErr } = await supabase.from("devis").update({ remise_bienvenue: 10 }).eq("id", newDevis.id)
-      if (discountErr) return Response.json({ error: "Erreur application remise bienvenue", detail: discountErr.message }, { status: 500 })
-      if (leadId) {
-        await supabase.from("leads").update({ traite: true }).eq("id", leadId)
-      }
-    }
-    return Response.json({ ok: true, id: newDevis?.id })
+    // Création client + devis ATOMIQUE via RPC transactionnelle : si l'insert devis
+    // échoue, le client n'est PAS créé (zéro orphelin). Remise bienvenue (10) et
+    // archivage du lead sont posés dans la même transaction (cf. rpc_add_client_devis).
+    // provenance/zone/categorie/motif_echec : on passe explicitement les DEFAULT base
+    // (la RPC insère la valeur telle quelle, sans retomber sur le DEFAULT de colonne).
+    const { data: newDevisId, error: rpcErr } = await supabase.rpc("rpc_add_client_devis", {
+      p_client: { nom: client, ifu: body.ifu || null, rccm: body.rccm || null },
+      p_devis: {
+        numero,
+        prestation: typePrestation || "—",
+        description: commentaire || "",
+        montant_net: montantDevis || 0,
+        montant_total: montantDevis || 0,
+        crm_statut: statut || "contact",
+        provenance: provenance || "—",
+        zone: zone || "—",
+        categorie: categorie || "Particulier",
+        motif_echec: motifEchec || "—",
+        paiements_recus: paiementsRecus || 0,
+        date_contact: dateContact || null,
+        attestation_crm: attestation || "non",
+        date_facture_crm: dateFacture || null,
+        montant_facture_crm: montantFacture || 0,
+        type_crm: typeContrat || "ponctuel",
+        duree_contrat_mois: dureeContratMois || 12,
+        frequence_intervention: frequenceIntervention || "trimestrielle",
+        date_debut_contrat: dateDebutContrat || null,
+      },
+      p_lead_id: leadId || null,
+      p_offre_bienvenue: !!offreBienvenue,
+    })
+    if (rpcErr) return Response.json({ error: "Erreur insertion devis: " + rpcErr.message + " | code: " + rpcErr.code }, { status: 500 })
+    return Response.json({ ok: true, id: newDevisId })
   }
 
   if (action === "save_devis_fields") {

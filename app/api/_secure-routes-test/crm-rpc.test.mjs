@@ -58,3 +58,39 @@ test("generate_planning -> 400 si pas de date de début de contrat (comportement
   assert.equal(res.status, 400);
   assert.equal(__log().rpcCalls.length, 0);
 });
+
+// ===== Commit 2 : add_client -> rpc_add_client_devis =====
+test("add_client -> appelle rpc_add_client_devis (atomique), aucune écriture directe", async () => {
+  __reset();
+  __config({ isAdmin: true, rpcReturn: "DEVIS-NEW-1" });
+  const res = await CRM(req({ action: "add_client", client: "ACME", typePrestation: "Déso", montantDevis: 500, offreBienvenue: true, leadId: "LEAD-9" }));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.id, "DEVIS-NEW-1", "id = retour de la RPC (devis créé)");
+  const calls = __log().rpcCalls;
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "rpc_add_client_devis");
+  assert.equal(calls[0].args.p_client.nom, "ACME");
+  assert.ok(String(calls[0].args.p_devis.numero).startsWith("DEV-GSE-"), "numéro généré côté app");
+  assert.equal(calls[0].args.p_devis.montant_total, 500);
+  assert.equal(calls[0].args.p_offre_bienvenue, true);
+  assert.equal(calls[0].args.p_lead_id, "LEAD-9");
+  assert.equal(__log().inserts.length, 0, "aucun INSERT direct clients/devis");
+  assert.equal(__log().updates.length, 0, "aucun UPDATE direct (remise/lead gérés par la RPC)");
+});
+
+test("add_client -> erreur RPC remonte en 500 (ex. numéro dupliqué)", async () => {
+  __reset();
+  __config({ isAdmin: true, rpcErr: { message: "duplicate", code: "23505" } });
+  const res = await CRM(req({ action: "add_client", client: "X" }));
+  assert.equal(res.status, 500);
+});
+
+test("add_client -> 403 pour un compte lecture, aucune RPC", async () => {
+  __reset();
+  __config({ isActiveAdmin: true, isAdmin: false });
+  const res = await CRM(req({ action: "add_client", client: "X" }));
+  assert.equal(res.status, 403);
+  assert.equal(__log().rpcCalls.length, 0);
+});
