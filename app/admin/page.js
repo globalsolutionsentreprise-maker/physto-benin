@@ -1906,14 +1906,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   function ouvrirAjoutClient() {
     setEditingClient(null)
     setLeadEnConversion(null)
-    setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "", bilingue: false })
+    setFormClient({ prenom: "", nom: "", email: "", telephone: "", entreprise: "", adresse: "", ifu: "", rccm: "", bilingue: false })
     setShowFormClient(true)
     setMsg("")
   }
 
   function ouvrirEditionClient(c) {
     setEditingClient(c)
-    setFormClient({ prenom: c.prenom || "", nom: c.nom || "", email: c.email || "", telephone: c.telephone || "", entreprise: c.entreprise || "", adresse: c.adresse || "", bilingue: !!c.bilingue })
+    setFormClient({ prenom: c.prenom || "", nom: c.nom || "", email: c.email || "", telephone: c.telephone || "", entreprise: c.entreprise || "", adresse: c.adresse || "", ifu: c.ifu || "", rccm: c.rccm || "", bilingue: !!c.bilingue })
     setShowFormClient(true)
     setMsg("")
   }
@@ -5554,6 +5554,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Email"), React.createElement("input", { type: "email", value: formClient.email, onChange: function(e) { setFormClient(Object.assign({}, formClient, { email: e.target.value })) }, placeholder: "jean@email.com (optionnel)", style: inp })),
           React.createElement("div", null, React.createElement("label", { style: lbl }, "Téléphone"), React.createElement("input", { value: formClient.telephone, onChange: function(e) { setFormClient(Object.assign({}, formClient, { telephone: e.target.value })) }, placeholder: "+229 01...", style: inp })),
           React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Entreprise"), React.createElement("input", { value: formClient.entreprise, onChange: function(e) { setFormClient(Object.assign({}, formClient, { entreprise: e.target.value })) }, placeholder: "Nom entreprise (optionnel)", style: inp })),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "IFU"), React.createElement("input", { value: formClient.ifu || "", onChange: function(e) { setFormClient(Object.assign({}, formClient, { ifu: e.target.value })) }, placeholder: "N° IFU (entreprise)", style: inp })),
+          React.createElement("div", null, React.createElement("label", { style: lbl }, "RCCM"), React.createElement("input", { value: formClient.rccm || "", onChange: function(e) { setFormClient(Object.assign({}, formClient, { rccm: e.target.value })) }, placeholder: "N° RCCM (entreprise)", style: inp })),
           React.createElement("div", { style: { gridColumn: "1/-1" } }, React.createElement("label", { style: lbl }, "Adresse"), React.createElement("input", { value: formClient.adresse, onChange: function(e) { setFormClient(Object.assign({}, formClient, { adresse: e.target.value })) }, placeholder: "Ex: Cadjehoun, Cotonou", style: inp })),
           React.createElement("label", { style: { gridColumn: "1/-1", display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#333", cursor: "pointer", padding: "4px 0" } },
             React.createElement("input", { type: "checkbox", checked: !!formClient.bilingue, onChange: function(e) { setFormClient(Object.assign({}, formClient, { bilingue: e.target.checked })) }, style: { width: "16px", height: "16px", cursor: "pointer" } }),

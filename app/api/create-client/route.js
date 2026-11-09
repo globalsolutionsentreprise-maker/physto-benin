@@ -51,7 +51,7 @@ export async function POST(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   try {
-    let { nom, prenom, email, telephone, entreprise, adresse, leadDescription } = await req.json()
+    let { nom, prenom, email, telephone, entreprise, adresse, ifu, rccm, leadDescription } = await req.json()
     // Normaliser l'email (Supabase Auth stocke en minuscules) → match fiable en
     // .eq() et pas de doublon de fiche par simple différence de casse/espaces.
     email = email ? String(email).trim().toLowerCase() : email
@@ -104,7 +104,7 @@ export async function POST(req) {
       if (existingClient) {
         // Ne jamais écraser user_id par null : garder le lien existant si on n'a pas
         // (re)trouvé d'id Auth. On ne met user_id que si on a un id valide.
-        const fields = { nom, prenom, telephone, entreprise, adresse }
+        const fields = { nom, prenom, telephone, entreprise, adresse, ifu: ifu || null, rccm: rccm || null }
         const linkId = userId || existingClient.user_id || null
         if (linkId) fields.user_id = linkId
         const { error: updErr } = await supabase.from("clients").update(fields).eq("email", email)
@@ -113,7 +113,7 @@ export async function POST(req) {
       } else {
         const { data: newClient, error: clientError } = await supabase
           .from("clients")
-          .insert({ user_id: userId, nom, prenom, email, telephone, entreprise, adresse })
+          .insert({ user_id: userId, nom, prenom, email, telephone, entreprise, adresse, ifu: ifu || null, rccm: rccm || null })
           .select()
           .single()
         if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
@@ -123,7 +123,7 @@ export async function POST(req) {
       // Pas d'email : insertion directe sans compte Auth
       const { data: newClient, error: clientError } = await supabase
         .from("clients")
-        .insert({ user_id: null, nom, prenom, email: null, telephone, entreprise, adresse })
+        .insert({ user_id: null, nom, prenom, email: null, telephone, entreprise, adresse, ifu: ifu || null, rccm: rccm || null })
         .select()
         .single()
       if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
