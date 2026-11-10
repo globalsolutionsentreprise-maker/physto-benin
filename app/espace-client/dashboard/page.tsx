@@ -13,11 +13,20 @@ const STATUT_LABELS: Record<string, { label: string; color: string; bg: string }
   annule:               { label: "Annulé",              color: "#991b1b", bg: "#fee2e2" },
 }
 
+const CAT_LABEL: Record<string, string> = {
+  facture: "Facture", rapport_intervention: "Rapport d'intervention", fiche_technique: "Fiche technique",
+  fiche_controle: "Fiche de contrôle", attestation: "Attestation", contrat: "Contrat", devis: "Devis", autre: "Document",
+}
+
 export default function Dashboard() {
   const router = useRouter()
   const [client, setClient] = useState<any>(null)
   const [devisList, setDevisList] = useState<any[]>([])
   const [attestations, setAttestations] = useState<any[]>([])
+  const [documents, setDocuments] = useState<any[]>([])
+  const [docCat, setDocCat] = useState<string>("tous")
+  const [docQuery, setDocQuery] = useState<string>("")
+  const [docMsg, setDocMsg] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -48,6 +57,17 @@ export default function Dashboard() {
         .order("generated_at", { ascending: false })
       setAttestations(atts || [])
 
+      // Documents mis à disposition : la RLS ne renvoie que les documents PUBLIÉS
+      // de cet établissement ; les filtres explicites confirment l'intention.
+      const { data: docs } = await supabase
+        .from("documents")
+        .select("*")
+        .eq("client_id", clientData.id)
+        .eq("statut", "publie")
+        .order("date_document", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+      setDocuments(docs || [])
+
       setLoading(false)
     }
     load()
@@ -56,6 +76,25 @@ export default function Dashboard() {
   async function logout() {
     await supabase.auth.signOut()
     router.push("/espace-client")
+  }
+
+  // Téléchargement sécurisé : la route vérifie propriété + statut publié, puis
+  // renvoie une URL signée courte (le bucket est privé).
+  async function ouvrirDocument(id: string) {
+    setDocMsg(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch("/api/client-documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + (session?.access_token || "") },
+        body: JSON.stringify({ action: "download", documentId: id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.url) window.open(data.url, "_blank", "noopener")
+      else setDocMsg("Document indisponible pour le moment. Réessayez.")
+    } catch {
+      setDocMsg("Erreur réseau. Réessayez.")
+    }
   }
 
   if (loading) {
@@ -186,6 +225,63 @@ export default function Dashboard() {
             </div>
           </section>
         )}
+
+        {/* Mes documents */}
+        <section style={{ marginTop: "40px" }}>
+          <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#0a2e1a", marginBottom: "16px", paddingBottom: "10px", borderBottom: "1px solid #e8e6e0" }}>
+            Mes documents
+          </h2>
+          {documents.length === 0 ? (
+            <div style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "40px", textAlign: "center", color: "#888", fontSize: "14px" }}>
+              Aucun document disponible pour l'instant. GSE met vos documents à disposition ici au fur et à mesure.
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", alignItems: "center" }}>
+                {["tous", ...Array.from(new Set(documents.map(d => d.categorie)))].map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setDocCat(cat)}
+                    style={{ padding: "6px 12px", borderRadius: "20px", fontSize: "12px", cursor: "pointer", border: "1px solid " + (docCat === cat ? "#0a2e1a" : "#e0ddd6"), backgroundColor: docCat === cat ? "#0a2e1a" : "#fff", color: docCat === cat ? "#fff" : "#444", fontWeight: docCat === cat ? 600 : 400 }}
+                  >
+                    {cat === "tous" ? "Tous" : (CAT_LABEL[cat] || cat)}
+                  </button>
+                ))}
+                <input
+                  value={docQuery}
+                  onChange={e => setDocQuery(e.target.value)}
+                  placeholder="Rechercher (référence, titre)…"
+                  style={{ marginLeft: "auto", padding: "8px 12px", border: "1.5px solid #e0ddd6", borderRadius: "8px", fontSize: "13px", minWidth: "160px", flex: "1 1 160px", maxWidth: "260px" }}
+                />
+              </div>
+              {docMsg && (
+                <div style={{ padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", borderRadius: "8px", fontSize: "13px", marginBottom: "12px" }}>{docMsg}</div>
+              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {documents
+                  .filter(d => (docCat === "tous" || d.categorie === docCat)
+                    && (!docQuery || (d.reference || "").toLowerCase().includes(docQuery.toLowerCase()) || (d.titre || "").toLowerCase().includes(docQuery.toLowerCase())))
+                  .map(doc => (
+                    <div
+                      key={doc.id}
+                      onClick={() => ouvrirDocument(doc.id)}
+                      style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", gap: "12px" }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: "11px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "4px" }}>{CAT_LABEL[doc.categorie] || doc.categorie}</div>
+                        <div style={{ fontSize: "15px", color: "#333", fontWeight: "500" }}>{doc.titre}</div>
+                        <div style={{ fontSize: "12px", color: "#888", marginTop: "4px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                          {doc.date_document && <span>{new Date(doc.date_document).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>}
+                          {doc.reference && <span>Réf. {doc.reference}</span>}
+                        </div>
+                      </div>
+                      <span style={{ padding: "8px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: "600", backgroundColor: "#0a2e1a", color: "#fff", whiteSpace: "nowrap", flexShrink: 0 }}>Ouvrir le PDF</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     </main>
   )

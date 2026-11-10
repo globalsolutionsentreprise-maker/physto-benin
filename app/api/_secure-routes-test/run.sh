@@ -21,10 +21,14 @@ esb ../create-client/route.js          create-client.mjs
 esb ../register-lead/route.js          register-lead.mjs
 esb ../newsletter-subscribe/route.js   newsletter.mjs
 esb ../weekly-prospects/route.js       weekly.mjs
+esb ../admin-documents/route.js        admin-documents.mjs
+esb ../client-documents/route.js       client-documents.mjs
 
 node --import tsx --test \
   routes.test.mjs \
   hors-site.test.mjs \
   lot-b.test.mjs \
   p2-permissions.test.mjs \
-  public-forms.test.mjs
+  public-forms.test.mjs \
+  documents.test.mjs \
+  client-documents.test.mjs

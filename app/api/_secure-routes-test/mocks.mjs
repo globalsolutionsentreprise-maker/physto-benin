@@ -1,9 +1,9 @@
 // Mocks pour tester generate-attestation + create-payment (chemins de rejet).
 let sc = {};
 export function __config(c) { sc = c || {}; }
-let log = { updates: [], inserts: [] };
+let log = { updates: [], inserts: [], removes: [], deletes: [] };
 export function __log() { return log; }
-export function __reset() { log = { updates: [], inserts: [] }; }
+export function __reset() { log = { updates: [], inserts: [], removes: [], deletes: [] }; }
 
 // --- @supabase/supabase-js ---
 export function createClient(_url, key) {
@@ -24,6 +24,7 @@ export function createClient(_url, key) {
         limit() { return b; },
         insert(o) { b._op = "insert"; b._obj = o; return b; },
         update(o) { b._op = "update"; b._obj = o; return b; },
+        delete() { b._op = "delete"; return b; },
         async single() { return term(b, table); },
         async maybeSingle() { return term(b, table); },
         then(res, rej) { return Promise.resolve(term(b, table)).then(res, rej); },
@@ -32,13 +33,15 @@ export function createClient(_url, key) {
     },
     storage: { from() { return {
       async upload(path) { log.inserts.push({ table: "storage", obj: { path } }); return { data: { path }, error: sc.uploadErr || null }; },
-      async createSignedUrl(p) { return { data: { signedUrl: "https://signed/" + p }, error: null }; },
+      async createSignedUrl(p) { return { data: { signedUrl: "https://signed/" + p }, error: sc.signErr || null }; },
+      async remove(paths) { log.removes.push(paths); return { data: {}, error: sc.removeErr || null }; },
     }; } },
   };
 }
 function term(b, table) {
   if (b._op === "insert") { log.inserts.push({ table, obj: b._obj }); return { data: sc.insertErr?.[table] ? null : { id: "new", ...b._obj, ...(sc.insertReturn?.[table] || {}) }, error: sc.insertErr?.[table] || null }; }
-  if (b._op === "update") { log.updates.push({ table, obj: b._obj }); return { data: null, error: null }; }
+  if (b._op === "update") { log.updates.push({ table, obj: b._obj }); return { data: null, error: sc.updateErr?.[table] || null }; }
+  if (b._op === "delete") { log.deletes.push(table); return { data: null, error: sc.deleteErr?.[table] || null }; }
   // File de SELECT par table : chaque lecture consomme l'élément suivant (modélise une
   // ligne qui change entre deux lectures, ex. récupération après course 23505).
   if (sc.dbQueue?.[table] && sc.dbQueue[table].length) {

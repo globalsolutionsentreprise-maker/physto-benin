@@ -6,6 +6,7 @@ import QRCode from "qrcode"
 import { appendEnglishPage, DEVIS_EN, RAPPORT_INTERV_EN, CERT_EN } from "@/lib/doc-bilingue"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
+import DocumentsClient from "./DocumentsClient"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -5929,7 +5930,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       ),
       devisClient.length === 0 && !showNouveauDevis
         ? React.createElement('div', { style: { textAlign: 'center', padding: '40px', backgroundColor: '#fff', border: '1px solid #e8e6e0', borderRadius: '8px', color: '#888' } }, 'Aucun devis pour ce client.')
-        : devisClient.map(function(d) { return renderDossier(d) })
+        : devisClient.map(function(d) { return renderDossier(d) }),
+      React.createElement(DocumentsClient, { key: 'docs-' + cl.id, db: db, clientId: cl.id, canWrite: canWrite })
     )
   }
 
