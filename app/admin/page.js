@@ -1551,7 +1551,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     termine: { label: "Terminé", c: "#1f2937", bg: "#f3f4f6" },
     annule: { label: "Annulé", c: "#991b1b", bg: "#fee2e2" }
   }
-  const PRESTATIONS = ["Désinsectisation", "Dératisation", "Désinfection", "Anti-termites", "Anti-moustiques", "Punaises de lit", "Reptiles et Serpents", "Contrat d'entretien"]
+  // Prestations = catégories d'activité GSE (alignées sur la fiche technicien TYPES_PRESTA) ; la cible précise (cafards, rats, termites, moustiques…) se saisit dans le détail de chaque ligne.
+  const PRESTATIONS = ["Désinsectisation", "Désinfection", "Dératisation", "Fumigation", "Traitement phytosanitaire espèces verts"]
 
   function ligneVide() { return { prestation: "", secteur: "", superficie: "", prixM2: "", forfait: "" } }
 
@@ -5362,11 +5363,11 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         )
       })(),
       React.createElement("div", { style: { marginBottom: "14px" } },
-        React.createElement("label", { style: lbl }, "Lignes du devis * · une ligne par secteur/zone (renseigne Surface + Prix/m², OU un Forfait)"),
+        React.createElement("label", { style: lbl }, "Lignes du devis * · une ligne par prestation (précise la cible dans le détail ; renseigne Surface + Prix/m², OU un Forfait)"),
         React.createElement("div", { style: { border: "1.5px solid #e0ddd6", borderRadius: "8px", overflow: "hidden" } },
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", backgroundColor: "#0a2e1a", fontSize: "10px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.06em" } },
             React.createElement("span", null, "Prestation"),
-            React.createElement("span", null, "Secteur / description"),
+            React.createElement("span", null, "Détail / cible"),
             React.createElement("span", { style: { textAlign: "right" } }, "Surface"),
             React.createElement("span", { style: { textAlign: "right" } }, "Prix/m²"),
             React.createElement("span", { style: { textAlign: "right" } }, "Forfait"),
@@ -5386,9 +5387,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
             return React.createElement("div", { key: idx, style: { display: "grid", gridTemplateColumns: "1.3fr 1.3fr 0.7fr 0.8fr 0.9fr 0.9fr 30px", gap: "6px", padding: "8px 10px", alignItems: "center", borderTop: "1px solid #f0ede8", backgroundColor: "#fff" } },
               React.createElement("select", { value: l.prestation || "", onChange: function(e) { setLigne("prestation", e.target.value) }, style: Object.assign({}, inp, { padding: "7px 8px" }) },
                 React.createElement("option", { value: "" }, "· choisir ·"),
-                PRESTATIONS.map(function(p) { return React.createElement("option", { key: p, value: p }, p) })
+                (l.prestation && !PRESTATIONS.includes(l.prestation) ? [l.prestation].concat(PRESTATIONS) : PRESTATIONS).map(function(p) { return React.createElement("option", { key: p, value: p }, p) })
               ),
-              React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Ex: Magasin, dératisation…", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
+              React.createElement("input", { type: "text", value: l.secteur || "", onChange: function(e) { setLigne("secteur", e.target.value) }, placeholder: "Cible / zone (ex : cafards, rats, termites, cuisine…)", style: Object.assign({}, inp, { padding: "7px 8px" }) }),
               React.createElement("input", { type: "number", value: l.superficie || "", disabled: estForfait, onChange: function(e) { setLigne("superficie", e.target.value) }, placeholder: "m²", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
               React.createElement("input", { type: "number", value: l.prixM2 || "", disabled: estForfait, onChange: function(e) { setLigne("prixM2", e.target.value) }, placeholder: "FCFA", title: estForfait ? "Ignoré : un forfait est saisi" : "", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right", backgroundColor: estForfait ? "#f3f4f6" : "#fff" }) }),
               React.createElement("input", { type: "number", value: l.forfait || "", onChange: function(e) { setLigne("forfait", e.target.value) }, placeholder: "FCFA", title: "Montant forfaitaire (prime sur surface × prix)", style: Object.assign({}, inp, { padding: "7px 8px", textAlign: "right" }) }),
