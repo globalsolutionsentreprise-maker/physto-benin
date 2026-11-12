@@ -1552,7 +1552,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     annule: { label: "Annulé", c: "#991b1b", bg: "#fee2e2" }
   }
   // Prestations = catégories d'activité GSE (alignées sur la fiche technicien TYPES_PRESTA) ; la cible précise (cafards, rats, termites, moustiques…) se saisit dans le détail de chaque ligne.
-  const PRESTATIONS = ["Désinsectisation", "Désinfection", "Dératisation", "Fumigation", "Traitement phytosanitaire espèces verts"]
+  const PRESTATIONS = ["Désinsectisation", "Désinfection", "Dératisation", "Fumigation", "Traitement phytosanitaire espaces verts"]
 
   function ligneVide() { return { prestation: "", secteur: "", superficie: "", prixM2: "", forfait: "" } }
 
@@ -3593,7 +3593,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var chkStyle = { width: '14px', height: '14px', accentColor: '#0a2e1a', cursor: 'pointer' }
 
     var TYPES_PASSAGE = ['Contractuel', 'Occasionnel', 'Essai', 'Contrôle']
-    var TYPES_PRESTA = ['Désinsectisation', 'Désinfection', 'Dératisation', 'Fumigation', 'Traitement phytosanitaire espèces verts']
+    var TYPES_PRESTA = ['Désinsectisation', 'Désinfection', 'Dératisation', 'Fumigation', 'Traitement phytosanitaire espaces verts']
     var NUISIBLES = ['Insectes rampants', 'Insectes volants', 'Rongeurs', 'Microbes']
     var PRODUITS_CATS = [
       { key: 'insecticides', label: 'Insecticides (Rampants / Volants)' },
