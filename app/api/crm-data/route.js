@@ -537,6 +537,21 @@ export async function POST(req) {
     return Response.json({ ok: true })
   }
 
+  if (action === "edit_dep_client") {
+    const { id, libelle, montant, categorie, date } = body
+    if (!id) return Response.json({ error: "id manquant" }, { status: 400 })
+    // Modifie la ligne existante (pas de nouvelle ligne). Même garde-fou doublon que
+    // l'ajout : l'index unique depenses_devis_uniq (devis_id, libelle, montant, categorie).
+    const { data: dep, error } = await supabase.from("depenses_devis")
+      .update({ libelle, montant: montant || 0, categorie: categorie || "autre", date: date || null })
+      .eq("id", id).select().single()
+    if (error) {
+      if (error.code === "23505") return Response.json({ error: "Une dépense identique existe déjà sur cette affaire." }, { status: 409 })
+      return fail(error)
+    }
+    return Response.json({ ok: true, dep: { id: dep.id, libelle: dep.libelle, montant: dep.montant, categorie: dep.categorie || "autre", date: dep.date || dep.created_at?.split("T")[0] || "" } })
+  }
+
   if (action === "generate_planning") {
     const { devisId, clientNom, adresse } = body
     const { data: devis } = await supabase.from("devis")

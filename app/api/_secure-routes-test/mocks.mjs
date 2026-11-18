@@ -1,9 +1,9 @@
 // Mocks pour tester generate-attestation + create-payment (chemins de rejet).
 let sc = {};
 export function __config(c) { sc = c || {}; }
-let log = { updates: [], inserts: [], removes: [], deletes: [], rpcCalls: [] };
+let log = { updates: [], inserts: [], rpcCalls: [], removes: [], deletes: [] };
 export function __log() { return log; }
-export function __reset() { log = { updates: [], inserts: [], removes: [], deletes: [], rpcCalls: [] }; }
+export function __reset() { log = { updates: [], inserts: [], rpcCalls: [], removes: [], deletes: [] }; }
 
 // --- @supabase/supabase-js ---
 export function createClient(_url, key) {
@@ -40,7 +40,7 @@ export function createClient(_url, key) {
 }
 function term(b, table) {
   if (b._op === "insert") { log.inserts.push({ table, obj: b._obj }); return { data: sc.insertErr?.[table] ? null : { id: "new", ...b._obj, ...(sc.insertReturn?.[table] || {}) }, error: sc.insertErr?.[table] || null }; }
-  if (b._op === "update") { log.updates.push({ table, obj: b._obj }); return { data: null, error: sc.updateErr?.[table] || null }; }
+  if (b._op === "update") { log.updates.push({ table, obj: b._obj }); return { data: sc.updateReturn?.[table] !== undefined ? { id: "upd", ...b._obj, ...sc.updateReturn[table] } : null, error: sc.updateErr?.[table] || null }; }
   if (b._op === "delete") { log.deletes.push(table); return { data: null, error: sc.deleteErr?.[table] || null }; }
   // File de SELECT par table : chaque lecture consomme l'élément suivant (modélise une
   // ligne qui change entre deux lectures, ex. récupération après course 23505).

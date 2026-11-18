@@ -140,3 +140,49 @@ test("delete_client -> clientId manquant -> 400, aucune RPC", async () => {
   assert.equal(res.status, 400);
   assert.equal(__log().rpcCalls.length, 0);
 });
+
+// ===== Charges & investissements par affaire : edit_dep_client =====
+test("edit_dep_client -> met à jour depenses_devis (pas d'insert), renvoie la ligne", async () => {
+  __reset();
+  __config({ isAdmin: true, updateReturn: { depenses_devis: {} } });
+  const res = await CRM(req({ action: "edit_dep_client", id: "DEP-1", libelle: "Carburant", montant: 12000, categorie: "transport", date: "2026-11-18" }));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  const ups = __log().updates.filter((u) => u.table === "depenses_devis");
+  assert.equal(ups.length, 1, "une seule mise à jour");
+  assert.equal(ups[0].obj.montant, 12000);
+  assert.equal(ups[0].obj.categorie, "transport");
+  assert.equal(__log().inserts.filter((i) => i.table === "depenses_devis").length, 0, "aucun INSERT (pas de nouvelle ligne)");
+});
+
+test("edit_dep_client -> changement de catégorie en investissement", async () => {
+  __reset();
+  __config({ isAdmin: true, updateReturn: { depenses_devis: {} } });
+  const res = await CRM(req({ action: "edit_dep_client", id: "DEP-1", libelle: "Pulvérisateur", montant: 80000, categorie: "investissement", date: "2026-11-18" }));
+  assert.equal(res.status, 200);
+  assert.equal(__log().updates.find((u) => u.table === "depenses_devis").obj.categorie, "investissement");
+});
+
+test("edit_dep_client -> 409 si doublon (index unique 23505)", async () => {
+  __reset();
+  __config({ isAdmin: true, updateErr: { depenses_devis: { code: "23505", message: "dup" } } });
+  const res = await CRM(req({ action: "edit_dep_client", id: "DEP-1", libelle: "X", montant: 1, categorie: "autre" }));
+  assert.equal(res.status, 409);
+});
+
+test("edit_dep_client -> 400 si id manquant", async () => {
+  __reset();
+  __config({ isAdmin: true });
+  const res = await CRM(req({ action: "edit_dep_client", montant: 1 }));
+  assert.equal(res.status, 400);
+  assert.equal(__log().updates.filter((u) => u.table === "depenses_devis").length, 0);
+});
+
+test("edit_dep_client -> 403 pour un compte lecture", async () => {
+  __reset();
+  __config({ isActiveAdmin: true });
+  const res = await CRM(req({ action: "edit_dep_client", id: "DEP-1", montant: 1 }));
+  assert.equal(res.status, 403);
+  assert.equal(__log().updates.filter((u) => u.table === "depenses_devis").length, 0);
+});

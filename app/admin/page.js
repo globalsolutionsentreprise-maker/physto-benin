@@ -7,6 +7,7 @@ import { appendEnglishPage, DEVIS_EN, RAPPORT_INTERV_EN, CERT_EN } from "@/lib/d
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 import { clientMatchesQuery } from "@/lib/client-search.mjs"
+import { synthDepenses, isInvestissement } from "@/lib/depenses-affaire.mjs"
 import DocumentsClient from "./DocumentsClient"
 
 const supabase = createClient(
@@ -1489,6 +1490,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   const [finLoading, setFinLoading] = React.useState(false)
   const [depModal, setDepModal] = React.useState(false)
   const [depForm, setDepForm] = React.useState({ categorie: "autre", libelle: "", montant: "", date: "" })
+  // Filtres de la vue Finances « Dépenses par affaire »
+  const [depAffSearch, setDepAffSearch] = React.useState("")
+  const [depAffNature, setDepAffNature] = React.useState("tous")   // tous | charge | invest
+  const [depAffCat, setDepAffCat] = React.useState("toutes")
+  const [depAffFrom, setDepAffFrom] = React.useState("")
+  const [depAffTo, setDepAffTo] = React.useState("")
   const [chargeForm, setChargeForm] = React.useState({ libelle: "", montant: "", dateDebut: "", dateFin: "" })
   const [depSaving, setDepSaving] = React.useState(false)
   const [depErr, setDepErr] = React.useState("")
@@ -4188,8 +4195,14 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     if (m <= 200000) return 12000
     return 15000
   }
-  function openDepModal() {
-    setDepForm({ categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10), devisId: "" })
+  function openDepModal(prefillDevisId) {
+    setDepForm({ editId: null, categorie: "autre", libelle: "", montant: "", date: new Date().toISOString().slice(0, 10), devisId: prefillDevisId || "" })
+    setDepErr("")
+    setDepModal(true)
+  }
+  // Ouvre le modal en mode ÉDITION d'une dépense rattachée à une affaire.
+  function openEditDep(item, devisId) {
+    setDepForm({ editId: item.id, categorie: item.categorie || "autre", libelle: item.libelle || "", montant: item.montant != null ? String(item.montant) : "", date: item.date || "", devisId: devisId || "" })
     setDepErr("")
     setDepModal(true)
   }
@@ -4205,16 +4218,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     try {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
-      var body = depForm.devisId
-        ? { action: "add_dep_client", devisId: depForm.devisId, libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
-        : { action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
+      var body = depForm.editId
+        ? { action: "edit_dep_client", id: depForm.editId, libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
+        : depForm.devisId
+          ? { action: "add_dep_client", devisId: depForm.devisId, libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
+          : { action: "add_depense", libelle: libelle, montant: montant, date: depForm.date || null, categorie: depForm.categorie || "autre" }
       var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify(body) })
       var out = {}
       try { out = await res.json() } catch (e) {}
       if (!res.ok) { setDepErr(out.error || "Enregistrement impossible."); setDepSaving(false); return }
       setDepModal(false)
       await chargerFinances()
-      setMsg(depForm.devisId ? "Dépense rattachée à l'affaire enregistrée." : "Dépense enregistrée.")
+      setMsg(depForm.editId ? "Dépense modifiée." : (depForm.devisId ? "Dépense rattachée à l'affaire enregistrée." : "Dépense enregistrée."))
     } catch (e) { setMsg("Erreur enregistrement dépense") }
     setDepSaving(false)
   }
@@ -4224,6 +4239,18 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       var sess = await db.auth.getSession()
       var token = (sess.data.session && sess.data.session.access_token) || ""
       var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_depense", id: id }) })
+      if (!res.ok) { var o = {}; try { o = await res.json() } catch (e2) {} ; setMsg("Erreur suppression : " + (o.error || res.status)); return }
+      await chargerFinances()
+      setMsg("Dépense supprimée")
+    } catch (e) { setMsg("Erreur suppression") }
+  }
+  // Supprime une dépense RATTACHÉE À UNE AFFAIRE (depenses_devis) via del_dep_client.
+  async function supprimerDepenseAffaire(id) {
+    if (!confirm("Supprimer cette dépense de l'affaire ?")) return
+    try {
+      var sess = await db.auth.getSession()
+      var token = (sess.data.session && sess.data.session.access_token) || ""
+      var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "del_dep_client", id: id }) })
       if (!res.ok) { var o = {}; try { o = await res.json() } catch (e2) {} ; setMsg("Erreur suppression : " + (o.error || res.status)); return }
       await chargerFinances()
       setMsg("Dépense supprimée")
@@ -4513,7 +4540,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     return e("div", { style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }, onClick: function() { setDepModal(false) } },
       e("div", { onClick: function(ev) { ev.stopPropagation() }, style: { background: "#fff", borderRadius: "12px", padding: "24px", width: "440px", maxWidth: "92vw" } },
         e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" } },
-          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, "Nouvelle dépense"),
+          e("h3", { style: { margin: 0, fontSize: "16px", fontWeight: "700", color: "#111" } }, depForm.editId ? "Modifier la dépense" : "Nouvelle dépense"),
           e("button", { onClick: function() { setDepModal(false) }, style: { background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#888" } }, "×")
         ),
         e("div", { style: { marginBottom: "12px" } },
@@ -4522,7 +4549,13 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
             DEP_CATS.map(function(c) { return e("option", { key: c.key, value: c.key }, c.label) })
           )
         ),
-        e("div", { style: { marginBottom: "12px" } },
+        depForm.editId ? (function() {
+          var aff = (finData.clients || []).find(function(c) { return c.id === depForm.devisId })
+          return e("div", { style: { marginBottom: "12px" } },
+            e("label", { style: lblS }, "Affaire liée"),
+            e("div", { style: Object.assign({}, inpS, { background: "#f6f5f1", color: "#555" }) }, aff ? aff.client : "Affaire")
+          )
+        })() : e("div", { style: { marginBottom: "12px" } },
           e("label", { style: lblS }, "Affaire liée (optionnel · rattache la dépense à un devis)"),
           e("select", { value: depForm.devisId || "", onChange: function(ev) { var v = ev.target.value; setDepForm(function(p) { return Object.assign({}, p, { devisId: v }) }) }, style: Object.assign({}, inpS, { cursor: "pointer" }) },
             e("option", { value: "" }, "· Dépense générale (non rattachée) ·"),
@@ -4729,9 +4762,77 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
           )
         )
       ),
+      (function() {
+        var rows = []
+        cls.forEach(function(c) { (c.depensesItems || []).forEach(function(it) {
+          rows.push({ id: it.id, affaireId: c.id, affaire: c.client, date: it.date || "", libelle: it.libelle || "", categorie: it.categorie || "autre", montant: it.montant || 0, inv: isInvestissement(it.categorie) })
+        }) })
+        var qq = depAffSearch.trim().toLowerCase()
+        var filtered = rows.filter(function(x) {
+          if (qq && (x.affaire + " " + x.libelle).toLowerCase().indexOf(qq) === -1) return false
+          if (depAffNature === "charge" && x.inv) return false
+          if (depAffNature === "invest" && !x.inv) return false
+          if (depAffCat !== "toutes" && x.categorie !== depAffCat) return false
+          if (depAffFrom && (!x.date || x.date < depAffFrom)) return false
+          if (depAffTo && (!x.date || x.date > depAffTo)) return false
+          return true
+        })
+        filtered.sort(function(a, b) { return (b.date || "").localeCompare(a.date || "") })
+        var totF = filtered.reduce(function(s, x) { return s + x.montant }, 0)
+        var selS = { padding: "7px 9px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit", background: "#fff", cursor: "pointer" }
+        var dtS = { padding: "6px 8px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit" }
+        return e("div", { style: { marginBottom: "24px" } },
+          e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexWrap: "wrap", gap: "8px" } },
+            e("div", { style: Object.assign({}, secS, { margin: 0 }) }, "Dépenses par affaire"),
+            e("button", { onClick: function() { openDepModal() }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "+ Ajouter")
+          ),
+          e("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "10px" } },
+            e("input", { type: "search", value: depAffSearch, onChange: function(ev) { setDepAffSearch(ev.target.value) }, placeholder: "Rechercher une affaire, un client, un libellé…", style: { flex: "1 1 220px", minWidth: "160px", padding: "7px 10px", border: "1px solid #d8d5cc", borderRadius: "6px", fontSize: "12px", fontFamily: "inherit", boxSizing: "border-box" } }),
+            e("select", { value: depAffNature, onChange: function(ev) { setDepAffNature(ev.target.value) }, style: selS },
+              e("option", { value: "tous" }, "Charges + investissements"),
+              e("option", { value: "charge" }, "Charges seulement"),
+              e("option", { value: "invest" }, "Investissements seulement")
+            ),
+            e("select", { value: depAffCat, onChange: function(ev) { setDepAffCat(ev.target.value) }, style: selS },
+              e("option", { value: "toutes" }, "Toutes catégories"),
+              DEP_CATS.map(function(c) { return e("option", { key: c.key, value: c.key }, c.label) })
+            ),
+            e("input", { type: "date", title: "Du", value: depAffFrom, onChange: function(ev) { setDepAffFrom(ev.target.value) }, style: dtS }),
+            e("input", { type: "date", title: "Au", value: depAffTo, onChange: function(ev) { setDepAffTo(ev.target.value) }, style: dtS }),
+            (depAffSearch || depAffNature !== "tous" || depAffCat !== "toutes" || depAffFrom || depAffTo)
+              ? e("button", { onClick: function() { setDepAffSearch(""); setDepAffNature("tous"); setDepAffCat("toutes"); setDepAffFrom(""); setDepAffTo("") }, style: { padding: "7px 12px", border: "1px solid #e0ddd6", background: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", color: "#555" } }, "Réinitialiser")
+              : null
+          ),
+          e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px" } },
+            e("table", { style: { width: "100%", borderCollapse: "collapse" } },
+              e("thead", null, e("tr", null, ["Affaire / client", "Date", "Libellé", "Catégorie", "Nature", "Montant", ""].map(function(hh, i) { return e("th", { key: i, style: thS }, hh) }))),
+              e("tbody", null,
+                filtered.map(function(x) {
+                  var cat = DEP_CATS.find(function(k) { return k.key === x.categorie }) || { label: x.categorie }
+                  return e("tr", { key: x.id },
+                    e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal", fontWeight: "600", color: "#0a2e1a" }) }, x.affaire),
+                    e("td", { style: tdS }, finFmtD(x.date)),
+                    e("td", { style: Object.assign({}, tdS, { whiteSpace: "normal" }) }, x.libelle),
+                    e("td", { style: tdS }, cat.label),
+                    e("td", { style: tdS }, e("span", { style: { fontSize: "10px", fontWeight: "700", color: x.inv ? "#185FA5" : "#7a6f5d", backgroundColor: x.inv ? "#e6f0fb" : "#f0ede6", borderRadius: "20px", padding: "2px 10px" } }, x.inv ? "Investissement" : "Charge")),
+                    e("td", { style: Object.assign({}, tdS, { color: x.inv ? "#185FA5" : "#E24B4A", fontWeight: "600" }) }, finFmt(x.montant) + " FCFA"),
+                    e("td", { style: tdS }, e("div", { style: { display: "flex", gap: "6px" } },
+                      e("button", { onClick: function() { openEditDep(x, x.affaireId) }, title: "Modifier", style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "✏️"),
+                      e("button", { onClick: function() { supprimerDepenseAffaire(x.id) }, title: "Supprimer", style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
+                    ))
+                  )
+                }),
+                filtered.length === 0 ? e("tr", null, e("td", { style: Object.assign({}, tdS, { color: "#999", textAlign: "center" }), colSpan: 7 }, rows.length === 0 ? "Aucune dépense rattachée à une affaire." : "Aucune dépense ne correspond aux filtres.")) : null,
+                filtered.length > 0 ? e("tr", { style: { fontWeight: "600" } }, e("td", { style: Object.assign({}, tdS, { fontWeight: "600" }), colSpan: 5 }, "Total (" + filtered.length + ")"), e("td", { style: Object.assign({}, tdS, { fontWeight: "700" }) }, finFmt(totF) + " FCFA"), e("td", { style: tdS }, "")) : null
+              )
+            )
+          )
+        )
+      })(),
+
       e("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } },
         e("div", { style: Object.assign({}, secS, { margin: 0 }) }, "Dépenses générales"),
-        e("button", { onClick: openDepModal, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter")
+        e("button", { onClick: function() { openDepModal() }, style: { background: "none", border: "1px solid #e0ddd6", color: "#555", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "+ Ajouter")
       ),
       e("div", { style: { overflowX: "auto", background: "#fff", border: "1px solid #e8e6e0", borderRadius: "10px", marginBottom: "24px" } },
         e("table", { style: { width: "100%", borderCollapse: "collapse" } },
@@ -5860,6 +5961,45 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
               })
             )
           ),
+
+          (function() {
+            var affFin = ((finData && finData.clients) || []).find(function(x) { return x.id === d.id })
+            var depItems = (affFin && affFin.depensesItems) || []
+            var synth = synthDepenses(depItems)
+            var chip = function(label, val, color) {
+              return React.createElement('div', { key: label, style: { border: '1px solid #e8e6e0', borderRadius: '8px', padding: '6px 12px', background: '#faf9f6' } },
+                React.createElement('div', { style: { fontSize: '9px', fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em' } }, label),
+                val ? React.createElement('div', { style: { fontSize: '13px', fontWeight: '700', color: color } }, val) : null
+              )
+            }
+            return React.createElement('div', { style: { marginBottom: '14px' } },
+              React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' } },
+                React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' } }, 'Charges & investissements'),
+                React.createElement('button', { onClick: function() { openDepModal(d.id) }, style: { background: 'none', border: '1px solid #e0ddd6', color: '#555', borderRadius: '6px', padding: '5px 12px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', ...roHide } }, '+ Ajouter une charge ou un investissement')
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' } },
+                chip('Charges', finFmt(synth.totalCharges) + ' FCFA', '#E24B4A'),
+                chip('Investissements', finFmt(synth.totalInvest) + ' FCFA', '#185FA5'),
+                chip(synth.nb + ' ligne(s)', '', '#555')
+              ),
+              depItems.length === 0
+                ? React.createElement('div', { style: { fontSize: '12px', color: '#999', padding: '4px 0' } }, 'Aucune charge enregistrée pour cette affaire.')
+                : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
+                    depItems.map(function(it) {
+                      var inv = isInvestissement(it.categorie)
+                      var cat = DEP_CATS.find(function(x) { return x.key === it.categorie }) || { label: it.categorie || 'Autre' }
+                      return React.createElement('div', { key: it.id, style: { display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid ' + (inv ? '#cfe0f0' : '#e8e6e0'), background: inv ? '#f5f9fd' : '#fff', borderRadius: '8px', padding: '8px 12px' } },
+                        React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: '#0a2e1a', flexShrink: 0 } }, it.date ? new Date(it.date + 'T00:00:00').toLocaleDateString('fr-FR') : '·'),
+                        React.createElement('span', { style: { fontSize: '10px', fontWeight: '700', color: inv ? '#185FA5' : '#7a6f5d', backgroundColor: inv ? '#e6f0fb' : '#f0ede6', borderRadius: '20px', padding: '2px 10px', flexShrink: 0 } }, cat.label),
+                        React.createElement('span', { style: { fontSize: '12px', color: '#555', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, it.libelle || ''),
+                        React.createElement('span', { style: { fontSize: '12px', fontWeight: '700', color: inv ? '#185FA5' : '#E24B4A', flexShrink: 0 } }, finFmt(it.montant) + ' FCFA'),
+                        React.createElement('button', { onClick: function() { openEditDep(it, d.id) }, title: 'Modifier', style: { background: 'none', border: '1px solid #e0ddd6', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, ...roHide } }, '✏️'),
+                        React.createElement('button', { onClick: function() { supprimerDepenseAffaire(it.id) }, title: 'Supprimer', style: { background: 'none', border: '1px solid #fecaca', color: '#991b1b', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, ...roHide } }, '🗑')
+                      )
+                    })
+                  )
+            )
+          })(),
 
           histoDevis.length > 0 && React.createElement('div', { style: { marginBottom: '14px' } },
             React.createElement('div', { style: { fontSize: '11px', fontWeight: '700', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' } }, 'Historique'),
