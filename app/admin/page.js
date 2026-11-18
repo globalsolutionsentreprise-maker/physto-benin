@@ -6,6 +6,7 @@ import QRCode from "qrcode"
 import { appendEnglishPage, DEVIS_EN, RAPPORT_INTERV_EN, CERT_EN } from "@/lib/doc-bilingue"
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { resumeContrat, dateFinContrat, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
+import { clientMatchesQuery } from "@/lib/client-search.mjs"
 import DocumentsClient from "./DocumentsClient"
 
 const supabase = createClient(
@@ -1421,6 +1422,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   const [devisList, setDevisList] = React.useState([])
   const [clients, setClients] = React.useState([])
   const [clientsLoaded, setClientsLoaded] = React.useState(false)
+  const [rechercheClient, setRechercheClient] = React.useState("")
   const [loading, setLoading] = React.useState(true)
   const [msg, setMsg] = React.useState("")
   const [filtre, setFiltre] = React.useState("tous")
@@ -5549,13 +5551,27 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
 
   function renderVueClients() {
     var clientsSeg = segFiltre(clients)
+    var q = rechercheClient.trim()
+    var clientsFiltres = q ? clientsSeg.filter(function(c) { return clientMatchesQuery(c, rechercheClient) }) : clientsSeg
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
-        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clientsSeg.length + " client(s)"),
+        React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clientsFiltres.length + (q ? " / " + clientsSeg.length : "") + " client(s)"),
         React.createElement("div", { style: { display: "flex", gap: "8px" } },
           React.createElement("button", { onClick: charger, style: { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "8px 14px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" } }, "↺"),
           React.createElement("button", { onClick: ouvrirAjoutClient, style: { backgroundColor: "#0a2e1a", color: "#fff", border: "none", borderRadius: "6px", padding: "10px 20px", fontSize: "13px", fontWeight: "700", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "+ Nouveau client")
         )
+      ),
+      React.createElement("div", { style: { position: "relative", marginBottom: "16px" } },
+        React.createElement("span", { style: { position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: "#aaa", pointerEvents: "none" } }, "🔍"),
+        React.createElement("input", {
+          type: "search",
+          value: rechercheClient,
+          onChange: function(e) { setRechercheClient(e.target.value) },
+          placeholder: "Rechercher par nom, téléphone ou établissement…",
+          "aria-label": "Rechercher un client",
+          style: { width: "100%", boxSizing: "border-box", padding: "11px 38px 11px 38px", fontSize: "13px", fontFamily: "inherit", border: "1px solid #e0ddd6", borderRadius: "8px", backgroundColor: "#fff", outline: "none" }
+        }),
+        q ? React.createElement("button", { onClick: function() { setRechercheClient("") }, "aria-label": "Effacer la recherche", style: { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "16px", color: "#999", cursor: "pointer", lineHeight: 1, padding: "4px" } }, "×") : null
       ),
       showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
         React.createElement("h4", { style: { margin: "0 0 4px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : (leadEnConversion ? "Convertir le lead en client" : "Ajouter un client")),
@@ -5580,9 +5596,9 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
       ),
       loading
         ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...")
-        : clientsSeg.length === 0
-          ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, "Aucun client.")
-          : React.createElement("div", null, clientsSeg.map(function(c) {
+        : clientsFiltres.length === 0
+          ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, q ? "Aucun client ne correspond à « " + q + " »." : "Aucun client.")
+          : React.createElement("div", null, clientsFiltres.map(function(c) {
               var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
               var nbDocs = certsList.filter(function(cert) { return cert.client_id === c.id }).length + fichesList.filter(function(f) { return f.client_id === c.id }).length
               return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
