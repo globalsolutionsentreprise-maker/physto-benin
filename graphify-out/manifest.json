@@ -10,58 +10,53 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1792402865.6700032,
-    "ast_hash": "5461ad202dd3404e730a4e0d4d4dfefe",
+    "mtime": 1794679131.870266,
+    "ast_hash": "03bfdddca174902bb49f984c7a43cf8a",
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1793204069.585194,
-    "ast_hash": "d5a604e9b43466a217c443262d2c0b6e",
+    "mtime": 1794555984.7645826,
+    "ast_hash": "68788adf84940dcb64bcbfb180bfa6a3",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
-    "mtime": 1786712578.6917365,
-    "ast_hash": "3a3fa020a0e9f92462d799aa37b45f85",
+    "mtime": 1794006145.12653,
+    "ast_hash": "5acfacf301fdc006632cbae9b8a8ae94",
     "semantic_hash": ""
   },
   "app/api/analyze-contract/route.js": {
-    "mtime": 1793191213.6870704,
-    "ast_hash": "352b31f18c30e81fc814ab4ce66aecf5",
+    "mtime": 1794005332.1634583,
+    "ast_hash": "e68dbc199db48ac42322970ce15b49fc",
     "semantic_hash": ""
   },
   "app/api/analyze-rapport/route.js": {
-    "mtime": 1793193636.8120549,
-    "ast_hash": "e7b85d989c4b68796af0e9c7ef0de5f5",
+    "mtime": 1794005655.2317529,
+    "ast_hash": "24eb8daff42f69d28989824dcc053d01",
     "semantic_hash": ""
   },
   "app/api/create-client/route.js": {
-    "mtime": 1793191206.0139437,
-    "ast_hash": "35fd10d7a688cfab04a54d12cd3f61a8",
-    "semantic_hash": ""
-  },
-  "app/api/create-payment/route.ts": {
-    "mtime": 1780430769.3780556,
-    "ast_hash": "89e1f08a246fa3aa667089cb789f9a11",
+    "mtime": 1794258917.753019,
+    "ast_hash": "532977ae99a39f3f2149360bf77f17f6",
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1793192029.957002,
-    "ast_hash": "6a709cf381fa22d717a8fe716fc6afe5",
+    "mtime": 1794258964.0132394,
+    "ast_hash": "812b34c0b12efecde06d822efeaf15eb",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
-    "mtime": 1793191217.1412313,
-    "ast_hash": "7cf8f1862abf60b2b52aebf61e8ce7de",
+    "mtime": 1794005325.1879678,
+    "ast_hash": "12a51cb65d84df7a15654e3ef582dd5a",
     "semantic_hash": ""
   },
   "app/api/generate-attestation/route.ts": {
-    "mtime": 1792589549.3056872,
-    "ast_hash": "ba4e7868b867f5b7f7cece6c62507e85",
+    "mtime": 1794104065.8528903,
+    "ast_hash": "6b41691cf8c4f7b052d27098d0361113",
     "semantic_hash": ""
   },
   "app/api/generate-contract/route.js": {
-    "mtime": 1793191633.057724,
-    "ast_hash": "52858e1549c8f2c819ee5670d131b396",
+    "mtime": 1794005644.736157,
+    "ast_hash": "a19fa4417fa9f39a43c33df86165e543",
     "semantic_hash": ""
   },
   "app/api/meteo-cotonou/route.js": {
@@ -70,18 +65,18 @@
     "semantic_hash": ""
   },
   "app/api/newsletter-subscribe/route.js": {
-    "mtime": 1781607098.909571,
-    "ast_hash": "bb3f9dc5c58b16cfb3a9d1a301b66e0a",
+    "mtime": 1794150040.222376,
+    "ast_hash": "46406c1a66373037cdee3f595076bfe1",
     "semantic_hash": ""
   },
   "app/api/register-lead/route.js": {
-    "mtime": 1792589549.3082979,
-    "ast_hash": "1d8fca5fce6c247c4426ba8403f0f063",
+    "mtime": 1794150021.9768703,
+    "ast_hash": "342654b3fd970d9498753ecd4dd27a68",
     "semantic_hash": ""
   },
   "app/api/rh-data/route.js": {
-    "mtime": 1793193769.8794253,
-    "ast_hash": "f447640775a3d8e063cf3a27408c9398",
+    "mtime": 1794005676.6876915,
+    "ast_hash": "c1cbe5d929d37ddf8a134ba8f8e8d8f1",
     "semantic_hash": ""
   },
   "app/api/rh-frame/route.js": {
@@ -90,8 +85,8 @@
     "semantic_hash": ""
   },
   "app/api/send-devis/route.js": {
-    "mtime": 1793191201.8612108,
-    "ast_hash": "843c6025a52cd9609c7ff06183393a3a",
+    "mtime": 1794005318.7661772,
+    "ast_hash": "cde5e0d7af32674987babc85c0eab014",
     "semantic_hash": ""
   },
   "app/blog/[slug]/page.tsx": {
@@ -120,8 +115,8 @@
     "semantic_hash": ""
   },
   "app/contact/ContactForm.js": {
-    "mtime": 1792589549.2743335,
-    "ast_hash": "f62928ba0072e0b82f854d961e6a275d",
+    "mtime": 1794150068.1296642,
+    "ast_hash": "0bd3721667be7504443b5d545337f38c",
     "semantic_hash": ""
   },
   "app/contact/page.tsx": {
@@ -135,13 +130,13 @@
     "semantic_hash": ""
   },
   "app/espace-client/dashboard/page.tsx": {
-    "mtime": 1777295736.4524,
-    "ast_hash": "77980f83dcab3a7c0846661d29cf0791",
+    "mtime": 1794351026.7077756,
+    "ast_hash": "611a3802276b2962c23bcc3c50d377b8",
     "semantic_hash": ""
   },
   "app/espace-client/devis/[id]/page.tsx": {
-    "mtime": 1793191833.504423,
-    "ast_hash": "f74d2309803c58296be949bc37e1eee2",
+    "mtime": 1794101727.7965796,
+    "ast_hash": "f211e9117a79278f8898d939a6c7e4d2",
     "semantic_hash": ""
   },
   "app/espace-client/page.tsx": {
@@ -160,8 +155,8 @@
     "semantic_hash": ""
   },
   "app/mentions-legales/page.tsx": {
-    "mtime": 1793195035.2086396,
-    "ast_hash": "6f263df7510673918b70557b1ca4d640",
+    "mtime": 1794215005.4259055,
+    "ast_hash": "ecd1bb93227de2bbf6550c69480feafa",
     "semantic_hash": ""
   },
   "app/not-found.tsx": {
@@ -180,8 +175,8 @@
     "semantic_hash": ""
   },
   "app/qui-sommes-nous/page.tsx": {
-    "mtime": 1792589960.4055967,
-    "ast_hash": "dfea64cab5d8608ae941edb7e141cb3c",
+    "mtime": 1795038435.2380106,
+    "ast_hash": "eae763592ce676e76f8a2457e40a9d77",
     "semantic_hash": ""
   },
   "app/services/[slug]/page.tsx": {
@@ -200,8 +195,8 @@
     "semantic_hash": ""
   },
   "app/verifier/[token]/page.tsx": {
-    "mtime": 1792589549.3133793,
-    "ast_hash": "d6b12c2ba89934020c51c81adc6172aa",
+    "mtime": 1794145429.6233644,
+    "ast_hash": "208d86b889e57f0e275f9c9e252a57a3",
     "semantic_hash": ""
   },
   "eslint.config.mjs": {
@@ -257,11 +252,6 @@
   "supabase/.temp/linked-project.json": {
     "mtime": 1777748770.414637,
     "ast_hash": "2778ad56a99af0a3129da6f95d6debe7",
-    "semantic_hash": ""
-  },
-  "supabase/functions/fedapay-webhook/index.ts": {
-    "mtime": 1778155025.7429318,
-    "ast_hash": "502e1bc5297090e037d36cd6eda6db32",
     "semantic_hash": ""
   },
   "supabase/migrations/20260507_devis_modalites_paiement.sql": {
@@ -580,8 +570,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1793192717.2583423,
-    "ast_hash": "7f48f9f995bfd0095d5f85dd71c84cac",
+    "mtime": 1795039968.4660206,
+    "ast_hash": "454e8896ccc39baba7a42c2836a68e81",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -655,8 +645,8 @@
     "semantic_hash": ""
   },
   "app/contrat-conformite/AuditForm.tsx": {
-    "mtime": 1783608191.2916925,
-    "ast_hash": "9167186151f8041ee737fc0d2a72e62b",
+    "mtime": 1794160972.9482944,
+    "ast_hash": "667a23e047f39d1f970a16895a3810d9",
     "semantic_hash": ""
   },
   "app/contrat-conformite/page.tsx": {
@@ -875,8 +865,8 @@
     "semantic_hash": ""
   },
   "app/api/recrutement/route.js": {
-    "mtime": 1787000641.5272782,
-    "ast_hash": "4c873a05dd9f796fd4db60295142afaa",
+    "mtime": 1794005307.0339665,
+    "ast_hash": "dd2e54b7fd8ab0434cdd6c4614de1368",
     "semantic_hash": ""
   },
   "app/recrutement/FormCandidature.tsx": {
@@ -950,8 +940,8 @@
     "semantic_hash": ""
   },
   "app/api/prospection/route.js": {
-    "mtime": 1791815370.3027234,
-    "ast_hash": "bcaac74e1da13141283e9da1d8dc9c66",
+    "mtime": 1794005292.0462484,
+    "ast_hash": "1d73bc735c3f116e455b1f14312a8fd6",
     "semantic_hash": ""
   },
   "supabase/migrations/20260914120000_prospects.sql": {
@@ -1095,8 +1085,8 @@
     "semantic_hash": ""
   },
   "app/api/weekly-prospects/route.js": {
-    "mtime": 1792589549.3186402,
-    "ast_hash": "15e2fe122df82af812ccbfac3908d3db",
+    "mtime": 1794150034.0916195,
+    "ast_hash": "4722a249997b9bdcf3929fec390c3fca",
     "semantic_hash": ""
   },
   "vercel.json": {
@@ -1245,18 +1235,18 @@
     "semantic_hash": ""
   },
   "lib/verify-admin.js": {
-    "mtime": 1793191196.2260082,
-    "ast_hash": "de89e348224b0ef31e553b929a32940b",
+    "mtime": 1794005016.524171,
+    "ast_hash": "7a58972e8b427c3e2eadf1489c5bff3b",
     "semantic_hash": ""
   },
   "tasks/audit-ecc-2026-10.md": {
-    "mtime": 1793195593.5065374,
-    "ast_hash": "721fd024e26ce532e0ac58a0ace4838d",
+    "mtime": 1793998262.6953125,
+    "ast_hash": "c749c790dd62cd954e1c40af1cf8d4cf",
     "semantic_hash": ""
   },
   "app/api/client-devis/route.js": {
-    "mtime": 1793191813.1800778,
-    "ast_hash": "6fd67694e467138db8502519fa7e21a7",
+    "mtime": 1794104113.7507114,
+    "ast_hash": "6ff925ab22c5f4a0a851e803cb8df3aa",
     "semantic_hash": ""
   },
   "supabase/migrations/20261028120000_rls_hardening.sql": {
@@ -1272,6 +1262,246 @@
   "supabase/migrations/20261028130000_indexes.sql": {
     "mtime": 1793195078.8002234,
     "ast_hash": "ec67870e6f4365f7e6884dec8b8101fc",
+    "semantic_hash": ""
+  },
+  "app/admin/DocumentsClient.js": {
+    "mtime": 1794349546.0636241,
+    "ast_hash": "d53e10706a7d7c54da4854db2cd2496f",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/admin-documents.mjs": {
+    "mtime": 1795039829.4313545,
+    "ast_hash": "9299369a596413efebac94c9520e4c34",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/client-documents.mjs": {
+    "mtime": 1795039829.6156392,
+    "ast_hash": "5c5a2563876de927784635aacb5d7cbc",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/client-documents.test.mjs": {
+    "mtime": 1794351051.3217015,
+    "ast_hash": "7b4e61256787b7bb59fbcc1bbe0f7494",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/crm-rpc.test.mjs": {
+    "mtime": 1794258964.0123756,
+    "ast_hash": "4433bf89dc99dac9fff995997e3eb860",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/documents.test.mjs": {
+    "mtime": 1794349943.5363386,
+    "ast_hash": "e04f4e3df0eb3d55b7c19554132c3ae6",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/hors-site.test.mjs": {
+    "mtime": 1794101786.5661848,
+    "ast_hash": "8e6d348023a64c1fd9c3a714f590b860",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/loader.mjs": {
+    "mtime": 1794106551.3754082,
+    "ast_hash": "1b7a2a8dd078ddd88062c5a23c46f926",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/lot-b.test.mjs": {
+    "mtime": 1794099885.2785645,
+    "ast_hash": "a4b2f03b155959ac639bcfb080b04a4b",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/mocks.mjs": {
+    "mtime": 1794349870.8261213,
+    "ast_hash": "5e2eb7c1e18bae68462a823889f81676",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/p2-permissions.test.mjs": {
+    "mtime": 1794106595.9007769,
+    "ast_hash": "4c6444ea2de5be33ca0a4d308c8b5bc0",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/public-forms.test.mjs": {
+    "mtime": 1794161374.9416149,
+    "ast_hash": "ad7bf06caa81baed4ac6a41eece5379d",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/routes.test.mjs": {
+    "mtime": 1794104080.7107902,
+    "ast_hash": "050f0d7ec537c7b7c089b3e3c6073c42",
+    "semantic_hash": ""
+  },
+  "app/api/_secure-routes-test/run.sh": {
+    "mtime": 1794351056.2861817,
+    "ast_hash": "2e6513bb17e5e81331f488e8b14d2798",
+    "semantic_hash": ""
+  },
+  "app/api/admin-documents/route.js": {
+    "mtime": 1794349399.840275,
+    "ast_hash": "a4b56a13fa2171fe345476fc9824bd5a",
+    "semantic_hash": ""
+  },
+  "app/api/client-documents/route.js": {
+    "mtime": 1794350986.78616,
+    "ast_hash": "36c1a0bd3d245735a4d3441a10cee4f1",
+    "semantic_hash": ""
+  },
+  "app/api/create-client/_create-client-test/loader.mjs": {
+    "mtime": 1793998228.4216704,
+    "ast_hash": "06e49ccca5c937363beb8f8317ce1a3d",
+    "semantic_hash": ""
+  },
+  "app/api/create-client/_create-client-test/next-server-mock.mjs": {
+    "mtime": 1793998221.4701931,
+    "ast_hash": "ec3d5b0be98e9949a99ab3bb28bd9fbc",
+    "semantic_hash": ""
+  },
+  "app/api/create-client/_create-client-test/route.test.mjs": {
+    "mtime": 1794005373.5917072,
+    "ast_hash": "5cc29b9e7a980e86b8b439e8b1a2c435",
+    "semantic_hash": ""
+  },
+  "app/api/create-client/_create-client-test/supabase-mock.mjs": {
+    "mtime": 1793998758.9731252,
+    "ast_hash": "9757dcfc077d871d1562443d42a90de5",
+    "semantic_hash": ""
+  },
+  "app/api/create-client/_create-client-test/verify-admin-mock.mjs": {
+    "mtime": 1794005349.9474614,
+    "ast_hash": "21cd8eff29a69be3f97d2e275424308b",
+    "semantic_hash": ""
+  },
+  "app/api/declarer-paiement/route.js": {
+    "mtime": 1794101716.091191,
+    "ast_hash": "7e74936270bde07e5733a74118534bf9",
+    "semantic_hash": ""
+  },
+  "app/api/justificatif-upload/route.js": {
+    "mtime": 1794099618.687543,
+    "ast_hash": "f876e8803a93b6c6f4486edd56901286",
+    "semantic_hash": ""
+  },
+  "app/api/paiements-data/route.js": {
+    "mtime": 1794099599.750882,
+    "ast_hash": "dc8fd99b14073ef7ac904a9e6ce626da",
+    "semantic_hash": ""
+  },
+  "app/api/valider-paiement/route.js": {
+    "mtime": 1794104119.8425906,
+    "ast_hash": "c1f7b2fbb44b114a0e0cc3a493f9186b",
+    "semantic_hash": ""
+  },
+  "app/api/verifier/[token]/_verifier-test/loader.mjs": {
+    "mtime": 1793972806.7788737,
+    "ast_hash": "abfda5004b7f80657b26e0b1340f0ebb",
+    "semantic_hash": ""
+  },
+  "app/api/verifier/[token]/_verifier-test/route.test.mjs": {
+    "mtime": 1793972833.1756485,
+    "ast_hash": "95e78c02e4470155d68e4f02a50fa9e4",
+    "semantic_hash": ""
+  },
+  "app/api/verifier/[token]/_verifier-test/supabase-mock.mjs": {
+    "mtime": 1793972800.2051604,
+    "ast_hash": "3932b5d0378f18356b17fd484e4db1bb",
+    "semantic_hash": ""
+  },
+  "app/api/verifier/[token]/route.js": {
+    "mtime": 1793971618.9084573,
+    "ast_hash": "58a858173050688bb0460769cedb3daa",
+    "semantic_hash": ""
+  },
+  "app/verifier/[token]/_verifier-test/page.test.mjs": {
+    "mtime": 1793972845.9160016,
+    "ast_hash": "4542cf39dbcd99728741333fcc35c50c",
+    "semantic_hash": ""
+  },
+  "lib/_verify-admin-test/loader.mjs": {
+    "mtime": 1794005732.0258176,
+    "ast_hash": "a24b3dc39ad6d843ae4eb4ef1124939d",
+    "semantic_hash": ""
+  },
+  "lib/_verify-admin-test/supabase-mock.mjs": {
+    "mtime": 1794005737.543126,
+    "ast_hash": "9b869a5e6a1090b9955c0a2321acb857",
+    "semantic_hash": ""
+  },
+  "lib/_verify-admin-test/verify-admin.test.mjs": {
+    "mtime": 1794005755.5998335,
+    "ast_hash": "da9327bc139a8b9cf32612e058d75351",
+    "semantic_hash": ""
+  },
+  "lib/attestation.js": {
+    "mtime": 1794104116.7176344,
+    "ast_hash": "ebc240b58b3352b1ab79c2202064b0be",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261107120000_rls_role_admin.sql": {
+    "mtime": 1794007279.0200036,
+    "ast_hash": "a2f2b16732e1a2bbc98df72f7dfacb1d",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261107130000_rls_drop_permissive.sql": {
+    "mtime": 1794038440.9013736,
+    "ast_hash": "236010675e53291c2559ed1c9087cf6e",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261107140000_paiements_unique_active.sql": {
+    "mtime": 1794062999.682544,
+    "ast_hash": "2b0f80ba8e024cdb6c5c374f0e31d5f9",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261108120000_paiements_hors_site.sql": {
+    "mtime": 1794098234.2513223,
+    "ast_hash": "a3e3db6e37065adfdeaa24507c67b0a1",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261108130000_justificatifs_bucket.sql": {
+    "mtime": 1794099626.5384545,
+    "ast_hash": "68d80d499e4dde499625c4f2c1874801",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261109120000_rpc_transactionnelles.sql": {
+    "mtime": 1794258917.783121,
+    "ast_hash": "da9ef290beac777f1eeef922323ea825",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261110120000_documents_espace_client.sql": {
+    "mtime": 1794349342.0108027,
+    "ast_hash": "d16c7747d00f1b701eef6df62e97224b",
+    "semantic_hash": ""
+  },
+  "supabase/tests/rls_corrective.test.sql": {
+    "mtime": 1794038615.731608,
+    "ast_hash": "31eec21dbce7d3468bfc8b9784ca0a5e",
+    "semantic_hash": ""
+  },
+  "supabase/tests/rls_role_admin.test.sql": {
+    "mtime": 1794009669.9573321,
+    "ast_hash": "870e56f123d960f8040da7a0ec44c6a9",
+    "semantic_hash": ""
+  },
+  "tasks/audit-documents-espace-client.md": {
+    "mtime": 1794351091.2416456,
+    "ast_hash": "900d55d139c877a58d7e0440168a0988",
+    "semantic_hash": ""
+  },
+  "tasks/audit-p1-7-rpc-transactionnelles.md": {
+    "mtime": 1794258917.7834322,
+    "ast_hash": "9007c8d1aa368586275f1f241c4d4fea",
+    "semantic_hash": ""
+  },
+  "tasks/audit-retrait-fedapay.md": {
+    "mtime": 1794098211.7021043,
+    "ast_hash": "1bfdd9bdb2a5486a64d6ab9b3c9b36a0",
+    "semantic_hash": ""
+  },
+  "tasks/audit-rls-clients-devis-2026-11.md": {
+    "mtime": 1794149658.6602254,
+    "ast_hash": "c84dd0fd56eec9e3c80a9993fc782af8",
+    "semantic_hash": ""
+  },
+  ".claude/agents/appel-offres-reviewer.md": {
+    "mtime": 1794869986.138713,
+    "ast_hash": "849874b6e1c82a51a2659ba1aacf434c",
     "semantic_hash": ""
   }
 }

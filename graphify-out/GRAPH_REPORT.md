@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-10-28)
+# Graph Report - gse-site  (2026-11-18)
 
 ## Corpus Check
-- 217 files · ~799,903 words
+- 263 files · ~832,779 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1001 nodes · 1116 edges · 117 communities (78 shown, 39 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
+- 1202 nodes · 1366 edges · 139 communities (96 shown, 43 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `149f892d`
+- Built from commit: `77dfbb88`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -60,6 +60,7 @@
 - [[_COMMUNITY_Community 43|Community 43]]
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
 - [[_COMMUNITY_Community 50|Community 50]]
@@ -68,6 +69,8 @@
 - [[_COMMUNITY_Community 53|Community 53]]
 - [[_COMMUNITY_Community 54|Community 54]]
 - [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
@@ -112,6 +115,7 @@
 - [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
@@ -119,18 +123,35 @@
 - [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 121|Community 121]]
+- [[_COMMUNITY_Community 122|Community 122]]
+- [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 127|Community 127]]
+- [[_COMMUNITY_Community 128|Community 128]]
+- [[_COMMUNITY_Community 131|Community 131]]
+- [[_COMMUNITY_Community 132|Community 132]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
+- [[_COMMUNITY_Community 135|Community 135]]
+- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `compilerOptions` - 16 edges
-2. `POST()` - 14 edges
-3. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
-4. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
-5. `Agent WhatsApp IA — Implementation Plan` - 12 edges
-6. `Frise d'encaissement des contrats` - 12 edges
-7. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
-8. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
-9. `Pipeline unifié piloté par `etape` — Design` - 11 edges
-10. `Analyse IA de contrat enrichie (rapport de visite + devis réel)` - 11 edges
+1. `verifyAdmin()` - 17 edges
+2. `verifyAdminWrite()` - 16 edges
+3. `compilerOptions` - 16 edges
+4. `POST()` - 14 edges
+5. `Devis à lignes multiples (multi-secteurs) — Design` - 13 edges
+6. `Plan — Unification du CRM (piste 1 : tout en React, suppression de crm.html)` - 13 edges
+7. `Agent WhatsApp IA — Implementation Plan` - 12 edges
+8. `Frise d'encaissement des contrats` - 12 edges
+9. `Offre de bienvenue — Remise automatique 10% — Implementation Plan` - 11 edges
+10. `Agent WhatsApp IA — Phyto Bénin` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SectionClientsDevis()` --calls--> `paiementsParPassages()`  [EXTRACTED]
@@ -139,15 +160,15 @@
   app/admin/page.js → lib/contrat-analyse.mjs
 - `SectionClientsDevis()` --calls--> `appendEnglishPage()`  [EXTRACTED]
   app/admin/page.js → lib/doc-bilingue.js
-- `GET()` --calls--> `offresContrat()`  [EXTRACTED]
-  app/api/generate-contract/route.js → lib/contrat-analyse.mjs
-- `SectionClientsDevis()` --calls--> `buildFicheControleHtml()`  [EXTRACTED]
-  app/admin/page.js → lib/fiche-html.js
+- `POST()` --calls--> `verifyAdmin()`  [EXTRACTED]
+  app/api/_secure-routes-test/admin-documents.mjs → lib/verify-admin.js
+- `POST()` --calls--> `verifyAdminWrite()`  [EXTRACTED]
+  app/api/_secure-routes-test/admin-documents.mjs → lib/verify-admin.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (117 total, 39 thin omitted)
+## Communities (139 total, 43 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -163,7 +184,7 @@ Nodes (19): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 
 ### Community 3 - "Community 3"
 Cohesion: 0.07
-Nodes (16): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), WA_MSG, STATUT_LABELS, STATUT_LABELS (+8 more)
+Nodes (17): generateMetadata(), generateStaticParams(), metadata, Blog(), slugifier(), WA_MSG, CAT_LABEL, STATUT_LABELS (+9 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
@@ -206,8 +227,8 @@ Cohesion: 0.33
 Nodes (5): Contraintes, graphify, Règles impératives, SELF-LEARNING, Skill routing
 
 ### Community 14 - "Community 14"
-Cohesion: 0.11
-Nodes (44): callGeminiWithRetry(), POST(), expirerDevisEnRetard(), fail(), GET(), POST(), verifyAdmin(), appliquerContraintes() (+36 more)
+Cohesion: 0.10
+Nodes (44): callGeminiWithRetry(), POST(), CRM_READ_ACTIONS, expirerDevisEnRetard(), fail(), GET(), POST(), appliquerContraintes() (+36 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.33
@@ -222,8 +243,8 @@ Cohesion: 0.40
 Nodes (4): QA checklist for CRM module (crm.html), QA checklist for RH module (rh.html), Reporting, Test targets
 
 ### Community 22 - "Community 22"
-Cohesion: 0.33
-Nodes (8): CERT_PREFIX, dateFr(), GET(), MOIS_FR, POST(), preparerCertificat(), supabase, verifyAdmin()
+Cohesion: 0.14
+Nodes (6): callGeminiWithRetry(), POST(), TYPES, verifyAdmin(), verifyAdminWrite(), STATUTS
 
 ### Community 23 - "Community 23"
 Cohesion: 0.40
@@ -250,8 +271,8 @@ Cohesion: 0.15
 Nodes (12): Devis / CRM / Pipeline, Documents imprimables (devis, certificats, fiches, rapports, contrats), Format d'ajout, IA (Gemini, prompts), Journal récent, Lessons — Règles actives, Next.js 16, RÈGLES ACTIVES (non négociables) (+4 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.83
-Nodes (3): GET(), POST(), verifyAdmin()
+Cohesion: 0.07
+Nodes (14): DEVIS_CONTRAT, DEVIS, __config(), __log, NextRequest, NextResponse, Resend, __reset() (+6 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.12
@@ -262,12 +283,24 @@ Cohesion: 0.12
 Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue — Remise automatique 10% — Implementation Plan, Partie A — Charger les leads au démarrage, Partie B — Panneau leads en haut de l'interface, Partie C — Pré-remplir remise dans ouvrirEditionDevis, Partie D — Badge remise bienvenue dans la liste des devis, Partie E — generate-contract : remise fallback depuis remise_bienvenue (+8 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.11
-Nodes (25): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), MEDIA_ORIGIN (+17 more)
+Cohesion: 0.35
+Nodes (11): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), MEDIA_ORIGIN (+3 more)
+
+### Community 39 - "Community 39"
+Cohesion: 0.09
+Nodes (22): 1. Audit de l'existant (code vérifié), 2. Architecture proposée (minimale, greffée sur l'existant), 3. Sécurité (exigences Section 7) — comment chaque point est couvert, 4. États (Section 8), 5. Tests prévus (Section 11) — RLS + routes, pas que l'UI, 6. Plan par étapes (Section 12) — déploiement seulement après validation, 7. Points à confirmer avant Étape B, Cas factures (Section 4 du cahier) (+14 more)
+
+### Community 43 - "Community 43"
+Cohesion: 0.60
+Nodes (4): fmtDate(), Att, fetchValidite(), VerifierPage()
 
 ### Community 46 - "Community 46"
 Cohesion: 0.25
 Nodes (7): Audit ECC — 2026-10-28, Notes transverses, 🔴 P0 — Sécurité & argent, 🟠 P1 — Intégrité des données, 🟡 P2 — Perf & correction, 🔵 P3 — SEO / GEO, Suivi
+
+### Community 47 - "Community 47"
+Cohesion: 0.14
+Nodes (13): 1–2. FK référençant `devis` / `clients` + ON DELETE, 3. Triggers, 4. NOT NULL / DEFAULT / UNIQUE (live-confirmés), 5. Unicité & concurrence, 6. SQL définitif des 3 RPC (validé par l'introspection live — inchangé), 7. Tests prévus, 8. Rollback, 9. À confirmer si accès catalog obtenu (non bloquant, tout est fail-closed) (+5 more)
 
 ### Community 48 - "Community 48"
 Cohesion: 0.22
@@ -276,6 +309,14 @@ Nodes (5): TYPES, COUVERTURE, FAQS, metadata, PALIERS
 ### Community 50 - "Community 50"
 Cohesion: 0.29
 Nodes (3): Nuisible, Ville, VILLES
+
+### Community 58 - "Community 58"
+Cohesion: 0.14
+Nodes (13): 1. Empreinte FedaPay, 2. Données de production (à vérifier en lecture seule AVANT toute migration), 3. Supprimer / conserver / remplacer, 4. Parcours cible hors site (réemploi de `paiements`), 5. Impacts existants, 6. Plan de retrait (ordonné, sur autorisation par lot), A. Code 100 % FedaPay → à retirer (Lot C), Audit FedaPay & plan de retrait — GSE / Phyto-Bénin (+5 more)
+
+### Community 59 - "Community 59"
+Cohesion: 0.29
+Nodes (9): esc(), POST(), canonical(), GET(), POST(), signatureValide(), signQuery(), appendEnglishPage() (+1 more)
 
 ### Community 61 - "Community 61"
 Cohesion: 0.13
@@ -298,8 +339,8 @@ Cohesion: 0.20
 Nodes (4): Offre, getOffres(), metadata, Page()
 
 ### Community 68 - "Community 68"
-Cohesion: 0.36
-Nodes (8): champsOffre(), GET(), OFFRE_BOOL, OFFRE_NUM, OFFRE_TXT, POST(), sb(), verifyAdmin()
+Cohesion: 0.24
+Nodes (8): call(), ctx(), FORBIDDEN, req(), __getCalls(), __reset(), TOKENS, VALID_ROW
 
 ### Community 71 - "Community 71"
 Cohesion: 0.22
@@ -370,12 +411,12 @@ Cohesion: 0.50
 Nodes (3): Entrées, Format, Lessons — Journal d'apprentissage
 
 ### Community 100 - "Community 100"
-Cohesion: 0.09
-Nodes (24): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(), ProspectionPage(), S (+16 more)
+Cohesion: 0.12
+Nodes (17): SectionRecrutement(), chip(), COLOR, csvToRows(), LABEL, parseCSV(), ProspectionPage(), S (+9 more)
 
 ### Community 101 - "Community 101"
-Cohesion: 0.60
-Nodes (4): GET(), POST(), STATUTS, verifyAdmin()
+Cohesion: 0.31
+Nodes (7): fmtDate(), Lead, LeadCard(), STATUT_LABEL, telDigits(), telLink(), waLink()
 
 ### Community 102 - "Community 102"
 Cohesion: 0.12
@@ -398,8 +439,12 @@ Cohesion: 0.40
 Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
-Cohesion: 0.07
-Nodes (47): buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT, clientNomComplet(), gseFooter(), gseHeader(), gseSigs() (+39 more)
+Cohesion: 0.06
+Nodes (51): CAT_LABEL, CATS, EMPTY, STATUT, buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT (+43 more)
+
+### Community 109 - "Community 109"
+Cohesion: 0.28
+Nodes (4): mails, __config(), __log, scenario
 
 ### Community 114 - "Community 114"
 Cohesion: 0.70
@@ -409,18 +454,64 @@ Nodes (4): build(), fiche(), hdr(), li()
 Cohesion: 0.60
 Nodes (5): db(), GET(), POST(), secretOk(), STATUTS
 
+### Community 119 - "Community 119"
+Cohesion: 0.25
+Nodes (7): Audit RLS — tables `clients` et `devis` (production), Méthode & limites, Observations (pas des failles), Politiques (état après migrations de durcissement 20261028120000 + 20261107120000 + 20261107130000), Preuves HTTP (PostgREST prod, `/rest/v1`), Statut, Verdict par critère
+
+### Community 120 - "Community 120"
+Cohesion: 0.29
+Nodes (3): __config(), scenario, USER
+
+### Community 121 - "Community 121"
+Cohesion: 0.40
+Nodes (3): attPage, genAtt, page
+
+### Community 122 - "Community 122"
+Cohesion: 0.67
+Nodes (3): GET(), NOT_VALID, serviceDb()
+
+### Community 132 - "Community 132"
+Cohesion: 0.31
+Nodes (8): champsOffre(), GET(), OFFRE_BOOL, OFFRE_NUM, OFFRE_TXT, POST(), RECRUT_READ_ACTIONS, sb()
+
+### Community 133 - "Community 133"
+Cohesion: 0.32
+Nodes (6): CERT_PREFIX, dateFr(), MOIS_FR, POST(), preparerCertificat(), supabase
+
+### Community 134 - "Community 134"
+Cohesion: 0.52
+Nodes (4): POST(), buildEmailHtml(), emettreAttestation(), POST()
+
+### Community 135 - "Community 135"
+Cohesion: 0.53
+Nodes (5): CATEGORIES, cleanName(), j(), POST(), validateFile()
+
+### Community 136 - "Community 136"
+Cohesion: 0.53
+Nodes (5): CATEGORIES, cleanName(), j(), POST(), validateFile()
+
+### Community 137 - "Community 137"
+Cohesion: 0.50
+Nodes (3): Contexte GSE à connaître (vérifie toujours vs les fichiers réels), Format de sortie (concis, pas un pavé), Procédure
+
+### Community 138 - "Community 138"
+Cohesion: 0.83
+Nodes (3): creerBrouillonDevis(), findAuthUserId(), POST()
+
 ## Knowledge Gaps
-- **533 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+528 more)
+- **615 isolated node(s):** `allow`, `deny`, `ask`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `plansDirectory` (+610 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **43 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `verifyAdmin()` connect `Community 22` to `Community 132`, `Community 133`, `Community 38`, `Community 135`, `Community 136`, `Community 138`, `Community 14`, `Community 59`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
-  _533 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _615 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
@@ -428,6 +519,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.06923076923076923 - nodes in this community are weakly interconnected._
-- **Should `Community 6` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06707317073170732 - nodes in this community are weakly interconnected._
