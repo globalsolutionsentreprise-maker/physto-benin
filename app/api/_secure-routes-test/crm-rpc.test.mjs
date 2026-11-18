@@ -94,3 +94,49 @@ test("add_client -> 403 pour un compte lecture, aucune RPC", async () => {
   assert.equal(res.status, 403);
   assert.equal(__log().rpcCalls.length, 0);
 });
+
+// ===== Commit 3 : delete_client -> rpc_delete_client =====
+test("delete_client -> appelle rpc_delete_client avec le bon identifiant", async () => {
+  __reset();
+  __config({ isAdmin: true, rpcReturn: null });
+  const res = await CRM(req({ action: "delete_client", clientId: "CLI-7" }));
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  const calls = __log().rpcCalls;
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "rpc_delete_client");
+  assert.equal(calls[0].args.p_client_id, "CLI-7");
+});
+
+test("delete_client -> 403 pour un compte lecture (admin-write requis), aucune RPC", async () => {
+  __reset();
+  __config({ isActiveAdmin: true, isAdmin: false });
+  const res = await CRM(req({ action: "delete_client", clientId: "CLI-7" }));
+  assert.equal(res.status, 403);
+  assert.equal(__log().rpcCalls.length, 0);
+});
+
+test("delete_client -> 409 explicite si attestations associées (protection préservée)", async () => {
+  __reset();
+  __config({ isAdmin: true, rpcErr: { message: "CLIENT_HAS_ATTESTATIONS", code: "23503" } });
+  const res = await CRM(req({ action: "delete_client", clientId: "CLI-7" }));
+  assert.equal(res.status, 409);
+  const body = await res.json();
+  assert.equal(body.error, "attestations");
+});
+
+test("delete_client -> erreur RPC générique remonte en 500 (pas de faux succès)", async () => {
+  __reset();
+  __config({ isAdmin: true, rpcErr: { message: "boom", code: "XX" } });
+  const res = await CRM(req({ action: "delete_client", clientId: "CLI-7" }));
+  assert.equal(res.status, 500);
+});
+
+test("delete_client -> clientId manquant -> 400, aucune RPC", async () => {
+  __reset();
+  __config({ isAdmin: true });
+  const res = await CRM(req({ action: "delete_client" }));
+  assert.equal(res.status, 400);
+  assert.equal(__log().rpcCalls.length, 0);
+});

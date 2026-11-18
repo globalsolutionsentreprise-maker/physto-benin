@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { verifyAdmin } from "@/lib/verify-admin"
+import { verifyAdmin, verifyAdminWrite } from "@/lib/verify-admin"
 import { datesPassages, planifierPassages, montantDuPassage, paiementsParPassages } from "@/lib/contrat-analyse.mjs"
 
 export const dynamic = "force-dynamic"
@@ -438,6 +438,23 @@ export async function POST(req) {
     })
     if (rpcErr) return Response.json({ error: "Erreur insertion devis: " + rpcErr.message + " | code: " + rpcErr.code }, { status: 500 })
     return Response.json({ ok: true, id: newDevisId })
+  }
+
+  if (action === "delete_client") {
+    // Défense en profondeur sur une suppression destructive : écriture réservée au
+    // rôle admin (le gate par action le garantit déjà ; garde explicite demandée).
+    if (!await verifyAdminWrite(req)) return Response.json({ error: "Droits insuffisants." }, { status: 403 })
+    const { clientId } = body
+    if (!clientId) return Response.json({ error: "clientId manquant" }, { status: 400 })
+    // Suppression devis + client ATOMIQUE via RPC. Refuse si des attestations sont
+    // associées (données légales) → la RPC lève CLIENT_HAS_ATTESTATIONS.
+    const { error } = await supabase.rpc("rpc_delete_client", { p_client_id: clientId })
+    if (error) {
+      if (String(error.message || "").includes("CLIENT_HAS_ATTESTATIONS"))
+        return Response.json({ error: "attestations", message: "Suppression impossible : ce client a des attestations associées." }, { status: 409 })
+      return fail(error)
+    }
+    return Response.json({ ok: true })
   }
 
   if (action === "save_devis_fields") {

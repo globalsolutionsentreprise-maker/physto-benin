@@ -1975,10 +1975,20 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
     var msgConfirm = nbDevis > 0 ? "Ce client a " + nbDevis + " devis. Supprimer quand même ?" : "Supprimer " + (c.prenom || "") + " " + c.nom + " ?"
     if (!window.confirm(msgConfirm)) return
-    var dDevis = await db.from("devis").delete().eq("client_id", c.id)
-    if (dDevis.error) { setMsg("Erreur suppression des devis du client : " + dDevis.error.message); await charger(); return }
-    var dClient = await db.from("clients").delete().eq("id", c.id)
-    if (dClient.error) { setMsg("Erreur suppression client : " + dClient.error.message); await charger(); return }
+    // Suppression devis + client ATOMIQUE côté serveur (rpc_delete_client, service_role)
+    // au lieu de 2 DELETE directs non atomiques.
+    var sess = await db.auth.getSession()
+    var token = (sess.data.session && sess.data.session.access_token) || ""
+    var res = await fetch("/api/crm-data", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token }, body: JSON.stringify({ action: "delete_client", clientId: c.id }) })
+    var out = {}; try { out = await res.json() } catch (e) {}
+    if (!res.ok) {
+      if (res.status === 409 || out.error === "attestations")
+        setMsg("Suppression impossible : ce client a des attestations associées.")
+      else
+        setMsg("Erreur suppression : " + (out.error || res.status))
+      await charger()
+      return
+    }
     setMsg("✓ Client supprimé")
     await charger()
   }
