@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1795041082.6192467,
-    "ast_hash": "fa6db2e95804b0401e56374d032a3f78",
+    "mtime": 1795042716.8993006,
+    "ast_hash": "716b017f9fc78a15422d0f7ff785e0be",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "app/api/crm-data/route.js": {
-    "mtime": 1794258964.0132394,
-    "ast_hash": "812b34c0b12efecde06d822efeaf15eb",
+    "mtime": 1795042506.1910448,
+    "ast_hash": "f37ad814b545f4c3c0b4f03a29dd0b4d",
     "semantic_hash": ""
   },
   "app/api/generate-article/route.js": {
@@ -1270,12 +1270,12 @@
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/admin-documents.mjs": {
-    "mtime": 1795039829.4313545,
+    "mtime": 1795042803.3054314,
     "ast_hash": "9299369a596413efebac94c9520e4c34",
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/client-documents.mjs": {
-    "mtime": 1795039829.6156392,
+    "mtime": 1795042803.4893281,
     "ast_hash": "5c5a2563876de927784635aacb5d7cbc",
     "semantic_hash": ""
   },
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/crm-rpc.test.mjs": {
-    "mtime": 1794258964.0123756,
-    "ast_hash": "4433bf89dc99dac9fff995997e3eb860",
+    "mtime": 1795042795.8017178,
+    "ast_hash": "f5cd239811910db85a17626ebb2467b2",
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/documents.test.mjs": {
@@ -1310,8 +1310,8 @@
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/mocks.mjs": {
-    "mtime": 1794349870.8261213,
-    "ast_hash": "5e2eb7c1e18bae68462a823889f81676",
+    "mtime": 1795042778.5900736,
+    "ast_hash": "626459580bde3b94678ae030d81490f0",
     "semantic_hash": ""
   },
   "app/api/_secure-routes-test/p2-permissions.test.mjs": {
@@ -1512,6 +1512,16 @@
   "lib/client-search.test.mjs": {
     "mtime": 1795041040.0549722,
     "ast_hash": "8cf03337f929ee4dc0bc8240e948ed0c",
+    "semantic_hash": ""
+  },
+  "lib/depenses-affaire.mjs": {
+    "mtime": 1795042486.604213,
+    "ast_hash": "f09d2fbc3954e09b876be1f6ac2f8dad",
+    "semantic_hash": ""
+  },
+  "lib/depenses-affaire.test.mjs": {
+    "mtime": 1795042495.1682854,
+    "ast_hash": "6fb01097029bf3c4d3c453b48f87a0ae",
     "semantic_hash": ""
   }
 }

@@ -267,7 +267,7 @@
       "label": "supabase",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L12",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "admin_page_supabase",
       "community": 108,
@@ -277,7 +277,7 @@
       "label": "CHIFFRES_DEFAUT",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L17",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "admin_page_chiffres_defaut",
       "community": 108,
@@ -287,7 +287,7 @@
       "label": "mimeAudioDepuisNom()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "admin_page_mimeaudiodepuisnom",
       "community": 108,
@@ -297,7 +297,7 @@
       "label": "lireAudioBase64()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "admin_page_lireaudiobase64",
       "community": 108,
@@ -307,7 +307,7 @@
       "label": "Admin()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "admin_page_admin",
       "community": 108,
@@ -317,7 +317,7 @@
       "label": "SectionClientsDevis()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L1408",
+      "source_location": "L1409",
       "_origin": "ast",
       "id": "admin_page_sectionclientsdevis",
       "community": 108,
@@ -327,7 +327,7 @@
       "label": "injecterBase()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7118",
+      "source_location": "L7258",
       "_origin": "ast",
       "id": "admin_page_injecterbase",
       "community": 108,
@@ -337,7 +337,7 @@
       "label": "ouvrirDocImprimable()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7124",
+      "source_location": "L7264",
       "_origin": "ast",
       "id": "admin_page_ouvrirdocimprimable",
       "community": 108,
@@ -347,7 +347,7 @@
       "label": "gseHeader()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7141",
+      "source_location": "L7281",
       "_origin": "ast",
       "id": "admin_page_gseheader",
       "community": 108,
@@ -357,7 +357,7 @@
       "label": "gseSigs()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7150",
+      "source_location": "L7290",
       "_origin": "ast",
       "id": "admin_page_gsesigs",
       "community": 108,
@@ -367,7 +367,7 @@
       "label": "gseFooter()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7157",
+      "source_location": "L7297",
       "_origin": "ast",
       "id": "admin_page_gsefooter",
       "community": 108,
@@ -377,7 +377,7 @@
       "label": "buildAfficheHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7162",
+      "source_location": "L7302",
       "_origin": "ast",
       "id": "admin_page_buildaffichehtml",
       "community": 108,
@@ -387,7 +387,7 @@
       "label": "buildCertificatHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7201",
+      "source_location": "L7341",
       "_origin": "ast",
       "id": "admin_page_buildcertificathtml",
       "community": 108,
@@ -397,7 +397,7 @@
       "label": "clientNomComplet()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7282",
+      "source_location": "L7422",
       "_origin": "ast",
       "id": "admin_page_clientnomcomplet",
       "community": 108,
@@ -407,7 +407,7 @@
       "label": "buildRapportVisiteHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7289",
+      "source_location": "L7429",
       "_origin": "ast",
       "id": "admin_page_buildrapportvisitehtml",
       "community": 108,
@@ -417,7 +417,7 @@
       "label": "qrSvg()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7346",
+      "source_location": "L7486",
       "_origin": "ast",
       "id": "admin_page_qrsvg",
       "community": 108,
@@ -427,7 +427,7 @@
       "label": "buildRapportIntervHtml()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7362",
+      "source_location": "L7502",
       "_origin": "ast",
       "id": "admin_page_buildrapportintervhtml",
       "community": 108,
@@ -437,7 +437,7 @@
       "label": "SectionPaiements()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7420",
+      "source_location": "L7560",
       "_origin": "ast",
       "id": "admin_page_sectionpaiements",
       "community": 108,
@@ -447,7 +447,7 @@
       "label": "OFFRE_VIDE",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7524",
+      "source_location": "L7664",
       "_origin": "ast",
       "id": "admin_page_offre_vide",
       "community": 108,
@@ -457,7 +457,7 @@
       "label": "SectionRecrutement()",
       "file_type": "code",
       "source_file": "app/admin/page.js",
-      "source_location": "L7530",
+      "source_location": "L7670",
       "_origin": "ast",
       "id": "admin_page_sectionrecrutement",
       "community": 100,
@@ -1462,7 +1462,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "analyze_rapport_route",
-      "community": 22,
+      "community": 38,
       "norm_label": "route.js"
     },
     {
@@ -1472,7 +1472,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "analyze_rapport_route_media_origin",
-      "community": 22,
+      "community": 38,
       "norm_label": "media_origin"
     },
     {
@@ -1482,7 +1482,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "analyze_rapport_route_mediaautorisee",
-      "community": 22,
+      "community": 38,
       "norm_label": "mediaautorisee()"
     },
     {
@@ -1492,7 +1492,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "analyze_rapport_route_callgeminiwithretry",
-      "community": 22,
+      "community": 38,
       "norm_label": "callgeminiwithretry()"
     },
     {
@@ -1502,7 +1502,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "analyze_rapport_route_uploadvideotogemini",
-      "community": 22,
+      "community": 38,
       "norm_label": "uploadvideotogemini()"
     },
     {
@@ -1512,7 +1512,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "analyze_rapport_route_fichetokenvalide",
-      "community": 22,
+      "community": 38,
       "norm_label": "fichetokenvalide()"
     },
     {
@@ -1522,7 +1522,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "analyze_rapport_route_post",
-      "community": 22,
+      "community": 38,
       "norm_label": "post()"
     },
     {
@@ -1532,7 +1532,7 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "analyze_rapport_route_blocvisuels",
-      "community": 22,
+      "community": 38,
       "norm_label": "blocvisuels()"
     },
     {
@@ -1542,7 +1542,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "analyze_rapport_route_bloccaptures",
-      "community": 22,
+      "community": 38,
       "norm_label": "bloccaptures()"
     },
     {
@@ -1552,7 +1552,7 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptdictee",
-      "community": 22,
+      "community": 38,
       "norm_label": "buildpromptdictee()"
     },
     {
@@ -1562,7 +1562,7 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptvisite",
-      "community": 22,
+      "community": 38,
       "norm_label": "buildpromptvisite()"
     },
     {
@@ -1572,7 +1572,7 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "analyze_rapport_route_buildpromptintervention",
-      "community": 22,
+      "community": 38,
       "norm_label": "buildpromptintervention()"
     },
     {
@@ -2392,7 +2392,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "recrutement_route",
-      "community": 132,
+      "community": 22,
       "norm_label": "route.js"
     },
     {
@@ -2402,7 +2402,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "recrutement_route_recrut_read_actions",
-      "community": 132,
+      "community": 22,
       "norm_label": "recrut_read_actions"
     },
     {
@@ -2412,7 +2412,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "recrutement_route_sb",
-      "community": 132,
+      "community": 22,
       "norm_label": "sb()"
     },
     {
@@ -2422,7 +2422,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "recrutement_route_offre_txt",
-      "community": 132,
+      "community": 22,
       "norm_label": "offre_txt"
     },
     {
@@ -2432,7 +2432,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "recrutement_route_offre_num",
-      "community": 132,
+      "community": 22,
       "norm_label": "offre_num"
     },
     {
@@ -2442,7 +2442,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "recrutement_route_offre_bool",
-      "community": 132,
+      "community": 22,
       "norm_label": "offre_bool"
     },
     {
@@ -2452,7 +2452,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "recrutement_route_champsoffre",
-      "community": 132,
+      "community": 22,
       "norm_label": "champsoffre()"
     },
     {
@@ -2462,7 +2462,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "recrutement_route_get",
-      "community": 132,
+      "community": 22,
       "norm_label": "get()"
     },
     {
@@ -2472,7 +2472,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "recrutement_route_post",
-      "community": 132,
+      "community": 22,
       "norm_label": "post()"
     },
     {
@@ -5390,6 +5390,46 @@
       "id": "lib_contrat_analyse_test",
       "community": 14,
       "norm_label": "contrat-analyse.test.mjs"
+    },
+    {
+      "label": "depenses-affaire.mjs",
+      "file_type": "code",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_depenses_affaire",
+      "community": 108,
+      "norm_label": "depenses-affaire.mjs"
+    },
+    {
+      "label": "isInvestissement()",
+      "file_type": "code",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "lib_depenses_affaire_isinvestissement",
+      "community": 108,
+      "norm_label": "isinvestissement()"
+    },
+    {
+      "label": "synthDepenses()",
+      "file_type": "code",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "lib_depenses_affaire_synthdepenses",
+      "community": 108,
+      "norm_label": "synthdepenses()"
+    },
+    {
+      "label": "depenses-affaire.test.mjs",
+      "file_type": "code",
+      "source_file": "lib/depenses-affaire.test.mjs",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_depenses_affaire_test",
+      "community": 108,
+      "norm_label": "depenses-affaire.test.mjs"
     },
     {
       "label": "doc-bilingue.js",
@@ -12552,9 +12592,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_client_search",
-      "confidence_score": 1.0
+      "target": "lib_client_search"
     },
     {
       "relation": "imports",
@@ -12563,9 +12603,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "lib_client_search_clientmatchesquery",
-      "confidence_score": 1.0
+      "target": "lib_client_search_clientmatchesquery"
     },
     {
       "relation": "imports_from",
@@ -12610,6 +12650,39 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "lib_contrat_analyse_resumecontrat"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "lib_depenses_affaire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "lib_depenses_affaire_isinvestissement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "lib_depenses_affaire_synthdepenses",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -12695,9 +12768,9 @@
       "source_file": "app/admin/page.js",
       "source_location": "L5555",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
-      "target": "lib_client_search_clientmatchesquery",
-      "confidence_score": 1.0
+      "target": "lib_client_search_clientmatchesquery"
     },
     {
       "relation": "calls",
@@ -12720,6 +12793,28 @@
       "confidence_score": 1.0,
       "source": "admin_page_sectionclientsdevis",
       "target": "lib_contrat_analyse_resumecontrat"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L4768",
+      "weight": 1.0,
+      "source": "admin_page_sectionclientsdevis",
+      "target": "lib_depenses_affaire_isinvestissement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "app/admin/page.js",
+      "source_location": "L5968",
+      "weight": 1.0,
+      "source": "admin_page_sectionclientsdevis",
+      "target": "lib_depenses_affaire_synthdepenses",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -19142,9 +19237,9 @@
       "source_file": "lib/client-search.mjs",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search",
-      "target": "lib_client_search_clientmatchesquery",
-      "confidence_score": 1.0
+      "target": "lib_client_search_clientmatchesquery"
     },
     {
       "relation": "contains",
@@ -19152,9 +19247,9 @@
       "source_file": "lib/client-search.mjs",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search",
-      "target": "lib_client_search_norm",
-      "confidence_score": 1.0
+      "target": "lib_client_search_norm"
     },
     {
       "relation": "contains",
@@ -19162,9 +19257,9 @@
       "source_file": "lib/client-search.mjs",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search",
-      "target": "lib_client_search_normtel",
-      "confidence_score": 1.0
+      "target": "lib_client_search_normtel"
     },
     {
       "relation": "imports_from",
@@ -19173,9 +19268,9 @@
       "source_file": "lib/client-search.test.mjs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_test",
-      "target": "lib_client_search",
-      "confidence_score": 1.0
+      "target": "lib_client_search"
     },
     {
       "relation": "calls",
@@ -19184,9 +19279,9 @@
       "source_file": "lib/client-search.mjs",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_clientmatchesquery",
-      "target": "lib_client_search_normtel",
-      "confidence_score": 1.0
+      "target": "lib_client_search_normtel"
     },
     {
       "relation": "imports",
@@ -19195,9 +19290,9 @@
       "source_file": "lib/client-search.test.mjs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_test",
-      "target": "lib_client_search_normtel",
-      "confidence_score": 1.0
+      "target": "lib_client_search_normtel"
     },
     {
       "relation": "calls",
@@ -19206,9 +19301,9 @@
       "source_file": "lib/client-search.mjs",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_clientmatchesquery",
-      "target": "lib_client_search_norm",
-      "confidence_score": 1.0
+      "target": "lib_client_search_norm"
     },
     {
       "relation": "imports",
@@ -19217,9 +19312,9 @@
       "source_file": "lib/client-search.test.mjs",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_test",
-      "target": "lib_client_search_clientmatchesquery",
-      "confidence_score": 1.0
+      "target": "lib_client_search_clientmatchesquery"
     },
     {
       "relation": "contains",
@@ -19227,9 +19322,9 @@
       "source_file": "lib/client-search.test.mjs",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_client_search_test",
-      "target": "lib_client_search_test_c",
-      "confidence_score": 1.0
+      "target": "lib_client_search_test_c"
     },
     {
       "relation": "contains",
@@ -20094,6 +20189,70 @@
       "confidence_score": 1.0,
       "source": "lib_contrat_analyse_test",
       "target": "lib_contrat_analyse_divergenceprestations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire",
+      "target": "lib_depenses_affaire_isinvestissement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire",
+      "target": "lib_depenses_affaire_synthdepenses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire_test",
+      "target": "lib_depenses_affaire",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.mjs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire_synthdepenses",
+      "target": "lib_depenses_affaire_isinvestissement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire_test",
+      "target": "lib_depenses_affaire_isinvestissement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/depenses-affaire.test.mjs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "lib_depenses_affaire_test",
+      "target": "lib_depenses_affaire_synthdepenses",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -26265,5 +26424,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "12a69199c9ded9c4d1de49f5d402ddbc6c55f0e0"
+  "built_at_commit": "ac90af87fab8ac3ea63888af4260900b1d3831eb"
 }

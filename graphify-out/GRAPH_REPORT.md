@@ -1,16 +1,16 @@
-# Graph Report - gse-site  (2026-11-18)
+# Graph Report - gse-site  (2026-11-19)
 
 ## Corpus Check
-- 265 files · ~833,450 words
+- 267 files · ~835,758 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1208 nodes · 1379 edges · 133 communities (90 shown, 43 thin omitted)
+- 1212 nodes · 1390 edges · 133 communities (90 shown, 43 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `12a69199`
+- Built from commit: `ac90af87`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -52,6 +52,7 @@
 - [[_COMMUNITY_Community 35|Community 35]]
 - [[_COMMUNITY_Community 36|Community 36]]
 - [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 41|Community 41]]
@@ -132,7 +133,6 @@
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 131|Community 131]]
-- [[_COMMUNITY_Community 132|Community 132]]
 - [[_COMMUNITY_Community 137|Community 137]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -237,8 +237,8 @@ Cohesion: 0.40
 Nodes (4): QA checklist for CRM module (crm.html), QA checklist for RH module (rh.html), Reporting, Test targets
 
 ### Community 22 - "Community 22"
-Cohesion: 0.06
-Nodes (40): CATEGORIES, cleanName(), j(), POST(), validateFile(), blocCaptures(), blocVisuels(), buildPromptDictee() (+32 more)
+Cohesion: 0.05
+Nodes (37): CATEGORIES, cleanName(), j(), POST(), validateFile(), creerBrouillonDevis(), findAuthUserId(), POST() (+29 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.40
@@ -275,6 +275,10 @@ Nodes (16): (a) Prompt d'analyse declare le plancher a l'IA, (b) Avertissement p
 ### Community 33 - "Community 33"
 Cohesion: 0.12
 Nodes (16): Checklist de recette finale, Fichiers touchés, Offre de bienvenue — Remise automatique 10% — Implementation Plan, Partie A — Charger les leads au démarrage, Partie B — Panneau leads en haut de l'interface, Partie C — Pré-remplir remise dans ouvrirEditionDevis, Partie D — Badge remise bienvenue dans la liste des devis, Partie E — generate-contract : remise fallback depuis remise_bienvenue (+8 more)
+
+### Community 38 - "Community 38"
+Cohesion: 0.35
+Nodes (11): blocCaptures(), blocVisuels(), buildPromptDictee(), buildPromptIntervention(), buildPromptVisite(), callGeminiWithRetry(), ficheTokenValide(), MEDIA_ORIGIN (+3 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.09
@@ -430,7 +434,7 @@ Nodes (4): faq, name, updated, url
 
 ### Community 108 - "Community 108"
 Cohesion: 0.05
-Nodes (54): CAT_LABEL, CATS, EMPTY, STATUT, buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT (+46 more)
+Nodes (56): CAT_LABEL, CATS, EMPTY, STATUT, buildCertificatHtml(), buildRapportIntervHtml(), buildRapportVisiteHtml(), CHIFFRES_DEFAUT (+48 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.28
@@ -460,10 +464,6 @@ Nodes (3): attPage, genAtt, page
 Cohesion: 0.67
 Nodes (3): GET(), NOT_VALID, serviceDb()
 
-### Community 132 - "Community 132"
-Cohesion: 0.31
-Nodes (8): champsOffre(), GET(), OFFRE_BOOL, OFFRE_NUM, OFFRE_TXT, POST(), RECRUT_READ_ACTIONS, sb()
-
 ### Community 137 - "Community 137"
 Cohesion: 0.50
 Nodes (3): Contexte GSE à connaître (vérifie toujours vs les fichiers réels), Format de sortie (concis, pas un pavé), Procédure
@@ -477,7 +477,7 @@ Nodes (3): Contexte GSE à connaître (vérifie toujours vs les fichiers réels)
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `C` connect `Community 3` to `Community 108`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Why does `SectionRecrutement()` connect `Community 100` to `Community 108`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `allow`, `deny`, `ask` to the rest of the system?**
