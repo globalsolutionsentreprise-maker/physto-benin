@@ -4682,7 +4682,6 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     }
 
     return e("div", null,
-      renderDepModal(),
       renderObjModal(),
       e("div", { style: { display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" } },
         kpiCard("Encaissements", finFmt(tp) + " FCFA", "#1D9E75"),
@@ -7172,7 +7171,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     vue === "finances" ? renderVueFinances() : null,
     vue === "analyse" ? renderVueAnalyse() : null,
     vue === "contrats" ? renderVueContrats() : null,
-    vue === "documents" ? renderVueDocuments() : null
+    vue === "documents" ? renderVueDocuments() : null,
+    renderDepModal()
   )
 }
 
