@@ -1424,6 +1424,8 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
   const [clients, setClients] = React.useState([])
   const [clientsLoaded, setClientsLoaded] = React.useState(false)
   const [rechercheClient, setRechercheClient] = React.useState("")
+  const [pageClients, setPageClients] = React.useState(1)
+  const [pageSizeClients, setPageSizeClients] = React.useState(25)
   const [loading, setLoading] = React.useState(true)
   const [msg, setMsg] = React.useState("")
   const [filtre, setFiltre] = React.useState("tous")
@@ -5418,7 +5420,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var opt = function(key, emoji, titre, sousTitre) {
       var on = segmentCRM === key
       var mini = key === "tous"
-      return e("button", { key: key, onClick: function() { setSegmentCRM(key) },
+      return e("button", { key: key, onClick: function() { setSegmentCRM(key); setPageClients(1) },
         style: { flex: mini ? "0 0 auto" : "1", minWidth: mini ? "auto" : "150px", textAlign: "left", cursor: "pointer", fontFamily: "inherit",
           border: "2px solid " + (on ? "#0a2e1a" : "#e8e6e0"), background: on ? "#0a2e1a" : "#fff", color: on ? "#fff" : "#0a2e1a",
           borderRadius: "10px", padding: mini ? "10px 16px" : "12px 18px", display: "flex", alignItems: "center", gap: "10px" } },
@@ -5653,6 +5655,15 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
     var clientsSeg = segFiltre(clients)
     var q = rechercheClient.trim()
     var clientsFiltres = q ? clientsSeg.filter(function(c) { return clientMatchesQuery(c, rechercheClient) }) : clientsSeg
+    // Pagination côté client (toute la liste est déjà en mémoire). La page est clampée
+    // au rendu : si le nombre de résultats baisse (suppression/filtre), on retombe sur
+    // la dernière page valide, sans setState (pas de rendu superflu).
+    var totalClients = clientsFiltres.length
+    var sizeClients = pageSizeClients
+    var totalPagesClients = Math.max(1, Math.ceil(totalClients / sizeClients))
+    var pageCur = Math.min(Math.max(1, pageClients), totalPagesClients)
+    var startIdx = (pageCur - 1) * sizeClients
+    var clientsPage = clientsFiltres.slice(startIdx, startIdx + sizeClients)
     return React.createElement("div", null,
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" } },
         React.createElement("strong", { style: { fontSize: "15px", color: "#111" } }, clientsFiltres.length + (q ? " / " + clientsSeg.length : "") + " client(s)"),
@@ -5666,12 +5677,12 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         React.createElement("input", {
           type: "search",
           value: rechercheClient,
-          onChange: function(e) { setRechercheClient(e.target.value) },
+          onChange: function(e) { setRechercheClient(e.target.value); setPageClients(1) },
           placeholder: "Rechercher par nom, téléphone ou établissement…",
           "aria-label": "Rechercher un client",
           style: { width: "100%", boxSizing: "border-box", padding: "11px 38px 11px 38px", fontSize: "13px", fontFamily: "inherit", border: "1px solid #e0ddd6", borderRadius: "8px", backgroundColor: "#fff", outline: "none" }
         }),
-        q ? React.createElement("button", { onClick: function() { setRechercheClient("") }, "aria-label": "Effacer la recherche", style: { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "16px", color: "#999", cursor: "pointer", lineHeight: 1, padding: "4px" } }, "×") : null
+        q ? React.createElement("button", { onClick: function() { setRechercheClient(""); setPageClients(1) }, "aria-label": "Effacer la recherche", style: { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "16px", color: "#999", cursor: "pointer", lineHeight: 1, padding: "4px" } }, "×") : null
       ),
       showFormClient && React.createElement("div", { style: { backgroundColor: "#fafaf8", border: "2px solid #0a2e1a", borderRadius: "10px", padding: "24px", marginBottom: "20px" } },
         React.createElement("h4", { style: { margin: "0 0 4px", fontSize: "15px", fontWeight: "700", color: "#0a2e1a" } }, editingClient ? "Modifier le client" : (leadEnConversion ? "Convertir le lead en client" : "Ajouter un client")),
@@ -5698,7 +5709,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         ? React.createElement("div", { style: { textAlign: "center", padding: "40px", color: "#888" } }, "Chargement...")
         : clientsFiltres.length === 0
           ? React.createElement("div", { style: { textAlign: "center", padding: "40px", backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", color: "#888" } }, q ? "Aucun client ne correspond à « " + q + " »." : "Aucun client.")
-          : React.createElement("div", null, clientsFiltres.map(function(c) {
+          : React.createElement("div", null, clientsPage.map(function(c) {
               var nbDevis = devisList.filter(function(d) { return d.client_id === c.id }).length
               var nbDocs = certsList.filter(function(cert) { return cert.client_id === c.id }).length + fichesList.filter(function(f) { return f.client_id === c.id }).length
               return React.createElement("div", { key: c.id, style: { backgroundColor: "#fff", border: "1px solid #e8e6e0", borderRadius: "8px", padding: "14px 20px", marginBottom: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
@@ -5722,7 +5733,25 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
                   React.createElement("button", { onClick: function() { supprimerClient(c) }, style: { background: "none", border: "1px solid #fecaca", color: "#991b1b", borderRadius: "6px", padding: "7px 12px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit", ...roHide } }, "🗑")
                 )
               )
-            }))
+            })),
+      (!loading && totalClients > 0) ? (function() {
+        var firstShown = startIdx + 1
+        var lastShown = Math.min(startIdx + sizeClients, totalClients)
+        var pBtn = function(disabled) { return { background: "none", border: "1px solid #e0ddd6", borderRadius: "6px", padding: "7px 14px", fontSize: "12px", fontFamily: "inherit", color: disabled ? "#bbb" : "#0a2e1a", cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.6 : 1 } }
+        return React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", marginTop: "12px" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", fontSize: "12px", color: "#888" } },
+            React.createElement("span", null, firstShown + "-" + lastShown + " sur " + totalClients),
+            React.createElement("select", { value: String(sizeClients), onChange: function(ev) { setPageSizeClients(parseInt(ev.target.value, 10)); setPageClients(1) }, style: { border: "1px solid #e0ddd6", borderRadius: "6px", padding: "6px 8px", fontSize: "12px", fontFamily: "inherit", background: "#fff", cursor: "pointer" } },
+              ["25", "50", "100"].map(function(n) { return React.createElement("option", { key: n, value: n }, n + " / page") })
+            )
+          ),
+          totalPagesClients > 1 ? React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            React.createElement("button", { onClick: function() { setPageClients(Math.max(1, pageCur - 1)) }, disabled: pageCur <= 1, style: pBtn(pageCur <= 1) }, "‹ Précédent"),
+            React.createElement("span", { style: { fontSize: "12px", color: "#555" } }, "Page " + pageCur + " / " + totalPagesClients),
+            React.createElement("button", { onClick: function() { setPageClients(Math.min(totalPagesClients, pageCur + 1)) }, disabled: pageCur >= totalPagesClients, style: pBtn(pageCur >= totalPagesClients) }, "Suivant ›")
+          ) : null
+        )
+      })() : null
     )
   }
 
