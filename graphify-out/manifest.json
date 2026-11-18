@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "app/admin/page.js": {
-    "mtime": 1794555984.7645826,
-    "ast_hash": "68788adf84940dcb64bcbfb180bfa6a3",
+    "mtime": 1795041082.6192467,
+    "ast_hash": "fa6db2e95804b0401e56374d032a3f78",
     "semantic_hash": ""
   },
   "app/api/admin-auth/route.js": {
@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "app/components/Footer.tsx": {
-    "mtime": 1793195031.9645996,
-    "ast_hash": "2200268155b56f9ce5243fdd78c0370e",
+    "mtime": 1795040677.1406984,
+    "ast_hash": "840931277186bbe3b7e4d5486789a36f",
     "semantic_hash": ""
   },
   "app/components/ScrollReveal.tsx": {
@@ -115,8 +115,8 @@
     "semantic_hash": ""
   },
   "app/contact/ContactForm.js": {
-    "mtime": 1794150068.1296642,
-    "ast_hash": "0bd3721667be7504443b5d545337f38c",
+    "mtime": 1795040409.7018402,
+    "ast_hash": "ff7edb319bd64b3715a53b17b7f5c4b0",
     "semantic_hash": ""
   },
   "app/contact/page.tsx": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "tasks/lessons.md": {
-    "mtime": 1795039968.4660206,
-    "ast_hash": "454e8896ccc39baba7a42c2836a68e81",
+    "mtime": 1795040022.37145,
+    "ast_hash": "3578c8e57361c7781695d804c765cc78",
     "semantic_hash": ""
   },
   "tasks/plan-crm-unification.md": {
@@ -1502,6 +1502,16 @@
   ".claude/agents/appel-offres-reviewer.md": {
     "mtime": 1794869986.138713,
     "ast_hash": "849874b6e1c82a51a2659ba1aacf434c",
+    "semantic_hash": ""
+  },
+  "lib/client-search.mjs": {
+    "mtime": 1795041025.1651447,
+    "ast_hash": "fc7b017d93b9f2374f18543a62f104da",
+    "semantic_hash": ""
+  },
+  "lib/client-search.test.mjs": {
+    "mtime": 1795041040.0549722,
+    "ast_hash": "8cf03337f929ee4dc0bc8240e948ed0c",
     "semantic_hash": ""
   }
 }
