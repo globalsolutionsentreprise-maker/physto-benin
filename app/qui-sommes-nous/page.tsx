@@ -11,12 +11,6 @@ function creerSupabase() {
 }
 
 export default function QuiSommesNous() {
-  const [equipe, setEquipe] = useState([
-    { id: 1, init: "YK", nom: "Yakoubou Kabir", role: "Directeur Général", description: "Fondateur de Global Solutions Entreprise, expérimenté en conseil et gestion d'entreprise au Bénin et en France." },
-    { id: 2, init: "AT", nom: "Amadou T.", role: "Responsable Technique", description: "Technicien certifié en hygiène phytosanitaire, spécialisé dans les traitements anti-termites et désinsectisation." },
-    { id: 3, init: "MB", nom: "Marie B.", role: "Chargée de Clientèle", description: "Responsable de la relation client, des devis et du suivi des contrats d'entretien." },
-  ])
-
   const [mission, setMission] = useState("Notre mission est simple : offrir à chaque client, particulier ou professionnel, un environnement sain, sécurisé et durablement débarrassé de toute nuisance.")
   const [engagement, setEngagement] = useState("Notre engagement est de délivrer des interventions professionnelles, rigoureuses et durables, avec des produits homologués et des techniciens certifiés.")
   const [chiffres, setChiffres] = useState([
@@ -29,12 +23,10 @@ export default function QuiSommesNous() {
   useEffect(function() {
     const db = creerSupabase()
     async function charger() {
-      const [e, c, co] = await Promise.all([
-        db.from("equipe").select("*").order("ordre"),
+      const [c, co] = await Promise.all([
         db.from("chiffres").select("*").order("ordre"),
         db.from("contenus").select("*"),
       ])
-      if (e.data && e.data.length > 0) setEquipe(e.data)
       if (c.data && c.data.length > 0) setChiffres(c.data)
       if (co.data) {
         const m1 = co.data.find(x => x.cle === "mission_texte_1")
@@ -170,34 +162,6 @@ export default function QuiSommesNous() {
                   <div style={{ fontSize: "11px", color: "#cccccc", fontWeight: "700", letterSpacing: "0.15em", marginBottom: "20px" }}>{v.num}</div>
                   <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a", marginBottom: "14px" }}>{v.titre}</h3>
                   <p style={{ fontSize: "13px", color: "#777", lineHeight: "1.75" }}>{v.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ÉQUIPE */}
-      <section className="section-pad" style={{ backgroundColor: "#ffffff" }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ marginBottom: "64px" }}>
-            <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "16px" }}>NOTRE ÉQUIPE</div>
-            <h2 style={{ fontSize: "clamp(24px, 3vw, 38px)", fontWeight: "300", color: "#0a0a0a", lineHeight: "1.2", letterSpacing: "-0.02em" }}>
-              Des experts à
-              <br />
-              <strong style={{ fontWeight: "700" }}>votre service.</strong>
-            </h2>
-          </div>
-          <div className="grid-3-mob" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "3px" }}>
-            {equipe.map(function(m, i) {
-              return (
-                <div key={m.id || i} style={{ backgroundColor: "#f7f7f5", padding: "40px 32px" }}>
-                  <div style={{ width: "56px", height: "56px", borderRadius: "0", backgroundColor: "#0a2e1a", color: "#d4a920", fontSize: "14px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
-                    {m.init}
-                  </div>
-                  <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a", marginBottom: "6px" }}>{m.nom}</h3>
-                  <div style={{ fontSize: "11px", color: "#1a6b38", fontWeight: "700", letterSpacing: "0.08em", marginBottom: "16px" }}>{m.role.toUpperCase()}</div>
-                  <p style={{ fontSize: "13px", color: "#666", lineHeight: "1.8" }}>{m.description}</p>
                 </div>
               )
             })}
