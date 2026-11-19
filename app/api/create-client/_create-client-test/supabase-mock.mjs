@@ -2,11 +2,12 @@
 // Scénario piloté par __config() ; les écritures sont journalisées dans __log().
 
 let scenario = {};
-let log = { updates: [], inserts: [], createUserCalls: 0, listUsersCalls: 0, updateUserByIdCalls: 0 };
+const freshLog = () => ({ updates: [], inserts: [], createUserCalls: 0, listUsersCalls: 0, updateUserByIdCalls: 0, generateLinkCalls: 0, createUserPasswords: [], deleteUserCalls: 0, deletedUserIds: [], calls: [] });
+let log = freshLog();
 
 export function __config(c) {
   scenario = c || {};
-  log = { updates: [], inserts: [], createUserCalls: 0, listUsersCalls: 0, updateUserByIdCalls: 0 };
+  log = freshLog();
 }
 export function __log() { return log; }
 
@@ -16,10 +17,30 @@ export function createClient(_url, _key, _opts) {
       admin: {
         async createUser({ email, password }) {
           log.createUserCalls++;
+          log.calls.push("createUser");
+          log.createUserPasswords.push(password);
+          if (scenario.authError) {
+            // Échec Auth générique (hors « déjà inscrit ») : aucun compte créé.
+            return { data: null, error: { message: scenario.authError } };
+          }
           if (scenario.authExists) {
             return { data: null, error: { message: "A user with this email address has already been registered" } };
           }
           return { data: { user: { id: scenario.newAuthId || "u-new", email, password } }, error: null };
+        },
+        // Rollback compensatoire : supprime UNIQUEMENT le compte Auth créé dans la requête.
+        async deleteUser(id) {
+          log.deleteUserCalls++;
+          log.deletedUserIds.push(id);
+          log.calls.push("deleteUser");
+          if (scenario.deleteError) return { data: null, error: { message: scenario.deleteError } };
+          return { data: null, error: null };
+        },
+        async generateLink({ type, email, options }) {
+          log.generateLinkCalls++;
+          log.calls.push("generateLink");
+          if (scenario.generateLinkError) return { data: null, error: { message: scenario.generateLinkError } };
+          return { data: { properties: { action_link: `https://mock.supabase.co/auth/v1/verify?type=${type}&redirect_to=${encodeURIComponent(options?.redirectTo || "")}` } }, error: null };
         },
         async listUsers(opts) {
           log.listUsersCalls++;
@@ -52,13 +73,14 @@ export function createClient(_url, _key, _opts) {
         async single() {
           if (op === "insert") {
             log.inserts.push(pendingObj);
+            log.calls.push("insert");
             return { data: { id: scenario.newClientId || "c-new", ...pendingObj }, error: scenario.insertError || null };
           }
           return { data: null, error: null };
         },
         // `.update(...).eq(...)` est awaité directement : builder thenable.
         then(resolve, reject) {
-          if (op === "update") log.updates.push(pendingObj);
+          if (op === "update") { log.updates.push(pendingObj); log.calls.push("update"); }
           const res = op === "update" ? { error: scenario.updateError || null } : { data: null, error: null };
           return Promise.resolve(res).then(resolve, reject);
         },

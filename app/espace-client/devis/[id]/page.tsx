@@ -211,16 +211,16 @@ export default function DevisPage() {
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif", backgroundColor: "#f7f7f5", minHeight: "100vh" }}>
 
       {/* Nav */}
-      <nav style={{ backgroundColor: "#0a2e1a", padding: "0 40px", height: "60px", display: "flex", alignItems: "center", gap: "16px" }}>
+      <nav style={{ backgroundColor: "#0a2e1a", padding: "0 clamp(16px, 4vw, 40px)", height: "60px", display: "flex", alignItems: "center", gap: "16px" }}>
         <button onClick={() => router.push("/espace-client/dashboard")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", fontSize: "13px", cursor: "pointer" }}>← Tableau de bord</button>
         <span style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
         <span style={{ color: "#d4a920", fontWeight: "600", fontSize: "13px" }}>{devis.numero}</span>
       </nav>
 
-      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "clamp(24px, 5vw, 40px) clamp(16px, 4vw, 24px)" }}>
 
         {/* En-tête devis */}
-        <div style={{ backgroundColor: "#0a2e1a", borderRadius: "12px", padding: "32px", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ backgroundColor: "#0a2e1a", borderRadius: "12px", padding: "clamp(20px, 5vw, 32px)", marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <div style={{ fontSize: "11px", color: "#d4a920", fontWeight: "700", letterSpacing: "0.12em", marginBottom: "8px" }}>DEVIS</div>
             <h1 style={{ fontSize: "22px", fontWeight: "300", color: "#ffffff", margin: "0 0 6px", letterSpacing: "-0.02em" }}>

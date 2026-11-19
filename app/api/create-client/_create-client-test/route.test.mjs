@@ -34,8 +34,8 @@ function call(payload) {
 }
 async function body(res) { try { return await res.json(); } catch { return null; } }
 
-// 1 — Nouveau client avec email → compte créé, fiche insérée, email d'accès envoyé.
-test("1. Nouveau client (email neuf) → insert + email d'accès avec mot de passe réel", async () => {
+// 1 — Nouveau client avec email → compte créé, fiche insérée, email d'ACTIVATION (lien, pas mot de passe).
+test("1. Nouveau client (email neuf) → insert + email d'activation (lien, jamais le mot de passe)", async () => {
   __config({ authExists: false, existingClient: null, newAuthId: "u-new" });
   mails = [];
   const res = await call({ nom: "Doe", prenom: "Jane", email: "jane@acme.bj" });
@@ -43,12 +43,35 @@ test("1. Nouveau client (email neuf) → insert + email d'accès avec mot de pas
   assert.equal(res.status, 200);
   assert.equal(b.success, true);
   assert.equal(b.emailEnvoye, true);
+  assert.equal(b.activationLinkGenerated, true);
   const log = __log();
   assert.equal(log.inserts.length, 1);
   assert.equal(log.inserts[0].user_id, "u-new"); // lié au compte neuf
-  assert.equal(mails.length, 1);                  // email d'accès envoyé
-  assert.match(mails[0].body.html, /Mot de passe/);
+  assert.equal(mails.length, 1);                  // email d'activation envoyé
+  assert.equal(log.generateLinkCalls, 1);         // lien de récupération généré
+  // L'email contient le lien d'activation…
+  assert.match(mails[0].body.html, /auth\/v1\/verify/);
+  // …et NE contient JAMAIS le mot de passe généré en clair.
+  assert.ok(!mails[0].body.html.includes(log.createUserPasswords[0]), "le mot de passe ne doit jamais figurer dans l'email");
   assert.equal(log.updateUserByIdCalls, 0);       // jamais de reset
+});
+
+// 1bis — Sécurité du credential : mot de passe fort (crypto), jamais Math.random, jamais divulgué.
+test("1bis. Mot de passe initial = aléatoire fort, non divulgué, source crypto (pas Math.random)", async () => {
+  __config({ authExists: false, existingClient: null, newAuthId: "u-new" });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "sec@acme.bj" });
+  const b = await body(res);
+  assert.equal(b.success, true);
+  const log = __log();
+  const pwd = log.createUserPasswords[0];
+  assert.ok(typeof pwd === "string" && pwd.length >= 20, "mot de passe trop court (doit être ~24 car.)");
+  // Jamais renvoyé dans la réponse HTTP.
+  assert.ok(!JSON.stringify(b).includes(pwd), "le mot de passe ne doit jamais être renvoyé par l'API");
+  // La SOURCE du code ne doit plus utiliser Math.random pour le credential.
+  const src = await import("node:fs").then(m => m.promises.readFile(new URL("../route.js", import.meta.url), "utf8"));
+  assert.ok(!/Math\.random\(\)[^\n]*password|password[^\n]*Math\.random/i.test(src), "ne pas générer de credential avec Math.random");
+  assert.match(src, /randomBytes/, "doit utiliser crypto.randomBytes");
 });
 
 // 2 — Email déjà inscrit + fiche existante AVEC user_id → user_id PRÉSERVÉ, 0 email, 0 reset.
@@ -152,4 +175,89 @@ test("10. Email 'Jane@Acme.bj ' → normalisé, compte page 1 retrouvé", async 
   const res = await call({ nom: "Doe", email: "  Jane@Acme.bj  " });
   assert.equal(res.status, 200);
   assert.equal(__log().updates[0].user_id, "u-lc");
+});
+
+// ───────────────────────────────────────────────────────────────────────────
+// MISSION 7 TER — rollback compensatoire (Auth créé puis fiche KO → suppression du compte).
+// Vérifie les APPELS et leur ORDRE, pas la simple présence de chaînes dans la source.
+// ───────────────────────────────────────────────────────────────────────────
+
+// 11 — Succès nominal : l'email n'est envoyé qu'APRÈS l'insertion confirmée (ordre).
+test("11. Auth OK + insert OK → succès ; lien+email émis APRÈS l'insert (ordre), aucun deleteUser", async () => {
+  __config({ authExists: false, existingClient: null, newAuthId: "u-new" });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "ok@acme.bj" });
+  const b = await body(res);
+  assert.equal(res.status, 200);
+  assert.equal(b.success, true);
+  const log = __log();
+  assert.equal(log.deleteUserCalls, 0);                 // aucun rollback sur succès
+  const iIns = log.calls.indexOf("insert");
+  const iLink = log.calls.indexOf("generateLink");
+  assert.ok(iIns >= 0 && iLink > iIns, "generateLink doit suivre l'insert réussi");
+  assert.equal(mails.length, 1);                        // email après insert
+});
+
+// 12 — Échec Auth générique → aucune insertion, aucun deleteUser (rien n'a été créé).
+test("12. createUser échoue (erreur générique) → 500, aucune insertion client, aucun deleteUser", async () => {
+  __config({ authError: "auth down", existingClient: null });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "fail@acme.bj" });
+  assert.equal(res.status, 500);
+  const log = __log();
+  assert.equal(log.inserts.length, 0);
+  assert.equal(log.deleteUserCalls, 0);
+  assert.equal(mails.length, 0);
+});
+
+// 13 — Auth OK + INSERT KO + rollback OK → le compte créé est supprimé, 500, 0 email, 0 lien.
+test("13. Auth OK + insert client KO → compensation : deleteUser(compte créé), 500, aucun email, aucun lien", async () => {
+  __config({ authExists: false, existingClient: null, newAuthId: "u-new", insertError: { message: "insert boom" } });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "boom@acme.bj" });
+  const b = await body(res);
+  assert.equal(res.status, 500);
+  const log = __log();
+  assert.deepEqual(log.deletedUserIds, ["u-new"]);      // UNIQUEMENT le compte créé ici
+  assert.deepEqual(log.calls, ["createUser", "insert", "deleteUser"]); // ordre exact
+  assert.equal(log.generateLinkCalls, 0);               // aucun lien recovery généré
+  assert.equal(mails.length, 0);                        // aucun email envoyé
+  assert.ok(!("orphanAuthUser" in b), "rollback réussi → pas de drapeau orphelin");
+});
+
+// 14 — Auth OK + fiche existante + UPDATE KO → compensation sur le compte créé (branche update).
+test("14. Auth OK (compte neuf) + update fiche KO → deleteUser(compte créé), 500", async () => {
+  __config({ authExists: false, existingClient: { id: "c1", user_id: null }, newAuthId: "u-new", updateError: { message: "update boom" } });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "upd@acme.bj" });
+  assert.equal(res.status, 500);
+  const log = __log();
+  assert.deepEqual(log.deletedUserIds, ["u-new"]);
+  assert.equal(mails.length, 0);
+  assert.equal(log.generateLinkCalls, 0);
+});
+
+// 15 — Rollback KO : deleteUser échoue → 500 + orphanAuthUser:true, jamais de faux succès.
+test("15. Auth OK + insert KO + deleteUser KO → 500, orphanAuthUser:true, aucun faux succès", async () => {
+  __config({ authExists: false, existingClient: null, newAuthId: "u-new", insertError: { message: "insert boom" }, deleteError: "delete boom" });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "orphan@acme.bj" });
+  const b = await body(res);
+  assert.equal(res.status, 500);
+  assert.notEqual(b.success, true);                     // pas de faux succès
+  assert.equal(b.orphanAuthUser, true);                 // orphelin signalé
+  assert.equal(__log().deleteUserCalls, 1);             // une seule tentative (pas de boucle)
+  assert.equal(mails.length, 0);
+});
+
+// 16 — Compte PRÉEXISTANT + fiche KO → JAMAIS de suppression (createdUserId reste null).
+test("16. Compte existant (accountExisted) + update fiche KO → aucun deleteUser, 500", async () => {
+  __config({ authExists: true, existingClient: { id: "c1", user_id: "u-existing" }, updateError: { message: "update boom" } });
+  mails = [];
+  const res = await call({ nom: "Doe", email: "exists@acme.bj" });
+  assert.equal(res.status, 500);
+  const log = __log();
+  assert.equal(log.deleteUserCalls, 0);                 // compte préexistant JAMAIS supprimé
+  assert.equal(log.updateUserByIdCalls, 0);
+  assert.equal(mails.length, 0);
 });

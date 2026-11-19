@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase-client"
 
@@ -9,7 +9,15 @@ export default function EspaceClientLogin() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [cooldown, setCooldown] = useState(0)   // anti-spam de la demande de réinitialisation
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null)
+
+  // Décompte du délai anti-répétition (le vrai rate-limit est côté Supabase Auth).
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [cooldown])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -28,15 +36,21 @@ export default function EspaceClientLogin() {
 
   async function handleForgot(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/espace-client/reset-password`,
-    })
-    if (error) {
-      setMessage({ type: "error", text: "Impossible d'envoyer l'email." })
-    } else {
-      setMessage({ type: "success", text: "Email de réinitialisation envoyé. Vérifiez votre boîte." })
+    if (cooldown > 0) return
+    // Format d'email simple avant l'appel (le champ est déjà type=email + required).
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setMessage({ type: "error", text: "Veuillez saisir une adresse email valide." })
+      return
     }
+    setLoading(true)
+    // On ignore volontairement le résultat : message TOUJOURS générique pour ne pas
+    // révéler si un compte existe (anti-énumération). Supabase renvoie déjà « ok » pour
+    // un email inconnu ; on masque aussi les erreurs d'envoi (rate-limit, etc.).
+    await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/espace-client/reset-password`,
+    }).catch(() => {})
+    setMessage({ type: "success", text: "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé. Vérifiez votre boîte (et les indésirables)." })
+    setCooldown(30)   // empêche les clics répétés ; le rate-limit réel reste côté Supabase
     setLoading(false)
   }
 
@@ -138,10 +152,10 @@ export default function EspaceClientLogin() {
                 )}
                 <button
                   type="submit"
-                  disabled={loading}
-                  style={{ width: "100%", padding: "14px", backgroundColor: "#0a2e1a", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer" }}
+                  disabled={loading || cooldown > 0}
+                  style={{ width: "100%", padding: "14px", backgroundColor: "#0a2e1a", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "600", cursor: (loading || cooldown > 0) ? "not-allowed" : "pointer", opacity: (loading || cooldown > 0) ? 0.7 : 1 }}
                 >
-                  {loading ? "Envoi..." : "Envoyer le lien"}
+                  {loading ? "Envoi..." : cooldown > 0 ? `Patientez ${cooldown}s` : "Envoyer le lien"}
                 </button>
               </form>
               <button

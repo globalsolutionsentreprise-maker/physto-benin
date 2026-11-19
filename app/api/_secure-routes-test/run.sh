@@ -30,6 +30,6 @@ node --import tsx --test \
   lot-b.test.mjs \
   p2-permissions.test.mjs \
   public-forms.test.mjs \
+  crm-rpc.test.mjs \
   documents.test.mjs \
-  client-documents.test.mjs \
-  crm-rpc.test.mjs
+  client-documents.test.mjs

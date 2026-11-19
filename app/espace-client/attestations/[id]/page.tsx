@@ -63,7 +63,7 @@ export default function AttestationPage() {
       `}</style>
 
       {/* Barre de navigation (masquée à l'impression) */}
-      <nav className="no-print" style={{ backgroundColor: "#0a2e1a", padding: "0 40px", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "system-ui, sans-serif" }}>
+      <nav className="no-print" style={{ backgroundColor: "#0a2e1a", padding: "0 clamp(16px, 4vw, 40px)", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between", fontFamily: "system-ui, sans-serif", gap: "12px" }}>
         <button onClick={() => router.push("/espace-client/dashboard")} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", fontSize: "13px", cursor: "pointer" }}>
           ← Tableau de bord
         </button>
@@ -75,17 +75,17 @@ export default function AttestationPage() {
         </button>
       </nav>
 
-      <div className="attestation-wrap" style={{ backgroundColor: "#f7f7f5", minHeight: "100vh", padding: "40px 24px", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+      <div className="attestation-wrap" style={{ backgroundColor: "#f7f7f5", minHeight: "100vh", padding: "clamp(20px, 4vw, 40px) clamp(14px, 4vw, 24px)", fontFamily: "Georgia, 'Times New Roman', serif" }}>
         <div
           className="attestation-card"
-          style={{ maxWidth: "780px", margin: "0 auto", backgroundColor: "#ffffff", border: "1px solid #e8e6e0", borderRadius: "4px", padding: "60px 70px", position: "relative" }}
+          style={{ maxWidth: "780px", width: "100%", margin: "0 auto", backgroundColor: "#ffffff", border: "1px solid #e8e6e0", borderRadius: "4px", padding: "clamp(28px, 6vw, 60px) clamp(22px, 6vw, 70px)", position: "relative", boxSizing: "border-box" }}
         >
           {/* Filets décoratifs */}
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "6px", backgroundColor: "#0a2e1a", borderRadius: "4px 4px 0 0" }} />
           <div style={{ position: "absolute", top: "6px", left: 0, right: 0, height: "2px", backgroundColor: "#d4a920" }} />
 
           {/* === EN-TÊTE === */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "40px", flexWrap: "wrap", gap: "16px" }}>
             <div>
               {/* Logo officiel GSE */}
               <img src="/logo-gse.png" alt="Logo GSE" style={{ width: "72px", height: "72px", objectFit: "contain", marginBottom: "10px", borderRadius: "8px", display: "block" }} />
@@ -182,7 +182,7 @@ export default function AttestationPage() {
           </div>
 
           {/* === SIGNATURE + CACHET + QR CODE === */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingTop: "24px", borderTop: "1px solid #e8e6e0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", paddingTop: "24px", borderTop: "1px solid #e8e6e0", flexWrap: "wrap", gap: "24px" }}>
 
             {/* Signature */}
             <div>

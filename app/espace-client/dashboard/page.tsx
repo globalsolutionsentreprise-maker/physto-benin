@@ -108,7 +108,7 @@ export default function Dashboard() {
     <main style={{ fontFamily: "system-ui, -apple-system, sans-serif", backgroundColor: "#f7f7f5", minHeight: "100vh" }}>
 
       {/* Barre de navigation */}
-      <nav style={{ backgroundColor: "#0a2e1a", padding: "0 40px", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ backgroundColor: "#0a2e1a", padding: "0 clamp(16px, 4vw, 40px)", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <span style={{ color: "#d4a920", fontWeight: "700", fontSize: "16px", letterSpacing: "0.05em" }}>GSE</span>
           <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px" }}>Espace client</span>
@@ -121,7 +121,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "clamp(24px, 5vw, 40px) clamp(16px, 4vw, 24px)" }}>
 
         {/* Bonjour */}
         <div style={{ marginBottom: "40px" }}>
@@ -132,7 +132,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats rapides */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "40px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "16px", marginBottom: "40px" }}>
           {[
             { label: "Devis actifs", value: devisActifs.length, color: "#0a2e1a" },
             { label: "Prestations terminées", value: devisTermines.length, color: "#065f46" },
@@ -163,7 +163,7 @@ export default function Dashboard() {
                   <div
                     key={devis.id}
                     onClick={() => router.push(`/espace-client/devis/${devis.id}`)}
-                    style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", transition: "border-color 0.15s" }}
+                    style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", transition: "border-color 0.15s", flexWrap: "wrap", gap: "12px" }}
                     onMouseEnter={e => (e.currentTarget.style.borderColor = "#0a2e1a")}
                     onMouseLeave={e => (e.currentTarget.style.borderColor = "#e8e6e0")}
                   >
@@ -203,7 +203,7 @@ export default function Dashboard() {
                 <div
                   key={att.id}
                   onClick={() => router.push(`/espace-client/attestations/${att.id}`)}
-                  style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
+                  style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", flexWrap: "wrap", gap: "12px" }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = "#d4a920")}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "#e8e6e0")}
                 >
@@ -265,7 +265,7 @@ export default function Dashboard() {
                     <div
                       key={doc.id}
                       onClick={() => ouvrirDocument(doc.id)}
-                      style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", gap: "12px" }}
+                      style={{ backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e6e0", padding: "18px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", gap: "12px", flexWrap: "wrap" }}
                     >
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontSize: "11px", fontWeight: "700", color: "#d4a920", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "4px" }}>{CAT_LABEL[doc.categorie] || doc.categorie}</div>

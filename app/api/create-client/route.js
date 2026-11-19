@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { randomBytes } from "crypto"
 import { verifyAdminWrite } from "@/lib/verify-admin"
 
 export const dynamic = "force-dynamic"
@@ -63,10 +64,17 @@ export async function POST(req) {
     let userId = null
     let motDePasse = null
     let accountExisted = false
+    // Id du compte Auth CRÉÉ pendant CETTE requête (reste null si le compte existait déjà).
+    // Seul ce compte est éligible au rollback compensatoire si la fiche client échoue.
+    let createdUserId = null
 
     // Créer un compte Auth uniquement si un email est fourni
     if (email) {
-      motDePasse = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase() + "!"
+      // Mot de passe initial = aléatoire CRYPTOGRAPHIQUE jamais divulgué (ni email, ni
+      // réponse, ni log). Le client définit SON mot de passe via le lien d'activation
+      // Supabase (recovery) envoyé plus bas. On ne génère jamais un credential avec
+      // Math.random (prévisible). base64url : URL-safe, ~144 bits.
+      motDePasse = randomBytes(18).toString("base64url") + "Aa1!"
 
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
@@ -89,7 +97,27 @@ export async function POST(req) {
         }
       } else {
         userId = authData?.user?.id || null
+        createdUserId = userId   // compte neuf : seul candidat au rollback
       }
+    }
+
+    // Compensation (rollback best-effort) : Supabase Auth et Postgres ne partagent PAS de
+    // transaction. Si la fiche `clients` échoue APRÈS la création d'un compte Auth NEUF dans
+    // cette requête, on supprime ce compte pour ne pas laisser d'orphelin Auth. On ne supprime
+    // JAMAIS un compte préexistant (createdUserId reste null dans la branche accountExisted),
+    // ni un compte retrouvé par email, ni celui d'un autre client. Aucun email/lien n'est émis
+    // sur ce chemin (on sort avant le bloc d'activation). Secret jamais divulgué (l'id reste
+    // dans les logs serveur, pas dans la réponse).
+    async function echecFiche(msg) {
+      if (createdUserId) {
+        const { error: delErr } = await supabase.auth.admin.deleteUser(createdUserId)
+        if (delErr) {
+          console.error(`create-client: ROLLBACK ÉCHOUÉ, compte Auth orphelin possible (id=${createdUserId}):`, delErr.message)
+          return NextResponse.json({ error: "Erreur client: " + msg, orphanAuthUser: true }, { status: 500 })
+        }
+        console.error(`create-client: fiche KO → compte Auth créé supprimé par compensation (id=${createdUserId})`)
+      }
+      return NextResponse.json({ error: "Erreur client: " + msg }, { status: 500 })
     }
 
     // Créer ou mettre à jour le client dans la table clients
@@ -108,7 +136,7 @@ export async function POST(req) {
         const linkId = userId || existingClient.user_id || null
         if (linkId) fields.user_id = linkId
         const { error: updErr } = await supabase.from("clients").update(fields).eq("email", email)
-        if (updErr) return NextResponse.json({ error: "Erreur client: " + updErr.message }, { status: 500 })
+        if (updErr) return await echecFiche(updErr.message)
         clientId = existingClient.id
       } else {
         const { data: newClient, error: clientError } = await supabase
@@ -116,7 +144,7 @@ export async function POST(req) {
           .insert({ user_id: userId, nom, prenom, email, telephone, entreprise, adresse, ifu: ifu || null, rccm: rccm || null })
           .select()
           .single()
-        if (clientError) return NextResponse.json({ error: "Erreur client: " + clientError.message }, { status: 500 })
+        if (clientError) return await echecFiche(clientError.message)
         clientId = newClient.id
       }
     } else {
@@ -151,9 +179,42 @@ export async function POST(req) {
       })
     }
 
-    // Envoyer l'email de bienvenue avec les identifiants
+    // Email de bienvenue = LIEN D'ACTIVATION (jamais le mot de passe). Le client définit
+    // lui-même son mot de passe via le lien de récupération officiel Supabase, qui redirige
+    // vers /espace-client/reset-password. Aucun credential n'est transmis en clair.
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://phyto-benin.com"
     const nomComplet = [prenom, nom].filter(Boolean).join(" ")
+
+    // Lien d'activation officiel Supabase (généré, PAS envoyé par Supabase : on l'envoie via
+    // Resend, comme les autres emails GSE). redirectTo doit être autorisé dans le Dashboard
+    // Supabase (Auth → URL Configuration → Redirect URLs).
+    let activationLink = null
+    try {
+      const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: { redirectTo: `${siteUrl}/espace-client/reset-password` },
+      })
+      if (linkErr) console.error("generateLink error:", linkErr.message)
+      else activationLink = linkData?.properties?.action_link || null
+    } catch (e) {
+      console.error("generateLink exception:", e.message)
+    }
+
+    // Bloc d'action : lien direct si disponible, sinon repli explicite « Mot de passe oublié ».
+    const actionBlock = activationLink
+      ? `<div style="text-align:center;margin:32px 0;">
+      <a href="${activationLink}" style="display:inline-block;background:#0a2e1a;color:#d4a920;text-decoration:none;padding:14px 36px;border-radius:6px;font-size:14px;font-weight:700;">
+        Activer mon espace et définir mon mot de passe →
+      </a>
+    </div>
+    <p style="color:#999;font-size:12px;text-align:center;">Ce lien est à usage unique et expire après un court délai. S'il a expiré, utilisez « Mot de passe oublié ? » sur la page de connexion.</p>`
+      : `<div style="text-align:center;margin:32px 0;">
+      <a href="${siteUrl}/espace-client" style="display:inline-block;background:#0a2e1a;color:#d4a920;text-decoration:none;padding:14px 36px;border-radius:6px;font-size:14px;font-weight:700;">
+        Accéder à mon espace client →
+      </a>
+    </div>
+    <p style="color:#555;font-size:13px;text-align:center;">Pour définir votre mot de passe, cliquez sur « <b>Mot de passe oublié ?</b> » sur la page de connexion avec cette adresse email.</p>`
 
     const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -167,33 +228,15 @@ export async function POST(req) {
   <div style="padding:40px;">
     <p style="color:#333;font-size:15px;line-height:1.7;margin-top:0;">Bonjour ${nomComplet},</p>
     <p style="color:#555;font-size:14px;line-height:1.7;">
-      Votre espace client GSE a été créé. Vous pouvez dès maintenant consulter vos devis, suivre vos prestations et effectuer vos paiements en ligne.
+      Votre espace client GSE a été créé. Pour y accéder, définissez votre mot de passe personnel en cliquant sur le bouton ci-dessous. Vous pourrez ensuite consulter vos devis, suivre vos prestations et effectuer vos paiements en ligne.
     </p>
 
-    <div style="background:#f8f7f4;border:1px solid #e8e6e0;border-left:4px solid #d4a920;border-radius:6px;padding:24px;margin:24px 0;">
-      <div style="font-size:13px;font-weight:700;color:#0a2e1a;margin-bottom:16px;">Vos identifiants de connexion</div>
-      <table style="width:100%;border-collapse:collapse;">
-        <tr>
-          <td style="font-size:11px;color:#888;font-weight:700;text-transform:uppercase;padding-bottom:4px;width:40%;">Email</td>
-          <td style="font-size:14px;color:#333;font-weight:600;">${email}</td>
-        </tr>
-        <tr><td colspan="2" style="padding:8px 0;"></td></tr>
-        <tr>
-          <td style="font-size:11px;color:#888;font-weight:700;text-transform:uppercase;padding-bottom:4px;">Mot de passe</td>
-          <td style="font-size:16px;color:#0a2e1a;font-weight:700;font-family:monospace;letter-spacing:0.1em;">${motDePasse}</td>
-        </tr>
-      </table>
+    <div style="background:#f8f7f4;border:1px solid #e8e6e0;border-left:4px solid #d4a920;border-radius:6px;padding:20px 24px;margin:24px 0;">
+      <div style="font-size:11px;color:#888;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Votre identifiant</div>
+      <div style="font-size:14px;color:#333;font-weight:600;">${email}</div>
     </div>
 
-    <p style="color:#e65c00;font-size:13px;background:#fff7ed;border:1px solid #fed7aa;padding:12px 16px;border-radius:6px;">
-      ⚠️ Pensez à changer votre mot de passe après votre première connexion.
-    </p>
-
-    <div style="text-align:center;margin:32px 0;">
-      <a href="${siteUrl}/espace-client" style="display:inline-block;background:#0a2e1a;color:#d4a920;text-decoration:none;padding:14px 36px;border-radius:6px;font-size:14px;font-weight:700;">
-        Accéder à mon espace client →
-      </a>
-    </div>
+    ${actionBlock}
 
     <p style="color:#999;font-size:12px;border-top:1px solid #f0ede6;padding-top:20px;">
       Besoin d'aide ? Contactez-nous à <a href="mailto:direction@phyto-benin.com" style="color:#0a2e1a;">direction@phyto-benin.com</a>
@@ -215,7 +258,7 @@ export async function POST(req) {
       body: JSON.stringify({
         from: "GSE Phyto-Bénin <direction@phyto-benin.com>",
         to: [email],
-        subject: "Vos accès à l'espace client GSE",
+        subject: "Activez votre espace client GSE",
         html,
       }),
     })
@@ -230,8 +273,9 @@ export async function POST(req) {
       success: true,
       clientId,
       emailEnvoye: resendRes.ok,
+      activationLinkGenerated: !!activationLink,
       message: resendRes.ok
-        ? "Client créé et email de bienvenue envoyé à " + email
+        ? "Client créé et email d'activation envoyé à " + email
         : "Client créé mais email non envoyé (vérifiez RESEND_API_KEY)"
     })
 
