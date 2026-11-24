@@ -42,7 +42,7 @@ export default function Contact() {
             { t: "Diagnostic gratuit", s: "Visite de site sans engagement" },
             { t: "Réponse rapide", s: "On vous recontacte au plus vite" },
             { t: "Agréé par l'État", s: "APA-26-026/CNGP-BEN" },
-            { t: "Remise −10%", s: "Sur votre première demande" },
+            { t: "Remise −5%", s: "Sur votre première demande" },
           ].map(function(x) {
             return (
               <div key={x.t} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>

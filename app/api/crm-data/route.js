@@ -406,7 +406,7 @@ export async function POST(req) {
     const { client, provenance, zone, categorie, motifEchec, paiementsRecus, dateContact, attestation, dateFacture, montantFacture, commentaire, montantDevis, statut, typePrestation, typeContrat, dureeContratMois, frequenceIntervention, dateDebutContrat, offreBienvenue, leadId } = body
     const numero = "DEV-GSE-" + new Date().getFullYear() + "-" + crypto.randomUUID().slice(0, 8).toUpperCase()
     // Création client + devis ATOMIQUE via RPC transactionnelle : si l'insert devis
-    // échoue, le client n'est PAS créé (zéro orphelin). Remise bienvenue (10) et
+    // échoue, le client n'est PAS créé (zéro orphelin). Remise bienvenue (5) et
     // archivage du lead sont posés dans la même transaction (cf. rpc_add_client_devis).
     // provenance/zone/categorie/motif_echec : on passe explicitement les DEFAULT base
     // (la RPC insère la valeur telle quelle, sans retomber sur le DEFAULT de colonne).

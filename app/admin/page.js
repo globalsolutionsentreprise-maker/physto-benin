@@ -3990,7 +3990,7 @@ function SectionClientsDevis({ db, agrement, vueInitiale, canWrite }) {
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" } },
           React.createElement("span", { style: { fontSize: "11px", fontWeight: "700", color: "#d4a920" } }, d.numero),
           React.createElement("span", { style: { padding: "2px 10px", borderRadius: "20px", fontSize: "10px", fontWeight: "600", backgroundColor: st.bg, color: st.c } }, st.label),
-          d.remise_bienvenue > 0 && React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 7px", borderRadius: "20px" } }, "−10%")
+          d.remise_bienvenue > 0 && React.createElement("span", { style: { backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "9px", fontWeight: "800", padding: "2px 7px", borderRadius: "20px" } }, "−" + d.remise_bienvenue + "%")
         ),
         React.createElement("div", { style: { fontSize: "14px", fontWeight: "600", color: "#0a2e1a", marginBottom: "2px" } }, d.prestation),
         cl && React.createElement("div", { style: { fontSize: "12px", color: "#888" } }, [(cl.prenom || ""), cl.nom].filter(Boolean).join(" ") + (cl.entreprise ? " · " + cl.entreprise : "")),

@@ -163,9 +163,9 @@ export default function ContactForm() {
           </label>
 
           <div style={{ backgroundColor: "rgba(26,107,56,0.15)", border: "1px solid rgba(26,107,56,0.4)", borderRadius: "6px", padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "12px", fontWeight: "800", padding: "3px 10px", borderRadius: "20px", flexShrink: 0 }}>−10%</span>
+            <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "12px", fontWeight: "800", padding: "3px 10px", borderRadius: "20px", flexShrink: 0 }}>−5%</span>
             <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", lineHeight: "1.4" }}>
-              Votre remise de 10% est automatiquement incluse, valable pour toute première demande.
+              Votre remise de 5% est automatiquement incluse, valable pour toute première demande.
             </span>
           </div>
 

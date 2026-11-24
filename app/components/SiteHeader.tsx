@@ -65,9 +65,9 @@ export default function SiteHeader() {
       {/* OFFRE DE BIENVENUE */}
       <div style={{ backgroundColor: "#1a6b38", padding: "9px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "10px", fontWeight: "800", padding: "3px 9px", borderRadius: "20px", letterSpacing: "0.06em", flexShrink: 0 }}>−10%</span>
+          <span style={{ backgroundColor: "#d4a920", color: "#0a2e1a", fontSize: "10px", fontWeight: "800", padding: "3px 9px", borderRadius: "20px", letterSpacing: "0.06em", flexShrink: 0 }}>−5%</span>
           <span style={{ color: "#ffffff", fontSize: "12px", fontWeight: "400" }}>
-            Offre de bienvenue, <strong>10% de remise</strong> sur votre premier traitement · Pour toute première demande
+            Offre de bienvenue, <strong>5% de remise</strong> sur votre premier traitement · Pour toute première demande
           </span>
         </div>
         <a href="/contact" style={{ color: "#d4a920", fontSize: "11px", fontWeight: "700", textDecoration: "none", whiteSpace: "nowrap", letterSpacing: "0.04em", flexShrink: 0 }}>
